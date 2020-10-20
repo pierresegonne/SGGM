@@ -1,0 +1,8 @@
+- name: test_toy_1
+  experiment_name: toy
+  batch_size: 64
+  hidden_dim: 50
+
+- name: test_toy_2
+  experiment_name: toy
+  batch_size: 32

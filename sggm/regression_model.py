@@ -148,4 +148,10 @@ class Regressor(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        pass
+        x, y = batch
+        x.requires_grad = True
+        μ_x, α_x, β_x = self(x)
+        log_likelihood = self.llk(μ_x, α_x, β_x, y)
+        kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
+        loss = self.elbo(log_likelihood, kl_divergence)
+        self.log('eval_loss', loss, on_step=True)
