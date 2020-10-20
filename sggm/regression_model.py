@@ -3,7 +3,19 @@ import pytorch_lightning as pl
 import torch
 import torch.distributions as tcd
 
+from argparse import ArgumentParser
+
+from sggm.definitions import regressor_parameters
+from sggm.definitions import β_OUT, EPS, N_MC_SAMPLES
+
 pi = torch.tensor([np.pi])
+
+
+def fit_prior():
+    # Heuristic for now
+    prior_α = 1.02
+    prior_β = 0.57
+    return prior_α, prior_β
 
 
 def BaseMLP(input_dim, hidden_dim):
@@ -34,8 +46,8 @@ class Regressor(pl.LightningModule):
         self,
         input_dim, hidden_dim,
         prior_α, prior_β,
-        kl_factor=1, kl_noise=False,
-        eps=1e-10, mc_samples=2000
+        β_out=regressor_parameters[β_OUT],
+        eps=regressor_parameters[EPS], n_mc_samples=regressor_parameters[N_MC_SAMPLES]
     ):
         super(Regressor, self).__init__()
 
@@ -49,15 +61,15 @@ class Regressor(pl.LightningModule):
         self.prior_β = prior_β
         self.pp = tcd.Gamma(prior_α, prior_β)
 
-        self.kl_factor = kl_factor
-        self.kl_noise = kl_noise
+        self.β_out = β_out
 
         self.lr = 1e-2
 
         self.eps = eps
-        self.mc_samples = mc_samples
+        self.n_mc_samples = n_mc_samples
 
-        self.register_buffer('v', torch.Tensor([10 / 500]), requires_grad=True)
+        v_ini = torch.nn.Parameter(torch.Tensor([10 / 500]), requires_grad=True)
+        self.register_parameter('v', v_ini)
         self.lr_v = 1
 
         # ---------
@@ -82,7 +94,7 @@ class Regressor(pl.LightningModule):
             σ = 1 / torch.sqrt(mean_precision + self.eps)
         else:
             qp = tcd.Gamma(self.α(x), self.β(x))
-            samples_precision = qp.rsample(torch.Size([self.mc_samples]))
+            samples_precision = qp.rsample(torch.Size([self.n_mc_samples]))
             precision = torch.mean(samples_precision, 0, True)
             σ = 1 / torch.sqrt(precision)
         return σ
@@ -155,3 +167,10 @@ class Regressor(pl.LightningModule):
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
         loss = self.elbo(log_likelihood, kl_divergence)
         self.log('eval_loss', loss, on_step=True)
+
+    @staticmethod
+    def add_model_specific_args(parent_parser):
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        for parameter in regressor_parameters.values():
+            parser.add_argument(f'--{parameter.name}', default=parameter.default, type=parameter.type)
+        return parser

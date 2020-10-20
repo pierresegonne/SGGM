@@ -4,12 +4,13 @@ EXPERIMENTS_CONFIG = 'experiments_config'
 
 # All parameters for an experiment must be defined here
 BATCH_SIZE = 'batch_size'
-CHECK_VAL_EVERY_N_EPOCH = 'check_val_every_n_epoch'
+β_OUT = 'beta_out'
+EPS = 'eps'
 HIDDEN_DIM = 'hidden_dim'
 LEARNING_RATE = 'learning_rate'
-MAX_EPOCHS = 'max_epochs'
 NAME = 'name'
 N_TRIALS = 'n_trials'
+N_MC_SAMPLES = 'n_mc_samples'
 
 
 class Param:
@@ -21,11 +22,17 @@ class Param:
 
 parameters = {
     BATCH_SIZE: Param(BATCH_SIZE, 32, int),
-    CHECK_VAL_EVERY_N_EPOCH: Param(CHECK_VAL_EVERY_N_EPOCH, 10, int),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
     LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
     NAME: Param(NAME, 'unnamed', str),
     N_TRIALS: Param(N_TRIALS, 1, int),
+}
+
+# Parameters specific to the Regressor model
+regressor_parameters = {
+    β_OUT: Param(β_OUT, 1, float),
+    EPS: Param(EPS, 1e-10, float),
+    N_MC_SAMPLES: Param(N_MC_SAMPLES, 2000, int),
 }
 
 # -------------

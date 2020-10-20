@@ -2,6 +2,7 @@
   experiment_name: toy
   batch_size: 64
   hidden_dim: 50
+  beta_out: 1.2
 
 - name: test_toy_2
   experiment_name: toy
