@@ -2,6 +2,7 @@ import copy
 import json
 import pytorch_lightning as pl
 import yaml
+import torch
 
 
 from argparse import ArgumentParser
@@ -154,8 +155,8 @@ def cli_main():
         # ------------
         # testing
         # ------------
-        result = trainer.test()
-        # print(result)
+        results = trainer.test()
+        torch.save(results, f"{trainer.logger.log_dir}/results.pkl")
 
 
 if __name__ == "__main__":
