@@ -7,6 +7,7 @@ import yaml
 from argparse import ArgumentParser
 from torch.utils.data import DataLoader, random_split
 
+from sggm.callbacks.index import callbacks
 from sggm.definitions import (
     experiment_names,
     parameters,
@@ -65,6 +66,10 @@ class Experiment:
     @property
     def datamodule(self):
         return datamodules[self.experiment_name](**self.__dict__)
+
+    @property
+    def callbacks(self):
+        return [clbk(**self.__dict__) for clbk in callbacks[self.experiment_name]]
 
 
 def get_experiments_config(parsed_args):
@@ -140,7 +145,9 @@ def cli_main():
         trainer_args = TrainerArgs(trainer_args)
 
         profiler = pl.profiler.AdvancedProfiler()
-        trainer = pl.Trainer.from_argparse_args(trainer_args, profiler=False)
+        trainer = pl.Trainer.from_argparse_args(
+            trainer_args, profiler=False, callbacks=experiment.callbacks
+        )
 
         trainer.fit(model, datamodule)
 
