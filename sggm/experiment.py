@@ -146,8 +146,11 @@ def cli_main():
         trainer_args = TrainerArgs(trainer_args)
 
         profiler = pl.profiler.AdvancedProfiler()
+        default_callbacks = [pl.callbacks.EarlyStopping("eval_loss")]
         trainer = pl.Trainer.from_argparse_args(
-            trainer_args, profiler=False, callbacks=experiment.callbacks
+            trainer_args,
+            profiler=False,
+            callbacks=experiment.callbacks + default_callbacks,
         )
 
         trainer.fit(model, datamodule)
