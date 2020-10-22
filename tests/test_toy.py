@@ -6,6 +6,7 @@ import sys
 
 def test_toy():
     print("HERE", sys.modules.keys())
+    assert "sggm.data" in sys.modules.keys(), f"{sys.modules.keys()}"
     seed_everything(1234)
     prior_parameters = fit_prior()
     model = Regressor(
