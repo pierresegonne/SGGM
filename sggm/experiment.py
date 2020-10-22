@@ -14,7 +14,7 @@ from sggm.definitions import (
     regressor_parameters,
 )
 from sggm.definitions import EXPERIMENT_NAME, EXPERIMENTS_CONFIG
-
+from sggm.data.index import datamodules
 from sggm.regression_model import fit_prior, Regressor
 
 
@@ -47,8 +47,7 @@ class Experiment:
     @property
     def model(self):
         if self.experiment_name in regression_experiments:
-            # TODO get dimension
-            input_dim = 1
+            input_dim = self.datamodule.dims
             prior_parameters = fit_prior()
             return Regressor(
                 input_dim=input_dim,
@@ -64,9 +63,8 @@ class Experiment:
             return
 
     @property
-    def datasets(self):
-        # TODO get datasets based on experiment name
-        return [], [], []
+    def datamodule(self):
+        return datamodules[self.experiment_name](**self.__dict__)
 
 
 def get_experiments_config(parsed_args):
@@ -116,15 +114,12 @@ def cli_main():
         full_experiments_config = get_experiments_config(args)
 
         experiment = Experiment(full_experiments_config[experiment_idx])
+        print(f"--- Starting Experiment {experiment.__dict__}")
 
         # ------------
         # data
         # ------------
-        train_dataset, val_dataset, test_dataset = experiment.datasets
-
-        train_loader = DataLoader(train_dataset, batch_size=experiment.batch_size)
-        val_loader = DataLoader(val_dataset, batch_size=experiment.batch_size)
-        test_loader = DataLoader(test_dataset, batch_size=experiment.batch_size)
+        datamodule = experiment.datamodule
 
         # ------------
         # model
@@ -134,13 +129,26 @@ def cli_main():
         # ------------
         # training
         # ------------
-        trainer = pl.Trainer.from_argparse_args(args)
-        trainer.fit(model, train_loader, val_loader)
+
+        # Hack to override trainer arguments
+        class TrainerArgs:
+            def __init__(self, args):
+                self.__dict__ = args
+
+        trainer_args = vars(args)
+        trainer_args.update(experiment.__dict__)
+        trainer_args = TrainerArgs(trainer_args)
+
+        profiler = pl.profiler.AdvancedProfiler()
+        trainer = pl.Trainer.from_argparse_args(trainer_args, profiler=False)
+
+        trainer.fit(model, datamodule)
 
         # ------------
         # testing
         # ------------
-        # result = trainer.test(test_dataloaders=test_loader)
+        result = trainer.test()
+        # print(result)
 
 
 if __name__ == "__main__":

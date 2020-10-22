@@ -1,9 +1,18 @@
 - name: test_toy_1
   experiment_name: toy
-  batch_size: 64
+  batch_size: 128
   hidden_dim: 50
-  beta_out: 1.2
+  beta_out: 0.
+  max_epochs: 500
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  progress_bar_refresh_rate: 40 # How often to refresh progress bar (in steps).
+  # val_check_interval: 5 # How often to check the validation set.
+  check_val_every_n_epoch: 100 # Check val every n train epochs
 
-- name: test_toy_2
-  experiment_name: toy
-  batch_size: 32
+
+# - name: test_toy_2
+#   experiment_name: toy
+#   batch_size: 32
+#   max_epochs: 50
+#   log_every_n_steps: 5
+#   val_check_interval: 5

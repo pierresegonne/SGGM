@@ -85,6 +85,9 @@ class Regressor(pl.LightningModule):
 
         self.β = BaseMLPSoftPlus(input_dim, hidden_dim)
 
+        # Save hparams
+        self.save_hyperparameters()
+
     def forward(self, x):
         return self.μ(x), self.α(x), self.β(x)
 
@@ -112,7 +115,7 @@ class Regressor(pl.LightningModule):
         return torch.sqrt(var)
 
     def ood_x(self, x, **kwargs):
-        kl = kwargs["kl"]
+        kl = torch.mean(kwargs["kl"])
         kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
         random_direction = (torch.randint_like(kl_grad, 0, 2) * 2) - 1
         return x + self.v * random_direction * torch.sign(kl_grad)
@@ -158,7 +161,7 @@ class Regressor(pl.LightningModule):
         x_out = self.ood_x(x, kl=kl_divergence)
         _, α_x_out, β_x_out = self(x_out)
         kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
-        loss = self.elbo(log_likelihood, kl_divergence) + self.β_out * torch.mean(
+        loss = -self.elbo(log_likelihood, kl_divergence) + self.β_out * torch.mean(
             kl_divergence_out
         )
         self.log("train_loss", loss, on_epoch=True)
@@ -166,16 +169,25 @@ class Regressor(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        x.requires_grad = True
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.llk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-        loss = self.elbo(log_likelihood, kl_divergence)
-        self.log("eval_loss", loss, on_step=True)
+        loss = -self.elbo(log_likelihood, kl_divergence)
+        self.log("eval_loss", loss, on_epoch=True)
+
+    def test_step(self, batch, batch_idx):
+        x, y = batch
+        μ_x, α_x, β_x = self(x)
+        log_likelihood = self.llk(μ_x, α_x, β_x, y)
+        kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
+        loss = -self.elbo(log_likelihood, kl_divergence)
+        self.log("test_loss", loss, on_step=True)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
-        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser = ArgumentParser(
+            parents=[parent_parser], add_help=False, conflict_handler="resolve"
+        )
         for parameter in regressor_parameters.values():
             parser.add_argument(
                 f"--{parameter.name}", default=parameter.default, type=parameter.type
