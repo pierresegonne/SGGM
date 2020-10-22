@@ -17,4 +17,4 @@ def test_lit_classifier():
     trainer.fit(model, datamodule)
 
     results = trainer.test()
-    assert results[0]["eval_loss"] < 4
+    assert results[0]["eval_loss"] < 10

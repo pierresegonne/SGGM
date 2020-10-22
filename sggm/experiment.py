@@ -8,7 +8,7 @@ import torch
 from argparse import ArgumentParser
 from torch.utils.data import DataLoader, random_split
 
-from sggm.callbacks.index import callbacks
+from sggm.callbacks import callbacks
 from sggm.definitions import (
     experiment_names,
     parameters,
@@ -16,7 +16,7 @@ from sggm.definitions import (
     regressor_parameters,
 )
 from sggm.definitions import EXPERIMENT_NAME, EXPERIMENTS_CONFIG
-from sggm.data.index import datamodules
+from sggm.data import datamodules
 from sggm.regression_model import fit_prior, Regressor
 
 
