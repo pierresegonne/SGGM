@@ -7,7 +7,12 @@ import yaml
 from argparse import ArgumentParser
 from torch.utils.data import DataLoader, random_split
 
-from sggm.definitions import experiment_names, parameters, regression_experiments, regressor_parameters
+from sggm.definitions import (
+    experiment_names,
+    parameters,
+    regression_experiments,
+    regressor_parameters,
+)
 from sggm.definitions import EXPERIMENT_NAME, EXPERIMENTS_CONFIG
 
 from sggm.regression_model import fit_prior, Regressor
@@ -24,8 +29,10 @@ class Experiment:
         self.add_default_params(parameters)
 
         # No experiment name
-        if getattr(self, f'{EXPERIMENT_NAME}', None) is None:
-            raise Exception(f'Experiment {json.dumps(self.__dict__)} was not supplied any experiment name')
+        if getattr(self, f"{EXPERIMENT_NAME}", None) is None:
+            raise Exception(
+                f"Experiment {json.dumps(self.__dict__)} was not supplied any experiment name"
+            )
 
         # And also load default model specific default values
         # Regression
@@ -40,18 +47,25 @@ class Experiment:
     @property
     def model(self):
         if self.experiment_name in regression_experiments:
+            # TODO get dimension
             input_dim = 1
             prior_parameters = fit_prior()
             return Regressor(
-                input_dim=input_dim, hidden_dim=self.hidden_dim,
-                prior_α=prior_parameters[0], prior_β=prior_parameters[1],
-                β_out=self.beta_out, eps=self.eps, n_mc_samples=self.n_mc_samples)
+                input_dim=input_dim,
+                hidden_dim=self.hidden_dim,
+                prior_α=prior_parameters[0],
+                prior_β=prior_parameters[1],
+                β_out=self.beta_out,
+                eps=self.eps,
+                n_mc_samples=self.n_mc_samples,
+            )
         else:
-            raise Exception('Experiment does not have a model implemented')
+            raise Exception("Experiment does not have a model implemented")
             return
 
     @property
     def datasets(self):
+        # TODO get datasets based on experiment name
         return [], [], []
 
 
@@ -61,7 +75,7 @@ def get_experiments_config(parsed_args):
             experiments_config = yaml.load(config_file, Loader=yaml.FullLoader)
     else:
         _parsed_args = copy.deepcopy(vars(parsed_args))
-        del _parsed_args[f'{EXPERIMENTS_CONFIG}']
+        del _parsed_args[f"{EXPERIMENTS_CONFIG}"]
         experiments_config = [_parsed_args]
     return experiments_config
 
@@ -73,11 +87,13 @@ def cli_main():
     # ------------
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
-    parser.add_argument(f'-{EXPERIMENT_NAME}', choices=experiment_names)
-    parser.add_argument(f'--{EXPERIMENTS_CONFIG}', type=str)
+    parser.add_argument(f"-{EXPERIMENT_NAME}", choices=experiment_names)
+    parser.add_argument(f"--{EXPERIMENTS_CONFIG}", type=str)
     # Project wide parameters
     for parameter in parameters.values():
-        parser.add_argument(f'--{parameter.name}', default=parameter.default, type=parameter.type)
+        parser.add_argument(
+            f"--{parameter.name}", default=parameter.default, type=parameter.type
+        )
     args, unknown_args = parser.parse_known_args()
 
     experiments_config = get_experiments_config(args)
@@ -88,8 +104,10 @@ def cli_main():
     for experiment_idx, experiment_config in enumerate(experiments_config):
 
         # Add support for experiment specific arguments
-        if f'{EXPERIMENT_NAME}' not in experiment_config.keys():
-            raise Exception(f'Experiment {json.dumps(experiment_config)} was not supplied any experiment name')
+        if f"{EXPERIMENT_NAME}" not in experiment_config.keys():
+            raise Exception(
+                f"Experiment {json.dumps(experiment_config)} was not supplied any experiment name"
+            )
         else:
             if experiment_config[EXPERIMENT_NAME] in regression_experiments:
                 parser = Regressor.add_model_specific_args(parser)
@@ -125,5 +143,5 @@ def cli_main():
         # result = trainer.test(test_dataloaders=test_loader)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli_main()

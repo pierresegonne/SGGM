@@ -1,16 +1,15 @@
-
-EXPERIMENT_NAME = 'experiment_name'
-EXPERIMENTS_CONFIG = 'experiments_config'
+EXPERIMENT_NAME = "experiment_name"
+EXPERIMENTS_CONFIG = "experiments_config"
 
 # All parameters for an experiment must be defined here
-BATCH_SIZE = 'batch_size'
-β_OUT = 'beta_out'
-EPS = 'eps'
-HIDDEN_DIM = 'hidden_dim'
-LEARNING_RATE = 'learning_rate'
-NAME = 'name'
-N_TRIALS = 'n_trials'
-N_MC_SAMPLES = 'n_mc_samples'
+BATCH_SIZE = "batch_size"
+β_OUT = "beta_out"
+EPS = "eps"
+HIDDEN_DIM = "hidden_dim"
+LEARNING_RATE = "learning_rate"
+NAME = "name"
+N_TRIALS = "n_trials"
+N_MC_SAMPLES = "n_mc_samples"
 
 
 class Param:
@@ -24,7 +23,7 @@ parameters = {
     BATCH_SIZE: Param(BATCH_SIZE, 32, int),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
     LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
-    NAME: Param(NAME, 'unnamed', str),
+    NAME: Param(NAME, "unnamed", str),
     N_TRIALS: Param(N_TRIALS, 1, int),
 }
 
@@ -40,15 +39,12 @@ regressor_parameters = {
 # -------------
 
 
-TOY = 'toy'
-TOY_2D = 'toy_2d'
+TOY = "toy"
+TOY_2D = "toy_2d"
 
 experiment_names = [
     TOY,
     TOY_2D,
 ]
 
-regression_experiments = [
-    TOY,
-    TOY_2D
-]
+regression_experiments = [TOY, TOY_2D]
