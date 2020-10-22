@@ -44,13 +44,13 @@ class ShiftLayer(torch.nn.Module):
 class Regressor(pl.LightningModule):
     def __init__(
         self,
-        input_dim,
-        hidden_dim,
-        prior_α,
-        prior_β,
-        β_out=regressor_parameters[β_OUT],
-        eps=regressor_parameters[EPS],
-        n_mc_samples=regressor_parameters[N_MC_SAMPLES],
+        input_dim: int,
+        hidden_dim: int,
+        prior_α: float,
+        prior_β: float,
+        β_out: float = regressor_parameters[β_OUT].default,
+        eps: float = regressor_parameters[EPS].default,
+        n_mc_samples: int = regressor_parameters[N_MC_SAMPLES].default,
     ):
         super(Regressor, self).__init__()
 

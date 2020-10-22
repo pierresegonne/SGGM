@@ -3,7 +3,7 @@ from sggm.data.toy.datamodule import ToyDataModule
 from sggm.regression_model import fit_prior, Regressor
 
 
-def test_lit_classifier():
+def test_toy():
     seed_everything(1234)
     prior_parameters = fit_prior()
     model = Regressor(

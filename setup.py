@@ -3,13 +3,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="project",
+    name="SGGN",
     version="0.0.0",
-    description="Describe Your Cool Project",
-    author="",
-    author_email="",
-    # REPLACE WITH YOUR OWN GITHUB PROJECT LINK
-    url="https://github.com/PyTorchLightning/pytorch-lightning-conference-seed",
+    description="Scalable Geometrical Generative Models",
+    author="Pierre Segonne",
+    author_email="pierre.segonne@protonmail.com",
+    url="https://github.com/pierresegonne/SGGM",
     install_requires=["pytorch-lightning"],
     packages=find_packages(),
 )
