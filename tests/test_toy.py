@@ -1,9 +1,11 @@
 from pytorch_lightning import Trainer, seed_everything
 from sggm.data.toy.datamodule import ToyDataModule
 from sggm.regression_model import fit_prior, Regressor
+import sys
 
 
 def test_toy():
+    print("HERE", sys.modules.keys())
     seed_everything(1234)
     prior_parameters = fit_prior()
     model = Regressor(

@@ -62,7 +62,7 @@ jobs:
 
     - name: Tests
       run: |
-        coverage run --source sggm -m py.test sggm tests -v --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
+        coverage run --source sggm -m py.test sggm tests -v -s --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
 
     - name: Statistics
       if: success()
