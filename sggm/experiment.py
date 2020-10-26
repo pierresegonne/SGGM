@@ -153,7 +153,7 @@ def cli_main():
             ]
             # Note that checkpointing is handled by default
             logger = pl.loggers.TensorBoardLogger(
-                save_dir="lightning_logs", name=experiment.experiment_name
+                save_dir=f"lightning_logs/{experiment.experiment_name}", name=experiment.name
             )
             trainer = pl.Trainer.from_argparse_args(
                 trainer_args,

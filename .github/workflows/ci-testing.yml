@@ -64,10 +64,6 @@ jobs:
       run: |
         coverage run --source sggm -m py.test sggm tests -v -s --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
 
-    - name: Log
-      run: |
-        cat /home/runner/work/SGGM/SGGM/junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
-
     - name: Statistics
       if: success()
       run: |
