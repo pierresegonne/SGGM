@@ -8,7 +8,19 @@ from argparse import ArgumentParser
 from sggm.definitions import regressor_parameters
 from sggm.definitions import β_OUT, EPS, N_MC_SAMPLES
 
+# ----------
+# Model definitions
+# ----------
 pi = torch.tensor([np.pi])
+MARGINAL = "marginal"
+POSTERIOR = "posterior"
+available_methods = [MARGINAL, POSTERIOR]
+
+
+def check_available_methods(method):
+    assert (
+        method in available_methods
+    ), f"Unvalid method {method}, choices {available_methods}"
 
 
 def fit_prior():
@@ -41,6 +53,9 @@ class ShiftLayer(torch.nn.Module):
         return self.shift_factor + x
 
 
+# ----------
+# Model
+# ----------
 class Regressor(pl.LightningModule):
     def __init__(
         self,
@@ -88,13 +103,13 @@ class Regressor(pl.LightningModule):
         # Save hparams
         self.save_hyperparameters()
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         return self.μ(x), self.α(x), self.β(x)
 
-    def posterior_predictive_mean(self, x):
+    def posterior_predictive_mean(self, x: torch.Tensor):
         return self.μ(x)
 
-    def posterior_predictive_std(self, x, exact=True):
+    def posterior_predictive_std(self, x: torch.Tensor, exact: bool = True):
         if exact:
             mean_precision = self.α(x) / self.β(x)
             σ = 1 / torch.sqrt(mean_precision + self.eps)
@@ -105,23 +120,37 @@ class Regressor(pl.LightningModule):
             σ = 1 / torch.sqrt(precision)
         return σ
 
-    def marginal_predictive_mean(self, x):
+    def marginal_predictive_mean(self, x: torch.Tensor):
         return self.μ(x)
 
-    def marginal_predictive_std(self, x):
+    def marginal_predictive_std(self, x: torch.Tensor):
         α = self.α(x)
         # np.inf is not a number
         var = torch.where(α > 1, self.β(x) / (α - 1), 1e20 * torch.ones(α.shape))
         return torch.sqrt(var)
 
-    def ood_x(self, x, **kwargs):
+    def predictive_mean(self, x: torch.Tensor, method: str = MARGINAL):
+        check_available_methods(method)
+        if method == MARGINAL:
+            return self.marginal_predictive_mean(x)
+        elif method == POSTERIOR:
+            return self.posterior_predictive_mean(x)
+
+    def predictive_std(self, x: torch.Tensor, method: str = MARGINAL):
+        check_available_methods(method)
+        if method == MARGINAL:
+            return self.marginal_predictive_std(x)
+        elif method == POSTERIOR:
+            return self.posterior_predictive_std(x)
+
+    def ood_x(self, x: torch.Tensor, **kwargs):
         kl = torch.mean(kwargs["kl"])
         kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
         random_direction = (torch.randint_like(kl_grad, 0, 2) * 2) - 1
         return x + self.v * random_direction * torch.sign(kl_grad)
 
     @staticmethod
-    def llk(μ, α, β, y):
+    def llk(μ: torch.Tensor, α: torch.Tensor, β: torch.Tensor, y: torch.Tensor):
         expected_log_lambda = torch.digamma(α) - torch.log(β)
         expected_lambda = α / β
         ll = (1 / 2) * (
@@ -130,13 +159,13 @@ class Regressor(pl.LightningModule):
         return ll
 
     @staticmethod
-    def kl(α, β, a, b):
+    def kl(α: torch.Tensor, β: torch.Tensor, a: torch.Tensor, b: torch.Tensor):
         qp = tcd.Gamma(α, β)
         pp = tcd.Gamma(a, b)
         return tcd.kl_divergence(qp, pp)
 
     @staticmethod
-    def elbo(llk, kl):
+    def elbo(llk: torch.Tensor, kl: torch.Tensor):
         return torch.mean(llk - kl)
 
     # ---------
@@ -184,7 +213,7 @@ class Regressor(pl.LightningModule):
         self.log("test_loss", loss, on_step=True)
 
     @staticmethod
-    def add_model_specific_args(parent_parser):
+    def add_model_specific_args(parent_parser: ArgumentParser):
         parser = ArgumentParser(
             parents=[parent_parser], add_help=False, conflict_handler="resolve"
         )

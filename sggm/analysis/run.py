@@ -1,18 +1,35 @@
 import argparse
 
 from sggm.analysis.experiment_log import ExperimentLog
-from sggm.definitions import TOY, experiment_names
+from sggm.analysis.toy import toy_plot
+from sggm.definitions import experiment_names, TOY, TOY_2D
+from sggm.regression_model import check_available_methods, MARGINAL
 
 
 def run_analysis(experiment_name, name, **kwargs):
-    ExperimentLog(experiment_name, name)
-    pass
-    # if experiment_name == TOY:
-    #     return toy_plot(logger, **kwargs)
-    # elif experiment_name == TOY_2D:
-    #     return
-    # elif experiment_name == UCI_:
-    #     return
+    experiment_log = ExperimentLog(experiment_name, name)
+    if experiment_name == TOY:
+        return toy_plot(experiment_log, **kwargs)
+    elif experiment_name == TOY_2D:
+        return
+
+
+def add_experiment_args(parser, experiment_name):
+    if experiment_name == TOY:
+        parser.add_argument(
+            "--methods",
+            type=str,
+            default=MARGINAL,
+            help="Delimited list input, ex 'marginal,posterior'",
+        )
+    return parser
+
+
+def parse_experiment_args(args):
+    experiment_name = args.experiment_name
+    if experiment_name == TOY:
+        args.methods = [item for item in args.methods.split(",")]
+    return args
 
 
 if __name__ == "__main__":
@@ -22,6 +39,11 @@ if __name__ == "__main__":
         "--experiment_name", type=str, choices=experiment_names, required=True
     )
     parser.add_argument("--name", type=str, required=True)
-    args = parser.parse_args()
+    args, unknown_args = parser.parse_known_args()
 
-    run_analysis(args.experiment_name, args.name)
+    # Reparse the arguments once the extra arguments have been obtained
+    parser = add_experiment_args(parser, args.experiment_name)
+    args, unknown_args = parser.parse_known_args()
+    args = parse_experiment_args(args)
+
+    run_analysis(**vars(args))
