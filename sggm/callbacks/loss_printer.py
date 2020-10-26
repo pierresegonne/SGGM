@@ -12,7 +12,9 @@ class LossPrinter(pl.callbacks.Callback):
         ):
             # HACK
             # Only works because the last log is saved after log_every_n_steps
-            loss = pl_module._results.get_epoch_log_metrics()["train_loss_epoch"]
+            loss = pl_module._results.get_epoch_log_metrics()[
+                "train_loss_epoch"
+            ].detach()
             print(
                 f"[Epoch ({trainer.current_epoch}/{trainer.max_epochs}) Loss: {loss:.4f}]"
             )

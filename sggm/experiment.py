@@ -1,5 +1,6 @@
 import copy
 import json
+import os
 import pytorch_lightning as pl
 import yaml
 import torch
@@ -121,45 +122,54 @@ def cli_main():
 
         experiment = Experiment(full_experiments_config[experiment_idx])
         print(f"--- Starting Experiment {experiment.__dict__}")
+        for n_t in range(experiment.n_trials):
 
-        # ------------
-        # data
-        # ------------
-        datamodule = experiment.datamodule
+            # ------------
+            # data
+            # ------------
+            datamodule = experiment.datamodule
 
-        # ------------
-        # model
-        # ------------
-        model = experiment.model
+            # ------------
+            # model
+            # ------------
+            model = experiment.model
 
-        # ------------
-        # training
-        # ------------
+            # ------------
+            # training
+            # ------------
 
-        # Hack to override trainer arguments
-        class TrainerArgs:
-            def __init__(self, args):
-                self.__dict__ = args
+            # Hack to override trainer arguments
+            class TrainerArgs:
+                def __init__(self, args):
+                    self.__dict__ = args
 
-        trainer_args = vars(args)
-        trainer_args.update(experiment.__dict__)
-        trainer_args = TrainerArgs(trainer_args)
+            trainer_args = vars(args)
+            trainer_args.update(experiment.__dict__)
+            trainer_args = TrainerArgs(trainer_args)
 
-        profiler = pl.profiler.AdvancedProfiler()
-        default_callbacks = [pl.callbacks.EarlyStopping("eval_loss")]
-        trainer = pl.Trainer.from_argparse_args(
-            trainer_args,
-            profiler=False,
-            callbacks=experiment.callbacks + default_callbacks,
-        )
+            # profiler = pl.profiler.AdvancedProfiler()
+            default_callbacks = [
+                pl.callbacks.EarlyStopping("eval_loss"),
+            ]
+            # Note that checkpointing is handled by default
+            logger = pl.loggers.TensorBoardLogger(
+                save_dir="lightning_logs", name=experiment.experiment_name
+            )
+            trainer = pl.Trainer.from_argparse_args(
+                trainer_args,
+                callbacks=experiment.callbacks + default_callbacks,
+                logger=logger,
+                profiler=False,
+            )
 
-        trainer.fit(model, datamodule)
+            trainer.fit(model, datamodule)
 
-        # ------------
-        # testing
-        # ------------
-        results = trainer.test()
-        torch.save(results, f"{trainer.logger.log_dir}/results.pkl")
+            # ------------
+            # testing
+            # ------------
+            results = trainer.test()
+
+            torch.save(results, f"{trainer.logger.log_dir}/results.pkl")
 
 
 if __name__ == "__main__":
