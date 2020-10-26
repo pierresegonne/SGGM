@@ -5,10 +5,10 @@ import seaborn as sns
 import torch
 import torch.distributions as tcd
 
+from typing import Tuple
 from scipy.stats import norm
 from sggm.data.toy import ToyDataModule
 from sggm.regression_model import (
-    check_available_methods,
     fit_prior,
     MARGINAL,
     POSTERIOR,
@@ -22,7 +22,7 @@ data_range_plot = [-4, 14]
 data_range_training = [0, 10]
 
 
-def get_plot_dataset(N=1000):
+def get_plot_dataset(N: int = 1000) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     x = torch.linspace(*data_range_plot, steps=N)[:, None]
 
     return x, ToyDataModule.data_mean(x), ToyDataModule.data_std(x)
@@ -33,9 +33,9 @@ plot_dataset = get_plot_dataset()
 
 def get_colour_for_method(method):
     if method == MARGINAL:
-        return colours["navyBlue"]
-    elif method == POSTERIOR:
         return colours["orange"]
+    elif method == POSTERIOR:
+        return colours["navyBlue"]
 
 
 # ------------
@@ -44,6 +44,8 @@ def get_colour_for_method(method):
 def base_plot(
     data_ax,
     std_ax,
+    data=plot_dataset,
+    range_=data_range_training,
     plot_lims={
         "data_ax": [-25, 25],
         "std_ax": [0, 5],
@@ -51,12 +53,12 @@ def base_plot(
 ):
 
     # Unpack plot dataset
-    x_plot, y_plot, y_std_plot = plot_dataset
+    x_plot, y_plot, y_std_plot = data
     y_plot_mstd = y_plot - 1.96 * y_std_plot
     y_plot_pstd = y_plot + 1.96 * y_std_plot
 
     # Plot limits
-    plot_x_range = [np.min(x_plot) - 1, np.max(x_plot) + 1]
+    plot_x_range = [torch.min(x_plot) - 1, torch.max(x_plot) + 1]
 
     # Plot
     data_ax.plot(x_plot, y_plot, color="black", linestyle="dashed", linewidth=1)
@@ -67,14 +69,12 @@ def base_plot(
     data_ax.set_xlim(plot_x_range)
     data_ax.set_ylim(plot_lims["data_ax"])
 
-    training_mask = (data_range_training[0] <= x_plot) * (
-        x_plot <= data_range_training[1]
-    )
+    training_mask = (range_[0] <= x_plot) * (x_plot <= range_[1])
     std_ax.plot(
         x_plot[training_mask], y_std_plot[training_mask], color="black", linewidth=1
     )
-    b_training_mask = x_plot <= data_range_training[0]
-    a_training_mask = x_plot >= data_range_training[1]
+    b_training_mask = x_plot <= range_[0]
+    a_training_mask = x_plot >= range_[1]
     std_ax.plot(
         x_plot[b_training_mask],
         y_std_plot[b_training_mask],
@@ -142,6 +142,7 @@ def mean_models_plot(std_ax, experiment_log, method):
         color=colour,
         alpha=0.55,
     )
+    return std_ax
 
 
 def get_std_trials_df(versions, method):
@@ -164,13 +165,6 @@ def get_std_trials_df(versions, method):
 # ------------
 # Misc plot methods
 # ------------
-def ll(y, μ, α, β):
-    expected_log_lambda = torch.digamma(α) - torch.log(β)
-    expected_lambda = α / β
-    llk = (1 / 2) * (
-        expected_log_lambda - np.log(2 * np.pi) - expected_lambda * ((y - μ) ** 2)
-    )
-    return llk
 
 
 def kl_grad_shift_plot(ax, model, training_dataset):

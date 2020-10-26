@@ -1,22 +1,22 @@
-- name: test_toy_1
-  experiment_name: toy
-  # hparams
-  batch_size: 500
-  hidden_dim: 50
-  # beta_out: 0.
-  # pl trainer
-  n_trials: 2
-  max_epochs: 100
-  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 10 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  # val_check_interval: 5 # How often to check the validation set.
-  check_val_every_n_epoch: 10 # Check val every n train epochs
-
-
-# - name: test_toy_2
+# - name: test_standard_elbo
 #   experiment_name: toy
-#   batch_size: 32
-#   max_epochs: 50
-#   log_every_n_steps: 5
-#   val_check_interval: 5
+#   # hparams
+#   batch_size: 500
+#   hidden_dim: 50
+#   beta_out: 0
+#   # pl trainer
+#   n_trials: 3
+#   max_epochs: 10000
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 500 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   # val_check_interval: 5 # How often to check the validation set.
+#   check_val_every_n_epoch: 500 # Check val every n train epochs
+
+
+- name: test_toy_2d
+  experiment_name: toy_2d
+  batch_size: 32
+  max_epochs: 50
+  log_every_n_steps: 5
+  val_check_interval: 5

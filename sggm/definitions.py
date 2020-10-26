@@ -10,6 +10,13 @@ LEARNING_RATE = "learning_rate"
 NAME = "name"
 N_TRIALS = "n_trials"
 N_MC_SAMPLES = "n_mc_samples"
+N_WORKERS = "n_workers"  # num workers for data loading set to None will take N_cpus
+
+
+def none_or_int(value):
+    if value == "None":
+        return None
+    return int(value)
 
 
 class Param:
@@ -25,6 +32,7 @@ parameters = {
     LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
     NAME: Param(NAME, "unnamed", str),
     N_TRIALS: Param(N_TRIALS, 1, int),
+    N_WORKERS: Param(N_WORKERS, 0, none_or_int),
 }
 
 # Parameters specific to the Regressor model
