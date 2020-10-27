@@ -6,7 +6,15 @@ import torch.distributions as tcd
 from argparse import ArgumentParser
 
 from sggm.definitions import regressor_parameters
-from sggm.definitions import β_OUT, EPS, N_MC_SAMPLES
+from sggm.definitions import (
+    β_ELBO,
+    β_OOD,
+    GAUSSIAN_NOISE_AROUND_X,
+    EPS,
+    OOD_X_GENERATION_METHOD,
+    OPTIMISED_X_OOD,
+    N_MC_SAMPLES,
+)
 
 # ----------
 # Model definitions
@@ -56,6 +64,7 @@ class ShiftLayer(torch.nn.Module):
 # ----------
 # Model
 # ----------
+# Note that the default values are provided to ease exploration, they are actually not used.
 class Regressor(pl.LightningModule):
     def __init__(
         self,
@@ -63,7 +72,11 @@ class Regressor(pl.LightningModule):
         hidden_dim: int,
         prior_α: float,
         prior_β: float,
-        β_out: float = regressor_parameters[β_OUT].default,
+        β_elbo: float = regressor_parameters[β_ELBO].default,
+        β_ood: float = regressor_parameters[β_OOD].default,
+        ood_x_generation_method: str = regressor_parameters[
+            OOD_X_GENERATION_METHOD
+        ].default,
         eps: float = regressor_parameters[EPS].default,
         n_mc_samples: int = regressor_parameters[N_MC_SAMPLES].default,
     ):
@@ -75,19 +88,25 @@ class Regressor(pl.LightningModule):
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
 
-        self.prior_α = prior_α
-        self.prior_β = prior_β
-        self.pp = tcd.Gamma(prior_α, prior_β)
-
-        self.β_out = β_out
-
-        self.lr = 1e-2
-
         self.eps = eps
         self.n_mc_samples = n_mc_samples
 
+        self.ood_x_generation_method = ood_x_generation_method
+
         v_ini = torch.nn.Parameter(torch.Tensor([10 / 500]), requires_grad=True)
         self.register_parameter("v", v_ini)
+
+        # ---------
+        # HParameters
+        # ---------
+
+        self.prior_α = prior_α
+        self.prior_β = prior_β
+
+        self.β_ood = β_ood
+        self.β_elbo = β_elbo
+
+        self.lr = 1e-2
         self.lr_v = 1
 
         # ---------
@@ -100,16 +119,23 @@ class Regressor(pl.LightningModule):
 
         self.β = BaseMLPSoftPlus(input_dim, hidden_dim)
 
+        # ---------
+        # Misc
+        # ---------
+        self.pp = tcd.Gamma(prior_α, prior_β)
+
         # Save hparams
         self.save_hyperparameters()
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.μ(x), self.α(x), self.β(x)
 
-    def posterior_predictive_mean(self, x: torch.Tensor):
+    def posterior_predictive_mean(self, x: torch.Tensor) -> torch.Tensor:
         return self.μ(x)
 
-    def posterior_predictive_std(self, x: torch.Tensor, exact: bool = True):
+    def posterior_predictive_std(
+        self, x: torch.Tensor, exact: bool = True
+    ) -> torch.Tensor:
         if exact:
             mean_precision = self.α(x) / self.β(x)
             σ = 1 / torch.sqrt(mean_precision + self.eps)
@@ -120,37 +146,44 @@ class Regressor(pl.LightningModule):
             σ = 1 / torch.sqrt(precision)
         return σ
 
-    def marginal_predictive_mean(self, x: torch.Tensor):
+    def marginal_predictive_mean(self, x: torch.Tensor) -> torch.Tensor:
         return self.μ(x)
 
-    def marginal_predictive_std(self, x: torch.Tensor):
+    def marginal_predictive_std(self, x: torch.Tensor) -> torch.Tensor:
         α = self.α(x)
         # np.inf is not a number
         var = torch.where(α > 1, self.β(x) / (α - 1), 1e20 * torch.ones(α.shape))
         return torch.sqrt(var)
 
-    def predictive_mean(self, x: torch.Tensor, method: str = MARGINAL):
+    def predictive_mean(self, x: torch.Tensor, method: str = MARGINAL) -> torch.Tensor:
         check_available_methods(method)
         if method == MARGINAL:
             return self.marginal_predictive_mean(x)
         elif method == POSTERIOR:
             return self.posterior_predictive_mean(x)
 
-    def predictive_std(self, x: torch.Tensor, method: str = MARGINAL):
+    def predictive_std(self, x: torch.Tensor, method: str = MARGINAL) -> torch.Tensor:
         check_available_methods(method)
         if method == MARGINAL:
             return self.marginal_predictive_std(x)
         elif method == POSTERIOR:
             return self.posterior_predictive_std(x)
 
-    def ood_x(self, x: torch.Tensor, **kwargs):
-        kl = torch.mean(kwargs["kl"])
-        kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-        random_direction = (torch.randint_like(kl_grad, 0, 2) * 2) - 1
-        return x + self.v * random_direction * torch.sign(kl_grad)
+    def ood_x(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
+        if self.ood_x_generation_method == GAUSSIAN_NOISE_AROUND_X:
+            kl_noise_std = 20
+            return x + kl_noise_std * torch.randn_like(x)
+        elif self.ood_x_generation_method == OPTIMISED_X_OOD:
+            kl = torch.mean(kwargs["kl"])
+            kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
+            random_direction = (torch.randint_like(kl_grad, 0, 2) * 2) - 1
+            return x + self.v * random_direction * torch.sign(kl_grad)
+        return torch.empty(0, 0)
 
     @staticmethod
-    def llk(μ: torch.Tensor, α: torch.Tensor, β: torch.Tensor, y: torch.Tensor):
+    def llk(
+        μ: torch.Tensor, α: torch.Tensor, β: torch.Tensor, y: torch.Tensor
+    ) -> torch.Tensor:
         expected_log_lambda = torch.digamma(α) - torch.log(β)
         expected_lambda = α / β
         ll = (1 / 2) * (
@@ -159,14 +192,15 @@ class Regressor(pl.LightningModule):
         return ll
 
     @staticmethod
-    def kl(α: torch.Tensor, β: torch.Tensor, a: torch.Tensor, b: torch.Tensor):
+    def kl(
+        α: torch.Tensor, β: torch.Tensor, a: torch.Tensor, b: torch.Tensor
+    ) -> torch.Tensor:
         qp = tcd.Gamma(α, β)
         pp = tcd.Gamma(a, b)
         return tcd.kl_divergence(qp, pp)
 
-    @staticmethod
-    def elbo(llk: torch.Tensor, kl: torch.Tensor):
-        return torch.mean(llk - kl)
+    def elbo(self, llk: torch.Tensor, kl: torch.Tensor) -> torch.Tensor:
+        return torch.mean(llk - self.β_elbo * kl)
 
     # ---------
     def configure_optimizers(self):
@@ -188,9 +222,12 @@ class Regressor(pl.LightningModule):
         log_likelihood = self.llk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
         x_out = self.ood_x(x, kl=kl_divergence)
-        _, α_x_out, β_x_out = self(x_out)
-        kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
-        loss = -self.elbo(log_likelihood, kl_divergence) + self.β_out * torch.mean(
+        if torch.numel(x_out) > 0:
+            _, α_x_out, β_x_out = self(x_out)
+            kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
+        else:
+            kl_divergence_out = torch.zeros((1,))
+        loss = -self.elbo(log_likelihood, kl_divergence) + self.β_ood * torch.mean(
             kl_divergence_out
         )
         self.log("train_loss", loss, on_epoch=True)
@@ -219,6 +256,6 @@ class Regressor(pl.LightningModule):
         )
         for parameter in regressor_parameters.values():
             parser.add_argument(
-                f"--{parameter.name}", default=parameter.default, type=parameter.type
+                f"--{parameter.name}", default=parameter.default, type=parameter.type_
             )
         return parser

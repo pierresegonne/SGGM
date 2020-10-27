@@ -1,0 +1,99 @@
+- name: benchmark_mle
+  experiment_name: toy
+  # hparams
+  batch_size: 500
+  hidden_dim: 50
+  beta_elbo: 0
+  beta_ood: 0
+  # pl trainer
+  n_trials: 10
+  max_epochs: 6000
+  log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 100 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 100 # Check val every n train epochs
+
+- name: benchmark_standard_elbo
+  experiment_name: toy
+  # hparams
+  batch_size: 500
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 0
+  # pl trainer
+  n_trials: 10
+  max_epochs: 6000
+  log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 100 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 100 # Check val every n train epochs
+
+- name: benchmark_gaussian_noise
+  experiment_name: toy
+  # hparams
+  batch_size: 500
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  ood_x_generation_method: gaussian_noise_around_x
+  # pl trainer
+  n_trials: 10
+  max_epochs: 6000
+  log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 100 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 100 # Check val every n train epochs
+
+# TOY 2D
+
+- name: benchmark_mle
+  experiment_name: toy_2d
+  N_train: 10000
+  N_test: 200
+  # hparams
+  batch_size: 500
+  hidden_dim: 50
+  beta_elbo: 0
+  beta_ood: 0
+  # pl trainer
+  n_trials: 10
+  max_epochs: 6000
+  log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 100 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 100 # Check val every n train epochs
+
+- name: benchmark_standard_elbo
+  experiment_name: toy_2d
+  N_train: 10000
+  N_test: 200
+  # hparams
+  batch_size: 500
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 0
+  # pl trainer
+  n_trials: 10
+  max_epochs: 6000
+  log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 100 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 100 # Check val every n train epochs
+
+- name: benchmark_gaussian_noise
+  experiment_name: toy_2d
+  N_train: 10000
+  N_test: 200
+  # hparams
+  batch_size: 500
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  ood_x_generation_method: gaussian_noise_around_x
+  # pl trainer
+  n_trials: 10
+  max_epochs: 6000
+  log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 100 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 100 # Check val every n train epochs

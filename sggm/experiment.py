@@ -57,7 +57,9 @@ class Experiment:
                 hidden_dim=self.hidden_dim,
                 prior_α=prior_parameters[0],
                 prior_β=prior_parameters[1],
-                β_out=self.beta_out,
+                β_elbo=self.beta_elbo,
+                β_ood=self.beta_ood,
+                ood_x_generation_method=self.ood_x_generation_method,
                 eps=self.eps,
                 n_mc_samples=self.n_mc_samples,
             )
@@ -97,7 +99,10 @@ def cli_main():
     # Project wide parameters
     for parameter in parameters.values():
         parser.add_argument(
-            f"--{parameter.name}", default=parameter.default, type=parameter.type
+            f"--{parameter.name}",
+            default=parameter.default,
+            type=parameter.type_,
+            choices=parameter.choices,
         )
     args, unknown_args = parser.parse_known_args()
 
@@ -153,7 +158,8 @@ def cli_main():
             ]
             # Note that checkpointing is handled by default
             logger = pl.loggers.TensorBoardLogger(
-                save_dir=f"lightning_logs/{experiment.experiment_name}", name=experiment.name
+                save_dir=f"lightning_logs/{experiment.experiment_name}",
+                name=experiment.name,
             )
             trainer = pl.Trainer.from_argparse_args(
                 trainer_args,
