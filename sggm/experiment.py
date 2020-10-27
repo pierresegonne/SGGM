@@ -88,10 +88,6 @@ def get_experiments_config(parsed_args):
 
 
 def cli_main():
-    import sys
-
-    print(sys.path)
-    exit()
 
     # ------------
     # Parse args
