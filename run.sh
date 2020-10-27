@@ -20,8 +20,6 @@
 #BSUB -N
 ### -- Specify the output and error file. %J is the job-id --
 ### -- -o and -e mean append, -oo and -eo mean overwrite --
-# BSUB -o job_logs/mg_pretrain/ct/mix_task07_task_08/sequential/1/gpu-%J.out
-# BSUB -e job_logs/mg_pretrain/ct/mix_task07_task_08/sequential/1/gpu_%J.err
 # -- end of LSF options --
 
 nvidia-smi
