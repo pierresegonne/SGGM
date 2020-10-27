@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="SGGN",
+    name="SGGM",
     version="0.0.0",
     description="Scalable Geometrical Generative Models",
     author="Pierre Segonne",
