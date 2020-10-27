@@ -1,9 +1,9 @@
 #!/bin/sh
 ### General options
 ### specify queue --
-#BSUB -q gpuv100
+BSUB -q gpuv100
 ### -- set the job Name --
-BSUB -J jobname
+BSUB -J benchmarks_toy_toy_2d
 ### -- ask for number of cores (default: 1) --
 BSUB -n 2
 ### -- Select the resources: 1 gpu in exclusive process mode --
@@ -11,7 +11,7 @@ BSUB -n 2
 ### -- set walltime limit: hh:mm --  maximum 24 hours for GPU-queues right now
 #BSUB -W 24:00
 # request 5GB of system-memory
-#BSUB -R "rusage[mem=6GB]"
+BSUB -R "rusage[mem=6GB]"
 ### -- set the email address 
 BSUB -u s182172@student.dtu.dk
 ### -- send notification at start --
@@ -35,6 +35,6 @@ module load cudnn/v7.6.5.32-prod-cuda-10.2
 python3 -m venv env
 source env/bin/activate
 python3 -m pip install -r requirements.txt
-PYTHONPATH=.. python3 run.py
+cd sggm/ && python experiment.py --experiments_config configs/benchmarks.yml
 
 
