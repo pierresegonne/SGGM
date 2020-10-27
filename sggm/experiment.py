@@ -21,6 +21,14 @@ from sggm.data import datamodules
 from sggm.regression_model import fit_prior, Regressor
 
 
+def clean_dict(dic: dict) -> dict:
+    clean_dic = {}
+    for k, v in dic.items():
+        if type(v) in [str, int, float, object, None]:
+            clean_dic[k] = v
+    return clean_dic
+
+
 class Experiment:
     def __init__(self, configuration: object):
 
@@ -32,9 +40,9 @@ class Experiment:
         self.add_default_params(parameters)
 
         # No experiment name
-        if getattr(self, f"{EXPERIMENT_NAME}", None) is None:
+        if getattr(self, EXPERIMENT_NAME, None) is None:
             raise Exception(
-                f"Experiment {json.dumps(self.__dict__)} was not supplied any experiment name"
+                f"Experiment {json.dumps(clean_dict(self.__dict__))} was not supplied any experiment name"
             )
 
         # And also load default model specific default values
@@ -114,7 +122,7 @@ def cli_main():
     for experiment_idx, experiment_config in enumerate(experiments_config):
 
         # Add support for experiment specific arguments
-        if f"{EXPERIMENT_NAME}" not in experiment_config.keys():
+        if EXPERIMENT_NAME not in experiment_config.keys():
             raise Exception(
                 f"Experiment {json.dumps(experiment_config)} was not supplied any experiment name"
             )

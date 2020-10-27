@@ -1,10 +1,18 @@
 import multiprocessing
+import pandas as pd
+import pathlib
 import pytorch_lightning as pl
 import torch
 
+from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
 
 N_cpus = multiprocessing.cpu_count()
+
+DATA_FILENAME = "raw.csv"
+"""
+Link to get the raw.csv data: https://archive.ics.uci.edu/ml/datasets/Superconductivty+Data
+"""
 
 
 class UCISuperConductDataModule(pl.LightningDataModule):
@@ -12,45 +20,59 @@ class UCISuperConductDataModule(pl.LightningDataModule):
         self,
         batch_size: int,
         n_workers: int,
-        N_train: int = 625,
-        N_test: int = 1000,
         train_val_split: float = 0.8,
+        test_split: float = 0.1,
         **kwargs,
     ):
         super(UCISuperConductDataModule, self).__init__()
         self.batch_size = batch_size
-        self.N_train = N_train
-        self.N_test = N_test
         self.train_val_split = train_val_split
-
-        self.training_range = [0, 10]
-        self.testing_range = [-0.5, 10.5]
+        self.test_split = test_split
 
         self.n_workers = n_workers if n_workers is not None else N_cpus
         self.pin_memory = True if self.n_workers > 0 else False
 
         # Manual as we know it
-        self.dims = 1
+        self.dims = 81
         self.out_dims = 1
 
     def setup(self, stage: str = None):
-        x_train = torch.FloatTensor(self.N_train, 1).uniform_(*self.training_range)
-        eps1, eps2 = torch.randn_like(x_train), torch.randn_like(x_train)
-        y_train = self.data_mean(x_train) + 0.3 * eps1 + 0.3 * x_train * eps2
-        x_test = torch.FloatTensor(self.N_test, 1).uniform_(*self.testing_range)
-        y_test = self.data_mean(x_test)
 
-        self.toy_train = TensorDataset(x_train, y_train)
-        train_size = int(self.N_train * self.train_val_split)
-        val_size = self.N_train - train_size
-        self.toy_train, self.toy_val = torch.utils.data.random_split(
-            self.toy_train, [train_size, val_size]
+        df = pd.read_csv(f"{pathlib.Path(__file__).parent.absolute()}/{DATA_FILENAME}")
+        # Split features, targets
+        x = df.drop(columns=["critical_temp"]).values
+        y = df["critical_temp"].values
+
+        # First split test away
+        test_size = int(x.shape[0] * self.test_split)
+        x, x_test, y, y_test = train_test_split(x, y, test_size=test_size)
+        y, y_test = y[:, None], y_test[:, None]
+
+        # Standardise
+        self.x_mean = x.mean(axis=0)[None, :]
+        self.x_std = x.std(axis=0)[None, :]
+        self.y_mean = y.mean(axis=0)[:, None]
+        self.y_std = y.std(axis=0)[:, None]
+        x = (x - self.x_mean) / self.x_std
+        y = (y - self.y_mean) / self.y_std
+        x_test = (x_test - self.x_mean) / self.x_std
+        y_test = (y_test - self.y_mean) / self.y_std
+
+        # Register to tensor and generate datasets
+        x_train, y_train = torch.FloatTensor(x), torch.FloatTensor(y)
+        x_test, y_test = torch.FloatTensor(x_test), torch.FloatTensor(y_test)
+
+        self.train_dataset = TensorDataset(x_train, y_train)
+        train_size = int(x_train.shape[0] * self.train_val_split)
+        val_size = x_train.shape[0] - train_size
+        self.train_dataset, self.val_dataset = torch.utils.data.random_split(
+            self.train_dataset, [train_size, val_size]
         )
-        self.toy_test = TensorDataset(x_test, y_test)
+        self.test_dataset = TensorDataset(x_test, y_test)
 
     def train_dataloader(self):
         return DataLoader(
-            self.toy_train,
+            self.train_dataset,
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
@@ -58,7 +80,7 @@ class UCISuperConductDataModule(pl.LightningDataModule):
 
     def val_dataloader(self):
         return DataLoader(
-            self.toy_val,
+            self.val_dataset,
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
@@ -66,16 +88,8 @@ class UCISuperConductDataModule(pl.LightningDataModule):
 
     def test_dataloader(self):
         return DataLoader(
-            self.toy_test,
+            self.test_dataset,
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
         )
-
-    @staticmethod
-    def data_mean(x: torch.Tensor) -> torch.Tensor:
-        return x * torch.sin(x)
-
-    @staticmethod
-    def data_std(x: torch.Tensor) -> torch.Tensor:
-        return torch.abs(0.3 * torch.sqrt(1 + x * x))
