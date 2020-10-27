@@ -6,6 +6,7 @@
 #BSUB -J benchmarks_toy_toy_2d
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 2
+#BSUB -R "span[hosts=1]"
 ### -- Select the resources: 1 gpu in exclusive process mode --
 #BSUB -gpu "num=1:mode=exclusive_process"
 ### -- set walltime limit: hh:mm --  maximum 24 hours for GPU-queues right now
