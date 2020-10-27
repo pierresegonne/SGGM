@@ -31,9 +31,10 @@ def get_plot_dataset(N: int = 360) -> Tuple[torch.Tensor, torch.Tensor, torch.Te
     r = torch.linspace(*data_range_plot, steps=N)
     theta = torch.linspace(start=0, end=2 * pi, steps=N)
     r, theta = torch.meshgrid(r.flatten(), theta.flatten())
+    r, theta = torch.transpose(r, 0, 1), torch.transpose(theta, 0, 1)
     x, y = r * torch.cos(theta), r * torch.sin(theta)
+
     x_plot = torch.cat([x.flatten()[:, None], y.flatten()[:, None]], 1)
-    # TODO Investigate here there is something wrong
 
     r_plot = torch.norm(x_plot, dim=1)
 
@@ -204,9 +205,10 @@ def best_std_plot_2d(ax, experiment_log, method, idx=None):
     colour = get_colour_for_method(method)
     # Get df for all trials for the std
     std_df = get_std_trials_df(experiment_log.versions, method=method, idx=idx)
-    sns.lineplot(
+    ax = sns.lineplot(
         x="x", y="std(y|x)", ci="sd", data=std_df, ax=ax, color=colour, alpha=0.55
     )
+
     return ax
 
 
@@ -226,9 +228,11 @@ def get_std_trials_df(versions, method, idx=None):
             else:
                 std = column_to_mesh(std).mean(axis=0).numpy().reshape((-1, 1))
 
-            x_plot_slice = column_to_slice(x_plot[:, 0]).reshape((-1, 1))
+            x_plot_slice = column_to_slice(x_plot[:, 0]).numpy().reshape((-1, 1))
 
-            new_trial_stds = np.concatenate((x_plot_slice, std), axis=1)
+            new_trial_stds = np.concatenate((x_plot_slice, std), axis=1).astype(
+                np.float64
+            )
             update_df = pd.DataFrame(new_trial_stds, columns=["x", "std(y|x)"])
             df = df.append(update_df, ignore_index=True)
 

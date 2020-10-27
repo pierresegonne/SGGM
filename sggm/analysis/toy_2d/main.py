@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from torch import no_grad
 from sggm.analysis.toy_2d.helper import (
@@ -37,8 +38,6 @@ def plot(experiment_log, methods):
         ax_3d_training = training_plot_3d(ax_3d_training, best_training_dataset)
         data_ax_mean, std_ax_mean = base_plot_2d(data_ax_mean, std_ax_mean)
         data_ax_slice, std_ax_slice = base_plot_2d(data_ax_slice, std_ax_slice)
-
-        plt.show()
 
         for method in methods:
             ax_3d_true = true_plot_3d(ax_3d_true, best_model, method)
