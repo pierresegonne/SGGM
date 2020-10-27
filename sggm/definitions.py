@@ -92,10 +92,12 @@ regressor_parameters = {
 
 TOY = "toy"
 TOY_2D = "toy_2d"
+UCI_SUPERCONDUCT = "uci_superconduct"
 
 experiment_names = [
     TOY,
     TOY_2D,
+    UCI_SUPERCONDUCT,
 ]
 
-regression_experiments = [TOY, TOY_2D]
+regression_experiments = [TOY, TOY_2D, UCI_SUPERCONDUCT]
