@@ -98,6 +98,7 @@ class Regressor(pl.LightningModule):
             0.1 * torch.ones((1, self.input_dim)), requires_grad=True
         )
         self.register_parameter("v", v_ini)
+        self.v_ = 100
 
         # ---------
         # HParameters
@@ -180,6 +181,10 @@ class Regressor(pl.LightningModule):
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             # random_direction = (torch.randint_like(kl_grad, 0, 2) * 2) - 1
+            # --------------
+
+            return x + self.v_ * torch.sign(kl_grad)
+            # --------------
             return x + self.v * torch.sign(kl_grad)
         elif self.ood_x_generation_method == UNIFORM_X_OOD:
             x_ood = torch.rand_like(x) * 11 - 0.5
@@ -191,6 +196,21 @@ class Regressor(pl.LightningModule):
             # x_ood = x_ood.view(-1)[perm_idx].view(x_ood.size())
             return x_ood
         return torch.empty(0, 0)
+
+    def tune_on_validation(self, x: torch.Tensor, **kwargs):
+        if self.ood_x_generation_method == UNIFORM_X_OOD:
+            kl = torch.mean(kwargs["kl"])
+            kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
+            v_available = [0.0001, 0.001, 0.01, 1, 2, 3, 5, 10, 50, 100, 500]
+            v_, kl_ = None, -np.inf
+            for v_proposal in v_available:
+                _, al, be = self(x + v_proposal * torch.sign(kl_grad))
+                kl_proposal = torch.mean(self.kl(al, be, self.prior_α, self.prior_β))
+                if kl_proposal > kl_:
+                    kl_ = kl_proposal
+                    v_ = v_proposal
+            print('Selected', v_)
+            self.v_ = v_
 
     @staticmethod
     def llk(
@@ -253,6 +273,9 @@ class Regressor(pl.LightningModule):
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.llk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
+        # --
+        self.tune_on_validation(x, kl=kl_divergence)
+        # --
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         self.log("eval_loss", loss, on_epoch=True)
 

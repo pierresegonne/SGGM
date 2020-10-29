@@ -162,7 +162,7 @@ def cli_main():
 
             # profiler = pl.profiler.AdvancedProfiler()
             default_callbacks = [
-                pl.callbacks.EarlyStopping("eval_loss"),
+                pl.callbacks.EarlyStopping("eval_loss", patience=500),
             ]
             # Note that checkpointing is handled by default
             logger = pl.loggers.TensorBoardLogger(

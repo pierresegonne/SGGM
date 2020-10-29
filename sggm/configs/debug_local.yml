@@ -1,4 +1,4 @@
-- name: test_speed_per_input
+- name: test_speed_coarse_optimised_max_val
   experiment_name: toy
   # hparams
   batch_size: 500
@@ -7,7 +7,7 @@
   beta_ood: 1
   ood_x_generation_method: optimised_x_ood
   # pl trainer
-  n_trials: 3
+  n_trials: 1
   max_epochs: 6000
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 500 # How often does the log writes to disc
