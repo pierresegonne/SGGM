@@ -37,6 +37,10 @@ class ExperimentLog:
         self.experiment_name = experiment_name
         self.name = name
         self.save_dir = save_dir
+        # Verify the existence of log
+        assert os.path.exists(
+            f"{save_dir}/{experiment_name}/{name}"
+        ), f"experiment {save_dir}/{experiment_name}/{name} is not in logs"
 
         # Attribute the right PL Module for loading
         if self.experiment_name in regression_experiments:

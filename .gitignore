@@ -130,3 +130,4 @@ MNIST
 
 # custom
 sggm/local_
+sggm/hpc_lightning_logs/

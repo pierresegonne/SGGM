@@ -7,8 +7,8 @@ from sggm.definitions import experiment_names, TOY, TOY_2D
 from sggm.regression_model import check_available_methods, MARGINAL
 
 
-def run_analysis(experiment_name, name, **kwargs):
-    experiment_log = ExperimentLog(experiment_name, name)
+def run_analysis(experiment_name, name, save_dir, **kwargs):
+    experiment_log = ExperimentLog(experiment_name, name, save_dir=save_dir)
     if experiment_name == TOY:
         return toy_plot(experiment_log, **kwargs)
     elif experiment_name == TOY_2D:
@@ -40,6 +40,7 @@ if __name__ == "__main__":
         "--experiment_name", type=str, choices=experiment_names, required=True
     )
     parser.add_argument("--name", type=str, required=True)
+    parser.add_argument("--save_dir", type=str, default="../lightning_logs")
     args, unknown_args = parser.parse_known_args()
 
     # Reparse the arguments once the extra arguments have been obtained
