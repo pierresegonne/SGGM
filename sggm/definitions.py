@@ -11,6 +11,7 @@ OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 # Options for OOD_X_GENERATION_METHOD
 GAUSSIAN_NOISE_AROUND_X = "gaussian_noise_around_x"
 OPTIMISED_X_OOD = "optimised_x_ood"
+UNIFORM_X_OOD = "uniform_x_ood"
 EPS = "eps"
 HIDDEN_DIM = "hidden_dim"
 LEARNING_RATE = "learning_rate"

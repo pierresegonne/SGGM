@@ -94,7 +94,9 @@ class Regressor(pl.LightningModule):
 
         self.ood_x_generation_method = ood_x_generation_method
 
-        v_ini = torch.nn.Parameter(torch.Tensor([10 / 500]), requires_grad=True)
+        v_ini = torch.nn.Parameter(
+            0.1 * torch.ones((1, self.input_dim)), requires_grad=True
+        )
         self.register_parameter("v", v_ini)
 
         # ---------
@@ -108,7 +110,7 @@ class Regressor(pl.LightningModule):
         self.β_elbo = β_elbo
 
         self.lr = 1e-2
-        self.lr_v = 1
+        self.lr_v = 0.01
 
         # ---------
         # Inference Networks
@@ -177,10 +179,11 @@ class Regressor(pl.LightningModule):
         elif self.ood_x_generation_method == OPTIMISED_X_OOD:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            random_direction = (torch.randint_like(kl_grad, 0, 2) * 2) - 1
-            return x + self.v * random_direction * torch.sign(kl_grad)
+            # random_direction = (torch.randint_like(kl_grad, 0, 2) * 2) - 1
+            return x + self.v * torch.sign(kl_grad)
         elif self.ood_x_generation_method == UNIFORM_X_OOD:
             x_ood = torch.rand_like(x) * 11 - 0.5
+            # Create a U([a,b]\[c,d])
             # mid_idx = x.shape[0] // 2
             # x_ood[:mid_idx, :] = x_ood[:mid_idx, :] * 10 + 10
             # x_ood[mid_idx:, :] = x_ood[mid_idx:, :] * -5

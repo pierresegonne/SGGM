@@ -171,25 +171,38 @@ def kl_grad_shift_plot(ax, model, training_dataset):
     # Unpacking
     x_plot, y_plot, _ = plot_dataset
     x_train, _ = training_dataset
-    x_train_original = np.copy(x_train)
-    x_train = torch.Tensor(x_train)
-    x_train.requires_grad = True
 
-    # Forward pass
     with torch.set_grad_enabled(True):
-        a, b = fit_prior()
-        pp = tcd.Gamma(a, b)
-        _, α_x, β_x = model(x_train)
-        qp = tcd.Gamma(α_x, β_x)
-        kl = tcd.kl_divergence(qp, pp)
-        kl_grad = torch.autograd.grad(torch.mean(kl), x_train, retain_graph=True)[0]
-        random_direction = (torch.randint_like(kl_grad, 0, 2) * 2) - 1
-        x_train = x_train + model.v * random_direction * kl_grad
-    x_train = x_train.detach().numpy()
+        print(f"-- Final speed {model.v}")
+        x_train.requires_grad = True
+        μ_x, α_x, β_x = model(x_train)
+        kl_divergence = model.kl(α_x, β_x, model.prior_α, model.prior_β)
+        x_out = model.ood_x(x_train, kl=kl_divergence)
+        x_train, x_out = (
+            x_train.detach().numpy().flatten(),
+            x_out.detach().numpy().flatten(),
+        )
 
-    ax.scatter(x_train, np.zeros(x_train.shape), color="black", alpha=0.5, marker="x")
+    # Reduce clutter by limiting number of points displayed
+    N_display = 100
+
     ax.scatter(
-        x_train_original, np.zeros(x_train.shape), color="blue", alpha=0.5, marker="x"
+        np.random.choice(x_out, N_display),
+        np.zeros((N_display,)),
+        color=colours["primaryRed"],
+        alpha=0.5,
+        marker="x",
+        s=8,
+        label=r"$\hat{x}_{n}$",
+    )
+    ax.scatter(
+        np.random.choice(x_train, N_display),
+        np.zeros((N_display,)),
+        color=colours["navyBlue"],
+        alpha=0.5,
+        marker="x",
+        s=8,
+        label=r"$x_{n}$",
     )
 
     # Plot KL for reference
