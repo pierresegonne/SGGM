@@ -27,8 +27,8 @@ class Toy2DDataModule(pl.LightningDataModule):
         self.N_test = N_test
         self.train_val_split = train_val_split
 
-        self.training_range = [0, 10]
-        self.testing_range = [-0.5, 10.5]
+        self.training_range = [0, 14]
+        self.testing_range = [-0.5, 14.5]
 
         self.n_workers = n_workers if n_workers is not None else N_cpus
         self.pin_memory = True if self.n_workers > 0 else False
