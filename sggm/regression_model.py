@@ -13,6 +13,7 @@ from sggm.definitions import (
     EPS,
     OOD_X_GENERATION_METHOD,
     OPTIMISED_X_OOD,
+    UNIFORM_X_OOD,
     N_MC_SAMPLES,
 )
 
@@ -178,6 +179,14 @@ class Regressor(pl.LightningModule):
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             random_direction = (torch.randint_like(kl_grad, 0, 2) * 2) - 1
             return x + self.v * random_direction * torch.sign(kl_grad)
+        elif self.ood_x_generation_method == UNIFORM_X_OOD:
+            x_ood = torch.rand_like(x) * 11 - 0.5
+            # mid_idx = x.shape[0] // 2
+            # x_ood[:mid_idx, :] = x_ood[:mid_idx, :] * 10 + 10
+            # x_ood[mid_idx:, :] = x_ood[mid_idx:, :] * -5
+            # perm_idx = torch.randperm(x_ood.nelement())
+            # x_ood = x_ood.view(-1)[perm_idx].view(x_ood.size())
+            return x_ood
         return torch.empty(0, 0)
 
     @staticmethod
@@ -199,7 +208,10 @@ class Regressor(pl.LightningModule):
         pp = tcd.Gamma(a, b)
         return tcd.kl_divergence(qp, pp)
 
-    def elbo(self, llk: torch.Tensor, kl: torch.Tensor) -> torch.Tensor:
+    def elbo(
+        self, llk: torch.Tensor, kl: torch.Tensor, train: bool = True
+    ) -> torch.Tensor:
+        β = self.β_elbo if train else 1
         return torch.mean(llk - self.β_elbo * kl)
 
     # ---------
@@ -238,7 +250,7 @@ class Regressor(pl.LightningModule):
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.llk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-        loss = -self.elbo(log_likelihood, kl_divergence)
+        loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         self.log("eval_loss", loss, on_epoch=True)
 
     def test_step(self, batch, batch_idx):
@@ -246,7 +258,7 @@ class Regressor(pl.LightningModule):
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.llk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-        loss = -self.elbo(log_likelihood, kl_divergence)
+        loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         self.log("test_loss", loss, on_step=True)
 
     @staticmethod
