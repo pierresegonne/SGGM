@@ -2,6 +2,7 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.distributions as tcd
+import torch.nn.functional as F
 
 from argparse import ArgumentParser
 
@@ -191,7 +192,6 @@ class Regressor(pl.LightningModule):
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
             return x + self.ood_generator_v * torch.sign(kl_grad)
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_KL_GA:
-            print(x)
             x_ood = x.clone().detach()
             x_ood.requires_grad = True
 
@@ -210,7 +210,6 @@ class Regressor(pl.LightningModule):
             # make sure to start anew the computational graph for x_ood
             x_ood = x_ood.detach()
             x_ood.requires_grad = True
-            print(x_ood)
             return x_ood
         elif self.ood_x_generation_method == UNIFORM_X_OOD:
             x_ood = torch.rand_like(x) * 11 - 0.5
@@ -319,7 +318,12 @@ class Regressor(pl.LightningModule):
         log_likelihood = self.llk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
-        self.log("test_loss", loss, on_step=True)
+        self.log("test_loss", loss, on_epoch=True)
+        # metrics
+        y_pred = self.predictive_mean(x)
+        self.log("test_ll", log_likelihood, on_epoch=True)
+        self.log("test_mae", F.l1_loss(y_pred, y), on_epoch=True)
+        self.log("test_rmse", torch.sqrt(F.mse_loss(y_pred, y)), on_epoch=True)
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):
