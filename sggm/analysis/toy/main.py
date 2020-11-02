@@ -9,7 +9,6 @@ from sggm.analysis.toy.helper import (
     # MISC plot functions
     kl_grad_shift_plot,
 )
-from sggm.styles_ import colours, colours_rgb
 
 
 def plot(experiment_log, methods):

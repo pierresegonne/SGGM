@@ -3,7 +3,8 @@ import argparse
 from sggm.analysis.experiment_log import ExperimentLog
 from sggm.analysis.toy import toy_plot
 from sggm.analysis.toy_2d import toy_2d_plot
-from sggm.definitions import experiment_names, TOY, TOY_2D
+from sggm.analysis.uci_yacht import uci_yacht_plot
+from sggm.definitions import experiment_names, TOY, TOY_2D, UCI_YACHT
 from sggm.regression_model import check_available_methods, MARGINAL
 
 
@@ -13,10 +14,12 @@ def run_analysis(experiment_name, name, save_dir, **kwargs):
         return toy_plot(experiment_log, **kwargs)
     elif experiment_name == TOY_2D:
         return toy_2d_plot(experiment_log, **kwargs)
+    elif experiment_name == UCI_YACHT:
+        return uci_yacht_plot(experiment_log, **kwargs)
 
 
 def add_experiment_args(parser, experiment_name):
-    if experiment_name in [TOY, TOY_2D]:
+    if experiment_name in [TOY, TOY_2D, UCI_YACHT]:
         parser.add_argument(
             "--methods",
             type=str,

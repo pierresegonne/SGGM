@@ -103,11 +103,13 @@ regressor_parameters = {
 TOY = "toy"
 TOY_2D = "toy_2d"
 UCI_SUPERCONDUCT = "uci_superconduct"
+UCI_YACHT = "uci_yacht"
 
 experiment_names = [
     TOY,
     TOY_2D,
     UCI_SUPERCONDUCT,
+    UCI_YACHT,
 ]
 
-regression_experiments = [TOY, TOY_2D, UCI_SUPERCONDUCT]
+regression_experiments = [TOY, TOY_2D, UCI_SUPERCONDUCT, UCI_YACHT]

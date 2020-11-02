@@ -9,14 +9,23 @@ from torch.utils.data import TensorDataset, DataLoader
 
 N_cpus = multiprocessing.cpu_count()
 
-DATA_FILENAME = "raw.csv"
+DATA_FILENAME = "yacht_hydrodynamics.data"
 """
-Link to get the raw.csv data: https://archive.ics.uci.edu/ml/datasets/Superconductivty+Data
+Link to get the yacht_hydrodynamics.data file: https://archive.ics.uci.edu/ml/datasets/Yacht+Hydrodynamics
 """
-Y_LABEL = "critical_temp"
+COLUMNS = [
+    "Longitudinal position of the center of the buoyancy",
+    "Prismatic coefficient",
+    "Length-displacement ratio",
+    "Beam-draught ratio",
+    "Length-beam ratio",
+    "Froude number",
+    "Residuary resistance per unit weight of displacement",
+]
+Y_LABEL = "Residuary resistance per unit weight of displacement"
 
 
-class UCISuperConductDataModule(pl.LightningDataModule):
+class UCIYachtDataModule(pl.LightningDataModule):
     def __init__(
         self,
         batch_size: int,
@@ -25,7 +34,7 @@ class UCISuperConductDataModule(pl.LightningDataModule):
         test_split: float = 0.1,
         **kwargs,
     ):
-        super(UCISuperConductDataModule, self).__init__()
+        super(UCIYachtDataModule, self).__init__()
         self.batch_size = batch_size
         self.train_val_split = train_val_split
         self.test_split = test_split
@@ -34,19 +43,22 @@ class UCISuperConductDataModule(pl.LightningDataModule):
         self.pin_memory = True if self.n_workers > 0 else False
 
         # Manual as we know it
-        self.dims = 81
+        self.dims = 6
         self.out_dims = 1
 
     def setup(self, stage: str = None):
 
-        df = pd.read_csv(f"{pathlib.Path(__file__).parent.absolute()}/{DATA_FILENAME}")
+        df = pd.read_fwf(
+            f"{pathlib.Path(__file__).parent.absolute()}/{DATA_FILENAME}",
+            names=COLUMNS,
+        )
         # Split features, targets
         x = df.drop(columns=[Y_LABEL]).values
         y = df[Y_LABEL].values
 
         # First split test away
         test_size = int(x.shape[0] * self.test_split)
-        x, x_test, y, y_test = train_test_split(x, y, test_size=test_size)
+        x, x_test, y, y_test = train_test_split(x, y, test_size=test_size)  # shuffles
         y, y_test = y[:, None], y_test[:, None]
 
         # Standardise
