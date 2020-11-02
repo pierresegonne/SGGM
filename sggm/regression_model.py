@@ -201,7 +201,7 @@ class Regressor(pl.LightningModule):
         if self.ood_x_generation_method == OPTIMISED_X_OOD:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            v_available = [0.0001, 0.001, 0.01, 1, 2, 3, 5, 10, 50, 100, 500]
+            v_available = [0.0001, 0.001, 0.01, 0.1, 1, 2, 3, 5, 10, 50, 100, 500]
             v_, kl_ = None, -np.inf
             for v_proposal in v_available:
                 _, al, be = self(x + v_proposal * torch.sign(kl_grad))
