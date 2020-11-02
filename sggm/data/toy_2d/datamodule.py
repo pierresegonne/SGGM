@@ -40,10 +40,13 @@ class Toy2DDataModule(pl.LightningDataModule):
     def setup(self, stage: str = None):
         x_train = self.random_polar(self.N_train, self.training_range)
         eps = torch.randn((self.N_train, 1))
-        y_train = self.data_mean(x_train) + self.data_std(x_train) * eps
+        r = torch.norm(x_train, dim=1, keepdim=True)
+        y_train = self.data_mean(r) + self.data_std(r) * eps
+        # y_train = self.data_mean(r)
 
         x_test = self.random_polar(self.N_test, self.testing_range)
-        y_test = self.data_mean(x_test)
+        r = torch.norm(x_test, dim=1, keepdim=True)
+        y_test = self.data_mean(r)
 
         self.toy_train = TensorDataset(x_train, y_train)
         train_size = int(self.N_train * self.train_val_split)
