@@ -3,7 +3,7 @@
 ### specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J vanilla_kl_ga
+#BSUB -J benchmarks_toy_2d_uci
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 2
 #BSUB -R "span[hosts=1]"
@@ -34,4 +34,4 @@ module load cudnn/v7.6.5.32-prod-cuda-10.2
 python3 -m venv env
 source env/bin/activate
 python3 -m pip install -r requirements.txt
-cd sggm/ && python experiment.py --experiments_config configs/vanilla_kl_ga.yml
+cd sggm/ && python experiment.py --experiments_config configs/benchmarks.yml
