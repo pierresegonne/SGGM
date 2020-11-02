@@ -198,7 +198,7 @@ class Regressor(pl.LightningModule):
         return torch.empty(0, 0)
 
     def tune_on_validation(self, x: torch.Tensor, **kwargs):
-        if self.ood_x_generation_method == UNIFORM_X_OOD:
+        if self.ood_x_generation_method == OPTIMISED_X_OOD:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             v_available = [0.0001, 0.001, 0.01, 1, 2, 3, 5, 10, 50, 100, 500]
@@ -209,7 +209,6 @@ class Regressor(pl.LightningModule):
                 if kl_proposal > kl_:
                     kl_ = kl_proposal
                     v_ = v_proposal
-            print('Selected', v_)
             self.v_ = v_
 
     @staticmethod
@@ -270,11 +269,14 @@ class Regressor(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        μ_x, α_x, β_x = self(x)
-        log_likelihood = self.llk(μ_x, α_x, β_x, y)
-        kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-        # --
-        self.tune_on_validation(x, kl=kl_divergence)
+        with torch.set_grad_enabled(True):
+            x.requires_grad = True
+            μ_x, α_x, β_x = self(x)
+            log_likelihood = self.llk(μ_x, α_x, β_x, y)
+            kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
+            # --
+            self.tune_on_validation(x, kl=kl_divergence)
+        self.log("_v", self.v_)
         # --
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         self.log("eval_loss", loss, on_epoch=True)
