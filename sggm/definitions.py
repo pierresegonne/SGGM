@@ -10,8 +10,11 @@ BATCH_SIZE = "batch_size"
 OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 # Options for OOD_X_GENERATION_METHOD
 GAUSSIAN_NOISE_AROUND_X = "gaussian_noise_around_x"
-OPTIMISED_X_OOD = "optimised_x_ood"
+OPTIMISED_X_OOD_V_PARAM = "optimised_x_ood_v_param"
+OPTIMISED_X_OOD_V_OPTIMISED = "optimised_x_ood_v_optimised"
+OPTIMISED_X_OOD_KL_GA = "optimised_x_ood_kl_ga"
 UNIFORM_X_OOD = "uniform_x_ood"
+
 EPS = "eps"
 HIDDEN_DIM = "hidden_dim"
 LEARNING_RATE = "learning_rate"
@@ -80,7 +83,13 @@ regressor_parameters = {
         OOD_X_GENERATION_METHOD,
         None,
         none_or_str,
-        choices=[GAUSSIAN_NOISE_AROUND_X, OPTIMISED_X_OOD],
+        choices=[
+            GAUSSIAN_NOISE_AROUND_X,
+            OPTIMISED_X_OOD_V_PARAM,
+            OPTIMISED_X_OOD_V_OPTIMISED,
+            OPTIMISED_X_OOD_KL_GA,
+            UNIFORM_X_OOD,
+        ],
     ),
     EPS: Param(EPS, 1e-10, float),
     N_MC_SAMPLES: Param(N_MC_SAMPLES, 2000, int),

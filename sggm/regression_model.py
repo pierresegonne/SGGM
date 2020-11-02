@@ -12,7 +12,9 @@ from sggm.definitions import (
     GAUSSIAN_NOISE_AROUND_X,
     EPS,
     OOD_X_GENERATION_METHOD,
-    OPTIMISED_X_OOD,
+    OPTIMISED_X_OOD_V_PARAM,
+    OPTIMISED_X_OOD_V_OPTIMISED,
+    OPTIMISED_X_OOD_KL_GA,
     UNIFORM_X_OOD,
     N_MC_SAMPLES,
 )
@@ -34,6 +36,8 @@ def check_available_methods(method):
 
 def fit_prior():
     # Heuristic for now
+    # Mean α / β
+    # Mode α - 1 / β
     prior_α = 1.02
     prior_β = 0.57
     return prior_α, prior_β
@@ -94,11 +98,13 @@ class Regressor(pl.LightningModule):
 
         self.ood_x_generation_method = ood_x_generation_method
 
-        v_ini = torch.nn.Parameter(
-            0.1 * torch.ones((1, self.input_dim)), requires_grad=True
-        )
-        self.register_parameter("v", v_ini)
-        self.v_ = 100
+        if self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
+            v_ini = torch.nn.Parameter(
+                0.1 * torch.ones((1, self.input_dim)), requires_grad=True
+            )
+            self.register_parameter("ood_generator_v", v_ini)
+        elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
+            self.ood_generator_v = 100
 
         # ---------
         # HParameters
@@ -112,6 +118,7 @@ class Regressor(pl.LightningModule):
 
         self.lr = 1e-2
         self.lr_v = 0.01
+        self.lr_ga_kl = 1
 
         # ---------
         # Inference Networks
@@ -177,15 +184,34 @@ class Regressor(pl.LightningModule):
         if self.ood_x_generation_method == GAUSSIAN_NOISE_AROUND_X:
             kl_noise_std = 20
             return x + kl_noise_std * torch.randn_like(x)
-        elif self.ood_x_generation_method == OPTIMISED_X_OOD:
+        elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            # random_direction = (torch.randint_like(kl_grad, 0, 2) * 2) - 1
-            # --------------
+            return x + self.ood_generator_v * torch.sign(kl_grad)
+        elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
+            return x + self.ood_generator_v * torch.sign(kl_grad)
+        elif self.ood_x_generation_method == OPTIMISED_X_OOD_KL_GA:
+            print(x)
+            x_ood = x.clone().detach()
+            x_ood.requires_grad = True
 
-            return x + self.v_ * torch.sign(kl_grad)
-            # --------------
-            return x + self.v * torch.sign(kl_grad)
+            K_max = 500
+            for k in range(K_max):
+                _, alpha_ood, beta_ood = self(x_ood)
+                kl = torch.mean(
+                    self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β)
+                )
+                kl.backward(retain_graph=True)
+
+                with torch.no_grad():
+                    x_ood = x_ood + 100 * x_ood.grad
+                x_ood.requires_grad = True
+
+            # make sure to start anew the computational graph for x_ood
+            x_ood = x_ood.detach()
+            x_ood.requires_grad = True
+            print(x_ood)
+            return x_ood
         elif self.ood_x_generation_method == UNIFORM_X_OOD:
             x_ood = torch.rand_like(x) * 11 - 0.5
             # Create a U([a,b]\[c,d])
@@ -198,7 +224,8 @@ class Regressor(pl.LightningModule):
         return torch.empty(0, 0)
 
     def tune_on_validation(self, x: torch.Tensor, **kwargs):
-        if self.ood_x_generation_method == OPTIMISED_X_OOD:
+        return
+        if self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             v_available = [0.0001, 0.001, 0.01, 0.1, 1, 2, 3, 5, 10, 50, 100, 500]
@@ -209,7 +236,8 @@ class Regressor(pl.LightningModule):
                 if kl_proposal > kl_:
                     kl_ = kl_proposal
                     v_ = v_proposal
-            self.v_ = v_
+            self.ood_generator_v = v_
+            self.log("ood_generator_v", self.ood_generator_v)
 
     @staticmethod
     def llk(
@@ -238,13 +266,17 @@ class Regressor(pl.LightningModule):
 
     # ---------
     def configure_optimizers(self):
+        params = [
+            {"params": self.μ.parameters()},
+            {"params": self.α.parameters()},
+            {"params": self.β.parameters()},
+        ]
+        if self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
+            params += [
+                {"params": self.ood_generator_v, "lr": self.lr_v},
+            ]
         optimizer = torch.optim.Adam(
-            [
-                {"params": self.μ.parameters()},
-                {"params": self.α.parameters()},
-                {"params": self.β.parameters()},
-                {"params": self.v, "lr": self.lr_v},
-            ],
+            params,
             lr=self.lr,
         )
         return optimizer
@@ -265,6 +297,7 @@ class Regressor(pl.LightningModule):
             kl_divergence_out
         )
         self.log("train_loss", loss, on_epoch=True)
+        self.log("mean_x_ood", torch.mean(x_out))
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -276,7 +309,6 @@ class Regressor(pl.LightningModule):
             kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
             # --
             self.tune_on_validation(x, kl=kl_divergence)
-        self.log("_v", self.v_)
         # --
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         self.log("eval_loss", loss, on_epoch=True)
