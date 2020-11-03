@@ -3,7 +3,7 @@
 ### specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J benchmarks_toy_2d_uci
+#BSUB -J benchmarks_uci
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 2
 #BSUB -R "span[hosts=1]"
@@ -21,6 +21,8 @@
 #BSUB -N
 ### -- Specify the output and error file. %J is the job-id --
 ### -- -o and -e mean append, -oo and -eo mean overwrite --
+#BSUB -o sggm/job_logs/gpu-%J.out
+#BSUB -e sggm/job_logs/gpu-%J.err
 # -- end of LSF options --
 
 nvidia-smi

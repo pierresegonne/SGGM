@@ -129,5 +129,6 @@ MNIST
 .DS_Store
 
 # custom
-sggm/local_
+sggm/local_/
 sggm/hpc_lightning_logs/
+sggm/job_logs/
