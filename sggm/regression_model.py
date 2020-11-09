@@ -106,6 +106,8 @@ class Regressor(pl.LightningModule):
             self.register_parameter("ood_generator_v", v_ini)
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
             self.ood_generator_v = 100
+        else:
+            self.ood_generator_v = None
 
         # ---------
         # HParameters
@@ -190,8 +192,12 @@ class Regressor(pl.LightningModule):
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             return x + self.ood_generator_v * torch.sign(kl_grad)
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
+            kl = torch.mean(kwargs["kl"])
+            kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             return x + self.ood_generator_v * torch.sign(kl_grad)
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_KL_GA:
+
+            # -------------------
             x_ood = x.clone().detach()
             x_ood.requires_grad = True
 
@@ -202,6 +208,12 @@ class Regressor(pl.LightningModule):
                     self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β)
                 )
                 kl.backward(retain_graph=True)
+                # retain_graph generally for 2nd order derivatives and the like
+                # TODO check
+                """
+                with torch.no_grad():
+                    with torch.enable_grad():
+                """
 
                 with torch.no_grad():
                     x_ood = x_ood + 100 * x_ood.grad
@@ -211,6 +223,8 @@ class Regressor(pl.LightningModule):
             x_ood = x_ood.detach()
             x_ood.requires_grad = True
             return x_ood
+            # -------------------
+
         elif self.ood_x_generation_method == UNIFORM_X_OOD:
             x_ood = torch.rand_like(x) * 11 - 0.5
             # Create a U([a,b]\[c,d])
@@ -223,7 +237,6 @@ class Regressor(pl.LightningModule):
         return torch.empty(0, 0)
 
     def tune_on_validation(self, x: torch.Tensor, **kwargs):
-        return
         if self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
@@ -236,7 +249,6 @@ class Regressor(pl.LightningModule):
                     kl_ = kl_proposal
                     v_ = v_proposal
             self.ood_generator_v = v_
-            self.log("ood_generator_v", self.ood_generator_v)
 
     @staticmethod
     def llk(
@@ -296,7 +308,12 @@ class Regressor(pl.LightningModule):
             kl_divergence_out
         )
         self.log("train_loss", loss, on_epoch=True)
-        self.log("mean_x_ood", torch.mean(x_out))
+        if torch.numel(x_out) > 0:
+            quantiles = torch.tensor([0.25, 0.5, 0.75])
+            x_out_quantiles = torch.quantile(x_out, quantiles)
+            self.log("q_025_x_ood", x_out_quantiles[0], on_epoch=True)
+            self.log("q_050_x_ood", x_out_quantiles[1], on_epoch=True)
+            self.log("q_075_x_ood", x_out_quantiles[2], on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -307,10 +324,13 @@ class Regressor(pl.LightningModule):
             log_likelihood = self.llk(μ_x, α_x, β_x, y)
             kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
             # --
+            # Note that there might be an issue if the validation batch size is smaller than the validation dataset?
             self.tune_on_validation(x, kl=kl_divergence)
         # --
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         self.log("eval_loss", loss, on_epoch=True)
+        if self.ood_generator_v:
+            self.log("ood_generator_v", self.ood_generator_v, on_epoch=True)
 
     def test_step(self, batch, batch_idx):
         x, y = batch

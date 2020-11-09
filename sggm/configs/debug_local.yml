@@ -1,19 +1,19 @@
-- name: test
-  experiment_name: uci_superconduct
+- name: donut
+  experiment_name: toy_2d
   # hparams
-  batch_size: 1000
+  batch_size: 500
   hidden_dim: 50
   beta_elbo: 1
   beta_ood: 0
-  # ood_x_generation_method: optimised_x_ood_kl_ga
+  # ood_x_generation_method: optimised_x_ood_v_param
   # pl trainer
   n_trials: 1
-  max_epochs: 2
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 500 # How often does the log writes to disc
+  max_epochs: 1
+  log_every_n_steps: 1 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 1 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   # val_check_interval: 5 # How often to check the validation set.
-  check_val_every_n_epoch: 500 # Check val every n train epochs
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
 # - name: test_toy_2d
 #   experiment_name: toy_2d

@@ -11,7 +11,6 @@ data_range_plot = [-2, 2]
 def get_plot_dataset(N: int = 1000) -> torch.Tensor:
     x_l = [torch.linspace(*data_range_plot, steps=N)[:, None] for _ in range(6)]
     x = torch.cat(x_l, dim=1)
-    print(x.shape)
     return x
 
 

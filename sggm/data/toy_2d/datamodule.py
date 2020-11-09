@@ -27,8 +27,8 @@ class Toy2DDataModule(pl.LightningDataModule):
         self.N_test = N_test
         self.train_val_split = train_val_split
 
-        self.training_range = [0, 14]
-        self.testing_range = [-0.5, 14.5]
+        self.training_range = [2, 12]
+        self.testing_range = [0, 16.5]
 
         self.n_workers = n_workers if n_workers is not None else N_cpus
         self.pin_memory = True if self.n_workers > 0 else False
@@ -93,7 +93,10 @@ class Toy2DDataModule(pl.LightningDataModule):
         return r * torch.sin(r)
 
     @staticmethod
-    def data_std(r: torch.Tensor) -> torch.Tensor:
-        central_std = 6 * torch.exp(Normal(loc=0, scale=0.5).log_prob(r))
+    def data_std(r: torch.Tensor, with_central_std: bool = False) -> torch.Tensor:
+        if with_central_std:
+            central_std = 6 * torch.exp(Normal(loc=0, scale=0.5).log_prob(r))
+        else:
+            central_std = 0
         inc_sin_std = torch.abs(0.3 * torch.sqrt(1 + r * r))
         return central_std + inc_sin_std

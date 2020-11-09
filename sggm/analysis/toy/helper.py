@@ -173,9 +173,9 @@ def kl_grad_shift_plot(ax, model, training_dataset):
     x_train, _ = training_dataset
 
     with torch.set_grad_enabled(True):
-        print(f"-- Final speed {model.v}")
         x_train.requires_grad = True
         μ_x, α_x, β_x = model(x_train)
+        print(torch.mean(α_x), torch.mean(β_x))
         kl_divergence = model.kl(α_x, β_x, model.prior_α, model.prior_β)
         x_out = model.ood_x(x_train, kl=kl_divergence)
         x_train, x_out = (
@@ -186,15 +186,16 @@ def kl_grad_shift_plot(ax, model, training_dataset):
     # Reduce clutter by limiting number of points displayed
     N_display = 100
 
-    ax.scatter(
-        np.random.choice(x_out, N_display),
-        np.zeros((N_display,)),
-        color=colours["primaryRed"],
-        alpha=0.5,
-        marker="x",
-        s=8,
-        label=r"$\hat{x}_{n}$",
-    )
+    if x_out is not None and x_out.size > 0:
+        ax.scatter(
+            np.random.choice(x_out, N_display),
+            np.zeros((N_display,)),
+            color=colours["primaryRed"],
+            alpha=0.5,
+            marker="x",
+            s=8,
+            label=r"$\hat{x}_{n}$",
+        )
     ax.scatter(
         np.random.choice(x_train, N_display),
         np.zeros((N_display,)),
