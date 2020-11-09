@@ -172,10 +172,10 @@ def kl_grad_shift_plot(ax, model, training_dataset):
     x_plot, y_plot, _ = plot_dataset
     x_train, _ = training_dataset
 
+    # Plot X OOD
     with torch.set_grad_enabled(True):
         x_train.requires_grad = True
         μ_x, α_x, β_x = model(x_train)
-        print(torch.mean(α_x), torch.mean(β_x))
         kl_divergence = model.kl(α_x, β_x, model.prior_α, model.prior_β)
         x_out = model.ood_x(x_train, kl=kl_divergence)
         x_train, x_out = (
@@ -248,11 +248,33 @@ def kl_grad_shift_plot(ax, model, training_dataset):
         markeredgecolor=(*colours_rgb["orange"], 0.1),
     )
 
+    # Gamma parameters
+    ax.plot(
+        x_plot,
+        α_x,
+        "o",
+        label="α(x)",
+        markersize=2,
+        markerfacecolor=(*colours_rgb["pink"], 0.6),
+        markeredgewidth=1,
+        markeredgecolor=(*colours_rgb["pink"], 0.1),
+    )
+    ax.plot(
+        x_plot,
+        β_x,
+        "o",
+        label="β(x)",
+        markersize=2,
+        markerfacecolor=(*colours_rgb["purple"], 0.6),
+        markeredgewidth=1,
+        markeredgecolor=(*colours_rgb["purple"], 0.1),
+    )
+
     # Misc
     ax.grid(True)
     ax.set_xlim(plot_x_range)
     ax.set_ylim([-top_kl_plot, top_kl_plot])
     ax.set_xlabel("x")
-    ax.legend()
+    ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
 
     return ax

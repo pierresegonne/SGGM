@@ -39,8 +39,8 @@ def fit_prior():
     # Heuristic for now
     # Mean α / β
     # Mode α - 1 / β
-    prior_α = 1.02
-    prior_β = 0.57
+    prior_α = 1.0005
+    prior_β = 0.02
     return prior_α, prior_β
 
 
@@ -190,39 +190,38 @@ class Regressor(pl.LightningModule):
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            return x + self.ood_generator_v * torch.sign(kl_grad)
+            kl_grad_unit = kl_grad / torch.norm(kl_grad, dim=1, keepdim=True)
+            return x + torch.abs(self.ood_generator_v) * kl_grad_unit
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
+
             return x + self.ood_generator_v * torch.sign(kl_grad)
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_KL_GA:
 
             # -------------------
-            x_ood = x.clone().detach()
-            x_ood.requires_grad = True
+            with torch.no_grad():
+                with torch.enable_grad():
 
-            K_max = 500
-            for k in range(K_max):
-                _, alpha_ood, beta_ood = self(x_ood)
-                kl = torch.mean(
-                    self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β)
-                )
-                kl.backward(retain_graph=True)
-                # retain_graph generally for 2nd order derivatives and the like
-                # TODO check
-                """
-                with torch.no_grad():
-                    with torch.enable_grad():
-                """
+                    # https://stackoverflow.com/questions/55266154/pytorch-preferred-way-to-copy-a-tensor
+                    x_ood = x.detach().clone()
+                    x_ood.requires_grad = True
 
-                with torch.no_grad():
-                    x_ood = x_ood + 100 * x_ood.grad
-                x_ood.requires_grad = True
+                    K_max = 100
+                    for k in range(K_max):
+                        _, alpha_ood, beta_ood = self(x_ood)
+                        kl = torch.mean(
+                            self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β)
+                        )
+                        kl.backward()
 
-            # make sure to start anew the computational graph for x_ood
-            x_ood = x_ood.detach()
-            x_ood.requires_grad = True
-            return x_ood
+                        with torch.no_grad():
+                            x_ood = x_ood + 100 * x_ood.grad
+                        x_ood.requires_grad = True
+
+                    # make sure to start anew the computational graph for x_ood
+                    # print("difference x xood", torch.norm(x - x_ood))
+                    return x_ood
             # -------------------
 
         elif self.ood_x_generation_method == UNIFORM_X_OOD:
@@ -309,11 +308,12 @@ class Regressor(pl.LightningModule):
         )
         self.log("train_loss", loss, on_epoch=True)
         if torch.numel(x_out) > 0:
-            quantiles = torch.tensor([0.25, 0.5, 0.75])
-            x_out_quantiles = torch.quantile(x_out, quantiles)
-            self.log("q_025_x_ood", x_out_quantiles[0], on_epoch=True)
-            self.log("q_050_x_ood", x_out_quantiles[1], on_epoch=True)
-            self.log("q_075_x_ood", x_out_quantiles[2], on_epoch=True)
+            # quantiles = torch.tensor([0.25, 0.5, 0.75])
+            # x_out_quantiles = torch.quantile(x_out, quantiles)
+            # self.log("q_025_x_ood", x_out_quantiles[0], on_epoch=True)
+            # self.log("q_050_x_ood", x_out_quantiles[1], on_epoch=True)
+            # self.log("q_075_x_ood", x_out_quantiles[2], on_epoch=True)
+            self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
         return loss
 
     def validation_step(self, batch, batch_idx):

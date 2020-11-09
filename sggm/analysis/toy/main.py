@@ -19,6 +19,9 @@ def plot(experiment_log, methods):
         fig, [data_ax, std_ax, misc_ax] = plt.subplots(
             3, 1, figsize=(9.5, 9), sharex=True
         )
+        # data_ax, _ = data_ax
+        # std_ax, _ = std_ax
+        # misc_ax, _ = misc_ax
 
         # Start by plotting fixed elements
         data_ax, std_ax = base_plot(data_ax, std_ax)
@@ -39,5 +42,5 @@ def plot(experiment_log, methods):
             best_training_dataset,
         )
 
-        plt.legend()
+        # plt.legend()
         plt.show()

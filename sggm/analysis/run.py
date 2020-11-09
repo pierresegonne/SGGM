@@ -10,6 +10,7 @@ from sggm.regression_model import check_available_methods, MARGINAL
 
 def run_analysis(experiment_name, name, save_dir, **kwargs):
     experiment_log = ExperimentLog(experiment_name, name, save_dir=save_dir)
+    print(f"-- Index of best version: {experiment_log.idx_best_version}")
     if experiment_name == TOY:
         return toy_plot(experiment_log, **kwargs)
     elif experiment_name == TOY_2D:
