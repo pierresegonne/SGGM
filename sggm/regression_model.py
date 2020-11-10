@@ -40,8 +40,8 @@ def fit_prior():
     # Heuristic for now
     # Mean α / β
     # Mode α - 1 / β
-    prior_α = 2.01
-    prior_β = 0.65
+    prior_α = 0.01
+    prior_β = 0.01
     return prior_α, prior_β
 
 
@@ -191,7 +191,7 @@ class Regressor(pl.LightningModule):
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             kl_grad_unit = kl_grad / torch.norm(kl_grad, dim=1, keepdim=True)
-            return x + torch.abs(self.ood_generator_v) * kl_grad_unit
+            return x + self.ood_generator_v * kl_grad_unit
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
@@ -317,7 +317,7 @@ class Regressor(pl.LightningModule):
             kl_divergence_out
         )
         self.log("train_loss", loss, on_epoch=True)
-        if torch.numel(x_out) > 0:
+        if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
             self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
         return loss
 

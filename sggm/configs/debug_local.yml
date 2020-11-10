@@ -1,4 +1,4 @@
-- name: new_prior
+- name: new_prior_4
   experiment_name: toy
   # hparams
   batch_size: 500
