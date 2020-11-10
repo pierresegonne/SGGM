@@ -334,7 +334,7 @@ class Regressor(pl.LightningModule):
         # --
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         self.log("eval_loss", loss, on_epoch=True)
-        if self.ood_generator_v:
+        if self.ood_generator_v is not None:
             self.log("ood_generator_v", self.ood_generator_v, on_epoch=True)
 
     def test_step(self, batch, batch_idx):
