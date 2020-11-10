@@ -6,6 +6,7 @@
   beta_elbo: 1
   beta_ood: 1
   ood_x_generation_method: gaussian_noise_around_x
+  prior_alpha: 1.1
   # pl trainer
   n_trials: 3
   max_epochs: 6000

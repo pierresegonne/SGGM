@@ -7,6 +7,8 @@ EXPERIMENTS_CONFIG = "experiments_config"
 BATCH_SIZE = "batch_size"
 β_ELBO = "beta_elbo"
 β_OOD = "beta_ood"
+PRIOR_α = "prior_alpha"
+PRIOR_β = "prior_beta"
 OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 # Options for OOD_X_GENERATION_METHOD
 GAUSSIAN_NOISE_AROUND_X = "gaussian_noise_around_x"
@@ -89,11 +91,14 @@ regressor_parameters = {
             OPTIMISED_X_OOD_V_PARAM,
             OPTIMISED_X_OOD_V_OPTIMISED,
             OPTIMISED_X_OOD_KL_GA,
+            OPTIMISED_X_OOD_BRUTE_FORCE,
             UNIFORM_X_OOD,
         ],
     ),
     EPS: Param(EPS, 1e-10, float),
     N_MC_SAMPLES: Param(N_MC_SAMPLES, 2000, int),
+    PRIOR_α: Param(PRIOR_α, 1.05, float),
+    PRIOR_β: Param(PRIOR_β, 1.0, float),
 }
 
 # -------------

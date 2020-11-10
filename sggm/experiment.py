@@ -18,7 +18,7 @@ from sggm.definitions import (
 )
 from sggm.definitions import EXPERIMENT_NAME, EXPERIMENTS_CONFIG
 from sggm.data import datamodules
-from sggm.regression_model import fit_prior, Regressor
+from sggm.regression_model import Regressor
 
 
 def clean_dict(dic: dict) -> dict:
@@ -59,12 +59,11 @@ class Experiment:
     def model(self):
         if self.experiment_name in regression_experiments:
             input_dim = self.datamodule.dims
-            prior_parameters = fit_prior()
             return Regressor(
                 input_dim=input_dim,
                 hidden_dim=self.hidden_dim,
-                prior_α=prior_parameters[0],
-                prior_β=prior_parameters[1],
+                prior_α=self.prior_alpha,
+                prior_β=self.prior_beta,
                 β_elbo=self.beta_elbo,
                 β_ood=self.beta_ood,
                 ood_x_generation_method=self.ood_x_generation_method,

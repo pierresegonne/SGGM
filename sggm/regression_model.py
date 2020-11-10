@@ -17,8 +17,10 @@ from sggm.definitions import (
     OPTIMISED_X_OOD_V_OPTIMISED,
     OPTIMISED_X_OOD_KL_GA,
     OPTIMISED_X_OOD_BRUTE_FORCE,
-    UNIFORM_X_OOD,
     N_MC_SAMPLES,
+    PRIOR_α,
+    PRIOR_β,
+    UNIFORM_X_OOD,
 )
 
 # ----------
@@ -36,13 +38,13 @@ def check_available_methods(method):
     ), f"Unvalid method {method}, choices {available_methods}"
 
 
-def fit_prior():
-    # Heuristic for now
-    # Mean α / β
-    # Mode α - 1 / β
-    prior_α = 0.01
-    prior_β = 0.01
-    return prior_α, prior_β
+# def fit_prior():
+#     # Heuristic for now
+#     # Mean α / β
+#     # Mode α - 1 / β
+#     prior_α = 0.01
+#     prior_β = 0.01
+#     return prior_α, prior_β
 
 
 def BaseMLP(input_dim, hidden_dim):
@@ -77,8 +79,8 @@ class Regressor(pl.LightningModule):
         self,
         input_dim: int,
         hidden_dim: int,
-        prior_α: float,
-        prior_β: float,
+        prior_α: float = regressor_parameters[PRIOR_α].default,
+        prior_β: float = regressor_parameters[PRIOR_β].default,
         β_elbo: float = regressor_parameters[β_ELBO].default,
         β_ood: float = regressor_parameters[β_OOD].default,
         ood_x_generation_method: str = regressor_parameters[

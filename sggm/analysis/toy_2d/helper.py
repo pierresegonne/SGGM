@@ -11,7 +11,6 @@ from sggm.analysis.toy.helper import base_plot, get_colour_for_method
 from sggm.data.toy_2d import Toy2DDataModule
 from sggm.regression_model import (
     check_available_methods,
-    fit_prior,
     MARGINAL,
     POSTERIOR,
 )

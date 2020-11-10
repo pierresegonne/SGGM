@@ -9,7 +9,6 @@ from typing import Tuple
 from scipy.stats import norm
 from sggm.data.toy import ToyDataModule
 from sggm.regression_model import (
-    fit_prior,
     MARGINAL,
     POSTERIOR,
 )
@@ -214,7 +213,7 @@ def kl_grad_shift_plot(ax, model, training_dataset):
 
     with torch.set_grad_enabled(False):
         # Forward pass
-        a, b = fit_prior()
+        a, b = model.prior_α, model.prior_β
         pp = tcd.Gamma(a, b)
         μ_x, α_x, β_x = model(torch.Tensor(x_plot))
         qp = tcd.Gamma(α_x, β_x)
