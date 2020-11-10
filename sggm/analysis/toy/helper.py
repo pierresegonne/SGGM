@@ -209,7 +209,7 @@ def kl_grad_shift_plot(ax, model, training_dataset):
     # Plot KL for reference
 
     # Plot box
-    top_kl_plot = 6
+    top_kl_plot = 3.5
     plot_x_range = [data_range_plot[0] - 1, data_range_plot[1] + 1]
 
     with torch.set_grad_enabled(False):
@@ -273,7 +273,7 @@ def kl_grad_shift_plot(ax, model, training_dataset):
     # Misc
     ax.grid(True)
     ax.set_xlim(plot_x_range)
-    ax.set_ylim([-top_kl_plot, top_kl_plot])
+    ax.set_ylim([-0.1, top_kl_plot])
     ax.set_xlabel("x")
     ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
 

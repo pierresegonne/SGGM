@@ -16,6 +16,7 @@ from sggm.definitions import (
     OPTIMISED_X_OOD_V_PARAM,
     OPTIMISED_X_OOD_V_OPTIMISED,
     OPTIMISED_X_OOD_KL_GA,
+    OPTIMISED_X_OOD_BRUTE_FORCE,
     UNIFORM_X_OOD,
     N_MC_SAMPLES,
 )
@@ -39,8 +40,8 @@ def fit_prior():
     # Heuristic for now
     # Mean α / β
     # Mode α - 1 / β
-    prior_α = 1.0005
-    prior_β = 0.02
+    prior_α = 2.01
+    prior_β = 0.65
     return prior_α, prior_β
 
 
@@ -112,7 +113,6 @@ class Regressor(pl.LightningModule):
         # ---------
         # HParameters
         # ---------
-
         self.prior_α = prior_α
         self.prior_β = prior_β
 
@@ -233,6 +233,13 @@ class Regressor(pl.LightningModule):
             # perm_idx = torch.randperm(x_ood.nelement())
             # x_ood = x_ood.view(-1)[perm_idx].view(x_ood.size())
             return x_ood
+        elif self.ood_x_generation_method == OPTIMISED_X_OOD_BRUTE_FORCE:
+            x_ood_proposal = torch.reshape(torch.linspace(-15, 20, 2500), (2500, 1))
+            _, alpha_ood, beta_ood = self(x_ood_proposal)
+            kl = self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β)
+            _, idx = torch.topk(kl, 500, dim=0, sorted=False)
+            return torch.reshape(x_ood_proposal[idx], (500, 1))
+
         return torch.empty(0, 0)
 
     def tune_on_validation(self, x: torch.Tensor, **kwargs):
@@ -297,7 +304,10 @@ class Regressor(pl.LightningModule):
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.llk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
+        # print(log_likelihood)
+        # print(kl_divergence)
         x_out = self.ood_x(x, kl=kl_divergence)
+        # print(x_out)
         if torch.numel(x_out) > 0:
             _, α_x_out, β_x_out = self(x_out)
             kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
@@ -308,11 +318,6 @@ class Regressor(pl.LightningModule):
         )
         self.log("train_loss", loss, on_epoch=True)
         if torch.numel(x_out) > 0:
-            # quantiles = torch.tensor([0.25, 0.5, 0.75])
-            # x_out_quantiles = torch.quantile(x_out, quantiles)
-            # self.log("q_025_x_ood", x_out_quantiles[0], on_epoch=True)
-            # self.log("q_050_x_ood", x_out_quantiles[1], on_epoch=True)
-            # self.log("q_075_x_ood", x_out_quantiles[2], on_epoch=True)
             self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
         return loss
 

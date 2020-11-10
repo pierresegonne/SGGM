@@ -13,6 +13,7 @@ GAUSSIAN_NOISE_AROUND_X = "gaussian_noise_around_x"
 OPTIMISED_X_OOD_V_PARAM = "optimised_x_ood_v_param"
 OPTIMISED_X_OOD_V_OPTIMISED = "optimised_x_ood_v_optimised"
 OPTIMISED_X_OOD_KL_GA = "optimised_x_ood_kl_ga"
+OPTIMISED_X_OOD_BRUTE_FORCE = "optimised_x_ood_brute_force"
 UNIFORM_X_OOD = "uniform_x_ood"
 
 EPS = "eps"
