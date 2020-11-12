@@ -41,7 +41,7 @@ def parse_results(experiment_name, name, save_dir, **kwargs):
     # Generate mean and std for all runs
     table_result = {}
     for k, v in all_results.items():
-        if k in ["train_loss", "eval_loss", "test_loss"]:
+        if k in ["train_loss", "eval_loss", "test_loss", "test_mae", "test_rmse"]:
             table_result[f"mean_{k}"] = np.array(v).mean()
             table_result[f"std_{k}"] = np.array(v).std()
     table_result = [table_result]
@@ -49,6 +49,8 @@ def parse_results(experiment_name, name, save_dir, **kwargs):
     # Save in readable format
     with open(f"{save_dir}/{experiment_name}/{name}/results.md", "w") as results_file:
         results_file.write(f"# Results - {experiment_name} - {name}\n\n")
+
+        results_file.write('![Visual output](_.png "Visual output")\n\n')
 
         results_file.write("## Hparams\n\n")
         table_hparams = Tomark.table([hparams])
