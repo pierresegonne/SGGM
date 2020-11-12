@@ -11,7 +11,7 @@ from tomark import Tomark
 """
 
 
-def parse_results(experiment_name, name, save_dir):
+def parse_results(experiment_name, name, save_dir, **kwargs):
     # Get all versions
     version_folders = glob.glob(f"{save_dir}/{experiment_name}/{name}/*/")
     assert (

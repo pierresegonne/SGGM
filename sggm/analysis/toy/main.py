@@ -17,7 +17,7 @@ def plot(experiment_log, methods):
         best_training_dataset = experiment_log.best_version.train_dataset.tensors
 
         fig, [data_ax, std_ax, misc_ax] = plt.subplots(
-            3, 1, figsize=(9.5, 9), sharex=True
+            3, 1, figsize=(12, 9), sharex=True
         )
         # data_ax, _ = data_ax
         # std_ax, _ = std_ax
