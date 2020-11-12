@@ -316,8 +316,9 @@ class Regressor(pl.LightningModule):
             kl_divergence_out
         )
         self.log("train_loss", loss, on_epoch=True)
-        if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
-            self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
+        # TODO uncomment following if need to monitor x out distribution
+        # if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
+        #     self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
         return loss
 
     def validation_step(self, batch, batch_idx):
