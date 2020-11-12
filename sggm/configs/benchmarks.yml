@@ -53,6 +53,8 @@
   hidden_dim: 50
   beta_elbo: 1
   beta_ood: 1
+  prior_alpha: 1.02
+  prior_beta: 0.57
   ood_x_generation_method: optimised_x_ood_v_param
   # pl trainer
   n_trials: 10
@@ -126,6 +128,8 @@
   hidden_dim: 50
   beta_elbo: 1
   beta_ood: 1
+  prior_alpha: 1.02
+  prior_beta: 0.57
   ood_x_generation_method: optimised_x_ood_v_param
   # pl trainer
   n_trials: 10
@@ -193,6 +197,8 @@
   hidden_dim: 50
   beta_elbo: 1
   beta_ood: 1
+  prior_alpha: 1.02
+  prior_beta: 0.57
   ood_x_generation_method: optimised_x_ood_v_param
   # pl trainer
   n_trials: 10
@@ -258,6 +264,8 @@
   hidden_dim: 50
   beta_elbo: 1
   beta_ood: 1
+  prior_alpha: 1.02
+  prior_beta: 0.57
   ood_x_generation_method: optimised_x_ood_v_param
   # pl trainer
   n_trials: 10
