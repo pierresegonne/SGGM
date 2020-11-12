@@ -3,7 +3,7 @@
 ### specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J prior_params
+#BSUB -J reverse_kl
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 2
 #BSUB -R "span[hosts=1]"

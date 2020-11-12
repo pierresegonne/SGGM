@@ -312,7 +312,8 @@ class Regressor(pl.LightningModule):
         # print(x_out)
         if torch.numel(x_out) > 0:
             _, α_x_out, β_x_out = self(x_out)
-            kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
+            # TODO correct after experiment - reverse KL
+            kl_divergence_out = self.kl(self.prior_α, self.prior_β, α_x_out, β_x_out)
         else:
             kl_divergence_out = torch.zeros((1,))
         loss = -self.elbo(log_likelihood, kl_divergence) + self.β_ood * torch.mean(
