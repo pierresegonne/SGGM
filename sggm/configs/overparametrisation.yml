@@ -9,7 +9,7 @@
   prior_alpha: 1.0025
   prior_beta: 0.05
   # pl trainer
-  n_trials: 10
+  n_trials: 5
   max_epochs: 6000
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 500 # How often does the log writes to disc
@@ -28,7 +28,7 @@
   prior_alpha: 1.0025
   prior_beta: 0.05
   # pl trainer
-  n_trials: 10
+  n_trials: 5
   max_epochs: 6000
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 500 # How often does the log writes to disc
@@ -47,7 +47,7 @@
   prior_alpha: 1.0025
   prior_beta: 0.05
   # pl trainer
-  n_trials: 10
+  n_trials: 5
   max_epochs: 6000
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 500 # How often does the log writes to disc
@@ -66,7 +66,7 @@
   prior_alpha: 1.0025
   prior_beta: 0.05
   # pl trainer
-  n_trials: 10
+  n_trials: 5
   max_epochs: 6000
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 500 # How often does the log writes to disc
