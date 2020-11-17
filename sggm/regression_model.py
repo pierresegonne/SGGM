@@ -135,23 +135,10 @@ class Regressor(pl.LightningModule):
 
         self.β = BaseMLPSoftPlus(input_dim, hidden_dim)
 
-        K = 5
-        self.pi = torch.nn.Sequential(
-            torch.nn.Linear(input_dim, 10),
-            torch.nn.Sigmoid(),
-            torch.nn.Linear(10, K),
-            torch.nn.Softmax(),
-        )
-        prior_β_l = [0.05, 0.5, 1, 5, 10]
-        prior_α_l = [1 + 0.05 * β for β in prior_β_l]
-        self.prior_α_l, self.prior_β_l = torch.Tensor(prior_α_l), torch.Tensor(
-            prior_β_l
-        )
-
         # ---------
         # Misc
         # ---------
-        # self.pp = tcd.Gamma(prior_α, prior_β)
+        self.pp = tcd.Gamma(prior_α, prior_β)
 
         # Save hparams
         self.save_hyperparameters()
@@ -290,24 +277,6 @@ class Regressor(pl.LightningModule):
         pp = tcd.Gamma(a, b)
         return tcd.kl_divergence(qp, pp)
 
-    def kl_vbem(
-        self, α: torch.Tensor, β: torch.Tensor, x: torch.Tensor
-    ) -> torch.Tensor:
-        qp = tcd.Independent(tcd.Gamma(α, β), 1)
-        mix = tcd.Categorical(self.pi(x))
-        comp = tcd.Independent(
-            tcd.Gamma(
-                self.prior_α_l.repeat(x.shape[0], 1)[:, :, None],
-                self.prior_β_l.repeat(x.shape[0], 1)[:, :, None],
-            ),
-            1,
-        )
-        pp = tcd.MixtureSameFamily(mix, comp)
-        l_q = qp.sample(torch.Size([self.n_mc_samples]))
-        kl = torch.mean(qp.log_prob(l_q) - pp.log_prob(l_q), dim=0)[:, None]
-        return kl
-        return tcd.kl_divergence(qp, pp)
-
     def elbo(
         self, llk: torch.Tensor, kl: torch.Tensor, train: bool = True
     ) -> torch.Tensor:
@@ -320,7 +289,6 @@ class Regressor(pl.LightningModule):
             {"params": self.μ.parameters()},
             {"params": self.α.parameters()},
             {"params": self.β.parameters()},
-            {"params": self.pi.parameters()},
         ]
         if self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
             params += [
@@ -337,13 +305,11 @@ class Regressor(pl.LightningModule):
         x.requires_grad = True
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.llk(μ_x, α_x, β_x, y)
-        # kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-        kl_divergence = self.kl_vbem(α_x, β_x, x)
+        kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
         x_out = self.ood_x(x, kl=kl_divergence)
         if torch.numel(x_out) > 0:
             _, α_x_out, β_x_out = self(x_out)
-            # kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
-            kl_divergence_out = self.kl_vbem(α_x_out, β_x_out, x_out)
+            kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
         else:
             kl_divergence_out = torch.zeros((1,))
         loss = -self.elbo(log_likelihood, kl_divergence) + self.β_ood * torch.mean(
@@ -361,8 +327,7 @@ class Regressor(pl.LightningModule):
             x.requires_grad = True
             μ_x, α_x, β_x = self(x)
             log_likelihood = self.llk(μ_x, α_x, β_x, y)
-            # kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-            kl_divergence = self.kl_vbem(α_x, β_x, x)
+            kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
             # --
             # Note that there might be an issue if the validation batch size is smaller than the validation dataset?
             self.tune_on_validation(x, kl=kl_divergence)
@@ -376,8 +341,7 @@ class Regressor(pl.LightningModule):
         x, y = batch
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.llk(μ_x, α_x, β_x, y)
-        # kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-        kl_divergence = self.kl_vbem(α_x, β_x, x)
+        kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         self.log("test_loss", loss, on_epoch=True)
         # metrics
