@@ -4,7 +4,7 @@ import os
 import torch
 import yaml
 
-from sggm.definitions import regression_experiments
+from sggm.definitions import regression_experiments, TEST_LOSS
 from sggm.regression_model import Regressor
 
 
@@ -51,6 +51,6 @@ class ExperimentLog:
             for version_path in glob.glob(f"{save_dir}/{experiment_name}/{name}/*/")
         ]
         self.idx_best_version = np.argmin(
-            [v.results[0]["test_loss"] for v in self.versions]
+            [v.results[0][TEST_LOSS] for v in self.versions]
         )
         self.best_version = self.versions[self.idx_best_version]

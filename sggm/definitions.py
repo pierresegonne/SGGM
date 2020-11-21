@@ -119,3 +119,24 @@ experiment_names = [
 ]
 
 regression_experiments = [TOY, TOY_2D, UCI_SUPERCONDUCT, UCI_YACHT]
+
+# -------------
+# Metric Names
+# -------------
+
+TRAIN_LOSS = "train_loss↓"
+
+EVAL_LOSS = "eval_loss↓"
+
+TEST_LOSS = "test_loss↓"
+TEST_ELBO = "test_elbo↑"
+TEST_MEAN_FIT_MAE = "test_mean_fit_mae↓"
+TEST_MEAN_FIT_RMSE = "test_mean_fit_rmse↓"
+TEST_VARIANCE_FIT_MAE = "test_variance_fit_mae↓"
+TEST_VARIANCE_FIT_RMSE = "test_variance_fit_rmse↓"
+TEST_SAMPLE_FIT_MAE = "test_sample_fit_mae↓"
+TEST_SAMPLE_FIT_RMSE = "test_sample_fit_rmse↓"
+TEST_ELLK = "test_expected_log_likelihood↑"
+TEST_KL = "test_kl_divergence↓"
+NOISE_ELLK = "noise_expected_log_likelihood↓"
+NOISE_KL = "noise_kl_divergence↓"

@@ -213,18 +213,9 @@ def kl_grad_shift_plot(ax, model, training_dataset):
 
     with torch.set_grad_enabled(False):
         # Forward pass
-        a, b = model.prior_α, model.prior_β
-        pp = tcd.Gamma(a, b)
         μ_x, α_x, β_x = model(torch.Tensor(x_plot))
-        qp = tcd.Gamma(α_x, β_x)
-        kl = tcd.kl_divergence(qp, pp)
-        expected_log_lambda = torch.digamma(α_x) - torch.log(β_x)
-        expected_lambda = α_x / β_x
-        llk = (1 / 2) * (
-            expected_log_lambda
-            - np.log(2 * np.pi)
-            - expected_lambda * ((torch.Tensor(y_plot) - μ_x) ** 2)
-        )
+        kl = model.kl(α_x, β_x, model.prior_α, model.prior_β)
+        ellk = model.ellk(μ_x, α_x, β_x, torch.Tensor(y_plot))
 
     ax.plot(
         x_plot,
@@ -238,9 +229,9 @@ def kl_grad_shift_plot(ax, model, training_dataset):
     )
     ax.plot(
         x_plot,
-        llk,
+        ellk,
         "o",
-        label=r"LLK(x,y,$\lambda$)",
+        label=r"ELLK(x,y,$\lambda$)",
         markersize=2,
         markerfacecolor=(*colours_rgb["orange"], 0.6),
         markeredgewidth=1,

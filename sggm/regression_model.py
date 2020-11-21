@@ -22,6 +22,23 @@ from sggm.definitions import (
     PRIOR_β,
     UNIFORM_X_OOD,
 )
+from sggm.definitions import (
+    TRAIN_LOSS,
+    EVAL_LOSS,
+    TEST_LOSS,
+    TEST_ELBO,
+    TEST_MEAN_FIT_MAE,
+    TEST_MEAN_FIT_RMSE,
+    TEST_VARIANCE_FIT_MAE,
+    TEST_VARIANCE_FIT_RMSE,
+    TEST_SAMPLE_FIT_MAE,
+    TEST_SAMPLE_FIT_RMSE,
+    TEST_ELLK,
+    TEST_KL,
+    NOISE_ELLK,
+    NOISE_KL,
+)
+from sggm.regression_model_helper import generate_noise_for_model_test
 
 # ----------
 # Model definitions
@@ -36,15 +53,6 @@ def check_available_methods(method):
     assert (
         method in available_methods
     ), f"Unvalid method {method}, choices {available_methods}"
-
-
-# def fit_prior():
-#     # Heuristic for now
-#     # Mean α / β
-#     # Mode α - 1 / β
-#     prior_α = 0.01
-#     prior_β = 0.01
-#     return prior_α, prior_β
 
 
 def BaseMLP(input_dim, hidden_dim):
@@ -259,7 +267,7 @@ class Regressor(pl.LightningModule):
             self.ood_generator_v = v_
 
     @staticmethod
-    def llk(
+    def ellk(
         μ: torch.Tensor, α: torch.Tensor, β: torch.Tensor, y: torch.Tensor
     ) -> torch.Tensor:
         expected_log_lambda = torch.digamma(α) - torch.log(β)
@@ -278,10 +286,10 @@ class Regressor(pl.LightningModule):
         return tcd.kl_divergence(qp, pp)
 
     def elbo(
-        self, llk: torch.Tensor, kl: torch.Tensor, train: bool = True
+        self, ellk: torch.Tensor, kl: torch.Tensor, train: bool = True
     ) -> torch.Tensor:
         β = self.β_elbo if train else 1
-        return torch.mean(llk - self.β_elbo * kl)
+        return torch.mean(ellk - self.β_elbo * kl)
 
     # ---------
     def configure_optimizers(self):
@@ -304,7 +312,7 @@ class Regressor(pl.LightningModule):
         x, y = batch
         x.requires_grad = True
         μ_x, α_x, β_x = self(x)
-        log_likelihood = self.llk(μ_x, α_x, β_x, y)
+        log_likelihood = self.ellk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
         x_out = self.ood_x(x, kl=kl_divergence)
         if torch.numel(x_out) > 0:
@@ -315,7 +323,7 @@ class Regressor(pl.LightningModule):
         loss = -self.elbo(log_likelihood, kl_divergence) + self.β_ood * torch.mean(
             kl_divergence_out
         )
-        self.log("train_loss", loss, on_epoch=True)
+        self.log(TRAIN_LOSS, loss, on_epoch=True)
         # TODO uncomment following if need to monitor x out distribution
         # if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
         #     self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
@@ -326,29 +334,71 @@ class Regressor(pl.LightningModule):
         with torch.set_grad_enabled(True):
             x.requires_grad = True
             μ_x, α_x, β_x = self(x)
-            log_likelihood = self.llk(μ_x, α_x, β_x, y)
+            log_likelihood = self.ellk(μ_x, α_x, β_x, y)
             kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
             # --
             # Note that there might be an issue if the validation batch size is smaller than the validation dataset?
             self.tune_on_validation(x, kl=kl_divergence)
         # --
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
-        self.log("eval_loss", loss, on_epoch=True)
+        self.log(EVAL_LOSS, loss, on_epoch=True)
         if self.ood_generator_v is not None:
             self.log("ood_generator_v", self.ood_generator_v, on_epoch=True)
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         μ_x, α_x, β_x = self(x)
-        log_likelihood = self.llk(μ_x, α_x, β_x, y)
+        log_likelihood = self.ellk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
-        self.log("test_loss", loss, on_epoch=True)
-        # metrics
         y_pred = self.predictive_mean(x)
-        self.log("test_ll", log_likelihood, on_epoch=True)
-        self.log("test_mae", F.l1_loss(y_pred, y), on_epoch=True)
-        self.log("test_rmse", torch.sqrt(F.mse_loss(y_pred, y)), on_epoch=True)
+
+        # ---------
+        # Metrics
+        self.log(TEST_LOSS, loss, on_epoch=True)
+        self.log(TEST_ELBO, -loss, on_epoch=True)
+
+        # Mean fit
+        self.log(TEST_MEAN_FIT_MAE, F.l1_loss(y_pred, y), on_epoch=True)
+        self.log(TEST_MEAN_FIT_RMSE, torch.sqrt(F.mse_loss(y_pred, y)), on_epoch=True)
+
+        # Variance fit
+        pred_var = self.predictive_std(x) ** 2
+        empirical_var = (y_pred - y) ** 2
+        self.log(
+            TEST_VARIANCE_FIT_MAE, F.l1_loss(pred_var, empirical_var), on_epoch=True
+        )
+        self.log(
+            TEST_VARIANCE_FIT_RMSE,
+            torch.sqrt(F.mse_loss(pred_var, empirical_var)),
+            on_epoch=True,
+        )
+
+        # Sample fit
+        lbds = tcd.Gamma(α_x, β_x).sample(y.shape)
+        samples_y = tcd.Normal(μ_x, 1 / torch.sqrt(lbds)).sample(y.shape)
+        self.log(TEST_SAMPLE_FIT_MAE, F.l1_loss(samples_y, y), on_epoch=True)
+        self.log(
+            TEST_SAMPLE_FIT_RMSE, torch.sqrt(F.mse_loss(samples_y, y)), on_epoch=True
+        )
+
+        # Model expected log likelihood
+        self.log(TEST_ELLK, torch.mean(log_likelihood), on_epoch=True)
+
+        # Model KL
+        self.log(TEST_KL, torch.mean(kl_divergence), on_epoch=True)
+
+        # Noise
+        x_noisy = generate_noise_for_model_test(x)
+        μ_x, α_x, β_x = self(x_noisy)
+        log_likelihood = self.ellk(μ_x, α_x, β_x, y)
+        kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
+
+        # Noise likelihood
+        self.log(NOISE_ELLK, torch.mean(log_likelihood), on_epoch=True)
+
+        # Noise KL
+        self.log(NOISE_KL, torch.mean(kl_divergence), on_epoch=True)
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):

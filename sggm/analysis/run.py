@@ -1,7 +1,7 @@
 import argparse
 
 from sggm.analysis.experiment_log import ExperimentLog
-from sggm.analysis.parse_results_to_md import parse_results
+from sggm.analysis.parse_results_to_csv import parse_results
 from sggm.analysis.toy import toy_plot
 from sggm.analysis.toy_2d import toy_2d_plot
 from sggm.analysis.uci_yacht import uci_yacht_plot
