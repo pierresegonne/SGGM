@@ -219,17 +219,31 @@ class Regressor(pl.LightningModule):
                     x_ood = x.detach().clone()
                     x_ood.requires_grad = True
 
-                    K_max = 100
-                    for k in range(K_max):
-                        _, alpha_ood, beta_ood = self(x_ood)
+                    # hparams
+                    K_max = 5000
+                    eps = 1e-5
+                    k = 0
+
+                    # initial evaluation
+                    _, α_ood, β_ood = self(x_ood)
+                    kl = torch.mean(self.kl(α_ood, β_ood, self.prior_α, self.prior_β))
+                    kl.backward()
+                    kl_prev = -1e10 * torch.ones_like(kl)
+
+                    while (k < K_max) and (torch.abs(kl - kl_prev) > eps):
+
+                        with torch.no_grad():
+                            x_ood = x_ood + x_ood.shape[0] * x_ood.grad
+                        x_ood.requires_grad = True
+
+                        kl_prev = kl.detach().clone()
+                        _, α_ood, β_ood = self(x_ood)
                         kl = torch.mean(
-                            self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β)
+                            self.kl(α_ood, β_ood, self.prior_α, self.prior_β)
                         )
                         kl.backward()
 
-                        with torch.no_grad():
-                            x_ood = x_ood + 100 * x_ood.grad
-                        x_ood.requires_grad = True
+                        k += 1
 
                     # make sure to start anew the computational graph for x_ood
                     return x_ood
@@ -287,23 +301,6 @@ class Regressor(pl.LightningModule):
     ) -> torch.Tensor:
         β = self.β_elbo if train else 1
         return torch.mean(ellk - self.β_elbo * kl)
-
-    # ---------
-    def configure_optimizers(self):
-        params = [
-            {"params": self.μ.parameters()},
-            {"params": self.α.parameters()},
-            {"params": self.β.parameters()},
-        ]
-        if self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
-            params += [
-                {"params": self.ood_generator_v, "lr": self.lr_v},
-            ]
-        optimizer = torch.optim.Adam(
-            params,
-            lr=self.lr,
-        )
-        return optimizer
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -372,8 +369,8 @@ class Regressor(pl.LightningModule):
         )
 
         # Sample fit
-        lbds = tcd.Gamma(α_x, β_x).sample(y.shape)
-        samples_y = tcd.Normal(μ_x, 1 / torch.sqrt(lbds)).sample(y.shape)
+        lbds = tcd.Gamma(α_x, β_x).sample((1,))
+        samples_y = tcd.Normal(μ_x, 1 / torch.sqrt(lbds)).sample((1,)).reshape(y.shape)
         self.log(TEST_SAMPLE_FIT_MAE, F.l1_loss(samples_y, y), on_epoch=True)
         self.log(
             TEST_SAMPLE_FIT_RMSE, torch.sqrt(F.mse_loss(samples_y, y)), on_epoch=True
@@ -396,6 +393,23 @@ class Regressor(pl.LightningModule):
 
         # Noise KL
         self.log(NOISE_KL, torch.mean(kl_divergence), on_epoch=True)
+
+    # ---------
+    def configure_optimizers(self):
+        params = [
+            {"params": self.μ.parameters()},
+            {"params": self.α.parameters()},
+            {"params": self.β.parameters()},
+        ]
+        if self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
+            params += [
+                {"params": self.ood_generator_v, "lr": self.lr_v},
+            ]
+        optimizer = torch.optim.Adam(
+            params,
+            lr=self.lr,
+        )
+        return optimizer
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):

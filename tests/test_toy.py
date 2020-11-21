@@ -1,6 +1,7 @@
 from pytorch_lightning import Trainer, seed_everything
 from sggm.data.toy.datamodule import ToyDataModule
 from sggm.regression_model import Regressor
+from sggm.definitions import EVAL_LOSS, TEST_LOSS
 
 
 def test_toy():
@@ -15,4 +16,5 @@ def test_toy():
     trainer.fit(model, datamodule)
 
     results = trainer.test()
-    assert results[0]["eval_loss"] < 10
+    assert results[0][EVAL_LOSS] < 10
+    assert results[0][TES_LOSS] < 10
