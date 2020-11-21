@@ -16,7 +16,7 @@ from sggm.definitions import (
     regression_experiments,
     regressor_parameters,
 )
-from sggm.definitions import EXPERIMENT_NAME, EXPERIMENTS_CONFIG
+from sggm.definitions import EVAL_LOSS, EXPERIMENT_NAME, EXPERIMENTS_CONFIG
 from sggm.data import datamodules
 from sggm.regression_model import Regressor
 
@@ -160,7 +160,7 @@ def cli_main():
 
             # profiler = pl.profiler.AdvancedProfiler()
             default_callbacks = [
-                pl.callbacks.EarlyStopping("eval_loss", patience=500),
+                pl.callbacks.EarlyStopping(EVAL_LOSS, patience=500),
             ]
             # Note that checkpointing is handled by default
             logger = pl.loggers.TensorBoardLogger(
