@@ -108,8 +108,8 @@ class Regressor(pl.LightningModule):
         self.eps = eps
         self.n_mc_samples = n_mc_samples
 
+        # OOD
         self.ood_x_generation_method = ood_x_generation_method
-
         if self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
             v_ini = torch.nn.Parameter(
                 0.1 * torch.ones((1, self.input_dim)), requires_grad=True
@@ -195,18 +195,20 @@ class Regressor(pl.LightningModule):
 
     def ood_x(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         if self.ood_x_generation_method == GAUSSIAN_NOISE_AROUND_X:
-            kl_noise_std = 20
-            return x + kl_noise_std * torch.randn_like(x)
+            noise_std = torch.std(x) * 3  # 3 is Arbitrary
+            return x + noise_std * torch.randn_like(x)
+
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             kl_grad_unit = kl_grad / torch.norm(kl_grad, dim=1, keepdim=True)
             return x + self.ood_generator_v * kl_grad_unit
+
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-
             return x + self.ood_generator_v * torch.sign(kl_grad)
+
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_KL_GA:
 
             # -------------------
@@ -230,19 +232,14 @@ class Regressor(pl.LightningModule):
                         x_ood.requires_grad = True
 
                     # make sure to start anew the computational graph for x_ood
-                    # print("difference x xood", torch.norm(x - x_ood))
                     return x_ood
             # -------------------
 
         elif self.ood_x_generation_method == UNIFORM_X_OOD:
-            x_ood = torch.rand_like(x) * 11 - 0.5
-            # Create a U([a,b]\[c,d])
-            # mid_idx = x.shape[0] // 2
-            # x_ood[:mid_idx, :] = x_ood[:mid_idx, :] * 10 + 10
-            # x_ood[mid_idx:, :] = x_ood[mid_idx:, :] * -5
-            # perm_idx = torch.randperm(x_ood.nelement())
-            # x_ood = x_ood.view(-1)[perm_idx].view(x_ood.size())
-            return x_ood
+            raise NotImplementedError(
+                "Uniform X ood generation must be implemented per use case."
+            )
+
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_BRUTE_FORCE:
             x_ood_proposal = torch.reshape(torch.linspace(-15, 20, 2500), (2500, 1))
             _, alpha_ood, beta_ood = self(x_ood_proposal)

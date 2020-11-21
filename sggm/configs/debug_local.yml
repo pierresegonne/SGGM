@@ -1,4 +1,4 @@
-- name: test_metrics
+- name: test
   experiment_name: toy
   # hparams
   batch_size: 500
@@ -9,8 +9,8 @@
   # prior_alpha: 1.5
   # prior_beta: 10
   # pl trainer
-  n_trials: 5
-  max_epochs: 6000
+  n_trials: 1
+  max_epochs: 4
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 500 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).

@@ -71,8 +71,7 @@ class Experiment:
                 n_mc_samples=self.n_mc_samples,
             )
         else:
-            raise Exception("Experiment does not have a model implemented")
-            return
+            raise NotImplementedError("Experiment does not have a model implemented")
 
     @property
     def datamodule(self):
