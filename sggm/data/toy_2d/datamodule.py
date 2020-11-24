@@ -38,11 +38,16 @@ class Toy2DDataModule(pl.LightningDataModule):
         self.out_dims = 1
 
     def setup(self, stage: str = None):
+        # Save mean and std
+        self.x_mean = 0
+        self.x_std = 1
+        self.y_mean = 0
+        self.y_std = 1
+
         x_train = self.random_polar(self.N_train, self.training_range)
         eps = torch.randn((self.N_train, 1))
         r = torch.norm(x_train, dim=1, keepdim=True)
         y_train = self.data_mean(r) + self.data_std(r) * eps
-        # y_train = self.data_mean(r)
 
         x_test = self.random_polar(self.N_test, self.testing_range)
         r = torch.norm(x_test, dim=1, keepdim=True)

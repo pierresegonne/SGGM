@@ -96,6 +96,8 @@ class Regressor(pl.LightningModule):
         ].default,
         eps: float = regressor_parameters[EPS].default,
         n_mc_samples: int = regressor_parameters[N_MC_SAMPLES].default,
+        y_mean: float = 0.0,  # Not in regressor parameters as it is infered from data
+        y_std: float = 1.0,  # Not in regressor parameters as it is infered from data
     ):
         super(Regressor, self).__init__()
 
@@ -130,7 +132,7 @@ class Regressor(pl.LightningModule):
         self.β_elbo = β_elbo
 
         self.lr = 1e-2
-        self.lr_v = 0.01
+        self.lr_v = 1e-2
         self.lr_ga_kl = 1
 
         # ---------
@@ -179,19 +181,33 @@ class Regressor(pl.LightningModule):
         var = torch.where(α > 1, self.β(x) / (α - 1), 1e20 * torch.ones(α.shape))
         return torch.sqrt(var)
 
-    def predictive_mean(self, x: torch.Tensor, method: str = MARGINAL) -> torch.Tensor:
+    def predictive_mean(
+        self, x: torch.Tensor, method: str = MARGINAL, scaled: bool = False
+    ) -> torch.Tensor:
         check_available_methods(method)
         if method == MARGINAL:
-            return self.marginal_predictive_mean(x)
+            pred_mean = self.marginal_predictive_mean(x)
         elif method == POSTERIOR:
-            return self.posterior_predictive_mean(x)
+            pred_mean = self.posterior_predictive_mean(x)
 
-    def predictive_std(self, x: torch.Tensor, method: str = MARGINAL) -> torch.Tensor:
+        if scaled:
+            pred_mean = self.y_mean + pred_mean * self.y_std
+
+        return pred_mean
+
+    def predictive_std(
+        self, x: torch.Tensor, method: str = MARGINAL, scaled: bool = False
+    ) -> torch.Tensor:
         check_available_methods(method)
         if method == MARGINAL:
-            return self.marginal_predictive_std(x)
+            pred_std = self.marginal_predictive_std(x)
         elif method == POSTERIOR:
-            return self.posterior_predictive_std(x)
+            pred_std = self.posterior_predictive_std(x)
+
+        if scaled:
+            pred_std *= self.y_std
+
+        return pred_std
 
     def ood_x(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         if self.ood_x_generation_method == GAUSSIAN_NOISE_AROUND_X:

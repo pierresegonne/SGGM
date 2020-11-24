@@ -69,6 +69,8 @@ class Experiment:
                 ood_x_generation_method=self.ood_x_generation_method,
                 eps=self.eps,
                 n_mc_samples=self.n_mc_samples,
+                y_mean=self.datamodule.y_mean,
+                y_std=self.datamodule.y_std,
             )
         else:
             raise NotImplementedError("Experiment does not have a model implemented")

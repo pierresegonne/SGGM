@@ -34,6 +34,12 @@ class ToyDataModule(pl.LightningDataModule):
         self.out_dims = 1
 
     def setup(self, stage: str = None):
+        # Save mean and std
+        self.x_mean = 0
+        self.x_std = 1
+        self.y_mean = 0
+        self.y_std = 1
+
         x_train = torch.FloatTensor(self.N_train, 1).uniform_(*self.training_range)
         eps1, eps2 = torch.randn_like(x_train), torch.randn_like(x_train)
         y_train = self.data_mean(x_train) + 0.3 * eps1 + 0.3 * x_train * eps2
