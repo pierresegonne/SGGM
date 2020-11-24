@@ -3,14 +3,21 @@ import pathlib
 
 from sggm.data.uci import UCIDataModule
 
-DATA_FILENAME = "raw.csv"
+DATA_FILENAME = "ccpp.csv"
 """
-Link to get the raw.csv data: https://archive.ics.uci.edu/ml/datasets/Superconductivty+Data
+Link to get the concrete.csv file: https://archive.ics.uci.edu/ml/datasets/Combined+Cycle+Power+Plant
+Note that I converted the xls file to csv, removed the sheets and renamed and the file itself.
 """
-Y_LABEL = "critical_temp"
+COLUMNS = [
+    "AT",
+    "V",
+    "AP",
+    "RH",
+]
+Y_LABEL = "PE"
 
 
-class UCISuperConductDataModule(UCIDataModule):
+class UCICCPPDataModule(UCIDataModule):
     def __init__(
         self,
         batch_size: int,
@@ -19,7 +26,7 @@ class UCISuperConductDataModule(UCIDataModule):
         test_split: float = 0.1,
         **kwargs,
     ):
-        super(UCISuperConductDataModule, self).__init__(
+        super(UCICCPPDataModule, self).__init__(
             batch_size,
             n_workers,
             train_val_split,
@@ -28,7 +35,7 @@ class UCISuperConductDataModule(UCIDataModule):
         )
 
         # Manual as we know it
-        self.dims = 81
+        self.dims = 4
         self.out_dims = 1
 
     def setup(self, stage: str = None):
@@ -37,5 +44,7 @@ class UCISuperConductDataModule(UCIDataModule):
         # Split features, targets
         x = df.drop(columns=[Y_LABEL]).values
         y = df[Y_LABEL].values
+        print("ccpp")
+        print(x.shape, y.shape)
 
-        super(UCISuperConductDataModule, self).setup(x, y)
+        super(UCICCPPDataModule, self).setup(x, y)

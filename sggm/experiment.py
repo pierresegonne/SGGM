@@ -50,6 +50,11 @@ class Experiment:
         if self.experiment_name in regression_experiments:
             self.add_default_params(regressor_parameters)
 
+        # Instance attributes
+        self._datamodule = None
+        self._model = None
+        self._callbacks = None
+
     def add_default_params(self, params):
         for parameter in params.values():
             if parameter.name not in self.__dict__.keys():
@@ -57,31 +62,46 @@ class Experiment:
 
     @property
     def model(self):
-        if self.experiment_name in regression_experiments:
-            input_dim = self.datamodule.dims
-            return Regressor(
-                input_dim=input_dim,
-                hidden_dim=self.hidden_dim,
-                prior_α=self.prior_alpha,
-                prior_β=self.prior_beta,
-                β_elbo=self.beta_elbo,
-                β_ood=self.beta_ood,
-                ood_x_generation_method=self.ood_x_generation_method,
-                eps=self.eps,
-                n_mc_samples=self.n_mc_samples,
-                y_mean=self.datamodule.y_mean,
-                y_std=self.datamodule.y_std,
-            )
+        if self._model is not None:
+            return self._model
         else:
-            raise NotImplementedError("Experiment does not have a model implemented")
+            if self.experiment_name in regression_experiments:
+                input_dim = self.datamodule.dims
+                return Regressor(
+                    input_dim=input_dim,
+                    hidden_dim=self.hidden_dim,
+                    prior_α=self.prior_alpha,
+                    prior_β=self.prior_beta,
+                    β_elbo=self.beta_elbo,
+                    β_ood=self.beta_ood,
+                    ood_x_generation_method=self.ood_x_generation_method,
+                    eps=self.eps,
+                    n_mc_samples=self.n_mc_samples,
+                    y_mean=self.datamodule.y_mean,
+                    y_std=self.datamodule.y_std,
+                )
+            else:
+                raise NotImplementedError(
+                    "Experiment does not have a model implemented"
+                )
 
     @property
     def datamodule(self):
-        return datamodules[self.experiment_name](**self.__dict__)
+        if self._datamodule is None:
+            self._datamodule = datamodules[self.experiment_name](
+                **clean_dict(self.__dict__)
+            )
+            self._datamodule.setup()
+        return self._datamodule
 
     @property
     def callbacks(self):
-        return [clbk(**self.__dict__) for clbk in callbacks[self.experiment_name]]
+        if self._callbacks is None:
+            self._callbacks = [
+                clbk(**clean_dict(self.__dict__))
+                for clbk in callbacks[self.experiment_name]
+            ]
+        return self._callbacks
 
 
 def get_experiments_config(parsed_args):
@@ -134,7 +154,7 @@ def cli_main():
         full_experiments_config = get_experiments_config(args)
 
         experiment = Experiment(full_experiments_config[experiment_idx])
-        print(f"--- Starting Experiment {experiment.__dict__}")
+        print(f"--- Starting Experiment {clean_dict(experiment.__dict__)}")
         for n_t in range(experiment.n_trials):
 
             # ------------

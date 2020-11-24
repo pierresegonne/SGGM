@@ -108,17 +108,35 @@ regressor_parameters = {
 
 TOY = "toy"
 TOY_2D = "toy_2d"
+UCI_CCPP = "uci_ccpp"
+UCI_CONCRETE = "uci_concrete"
 UCI_SUPERCONDUCT = "uci_superconduct"
+UCI_WINE_RED = "uci_wine_red"
+UCI_WINE_WHITE = "uci_wine_white"
 UCI_YACHT = "uci_yacht"
+
 
 experiment_names = [
     TOY,
     TOY_2D,
+    UCI_CONCRETE,
+    UCI_CCPP,
     UCI_SUPERCONDUCT,
+    UCI_WINE_RED,
+    UCI_WINE_WHITE,
     UCI_YACHT,
 ]
 
-regression_experiments = [TOY, TOY_2D, UCI_SUPERCONDUCT, UCI_YACHT]
+regression_experiments = [
+    TOY,
+    TOY_2D,
+    UCI_CONCRETE,
+    UCI_CCPP,
+    UCI_SUPERCONDUCT,
+    UCI_WINE_RED,
+    UCI_WINE_WHITE,
+    UCI_YACHT,
+]
 
 # -------------
 # Metric Names
