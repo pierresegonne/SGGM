@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from typing import Any, List, Union
 
 EXPERIMENT_NAME = "experiment_name"
