@@ -11,7 +11,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -28,7 +28,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -46,7 +46,7 @@
   ood_x_generation_method: gaussian_noise
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -64,7 +64,7 @@
   ood_x_generation_method: optimised_x_ood_v_optimised
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -86,7 +86,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -105,7 +105,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -125,7 +125,7 @@
   ood_x_generation_method: gaussian_noise_around_x
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -145,7 +145,7 @@
   ood_x_generation_method: optimised_x_ood_v_optimised
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -165,7 +165,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -182,7 +182,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -200,7 +200,7 @@
   ood_x_generation_method: gaussian_noise_around_x
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -219,7 +219,7 @@
   ood_x_generation_method: optimised_x_ood_v_optimised
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -239,7 +239,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -256,7 +256,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -274,7 +274,7 @@
   ood_x_generation_method: gaussian_noise_around_x
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -293,7 +293,7 @@
   ood_x_generation_method: optimised_x_ood_v_optimised
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -313,7 +313,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -330,7 +330,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -348,7 +348,7 @@
   ood_x_generation_method: gaussian_noise_around_x
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -367,7 +367,7 @@
   ood_x_generation_method: optimised_x_ood_v_optimised
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -387,7 +387,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -404,7 +404,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -422,7 +422,7 @@
   ood_x_generation_method: gaussian_noise_around_x
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -441,7 +441,7 @@
   ood_x_generation_method: optimised_x_ood_v_optimised
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -461,7 +461,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -478,7 +478,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -496,7 +496,7 @@
   ood_x_generation_method: gaussian_noise_around_x
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -515,7 +515,7 @@
   ood_x_generation_method: optimised_x_ood_v_optimised
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -535,7 +535,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -552,7 +552,7 @@
   prior_beta: 0.5
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -570,7 +570,7 @@
   ood_x_generation_method: gaussian_noise_around_x
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -588,7 +588,7 @@
   ood_x_generation_method: optimised_x_ood_v_optimised
   # pl trainer
   n_trials: 10
-  max_epochs: 3
+  max_epochs: 6000
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 100 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
