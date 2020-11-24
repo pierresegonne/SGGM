@@ -17,7 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macOS-10.15, windows-2019]
+        # os: [ubuntu-20.04, macOS-10.15, windows-2019]
+        os: [ubuntu-20.04, macOS-10.15]
         python-version: [3.8.5]
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
@@ -60,15 +61,14 @@ jobs:
         pip list
       shell: bash
 
-    - name: Tests (Ubuntu + macOS)
-      if: runner.os == 'macOS' || runner.os == 'ubuntu'
+    - name: Tests
       run: |
         coverage run --source sggm -m py.test sggm tests -v -s --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
     
-    - name: Tests (Windows)
-      if: runner.os == 'windows'
-      run: |
-        set PYTHONUTF8=1 && coverage run --source sggm -m py.test sggm tests -v -s --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
+    # - name: Tests (Windows)
+    #   if: runner.os == 'windows'
+    #   run: |
+    #     set PYTHONUTF8=1 && coverage run --source sggm -m py.test sggm tests -v -s --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
 
     - name: Statistics
       if: success()
