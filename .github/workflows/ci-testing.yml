@@ -35,11 +35,6 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
-    
-    - name: Setup windows encoding
-      if: runner.os == 'windows'
-      run: |
-        set PYTHONUTF8=1
 
     # Note: This uses an internal pip API and may not always work
     # https://github.com/actions/cache/blob/master/examples.md#multiple-oss-in-a-workflow
@@ -65,9 +60,15 @@ jobs:
         pip list
       shell: bash
 
-    - name: Tests
+    - name: Tests (Ubuntu + macOS)
+      if: runner.os == 'macOS' || runner.os == 'ubuntu'
       run: |
         coverage run --source sggm -m py.test sggm tests -v -s --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
+    
+    - name: Tests (Windows)
+      if: runner.os == 'windows'
+      run: |
+        set PYTHONUTF8=1 && coverage run --source sggm -m py.test sggm tests -v -s --junitxml=junit/test-results-${{ runner.os }}-${{ matrix.python-version }}.xml
 
     - name: Statistics
       if: success()
