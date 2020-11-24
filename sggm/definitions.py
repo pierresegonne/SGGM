@@ -123,20 +123,37 @@ regression_experiments = [TOY, TOY_2D, UCI_SUPERCONDUCT, UCI_YACHT]
 # -------------
 # Metric Names
 # -------------
+UP_METRIC_INDICATOR = "↑"
+DOWN_METRIC_INDICATOR = "↓"
 
-TRAIN_LOSS = "train_loss↓"
+TRAIN_LOSS = f"train_loss{DOWN_METRIC_INDICATOR}"
 
-EVAL_LOSS = "eval_loss↓"
+EVAL_LOSS = f"eval_loss{DOWN_METRIC_INDICATOR}"
 
-TEST_LOSS = "test_loss↓"
-TEST_ELBO = "test_elbo↑"
-TEST_MEAN_FIT_MAE = "test_mean_fit_mae↓"
-TEST_MEAN_FIT_RMSE = "test_mean_fit_rmse↓"
-TEST_VARIANCE_FIT_MAE = "test_variance_fit_mae↓"
-TEST_VARIANCE_FIT_RMSE = "test_variance_fit_rmse↓"
-TEST_SAMPLE_FIT_MAE = "test_sample_fit_mae↓"
-TEST_SAMPLE_FIT_RMSE = "test_sample_fit_rmse↓"
-TEST_ELLK = "test_expected_log_likelihood↑"
-TEST_KL = "test_kl_divergence↓"
-NOISE_ELLK = "noise_expected_log_likelihood↓"
-NOISE_KL = "noise_kl_divergence↓"
+TEST_LOSS = f"test_loss{DOWN_METRIC_INDICATOR}"
+TEST_ELBO = f"test_elbo{UP_METRIC_INDICATOR}"
+TEST_MEAN_FIT_MAE = f"test_mean_fit_mae{DOWN_METRIC_INDICATOR}"
+TEST_MEAN_FIT_RMSE = f"test_mean_fit_rmse{DOWN_METRIC_INDICATOR}"
+TEST_VARIANCE_FIT_MAE = f"test_variance_fit_mae{DOWN_METRIC_INDICATOR}"
+TEST_VARIANCE_FIT_RMSE = f"test_variance_fit_rmse{DOWN_METRIC_INDICATOR}"
+TEST_SAMPLE_FIT_MAE = f"test_sample_fit_mae{DOWN_METRIC_INDICATOR}"
+TEST_SAMPLE_FIT_RMSE = f"test_sample_fit_rmse{DOWN_METRIC_INDICATOR}"
+TEST_ELLK = f"test_expected_log_likelihood{UP_METRIC_INDICATOR}"
+TEST_KL = f"test_kl_divergence{DOWN_METRIC_INDICATOR}"
+NOISE_ELLK = f"noise_expected_log_likelihood{DOWN_METRIC_INDICATOR}"
+NOISE_KL = f"noise_kl_divergence{DOWN_METRIC_INDICATOR}"
+
+COMPARISON_METRICS = [
+    TEST_LOSS,
+    TEST_ELBO,
+    TEST_MEAN_FIT_MAE,
+    TEST_MEAN_FIT_RMSE,
+    TEST_VARIANCE_FIT_MAE,
+    TEST_VARIANCE_FIT_RMSE,
+    TEST_SAMPLE_FIT_MAE,
+    TEST_SAMPLE_FIT_RMSE,
+    TEST_ELLK,
+    TEST_KL,
+    NOISE_ELLK,
+    NOISE_KL,
+]

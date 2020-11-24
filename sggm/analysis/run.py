@@ -9,15 +9,16 @@ from sggm.definitions import experiment_names, TOY, TOY_2D, UCI_YACHT
 from sggm.regression_model import check_available_methods, MARGINAL
 
 
-def run_analysis(experiment_name, name, save_dir, **kwargs):
-    experiment_log = ExperimentLog(experiment_name, name, save_dir=save_dir)
-    print(f"-- Index of best version: {experiment_log.idx_best_version}")
-    if experiment_name == TOY:
-        return toy_plot(experiment_log, **kwargs)
-    elif experiment_name == TOY_2D:
-        return toy_2d_plot(experiment_log, **kwargs)
-    elif experiment_name == UCI_YACHT:
-        return uci_yacht_plot(experiment_log, **kwargs)
+def run_analysis(experiment_name, names, save_dir, **kwargs):
+    for name in names:
+        experiment_log = ExperimentLog(experiment_name, name, save_dir=save_dir)
+        print(f"-- Index of best version: {experiment_log.idx_best_version}")
+        if experiment_name == TOY:
+            toy_plot(experiment_log, **kwargs)
+        elif experiment_name == TOY_2D:
+            toy_2d_plot(experiment_log, **kwargs)
+        elif experiment_name == UCI_YACHT:
+            uci_yacht_plot(experiment_log, **kwargs)
 
 
 def add_experiment_args(parser, experiment_name):
@@ -26,7 +27,7 @@ def add_experiment_args(parser, experiment_name):
             "--methods",
             type=str,
             default=MARGINAL,
-            help="Delimited list input, ex 'marginal,posterior'",
+            help="Comma delimited list input, ex 'marginal,posterior'",
         )
     return parser
 
@@ -35,6 +36,7 @@ def parse_experiment_args(args):
     experiment_name = args.experiment_name
     if experiment_name in [TOY, TOY_2D]:
         args.methods = [item for item in args.methods.split(",")]
+    args.names = [name for name in args.names.split(",")]
     return args
 
 
@@ -44,7 +46,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--experiment_name", type=str, choices=experiment_names, required=True
     )
-    parser.add_argument("--name", type=str, required=True)
+    parser.add_argument(
+        "--names",
+        type=str,
+        required=True,
+        help="Comma delimited list of names, ex 'test1,test2'",
+    )
     parser.add_argument("--save_dir", type=str, default="../lightning_logs")
     args, unknown_args = parser.parse_known_args()
 
