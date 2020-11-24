@@ -17,4 +17,4 @@ def test_toy():
 
     results = trainer.test()
     assert results[0][EVAL_LOSS] < 10
-    assert results[0][TES_LOSS] < 10
+    assert results[0][TEST_LOSS] < 10
