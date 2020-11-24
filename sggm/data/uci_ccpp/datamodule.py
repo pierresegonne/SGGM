@@ -44,7 +44,5 @@ class UCICCPPDataModule(UCIDataModule):
         # Split features, targets
         x = df.drop(columns=[Y_LABEL]).values
         y = df[Y_LABEL].values
-        print("ccpp")
-        print(x.shape, y.shape)
 
         super(UCICCPPDataModule, self).setup(x, y)
