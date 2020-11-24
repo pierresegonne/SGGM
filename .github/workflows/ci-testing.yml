@@ -39,7 +39,7 @@ jobs:
     - name: Setup windows encoding
       if: runner.os == 'windows'
       run: |
-        export PYTHONIOENCODING=utf8
+        set PYTHONUTF8=1
 
     # Note: This uses an internal pip API and may not always work
     # https://github.com/actions/cache/blob/master/examples.md#multiple-oss-in-a-workflow
