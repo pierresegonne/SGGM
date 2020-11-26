@@ -15,10 +15,10 @@ from sggm.callbacks.loss_printer import LossPrinter
 callbacks = {
     TOY: [DataSaver, LossPrinter],
     TOY_2D: [DataSaver, LossPrinter],
-    UCI_CCPP: [DataSaver, LossPrinter],
-    UCI_CONCRETE: [DataSaver, LossPrinter],
-    UCI_SUPERCONDUCT: [DataSaver, LossPrinter],
-    UCI_WINE_RED: [DataSaver, LossPrinter],
-    UCI_WINE_WHITE: [DataSaver, LossPrinter],
-    UCI_YACHT: [DataSaver, LossPrinter],
+    UCI_CCPP: [LossPrinter],
+    UCI_CONCRETE: [LossPrinter],
+    UCI_SUPERCONDUCT: [LossPrinter],
+    UCI_WINE_RED: [LossPrinter],
+    UCI_WINE_WHITE: [LossPrinter],
+    UCI_YACHT: [LossPrinter],
 }
