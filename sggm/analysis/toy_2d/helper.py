@@ -157,7 +157,6 @@ def true_plot_3d(ax, best_model, method):
 
     # Getting best mean
     best_mean = best_model.predictive_mean(x_plot, method)
-    print(best_mean.shape)
 
     # 2D mesh for 3D plot
     X_plot_mesh = column_to_mesh(x_plot[:, 0]).numpy()

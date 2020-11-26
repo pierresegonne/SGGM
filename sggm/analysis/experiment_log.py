@@ -25,8 +25,16 @@ class VersionLog:
         # performance
         self.results = torch.load(f"{version_path}/results.pkl")
         # datasets
-        self.train_dataset = torch.load(f"{version_path}/train_dataset.pkl")
-        self.val_dataset = torch.load(f"{version_path}/val_dataset.pkl")
+        self.train_dataset = (
+            torch.load(f"{version_path}/train_dataset.pkl")
+            if os.path.exists(f"{version_path}/train_dataset.pkl")
+            else None
+        )
+        self.val_dataset = (
+            torch.load(f"{version_path}/val_dataset.pkl")
+            if os.path.exists(f"{version_path}/val_dataset.pkl")
+            else None
+        )
         # hparams
         with open(f"{version_path}/hparams.yaml") as hparams_file:
             self.hparams = yaml.load(hparams_file, Loader=yaml.FullLoader)

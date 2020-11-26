@@ -17,8 +17,8 @@ def run_analysis(experiment_name, names, save_dir, **kwargs):
             toy_plot(experiment_log, **kwargs)
         elif experiment_name == TOY_2D:
             toy_2d_plot(experiment_log, **kwargs)
-        elif experiment_name == UCI_YACHT:
-            uci_yacht_plot(experiment_log, **kwargs)
+        # elif experiment_name == UCI_YACHT:
+        #     uci_yacht_plot(experiment_log, **kwargs)
 
 
 def add_experiment_args(parser, experiment_name):

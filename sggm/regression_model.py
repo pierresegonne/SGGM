@@ -151,7 +151,17 @@ class Regressor(pl.LightningModule):
         self.pp = tcd.Gamma(prior_α, prior_β)
 
         # Save hparams
-        self.save_hyperparameters()
+        self.save_hyperparameters(
+            "input_dim",
+            "hidden_dim",
+            "prior_α",
+            "prior_β",
+            "β_elbo",
+            "β_ood",
+            "ood_x_generation_method",
+            "eps",
+            "n_mc_samples",
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.μ(x), self.α(x), self.β(x)
