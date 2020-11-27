@@ -4,9 +4,26 @@ from sggm.analysis.experiment_log import ExperimentLog
 from sggm.analysis.parse_results_to_csv import parse_results
 from sggm.analysis.toy import toy_plot
 from sggm.analysis.toy_2d import toy_2d_plot
-from sggm.analysis.uci_yacht import uci_yacht_plot
-from sggm.definitions import experiment_names, TOY, TOY_2D, UCI_YACHT
+from sggm.analysis.uci import uci_plot
+from sggm.definitions import experiment_names, TOY, TOY_2D
+from sggm.definitions import (
+    UCI_CONCRETE,
+    UCI_CCPP,
+    UCI_SUPERCONDUCT,
+    UCI_WINE_RED,
+    UCI_WINE_WHITE,
+    UCI_YACHT,
+)
 from sggm.regression_model import check_available_methods, MARGINAL
+
+UCI = [
+    UCI_CONCRETE,
+    UCI_CCPP,
+    UCI_SUPERCONDUCT,
+    UCI_WINE_RED,
+    UCI_WINE_WHITE,
+    UCI_YACHT,
+]
 
 
 def run_analysis(experiment_name, names, save_dir, **kwargs):
@@ -17,24 +34,28 @@ def run_analysis(experiment_name, names, save_dir, **kwargs):
             toy_plot(experiment_log, **kwargs)
         elif experiment_name == TOY_2D:
             toy_2d_plot(experiment_log, **kwargs)
-        # elif experiment_name == UCI_YACHT:
-        #     uci_yacht_plot(experiment_log, **kwargs)
+        elif experiment_name in UCI:
+            uci_plot(experiment_log, **kwargs)
 
 
 def add_experiment_args(parser, experiment_name):
-    if experiment_name in [TOY, TOY_2D, UCI_YACHT]:
+    if experiment_name in [TOY, TOY_2D, *UCI]:
         parser.add_argument(
             "--methods",
             type=str,
             default=MARGINAL,
             help="Comma delimited list input, ex 'marginal,posterior'",
         )
+    if experiment_name in UCI:
+        parser.add_argument(
+            "--index", type=int, required=True, help="index of the feature to plot"
+        )
     return parser
 
 
 def parse_experiment_args(args):
     experiment_name = args.experiment_name
-    if experiment_name in [TOY, TOY_2D]:
+    if experiment_name in [TOY, TOY_2D, *UCI]:
         args.methods = [item for item in args.methods.split(",")]
     args.names = [name for name in args.names.split(",")]
     return args

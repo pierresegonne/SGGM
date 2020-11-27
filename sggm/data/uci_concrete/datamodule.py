@@ -17,6 +17,7 @@ COLUMNS = [
     "Coarse Aggregate  (component 6)(kg in a m^3 mixture)",
     "Fine Aggregate (component 7)(kg in a m^3 mixture)",
     "Age (day)",
+    "Concrete compressive strength(MPa)",
 ]
 Y_LABEL = "Concrete compressive strength(MPa)"
 

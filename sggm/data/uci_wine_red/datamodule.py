@@ -20,6 +20,7 @@ COLUMNS = [
     "pH",
     "sulphates",
     "alcohol",
+    "quality",
 ]
 Y_LABEL = "quality"
 

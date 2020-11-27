@@ -8,12 +8,7 @@ DATA_FILENAME = "ccpp.csv"
 Link to get the concrete.csv file: https://archive.ics.uci.edu/ml/datasets/Combined+Cycle+Power+Plant
 Note that I converted the xls file to csv, removed the sheets and renamed and the file itself.
 """
-COLUMNS = [
-    "AT",
-    "V",
-    "AP",
-    "RH",
-]
+COLUMNS = ["AT", "V", "AP", "RH", "PE"]
 Y_LABEL = "PE"
 
 
