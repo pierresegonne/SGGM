@@ -150,6 +150,7 @@ class Regressor(pl.LightningModule):
         # ---------
         self.pp = tcd.Gamma(prior_α, prior_β)
         self.example_input_array = torch.rand((10, self.input_dim))
+        self.pi = pi
 
         # Save hparams
         self.save_hyperparameters(
