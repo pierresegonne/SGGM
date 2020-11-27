@@ -417,7 +417,7 @@ class Regressor(pl.LightningModule):
         # Noise
         x_noisy = generate_noise_for_model_test(x)
         μ_x, α_x, β_x = self(x_noisy)
-        log_likelihood = self.ellk(μ_x, α_x, β_x, y)
+        log_likelihood = self.ellk(μ_x, α_x, β_x, μ_x) # assume perfect match OOD
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
 
         # Noise likelihood
