@@ -1,11 +1,11 @@
-- name: investigate_x_ood_kl_ga
+- name: test_test
   experiment_name: toy
   # hparams
   batch_size: 500
-  hidden_dim: 5
+  hidden_dim: 50
   beta_elbo: 1
   beta_ood: 1
-  ood_x_generation_method: optimised_x_ood_kl_ga # optimised_x_ood_v_optimised
+  # ood_x_generation_method: optimised_x_ood_kl_ga # optimised_x_ood_v_optimised
   # prior_alpha: 1.5
   # prior_beta: 10
   # pl trainer
