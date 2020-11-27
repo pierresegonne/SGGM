@@ -9,11 +9,13 @@ from sggm.definitions import (
     UCI_YACHT,
 )
 from sggm.callbacks.data_saver import DataSaver
+from sggm.callbacks.fit_saver import FitSaver
+from sggm.callbacks.kl_saver import KLSaver
 from sggm.callbacks.loss_printer import LossPrinter
 
 
 callbacks = {
-    TOY: [DataSaver, LossPrinter],
+    TOY: [DataSaver, FitSaver, KLSaver, LossPrinter],
     TOY_2D: [DataSaver, LossPrinter],
     UCI_CCPP: [LossPrinter],
     UCI_CONCRETE: [LossPrinter],
