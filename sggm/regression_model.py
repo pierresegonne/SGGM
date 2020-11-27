@@ -43,7 +43,7 @@ from sggm.regression_model_helper import generate_noise_for_model_test
 # ----------
 # Model definitions
 # ----------
-pi = torch.tensor([np.pi])
+log_2_pi = float(torch.log(2 * torch.tensor([np.pi])))
 MARGINAL = "marginal"
 POSTERIOR = "posterior"
 available_methods = [MARGINAL, POSTERIOR]
@@ -150,7 +150,6 @@ class Regressor(pl.LightningModule):
         # ---------
         self.pp = tcd.Gamma(prior_α, prior_β)
         self.example_input_array = torch.rand((10, self.input_dim))
-        self.pi = pi
 
         # Save hparams
         self.save_hyperparameters(
@@ -316,7 +315,7 @@ class Regressor(pl.LightningModule):
         expected_log_lambda = torch.digamma(α) - torch.log(β)
         expected_lambda = α / β
         ll = (1 / 2) * (
-            expected_log_lambda - torch.log(2 * pi) - expected_lambda * ((y - μ) ** 2)
+            expected_log_lambda - log_2_pi - expected_lambda * ((y - μ) ** 2)
         )
         return ll
 
