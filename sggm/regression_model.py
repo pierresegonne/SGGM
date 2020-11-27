@@ -349,8 +349,6 @@ class Regressor(pl.LightningModule):
         loss = -self.elbo(log_likelihood, kl_divergence) + self.β_ood * torch.mean(
             kl_divergence_out
         )
-        # Record graph
-        self.logger.experiment.add_graph(self, x_out)
         self.log(TRAIN_LOSS, loss, on_epoch=True)
         # TODO uncomment following if need to monitor x out distribution
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
