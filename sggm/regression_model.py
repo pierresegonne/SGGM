@@ -149,6 +149,7 @@ class Regressor(pl.LightningModule):
         # Misc
         # ---------
         self.pp = tcd.Gamma(prior_α, prior_β)
+        self.example_input_array = torch.rand((10, self.input_dim))
 
         # Save hparams
         self.save_hyperparameters(
@@ -257,7 +258,6 @@ class Regressor(pl.LightningModule):
                     kl_prev = -1e10 * torch.ones_like(kl)
 
                     while (k < K_max) and (torch.abs(kl - kl_prev) > eps):
-
                         with torch.no_grad():
                             x_ood = x_ood + x_ood.shape[0] * x_ood.grad
                         x_ood.requires_grad = True
@@ -272,6 +272,9 @@ class Regressor(pl.LightningModule):
                         k += 1
 
                     # make sure to start anew the computational graph for x_ood
+                    x_ood = x_ood.detach().clone()
+                    # empty the gradients of the opt, note that this line will fail if there are more than 1 opt.
+                    self.optimizers().zero_grad()
                     return x_ood
             # -------------------
 
@@ -281,11 +284,13 @@ class Regressor(pl.LightningModule):
             )
 
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_BRUTE_FORCE:
-            x_ood_proposal = torch.reshape(torch.linspace(-15, 20, 2500), (2500, 1))
+            x_ood_proposal = torch.reshape(torch.linspace(-25, 35, 4000), (4000, 1))
             _, alpha_ood, beta_ood = self(x_ood_proposal)
             kl = self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β)
-            _, idx = torch.topk(kl, 500, dim=0, sorted=False)
-            return torch.reshape(x_ood_proposal[idx], (500, 1))
+            # Top K and then subsample
+            _, idx = torch.topk(kl, 1000, dim=0, sorted=False)
+            x_ood = x_ood_proposal[idx][::2]
+            return torch.reshape(x_ood, (500, 1))
 
         return torch.empty(0, 0)
 
@@ -335,6 +340,7 @@ class Regressor(pl.LightningModule):
         log_likelihood = self.ellk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
         x_out = self.ood_x(x, kl=kl_divergence)
+        x.requires_grad = False
         if torch.numel(x_out) > 0:
             _, α_x_out, β_x_out = self(x_out)
             kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
@@ -343,10 +349,12 @@ class Regressor(pl.LightningModule):
         loss = -self.elbo(log_likelihood, kl_divergence) + self.β_ood * torch.mean(
             kl_divergence_out
         )
+        # Record graph
+        self.logger.experiment.add_graph(self, x_out)
         self.log(TRAIN_LOSS, loss, on_epoch=True)
         # TODO uncomment following if need to monitor x out distribution
-        # if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
-        #     self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
+        if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
+            self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
         return loss
 
     def validation_step(self, batch, batch_idx):
