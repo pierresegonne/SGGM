@@ -15,7 +15,7 @@ from sggm.callbacks.loss_printer import LossPrinter
 
 
 callbacks = {
-    TOY: [DataSaver, FitSaver, KLSaver, LossPrinter],
+    TOY: [DataSaver, LossPrinter],
     TOY_2D: [DataSaver, LossPrinter],
     UCI_CCPP: [LossPrinter],
     UCI_CONCRETE: [LossPrinter],
