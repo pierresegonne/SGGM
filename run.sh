@@ -3,7 +3,7 @@
 ### specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J match_vv
+#BSUB -J test_x_ood_kl_ga
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 2
 #BSUB -R "span[hosts=1]"
@@ -37,4 +37,4 @@ python3 -m venv env
 source env/bin/activate
 python3 -m pip install -r requirements.txt
 export PYTHONIOENCODING=utf8
-cd sggm/ && python experiment.py --experiments_config configs/match_vv.yml --gpus -1
+cd sggm/ && python experiment.py --experiments_config configs/test_gen_ood_methods.yml --gpus -1
