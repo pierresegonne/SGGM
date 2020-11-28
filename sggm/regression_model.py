@@ -189,7 +189,9 @@ class Regressor(pl.LightningModule):
     def marginal_predictive_std(self, x: torch.Tensor) -> torch.Tensor:
         α = self.α(x)
         # np.inf is not a number
-        var = torch.where(α > 1, self.β(x) / (α - 1), 1e20 * torch.ones(α.shape))
+        var = torch.where(
+            α > 1, self.β(x) / (α - 1), 1e20 * torch.ones(α.shape).type_as(x)
+        )
         return torch.sqrt(var)
 
     def predictive_mean(
@@ -255,7 +257,7 @@ class Regressor(pl.LightningModule):
                     _, α_ood, β_ood = self(x_ood)
                     kl = torch.mean(self.kl(α_ood, β_ood, self.prior_α, self.prior_β))
                     kl.backward()
-                    kl_prev = -1e10 * torch.ones_like(kl)
+                    kl_prev = -1e10 * torch.ones_like(kl).type_as(kl)
 
                     while (k < K_max) and (torch.abs(kl - kl_prev) > eps):
                         with torch.no_grad():
@@ -345,7 +347,7 @@ class Regressor(pl.LightningModule):
             _, α_x_out, β_x_out = self(x_out)
             kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
         else:
-            kl_divergence_out = torch.zeros((1,))
+            kl_divergence_out = torch.zeros((1,)).type_as(x)
         loss = -self.elbo(log_likelihood, kl_divergence) + self.β_ood * torch.mean(
             kl_divergence_out
         )
@@ -417,7 +419,7 @@ class Regressor(pl.LightningModule):
         # Noise
         x_noisy = generate_noise_for_model_test(x)
         μ_x, α_x, β_x = self(x_noisy)
-        log_likelihood = self.ellk(μ_x, α_x, β_x, μ_x) # assume perfect match OOD
+        log_likelihood = self.ellk(μ_x, α_x, β_x, μ_x)  # assume perfect match OOD
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
 
         # Noise likelihood
