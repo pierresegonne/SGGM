@@ -17,7 +17,7 @@ class UCICCPPDataModule(UCIDataModule):
         self,
         batch_size: int,
         n_workers: int,
-        train_val_split: float = 0.8,
+        train_val_split: float = 0.9,
         test_split: float = 0.1,
         **kwargs,
     ):
