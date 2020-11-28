@@ -1,4 +1,6 @@
 import copy
+
+import copy
 import json
 import os
 import pytorch_lightning as pl
@@ -193,8 +195,6 @@ def cli_main():
             # ------------
             model = experiment.model
 
-            print(model)
-            exit()
             # ------------
             # training
             # ------------
