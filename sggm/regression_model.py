@@ -249,7 +249,7 @@ class Regressor(pl.LightningModule):
                     x_ood.requires_grad = True
 
                     # hparams
-                    K_max = 5000
+                    K_max = 200
                     eps = 1e-5
                     k = 0
 

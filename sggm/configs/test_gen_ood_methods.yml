@@ -44,7 +44,7 @@
   hidden_dim: 50
   beta_elbo: 1
   beta_ood: 1
-  ood_x_generation_method: optimised_x_ood_kl_ga
+  ood_x_generation_method: optimised_x_ood_kl_ga_fast
   prior_alpha: 1.025
   prior_beta: 0.5
   # pl trainer
