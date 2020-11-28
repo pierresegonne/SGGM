@@ -37,7 +37,7 @@
 #   # val_check_interval: 5 # How often to check the validation set.
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: x_ood_kl_ga
+- name: x_ood_kl_ga_2
   experiment_name: toy
   # hparams
   batch_size: 500
