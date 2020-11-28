@@ -101,3 +101,8 @@ class UCIDataModule(RegressionDataModule):
             return UCI_LARGE_MAX_BATCH_ITERATIONS
         else:
             return UCI_SMALL_MAX_BATCH_ITERATIONS
+
+    @max_batch_iterations.setter
+    def max_batch_iterations(self, value):
+        """ allows override of parent attribute with children property """
+        pass
