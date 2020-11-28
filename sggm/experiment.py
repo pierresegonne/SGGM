@@ -122,7 +122,7 @@ def cli_main():
     # ------------
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
-    parser.add_argument(f"-{EXPERIMENT_NAME}", choices=experiment_names)
+    parser.add_argument(f"--{EXPERIMENT_NAME}", choices=experiment_names)
     parser.add_argument(f"--{EXPERIMENTS_CONFIG}", type=str)
     # Project wide parameters
     for parameter in parameters.values():
@@ -180,6 +180,14 @@ def cli_main():
             trainer_args.update(experiment.__dict__)
             trainer_args = TrainerArgs(trainer_args)
 
+            # If max_epochs is set to -1, pass on automatic mode
+            print(trainer_args.max_epochs)
+            if trainer_args.max_epochs == -1:
+                trainer_args.max_epochs = datamodule.max_epochs
+            print(trainer_args.max_epochs)
+            exit()
+
+            # Profiler enables to investigate run times
             # profiler = pl.profiler.AdvancedProfiler()
             default_callbacks = [
                 pl.callbacks.EarlyStopping(EVAL_LOSS, patience=500),

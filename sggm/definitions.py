@@ -138,6 +138,16 @@ regression_experiments = [
     UCI_YACHT,
 ]
 
+
+# -------------
+# Max batch iterations
+# -------------
+TOY_MAX_BATCH_ITERATIONS = 6e3
+TOY_2D_MAX_BATCH_ITERATIONS = 1e4
+UCI_LARGE_MAX_BATCH_ITERATIONS = 1e5
+UCI_SMALL_MAX_BATCH_ITERATIONS = 2e4
+
+
 # -------------
 # Metric Names
 # -------------

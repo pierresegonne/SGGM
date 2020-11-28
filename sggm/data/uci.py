@@ -1,12 +1,15 @@
 import multiprocessing
 import numpy as np
-import pandas as pd
-import pathlib
-import pytorch_lightning as pl
 import torch
 
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
+
+from sggm.data.regression_datamodule import RegressionDataModule
+from sggm.definitions import (
+    UCI_LARGE_MAX_BATCH_ITERATIONS,
+    UCI_SMALL_MAX_BATCH_ITERATIONS,
+)
 
 """
 Abstraction level for all UCI regression datamodules
@@ -15,22 +18,22 @@ Abstraction level for all UCI regression datamodules
 N_cpus = multiprocessing.cpu_count()
 
 
-class UCIDataModule(pl.LightningDataModule):
+class UCIDataModule(RegressionDataModule):
     def __init__(
         self,
         batch_size: int,
         n_workers: int,
-        train_val_split: float = 0.8,
+        train_val_split: float = 0.9,
         test_split: float = 0.1,
         **kwargs,
     ):
-        super(UCIDataModule, self).__init__()
-        self.batch_size = batch_size
-        self.train_val_split = train_val_split
-        self.test_split = test_split
-
-        self.n_workers = n_workers if n_workers is not None else N_cpus
-        self.pin_memory = True if self.n_workers > 0 else False
+        super(UCIDataModule, self).__init__(
+            batch_size,
+            n_workers,
+            train_val_split,
+            test_split,
+            **kwargs,
+        )
 
     def setup(self, x: np.ndarray, y: np.ndarray):
 
@@ -84,3 +87,17 @@ class UCIDataModule(pl.LightningDataModule):
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
         )
+
+    @property
+    def max_batch_iterations(self):
+        self.check_setup()
+        is_large_uci = (
+            int(
+                len(self.train_dataset) / (self.train_val_split * (1 - self.test_split))
+            )
+            > 9000
+        )
+        if is_large_uci:
+            return UCI_LARGE_MAX_BATCH_ITERATIONS
+        else:
+            return UCI_SMALL_MAX_BATCH_ITERATIONS
