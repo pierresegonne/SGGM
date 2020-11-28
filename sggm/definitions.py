@@ -19,6 +19,7 @@ OPTIMISED_X_OOD_BRUTE_FORCE = "optimised_x_ood_brute_force"
 UNIFORM_X_OOD = "uniform_x_ood"
 
 EPS = "eps"
+EARLY_STOPPING_PATIENCE = "early_stopping_patience"
 HIDDEN_DIM = "hidden_dim"
 LEARNING_RATE = "learning_rate"
 NAME = "name"
@@ -72,10 +73,11 @@ class Param:
 parameters = {
     BATCH_SIZE: Param(BATCH_SIZE, 32, int),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
-    LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
+    LEARNING_RATE: Param(LEARNING_RATE, 1e-3, float),
     NAME: Param(NAME, "unnamed", str),
     N_TRIALS: Param(N_TRIALS, 1, int),
     N_WORKERS: Param(N_WORKERS, 0, none_or_int),
+    EARLY_STOPPING_PATIENCE: Param(EARLY_STOPPING_PATIENCE, 50, int),
 }
 
 # Parameters specific to the Regressor model
@@ -146,6 +148,20 @@ TOY_MAX_BATCH_ITERATIONS = 6e3
 TOY_2D_MAX_BATCH_ITERATIONS = 1e4
 UCI_LARGE_MAX_BATCH_ITERATIONS = 1e5
 UCI_SMALL_MAX_BATCH_ITERATIONS = 2e4
+
+
+# -------------
+# Activation functions
+# -------------
+F_ELU = "elu"
+F_RELU = "relu"
+F_SIGMOID = "sigmoid"
+
+ACTIVATION_FUNCTIONS = [
+    F_ELU,
+    F_RELU,
+    F_SIGMOID,
+]
 
 
 # -------------

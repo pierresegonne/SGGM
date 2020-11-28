@@ -23,6 +23,12 @@ from sggm.definitions import (
     UNIFORM_X_OOD,
 )
 from sggm.definitions import (
+    ACTIVATION_FUNCTIONS,
+    F_ELU,
+    F_RELU,
+    F_SIGMOID,
+)
+from sggm.definitions import (
     TRAIN_LOSS,
     EVAL_LOSS,
     TEST_LOSS,
@@ -55,16 +61,25 @@ def check_available_methods(method):
     ), f"Unvalid method {method}, choices {available_methods}"
 
 
-def BaseMLP(input_dim, hidden_dim):
+def BaseMLP(input_dim, hidden_dim, activation_function):
+    assert (
+        activation_function in ACTIVATION_FUNCTIONS
+    ), f"activation_function={activation_function} is not in {ACTIVATION_FUNCTIONS}"
+    if activation_function == F_ELU:
+        f = torch.nn.ELU()
+    elif activation_function == F_RELU:
+        f = torch.nn.ReLU()
+    elif activation_function == F_SIGMOID:
+        f = torch.nn.Sigmoid()
     return torch.nn.Sequential(
         torch.nn.Linear(input_dim, hidden_dim),
-        torch.nn.Sigmoid(),
+        f,
         torch.nn.Linear(hidden_dim, 1),
     )
 
 
-def BaseMLPSoftPlus(input_dim, hidden_dim):
-    mod = BaseMLP(input_dim, hidden_dim)
+def BaseMLPSoftPlus(input_dim, hidden_dim, activation_function):
+    mod = BaseMLP(input_dim, hidden_dim, activation_function)
     mod.add_module("softplus", torch.nn.Softplus())
     return mod
 
@@ -87,6 +102,7 @@ class Regressor(pl.LightningModule):
         self,
         input_dim: int,
         hidden_dim: int,
+        activation_function: str,
         prior_α: float = regressor_parameters[PRIOR_α].default,
         prior_β: float = regressor_parameters[PRIOR_β].default,
         β_elbo: float = regressor_parameters[β_ELBO].default,
@@ -106,6 +122,8 @@ class Regressor(pl.LightningModule):
         # ---------
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
+
+        self.activation_function = activation_function
 
         self.eps = eps
         self.n_mc_samples = n_mc_samples
@@ -138,12 +156,12 @@ class Regressor(pl.LightningModule):
         # ---------
         # Inference Networks
         # ---------
-        self.μ = BaseMLP(input_dim, hidden_dim)
+        self.μ = BaseMLP(input_dim, hidden_dim, activation_function)
 
-        self.α = BaseMLPSoftPlus(input_dim, hidden_dim)
+        self.α = BaseMLPSoftPlus(input_dim, hidden_dim, activation_function)
         self.α.add_module("shift", ShiftLayer(1))
 
-        self.β = BaseMLPSoftPlus(input_dim, hidden_dim)
+        self.β = BaseMLPSoftPlus(input_dim, hidden_dim, activation_function)
 
         # ---------
         # Misc

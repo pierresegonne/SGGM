@@ -16,6 +16,17 @@ from sggm.definitions import (
     regression_experiments,
     regressor_parameters,
 )
+from sggm.definitions import (
+    TOY,
+    TOY_2D,
+    UCI_CCPP,
+    UCI_CONCRETE,
+    UCI_SUPERCONDUCT,
+    UCI_WINE_RED,
+    UCI_WINE_WHITE,
+    UCI_YACHT,
+)
+from sggm.definitions import ACTIVATION_FUNCTIONS, F_ELU, F_SIGMOID
 from sggm.definitions import EVAL_LOSS, EXPERIMENT_NAME, EXPERIMENTS_CONFIG
 from sggm.data import datamodules
 from sggm.regression_model import Regressor
@@ -27,6 +38,20 @@ def clean_dict(dic: dict) -> dict:
         if type(v) in [str, int, float, object, None]:
             clean_dic[k] = v
     return clean_dic
+
+
+def activation_function(experiment_name):
+    if experiment_name in [TOY, TOY_2D]:
+        return F_SIGMOID
+    elif experiment_name in [
+        UCI_CCPP,
+        UCI_CONCRETE,
+        UCI_SUPERCONDUCT,
+        UCI_WINE_RED,
+        UCI_WINE_WHITE,
+        UCI_YACHT,
+    ]:
+        return F_ELU
 
 
 class Experiment:
@@ -70,6 +95,7 @@ class Experiment:
                 return Regressor(
                     input_dim=input_dim,
                     hidden_dim=self.hidden_dim,
+                    activation_function=activation_function(self.experiment_name),
                     prior_α=self.prior_alpha,
                     prior_β=self.prior_beta,
                     β_elbo=self.beta_elbo,
@@ -167,6 +193,8 @@ def cli_main():
             # ------------
             model = experiment.model
 
+            print(model)
+            exit()
             # ------------
             # training
             # ------------
@@ -181,16 +209,15 @@ def cli_main():
             trainer_args = TrainerArgs(trainer_args)
 
             # If max_epochs is set to -1, pass on automatic mode
-            print(trainer_args.max_epochs)
             if trainer_args.max_epochs == -1:
                 trainer_args.max_epochs = datamodule.max_epochs
-            print(trainer_args.max_epochs)
-            exit()
 
             # Profiler enables to investigate run times
             # profiler = pl.profiler.AdvancedProfiler()
             default_callbacks = [
-                pl.callbacks.EarlyStopping(EVAL_LOSS, patience=500),
+                pl.callbacks.EarlyStopping(
+                    EVAL_LOSS, patience=trainer_args.early_stopping_patience
+                ),
             ]
             # Note that checkpointing is handled by default
             logger = pl.loggers.TensorBoardLogger(

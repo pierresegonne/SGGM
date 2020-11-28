@@ -1,5 +1,5 @@
 - name: test_test
-  experiment_name: toy
+  experiment_name: uci_yacht
   # hparams
   batch_size: 1024
   hidden_dim: 50
