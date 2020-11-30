@@ -400,10 +400,6 @@ class Regressor(pl.LightningModule):
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         y_pred = self.predictive_mean(x)
 
-        print(y)
-        print(y_pred)
-        print(F.mse_loss(y_pred, y))
-
         # ---------
         # Metrics
         self.log(TEST_LOSS, loss, on_epoch=True)
