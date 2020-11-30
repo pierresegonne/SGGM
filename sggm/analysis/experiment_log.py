@@ -5,6 +5,7 @@ import torch
 import yaml
 
 from sggm.definitions import regression_experiments, TEST_LOSS
+from sggm.experiment import activation_function
 from sggm.regression_model import Regressor
 
 
@@ -13,7 +14,7 @@ def version_dir(path):
 
 
 class VersionLog:
-    def __init__(self, version_dir, version_path, pl_module):
+    def __init__(self, experiment_name, version_dir, version_path, pl_module):
         self.version_dir = version_dir
         self.version_id = int(version_dir.split("_")[-1])
         self.version_path = version_path
@@ -21,7 +22,9 @@ class VersionLog:
         # Load from version
         # model
         checkpoint_name = glob.glob(f"{version_path}/checkpoints/*")[-1]
-        self.model = pl_module.load_from_checkpoint(checkpoint_name)
+        self.model = pl_module.load_from_checkpoint(
+            checkpoint_name, activation_function=activation_function(experiment_name)
+        )
         # performance
         self.results = torch.load(f"{version_path}/results.pkl")
         # datasets
@@ -55,7 +58,9 @@ class ExperimentLog:
             pl_module = Regressor
 
         self.versions = [
-            VersionLog(version_dir(version_path), version_path, pl_module)
+            VersionLog(
+                experiment_name, version_dir(version_path), version_path, pl_module
+            )
             for version_path in glob.glob(f"{save_dir}/{experiment_name}/{name}/*/")
         ]
         self.idx_best_version = np.argmin(

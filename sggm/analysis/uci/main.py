@@ -41,11 +41,14 @@ def plot(experiment_log, methods, index):
 
         # Plot training points for reference
         training_dataset = next(iter(dm.train_dataloader()))
+        test_dataset = next(iter(dm.test_dataloader()))
 
-        fig, ax = plt.subplots(1, 1)
+        fig, [mean_ax, var_ax] = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
 
         x_train, y_train = training_dataset
-        ax.plot(
+        x_test, y_test = test_dataset
+
+        mean_ax.plot(
             x_train[:, index],
             y_train,
             "o",
@@ -53,6 +56,17 @@ def plot(experiment_log, methods, index):
             markerfacecolor=(*colours_rgb["navyBlue"], 0.6),
             markeredgewidth=1,
             markeredgecolor=(*colours_rgb["navyBlue"], 0.1),
+            label="Train",
+        )
+        mean_ax.plot(
+            x_test[:, index],
+            y_test,
+            "o",
+            markersize=3,
+            markerfacecolor=(*colours_rgb["primaryRed"], 0.6),
+            markeredgewidth=1,
+            markeredgecolor=(*colours_rgb["primaryRed"], 0.1),
+            label="Test",
         )
 
         # Predictive plot
@@ -73,14 +87,70 @@ def plot(experiment_log, methods, index):
             best_mean = best_model.predictive_mean(x_plot, method).flatten()
             best_std = best_model.predictive_std(x_plot, method).flatten()
 
-            ax.plot(x_plot[:, index], best_mean, "-", color=colour, alpha=0.55)
-            ax.fill_between(
+            mean_ax.plot(x_plot[:, index], best_mean, "-", color=colour, alpha=0.55)
+            mean_ax.fill_between(
                 x_plot[:, index],
                 best_mean + 1.96 * best_std,
                 best_mean - 1.96 * best_std,
                 facecolor=colour,
                 alpha=0.3,
             )
+
+            std_train, std_test = (
+                best_model.predictive_std(x_train, method).flatten(),
+                best_model.predictive_std(x_test, method).flatten(),
+            )
+            mean_train, mean_test = (
+                best_model.predictive_mean(x_train, method).flatten(),
+                best_model.predictive_mean(x_test, method).flatten(),
+            )
+
+            var_ax.plot(
+                x_train[:, index],
+                torch.sqrt((y_train.flatten() - mean_train) ** 2),
+                "o",
+                markersize=3,
+                markerfacecolor=(*colours_rgb["black"], 0.6),
+                markeredgewidth=1,
+                markeredgecolor=(*colours_rgb["black"], 0.1),
+                label="Train, empirical variance",
+            )
+            var_ax.plot(
+                x_test[:, index],
+                torch.sqrt((y_test.flatten() - mean_test) ** 2),
+                "o",
+                markersize=3,
+                markerfacecolor=(*colours_rgb["black"], 0.6),
+                markeredgewidth=1,
+                markeredgecolor=(*colours_rgb["black"], 0.1),
+                label="Test, empirical variance",
+            )
+            var_ax.plot(
+                x_train[:, index],
+                std_train,
+                "o",
+                markersize=3,
+                markerfacecolor=(*colours_rgb["orange"], 0.6),
+                markeredgewidth=1,
+                markeredgecolor=(*colours_rgb["orange"], 0.1),
+                label="Train, empirical variance",
+            )
+            var_ax.plot(
+                x_test[:, index],
+                std_test,
+                "o",
+                markersize=3,
+                markerfacecolor=(*colours_rgb["orange"], 0.6),
+                markeredgewidth=1,
+                markeredgecolor=(*colours_rgb["orange"], 0.1),
+                label="Test, empirical variance",
+            )
+
+        mean_ax.set_ylabel("y")
+        var_ax.set_ylabel(r"$\sigma$")
+        var_ax.set_xlabel(f"x[:{index}]")
+        mean_ax.grid(True)
+        var_ax.grid(True)
 
         save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
         plt.tight_layout()

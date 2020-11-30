@@ -294,7 +294,8 @@ class Regressor(pl.LightningModule):
                     # make sure to start anew the computational graph for x_ood
                     x_ood = x_ood.detach().clone()
                     # empty the gradients of the opt, note that this line will fail if there are more than 1 opt.
-                    self.optimizers().zero_grad()
+                    if hasattr(self, "trainer") and self.trainer is not None:
+                        self.optimizers().zero_grad()
                     return x_ood
             # -------------------
 
@@ -398,6 +399,10 @@ class Regressor(pl.LightningModule):
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         y_pred = self.predictive_mean(x)
+
+        print(y)
+        print(y_pred)
+        print(F.mse_loss(y_pred, y))
 
         # ---------
         # Metrics
