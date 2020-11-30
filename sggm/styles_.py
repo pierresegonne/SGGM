@@ -70,6 +70,10 @@ rc_params = {
     "legend.fontsize": 14,
     "xtick.labelsize": 12,
     "ytick.labelsize": 12,
+    # fonts
+    "font.family": "serif",
+    "font.serif": ["Computer Modern Roman"],
+    "text.usetex": True,
 }
 
 for param_key, param_value in rc_params.items():

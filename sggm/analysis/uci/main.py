@@ -75,6 +75,7 @@ def plot(experiment_log, methods, index):
         mines, _ = torch.min(x_train, dim=0)
         maxes = torch.where(maxes > 0, 1.25 * maxes, 0.75 * maxes)
         mines = torch.where(mines > 0, 0.75 * mines, 1.25 * mines)
+        # This is equivalent of having only one slice of the data.
         x_plot = [
             torch.linspace(mines[i], maxes[i], steps=1000)[:, None]
             for i in range(x_train.shape[1])

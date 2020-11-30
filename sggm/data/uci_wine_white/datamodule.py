@@ -54,3 +54,12 @@ class UCIWineWhiteDataModule(UCIDataModule):
         y = df[Y_LABEL].values
 
         super(UCIWineWhiteDataModule, self).setup(x, y)
+
+
+if __name__ == "__main__":
+
+    dm = UCIWineWhiteDataModule(1024, 0)
+    dm.setup()
+
+    # Info about the data
+    print(dm.y_std)
