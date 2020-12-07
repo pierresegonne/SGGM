@@ -29,7 +29,9 @@ UCI = [
 def run_analysis(experiment_name, names, save_dir, **kwargs):
     for name in names:
         experiment_log = ExperimentLog(experiment_name, name, save_dir=save_dir)
-        print(f"-- Index of best version: {experiment_log.idx_best_version}")
+        print(
+            f"-- Best version: {experiment_log.versions[experiment_log.idx_best_version].version_id}"
+        )
         if experiment_name == TOY:
             toy_plot(experiment_log, **kwargs)
         elif experiment_name == TOY_2D:

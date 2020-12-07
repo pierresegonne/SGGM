@@ -136,7 +136,7 @@ class Regressor(pl.LightningModule):
             )
             self.register_parameter("ood_generator_v", v_ini)
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
-            self.ood_generator_v = 100
+            self.ood_generator_v = 1
         else:
             self.ood_generator_v = None
 
@@ -319,15 +319,21 @@ class Regressor(pl.LightningModule):
         if self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            v_available = [0.0001, 0.001, 0.01, 0.1, 1, 2, 3, 5, 10, 50, 100, 500]
+
+            v_available = [0.0001, 0.001, 0.01, 0.1, 1, 2, 3, 5, 10, 25, 100]
             v_, kl_ = None, -np.inf
             for v_proposal in v_available:
-                _, al, be = self(x + v_proposal * torch.sign(kl_grad))
-                kl_proposal = torch.mean(self.kl(al, be, self.prior_α, self.prior_β))
-                if kl_proposal > kl_:
+                _, α, β = self(x + v_proposal * torch.sign(kl_grad))
+                kl_proposal = torch.mean(self.kl(α, β, self.prior_α, self.prior_β))
+                if (kl_proposal > kl_) & (kl_proposal < 1e10):
                     kl_ = kl_proposal
                     v_ = v_proposal
-            self.ood_generator_v = v_
+
+            # Prevent divergence
+            if kl_:
+                self.ood_generator_v = v_
+            if hasattr(self, "trainer") and self.trainer is not None:
+                self.optimizers().zero_grad()
 
     @staticmethod
     def ellk(
@@ -339,6 +345,7 @@ class Regressor(pl.LightningModule):
             expected_log_lambda - log_2_pi - expected_lambda * ((y - μ) ** 2)
         )
         return ll
+        return torch.clamp(ll, max=10)
 
     @staticmethod
     def kl(
@@ -347,6 +354,7 @@ class Regressor(pl.LightningModule):
         qp = tcd.Gamma(α, β)
         pp = tcd.Gamma(a, b)
         return tcd.kl_divergence(qp, pp)
+        return torch.clamp(tcd.kl_divergence(qp, pp), max=10)
 
     def elbo(
         self, ellk: torch.Tensor, kl: torch.Tensor, train: bool = True
@@ -355,25 +363,50 @@ class Regressor(pl.LightningModule):
         return torch.mean(ellk - self.β_elbo * kl)
 
     def training_step(self, batch, batch_idx):
+
         x, y = batch
         x.requires_grad = True
+
         μ_x, α_x, β_x = self(x)
-        log_likelihood = self.ellk(μ_x, α_x, β_x, y)
+
+        expected_log_likelihood = self.ellk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
+
         x_out = self.ood_x(x, kl=kl_divergence)
         x.requires_grad = False
         if torch.numel(x_out) > 0:
-            _, α_x_out, β_x_out = self(x_out)
+            μ_x_out, α_x_out, β_x_out = self(x_out)
+            expected_log_likelihood_out = self.ellk(μ_x_out, α_x_out, β_x_out, μ_x_out)
             kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
         else:
+            expected_log_likelihood_out = torch.zeros((1,)).type_as(x)
             kl_divergence_out = torch.zeros((1,)).type_as(x)
-        loss = -self.elbo(log_likelihood, kl_divergence) + self.β_ood * torch.mean(
-            kl_divergence_out
-        )
+
+        # loss = -self.elbo(
+        #     expected_log_likelihood, kl_divergence
+        # ) - self.β_ood * torch.mean(kl_divergence_out)
+        loss = -self.elbo(
+            expected_log_likelihood, kl_divergence
+        ) - self.β_ood * self.elbo(expected_log_likelihood_out, kl_divergence_out)
+
         self.log(TRAIN_LOSS, loss, on_epoch=True)
-        # TODO uncomment following if need to monitor x out distribution
+        self.log("ELLK", torch.mean(expected_log_likelihood), on_step=True)
+        self.log("KL", torch.mean(kl_divergence), on_step=True)
+        self.log("ELLK out", torch.mean(expected_log_likelihood_out), on_step=True)
+        self.log("KL out", torch.mean(kl_divergence_out), on_step=True)
+
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
             self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
+
+        for name, params in self.named_parameters():
+            try:
+                self.logger.experiment.add_histogram(
+                    name, params, self.current_epoch * 8 + batch_idx
+                )
+            except ValueError:
+                print(name, params)
+                # exit()
+
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -384,8 +417,9 @@ class Regressor(pl.LightningModule):
             log_likelihood = self.ellk(μ_x, α_x, β_x, y)
             kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
             # --
-            # Note that there might be an issue if the validation batch size is smaller than the validation dataset?
-            self.tune_on_validation(x, kl=kl_divergence)
+            # Avoid exploding gradients
+            if self.current_epoch > 2:
+                self.tune_on_validation(x, kl=kl_divergence)
         # --
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         self.log(EVAL_LOSS, loss, on_epoch=True)

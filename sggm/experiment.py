@@ -224,6 +224,8 @@ def cli_main():
                 save_dir=f"lightning_logs/{experiment.experiment_name}",
                 name=experiment.name,
             )
+            # TODO remove when debug over
+            torch.autograd.set_detect_anomaly(True)
             trainer = pl.Trainer.from_argparse_args(
                 trainer_args,
                 callbacks=experiment.callbacks + default_callbacks,
