@@ -88,7 +88,14 @@ def plot(experiment_log, methods, index):
             best_mean = best_model.predictive_mean(x_plot, method).flatten()
             best_std = best_model.predictive_std(x_plot, method).flatten()
 
-            mean_ax.plot(x_plot[:, index], best_mean, "-", color=colour, alpha=0.55)
+            mean_ax.plot(
+                x_plot[:, index],
+                best_mean,
+                "-",
+                color=colour,
+                alpha=0.55,
+                label=r"$\mu(x) \pm 1.96\sigma(x)$",
+            )
             mean_ax.fill_between(
                 x_plot[:, index],
                 best_mean + 1.96 * best_std,
@@ -114,7 +121,6 @@ def plot(experiment_log, methods, index):
                 markerfacecolor=(*colours_rgb["black"], 0.6),
                 markeredgewidth=1,
                 markeredgecolor=(*colours_rgb["black"], 0.1),
-                label="Train, empirical variance",
             )
             var_ax.plot(
                 x_test[:, index],
@@ -124,7 +130,7 @@ def plot(experiment_log, methods, index):
                 markerfacecolor=(*colours_rgb["black"], 0.6),
                 markeredgewidth=1,
                 markeredgecolor=(*colours_rgb["black"], 0.1),
-                label="Test, empirical variance",
+                label=r"$\sqrt{(\mu(x)-y)^{2}}$",
             )
             var_ax.plot(
                 x_train[:, index],
@@ -134,7 +140,7 @@ def plot(experiment_log, methods, index):
                 markerfacecolor=(*colours_rgb["orange"], 0.6),
                 markeredgewidth=1,
                 markeredgecolor=(*colours_rgb["orange"], 0.1),
-                label="Train, empirical variance",
+                label=r"$\sigma(x)$",
             )
             var_ax.plot(
                 x_test[:, index],
@@ -144,14 +150,21 @@ def plot(experiment_log, methods, index):
                 markerfacecolor=(*colours_rgb["orange"], 0.6),
                 markeredgewidth=1,
                 markeredgecolor=(*colours_rgb["orange"], 0.1),
-                label="Test, empirical variance",
             )
 
         mean_ax.set_ylabel("y")
+        y_max, _ = torch.max(y_train, dim=0)
+        y_min, _ = torch.min(y_train, dim=0)
+        y_max = torch.where(y_max > 0, 1.25 * y_max, 0.75 * y_max)
+        y_min = torch.where(y_min > 0, 0.75 * y_min, 1.25 * y_min)
+        mean_ax.set_ylim((y_min, y_max))
+        mean_ax.grid(True)
+        mean_ax.legend()
+
         var_ax.set_ylabel(r"$\sigma$")
         var_ax.set_xlabel(f"x[:{index}]")
-        mean_ax.grid(True)
         var_ax.grid(True)
+        var_ax.legend()
 
         save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
         plt.tight_layout()
