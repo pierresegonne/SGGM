@@ -225,7 +225,7 @@ def cli_main():
                 name=experiment.name,
             )
             # TODO remove when debug over
-            torch.autograd.set_detect_anomaly(True)
+            torch.autograd.set_detect_anomaly(False)
             trainer = pl.Trainer.from_argparse_args(
                 trainer_args,
                 callbacks=experiment.callbacks + default_callbacks,
