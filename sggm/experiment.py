@@ -212,8 +212,6 @@ def cli_main():
             if trainer_args.max_epochs == -1:
                 trainer_args.max_epochs = datamodule.max_epochs
 
-            # Profiler enables to investigate run times
-            # profiler = pl.profiler.AdvancedProfiler()
             default_callbacks = [
                 pl.callbacks.EarlyStopping(
                     EVAL_LOSS, patience=trainer_args.early_stopping_patience
@@ -224,8 +222,6 @@ def cli_main():
                 save_dir=f"lightning_logs/{experiment.experiment_name}",
                 name=experiment.name,
             )
-            # TODO remove when debug over
-            torch.autograd.set_detect_anomaly(False)
             trainer = pl.Trainer.from_argparse_args(
                 trainer_args,
                 callbacks=experiment.callbacks + default_callbacks,

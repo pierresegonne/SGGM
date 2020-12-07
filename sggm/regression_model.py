@@ -380,13 +380,6 @@ class Regressor(pl.LightningModule):
 
         μ_x, α_x, β_x = self(x)
 
-        # Check output
-        if torch.isnan(μ_x).any() | torch.isnan(α_x).any() | torch.isnan(β_x).any():
-            print("\n\n   --- Forward produces NaN\n\n")
-
-        # TODO opt
-        opt = self.optimizers()
-
         expected_log_likelihood = self.ellk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
 
@@ -400,12 +393,12 @@ class Regressor(pl.LightningModule):
             expected_log_likelihood_out = torch.zeros((1,)).type_as(x)
             kl_divergence_out = torch.zeros((1,)).type_as(x)
 
-        # loss = -self.elbo(
-        #     expected_log_likelihood, kl_divergence
-        # ) - self.β_ood * torch.mean(kl_divergence_out)
         loss = -self.elbo(
             expected_log_likelihood, kl_divergence
-        ) - self.β_ood * self.elbo(expected_log_likelihood_out, kl_divergence_out)
+        ) - self.β_ood * torch.mean(kl_divergence_out)
+        # loss = -self.elbo(
+        #     expected_log_likelihood, kl_divergence
+        # ) - self.β_ood * self.elbo(expected_log_likelihood_out, kl_divergence_out)
 
         self.log(TRAIN_LOSS, loss, on_epoch=True)
         self.log("ELLK", torch.mean(expected_log_likelihood), on_step=True)
@@ -415,30 +408,6 @@ class Regressor(pl.LightningModule):
 
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
             self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
-
-        # TODO manual opt
-        self.manual_backward(loss, opt)
-
-        for name, params in self.named_parameters():
-            if torch.isnan(params.grad).any():
-                print(f"\n\n   --- Grad has NaNs {name}\n\n")
-                print(loss)
-                print(torch.mean(expected_log_likelihood))
-                print(torch.mean(kl_divergence))
-                print(torch.mean(expected_log_likelihood_out))
-                print(torch.mean(kl_divergence_out))
-                exit()
-            try:
-                self.logger.experiment.add_histogram(
-                    name, params, self.current_epoch * 8 + batch_idx
-                )
-            except ValueError:
-                print(name, params)
-                # exit()
-
-        # TODO manual opt
-        opt.step()
-        opt.zero_grad()
 
         return loss
 
