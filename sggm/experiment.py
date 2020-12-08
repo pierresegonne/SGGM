@@ -1,6 +1,4 @@
 import copy
-
-import copy
 import json
 import os
 import pytorch_lightning as pl
