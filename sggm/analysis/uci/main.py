@@ -18,7 +18,7 @@ from sggm.definitions import (
     UCI_WINE_WHITE,
     UCI_YACHT,
 )
-from sggm.styles_ import colours, colours_rgb
+from sggm.styles_ import colours, colours_rgb, random_rgb_colour
 
 
 def plot(experiment_log, methods, index):
@@ -46,6 +46,7 @@ def plot(experiment_log, methods, index):
         training_dataset = next(iter(dm.train_dataloader()))
         test_dataset = next(iter(dm.test_dataloader()))
 
+        # Fit plot
         fig, [mean_ax, var_ax] = plt.subplots(2, 1, figsize=(12, 10), sharex=True)
 
         x_train, y_train = training_dataset
@@ -176,6 +177,59 @@ def plot(experiment_log, methods, index):
         var_ax.legend()
 
         save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
+        # plt.tight_layout()
+        # plt.savefig(f"{save_folder}/_i{index}.png")
+
+        # Interpolation plot
+        fig, int_ax = plt.subplots(1, 1, figsize=(12, 5))
+
+        # Number of random pairs of points
+        K = 3
+        pairs = x_train[torch.randint(0, x_train.shape[0], (K * 2,)), :]
+        for i_k, k in enumerate(range(K)):
+            # x1 to x2
+            x_1, x_2 = pairs[2 * k, :], pairs[(2 * k) + 1, :]
+
+            # idx, 0 = x1,i max, 1 = x2,i max
+            maxes, maxes_idx = torch.max(pairs[2 * k : (2 * k) + 2, :], dim=0)
+            mines, _ = torch.min(pairs[2 * k : (2 * k) + 2, :], dim=0)
+
+            # Generates the interpolations for each dimension
+            x_plot = [
+                torch.linspace(mines[i], maxes[i], steps=1000)[:, None]
+                for i in range(x_train.shape[1])
+            ]
+            # Adapts the direction of the interpolation based on point order
+            x_plot = [
+                col if maxes_idx[i] == 1 else torch.flip(col, dims=(0,))
+                for i, col in enumerate(x_plot)
+            ]
+            x_plot = torch.cat(x_plot, dim=1)
+
+            mean = best_model.predictive_mean(x_plot, method).flatten()
+            std = best_model.predictive_std(x_plot, method).flatten()
+
+            colour = random_rgb_colour()
+            int_ax.plot(
+                torch.linspace(0, 1, steps=1000),
+                mean,
+                "-",
+                color=colour,
+                alpha=0.55,
+                label=f"Trial {i_k}",
+            )
+            int_ax.fill_between(
+                torch.linspace(0, 1, steps=1000),
+                mean + 1.96 * std,
+                mean - 1.96 * std,
+                facecolor=colour,
+                alpha=0.3,
+            )
+        int_ax.legend()
+        int_ax.set_xlabel("Interpolation rate")
+        int_ax.grid(True)
+
         plt.tight_layout()
-        plt.savefig(f"{save_folder}/_i{index}.png")
+        plt.savefig(f"{save_folder}/_interpolation.png")
+
         plt.show()
