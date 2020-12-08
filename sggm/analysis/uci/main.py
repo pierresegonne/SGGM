@@ -6,6 +6,7 @@ from torch import no_grad
 from sggm.analysis.toy.helper import get_colour_for_method
 from sggm.data.uci_ccpp.datamodule import UCICCPPDataModule
 from sggm.data.uci_concrete import UCIConcreteDataModule
+from sggm.data.uci_superconduct import UCISuperConductDataModule
 from sggm.data.uci_wine_red import UCIWineRedDataModule
 from sggm.data.uci_wine_white import UCIWineWhiteDataModule
 from sggm.data.uci_yacht import UCIYachtDataModule
@@ -31,6 +32,8 @@ def plot(experiment_log, methods, index):
             dm = UCICCPPDataModule(bs, 0)
         elif experiment_name == UCI_CONCRETE:
             dm = UCIConcreteDataModule(bs, 0)
+        elif experiment_name == UCI_SUPERCONDUCT:
+            dm = UCISuperConductDataModule(bs, 0)
         elif experiment_name == UCI_WINE_RED:
             dm = UCIWineRedDataModule(bs, 0)
         elif experiment_name == UCI_WINE_WHITE:
@@ -88,22 +91,6 @@ def plot(experiment_log, methods, index):
             best_mean = best_model.predictive_mean(x_plot, method).flatten()
             best_std = best_model.predictive_std(x_plot, method).flatten()
 
-            mean_ax.plot(
-                x_plot[:, index],
-                best_mean,
-                "-",
-                color=colour,
-                alpha=0.55,
-                label=r"$\mu(x) \pm 1.96\sigma(x)$",
-            )
-            mean_ax.fill_between(
-                x_plot[:, index],
-                best_mean + 1.96 * best_std,
-                best_mean - 1.96 * best_std,
-                facecolor=colour,
-                alpha=0.3,
-            )
-
             std_train, std_test = (
                 best_model.predictive_std(x_train, method).flatten(),
                 best_model.predictive_std(x_test, method).flatten(),
@@ -111,6 +98,28 @@ def plot(experiment_log, methods, index):
             mean_train, mean_test = (
                 best_model.predictive_mean(x_train, method).flatten(),
                 best_model.predictive_mean(x_test, method).flatten(),
+            )
+
+            mean_ax.errorbar(
+                x_train[:, index],
+                mean_train,
+                yerr=1.96 * std_train,
+                fmt="o",
+                color=colour,
+                markersize=3,
+                elinewidth=1,
+                alpha=0.55,
+                label=r"$\mu(x) \pm 1.96\sigma(x)$",
+            )
+            mean_ax.errorbar(
+                x_test[:, index],
+                mean_test,
+                yerr=1.96 * std_test,
+                fmt="o",
+                color=colour,
+                markersize=3,
+                elinewidth=1,
+                alpha=0.55,
             )
 
             var_ax.plot(
