@@ -18,6 +18,15 @@ OPTIMISED_X_OOD_KL_GA = "optimised_x_ood_kl_ga"
 OPTIMISED_X_OOD_BRUTE_FORCE = "optimised_x_ood_brute_force"
 UNIFORM_X_OOD = "uniform_x_ood"
 
+OOD_X_GENERATION_AVAILABLE_METHODS = [
+    GAUSSIAN_NOISE_AROUND_X,
+    OPTIMISED_X_OOD_V_PARAM,
+    OPTIMISED_X_OOD_V_OPTIMISED,
+    OPTIMISED_X_OOD_KL_GA,
+    OPTIMISED_X_OOD_BRUTE_FORCE,
+    UNIFORM_X_OOD,
+]
+
 EPS = "eps"
 EARLY_STOPPING_PATIENCE = "early_stopping_patience"
 HIDDEN_DIM = "hidden_dim"

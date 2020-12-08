@@ -393,12 +393,15 @@ class Regressor(pl.LightningModule):
             expected_log_likelihood_out = torch.zeros((1,)).type_as(x)
             kl_divergence_out = torch.zeros((1,)).type_as(x)
 
-        loss = -self.elbo(
-            expected_log_likelihood, kl_divergence
-        ) - self.β_ood * torch.mean(kl_divergence_out)
-        # loss = -self.elbo(
-        #     expected_log_likelihood, kl_divergence
-        # ) - self.β_ood * self.elbo(expected_log_likelihood_out, kl_divergence_out)
+        KL_ONLY = True
+        if KL_ONLY:
+            loss = -self.elbo(
+                expected_log_likelihood, kl_divergence
+            ) + self.β_ood * torch.mean(kl_divergence_out)
+        else:
+            loss = -self.elbo(
+                expected_log_likelihood, kl_divergence
+            ) - self.β_ood * self.elbo(expected_log_likelihood_out, kl_divergence_out)
 
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
             self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)

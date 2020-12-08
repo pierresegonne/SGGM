@@ -27,7 +27,12 @@ from sggm.definitions import (
     UCI_YACHT,
 )
 from sggm.definitions import ACTIVATION_FUNCTIONS, F_ELU, F_SIGMOID
-from sggm.definitions import EVAL_LOSS, EXPERIMENT_NAME, EXPERIMENTS_CONFIG
+from sggm.definitions import (
+    EVAL_LOSS,
+    EXPERIMENT_NAME,
+    EXPERIMENTS_CONFIG,
+    OOD_X_GENERATION_AVAILABLE_METHODS,
+)
 from sggm.data import datamodules
 from sggm.regression_model import Regressor
 
@@ -52,6 +57,16 @@ def activation_function(experiment_name):
         UCI_YACHT,
     ]:
         return F_ELU
+
+
+def check_ood_x_generation_method(method):
+    if method is None:
+        return method
+    assert (
+        method in OOD_X_GENERATION_AVAILABLE_METHODS
+    ), f"""Method for x ood generation '{method}' is invalid.
+    Must either be None or in {OOD_X_GENERATION_AVAILABLE_METHODS}"""
+    return method
 
 
 class Experiment:
@@ -100,7 +115,9 @@ class Experiment:
                     prior_β=self.prior_beta,
                     β_elbo=self.beta_elbo,
                     β_ood=self.beta_ood,
-                    ood_x_generation_method=self.ood_x_generation_method,
+                    ood_x_generation_method=check_ood_x_generation_method(
+                        self.ood_x_generation_method
+                    ),
                     eps=self.eps,
                     n_mc_samples=self.n_mc_samples,
                     y_mean=self.datamodule.y_mean,
