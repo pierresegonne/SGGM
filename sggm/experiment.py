@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader, random_split
 from sggm.callbacks import callbacks
 from sggm.definitions import (
     experiment_names,
+    generative_experiments,
     parameters,
     regression_experiments,
     regressor_parameters,
@@ -25,6 +26,10 @@ from sggm.definitions import (
     UCI_WINE_RED,
     UCI_WINE_WHITE,
     UCI_YACHT,
+    #
+    MNIST,
+    FASHION_MNIST,
+    NOT_MNIST,
 )
 from sggm.definitions import ACTIVATION_FUNCTIONS, F_ELU, F_SIGMOID
 from sggm.definitions import (
@@ -123,6 +128,9 @@ class Experiment:
                     y_mean=self.datamodule.y_mean,
                     y_std=self.datamodule.y_std,
                 )
+            elif self.experiment_name in generative_experiments:
+                print("TODO")
+                exit()
             else:
                 raise NotImplementedError(
                     "Experiment does not have a model implemented"

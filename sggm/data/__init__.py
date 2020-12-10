@@ -6,6 +6,11 @@ from sggm.data.uci_superconduct import UCISuperConductDataModule
 from sggm.data.uci_wine_red import UCIWineRedDataModule
 from sggm.data.uci_wine_white import UCIWineWhiteDataModule
 from sggm.data.uci_yacht import UCIYachtDataModule
+
+from sggm.data.mnist import MNISTDataModule
+from sggm.data.fashion_mnist import FashionMNISTDataModule
+from sggm.data.not_mnist import NotMNISTDataModule
+
 from sggm.definitions import (
     TOY,
     TOY_2D,
@@ -15,6 +20,10 @@ from sggm.definitions import (
     UCI_WINE_RED,
     UCI_WINE_WHITE,
     UCI_YACHT,
+    #
+    MNIST,
+    FASHION_MNIST,
+    NOT_MNIST,
 )
 
 datamodules = {
@@ -26,4 +35,8 @@ datamodules = {
     UCI_WINE_RED: UCIWineRedDataModule,
     UCI_WINE_WHITE: UCIWineWhiteDataModule,
     UCI_YACHT: UCIYachtDataModule,
+    #
+    MNIST: MNISTDataModule,
+    FASHION_MNIST: FashionMNISTDataModule,
+    NOT_MNIST: NotMNISTDataModule,
 }

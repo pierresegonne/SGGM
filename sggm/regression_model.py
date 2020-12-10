@@ -2,6 +2,7 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.distributions as tcd
+import torch.nn as nn
 import torch.nn.functional as F
 
 from argparse import ArgumentParser
@@ -67,25 +68,25 @@ def BaseMLP(input_dim, hidden_dim, activation_function):
         activation_function in ACTIVATION_FUNCTIONS
     ), f"activation_function={activation_function} is not in {ACTIVATION_FUNCTIONS}"
     if activation_function == F_ELU:
-        f = torch.nn.ELU()
+        f = nn.ELU()
     elif activation_function == F_RELU:
-        f = torch.nn.ReLU()
+        f = nn.ReLU()
     elif activation_function == F_SIGMOID:
-        f = torch.nn.Sigmoid()
-    return torch.nn.Sequential(
-        torch.nn.Linear(input_dim, hidden_dim),
+        f = nn.Sigmoid()
+    return nn.Sequential(
+        nn.Linear(input_dim, hidden_dim),
         f,
-        torch.nn.Linear(hidden_dim, 1),
+        nn.Linear(hidden_dim, 1),
     )
 
 
 def BaseMLPSoftPlus(input_dim, hidden_dim, activation_function):
     mod = BaseMLP(input_dim, hidden_dim, activation_function)
-    mod.add_module("softplus", torch.nn.Softplus())
+    mod.add_module("softplus", nn.Softplus())
     return mod
 
 
-class ShiftLayer(torch.nn.Module):
+class ShiftLayer(nn.Module):
     def __init__(self, shift_factor):
         super(ShiftLayer, self).__init__()
         self.shift_factor = shift_factor
@@ -132,7 +133,7 @@ class Regressor(pl.LightningModule):
         # OOD
         self.ood_x_generation_method = ood_x_generation_method
         if self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
-            v_ini = torch.nn.Parameter(
+            v_ini = nn.Parameter(
                 0.1 * torch.ones((1, self.input_dim)), requires_grad=True
             )
             self.register_parameter("ood_generator_v", v_ini)

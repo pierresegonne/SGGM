@@ -7,3 +7,5 @@ flake8
 check-manifest
 twine==1.13.0
 scikit_learn==0.23.2
+torch==1.7.0
+torchvision==0.8.1

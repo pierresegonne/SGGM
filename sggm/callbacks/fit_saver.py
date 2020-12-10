@@ -5,7 +5,10 @@ import torch
 
 from sggm.styles_ import colours
 
-"Only to be used for toy"
+"""
+Saves plots of fit at given interval
+Only to be used for toy
+"""
 
 
 class FitSaver(pl.callbacks.Callback):

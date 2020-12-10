@@ -7,6 +7,10 @@ from sggm.definitions import (
     UCI_WINE_RED,
     UCI_WINE_WHITE,
     UCI_YACHT,
+    #
+    MNIST,
+    FASHION_MNIST,
+    NOT_MNIST,
 )
 from sggm.callbacks.data_saver import DataSaver
 from sggm.callbacks.fit_saver import FitSaver
@@ -23,4 +27,8 @@ callbacks = {
     UCI_WINE_RED: [LossPrinter],
     UCI_WINE_WHITE: [LossPrinter],
     UCI_YACHT: [LossPrinter],
+    #
+    MNIST: [],
+    FASHION_MNIST: [],
+    NOT_MNIST: [],
 }

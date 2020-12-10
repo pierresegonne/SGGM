@@ -107,10 +107,12 @@ regressor_parameters = {
         ],
     ),
     EPS: Param(EPS, 1e-10, float),
-    N_MC_SAMPLES: Param(N_MC_SAMPLES, 2000, int),
+    N_MC_SAMPLES: Param(N_MC_SAMPLES, 20, int),
     PRIOR_α: Param(PRIOR_α, 1.05, float),
     PRIOR_β: Param(PRIOR_β, 1.0, float),
 }
+
+generative_parameters = {}
 
 # -------------
 # Experiment Names
@@ -126,6 +128,10 @@ UCI_WINE_RED = "uci_wine_red"
 UCI_WINE_WHITE = "uci_wine_white"
 UCI_YACHT = "uci_yacht"
 
+MNIST = "mnist"
+FASHION_MNIST = "fashion_mnist"
+NOT_MNIST = "not_mnist"
+
 
 experiment_names = [
     TOY,
@@ -136,6 +142,9 @@ experiment_names = [
     UCI_WINE_RED,
     UCI_WINE_WHITE,
     UCI_YACHT,
+    MNIST,
+    FASHION_MNIST,
+    NOT_MNIST,
 ]
 
 regression_experiments = [
@@ -148,6 +157,8 @@ regression_experiments = [
     UCI_WINE_WHITE,
     UCI_YACHT,
 ]
+
+generative_experiments = [MNIST, FASHION_MNIST, NOT_MNIST]
 
 
 # -------------
@@ -163,11 +174,13 @@ UCI_SMALL_MAX_BATCH_ITERATIONS = 2e4
 # Activation functions
 # -------------
 F_ELU = "elu"
+F_LEAKY_RELU = "leaky_relu"
 F_RELU = "relu"
 F_SIGMOID = "sigmoid"
 
 ACTIVATION_FUNCTIONS = [
     F_ELU,
+    F_LEAKY_RELU,
     F_RELU,
     F_SIGMOID,
 ]
