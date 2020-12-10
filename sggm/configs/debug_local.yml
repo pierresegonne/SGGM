@@ -1,4 +1,4 @@
-- name: investigate_gaussian_noise
+- name: testv_optimised
   experiment_name: toy
   # hparams
   batch_size: 1024
@@ -7,9 +7,9 @@
   beta_ood: 1
   prior_alpha: 1.025
   prior_beta: 0.5
-  ood_x_generation_method: gaussian_noise_around_x
+  ood_x_generation_method: optimised_x_ood_v_optimised
   # pl trainer
-  n_trials: 5
+  n_trials: 1
   max_epochs: -1
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc

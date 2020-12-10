@@ -216,6 +216,9 @@ def kl_grad_shift_plot(ax, model, training_dataset):
         μ_x, α_x, β_x = model(torch.Tensor(x_plot))
         kl = model.kl(α_x, β_x, model.prior_α, model.prior_β)
         ellk = model.ellk(μ_x, α_x, β_x, torch.Tensor(y_plot))
+        mllk = tcd.StudentT(2 * α_x, μ_x, torch.sqrt(β_x / α_x)).log_prob(y_plot)
+        print(torch.max(mllk))
+        exit()
 
     ax.plot(
         x_plot,
@@ -236,6 +239,16 @@ def kl_grad_shift_plot(ax, model, training_dataset):
         markerfacecolor=(*colours_rgb["orange"], 0.6),
         markeredgewidth=1,
         markeredgecolor=(*colours_rgb["orange"], 0.1),
+    )
+    ax.plot(
+        x_plot,
+        mllk,
+        "o",
+        label=r"MLLK(x,y)",
+        markersize=2,
+        markerfacecolor=(*colours_rgb["red"], 0.6),
+        markeredgewidth=1,
+        markeredgecolor=(*colours_rgb["red"], 0.1),
     )
 
     # Gamma parameters
@@ -263,7 +276,7 @@ def kl_grad_shift_plot(ax, model, training_dataset):
     # Misc
     ax.grid(True)
     ax.set_xlim(plot_x_range)
-    ax.set_ylim([-0.1, top_kl_plot])
+    ax.set_ylim([-top_kl_plot, top_kl_plot])
     ax.set_xlabel("x")
     ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
 

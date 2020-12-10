@@ -33,6 +33,7 @@ from sggm.definitions import (
     EVAL_LOSS,
     TEST_LOSS,
     TEST_ELBO,
+    TEST_MLLK,
     TEST_MEAN_FIT_MAE,
     TEST_MEAN_FIT_RMSE,
     TEST_VARIANCE_FIT_MAE,
@@ -432,10 +433,16 @@ class Regressor(pl.LightningModule):
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         y_pred = self.predictive_mean(x)
 
+        # Define the marginal y|x
+        m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
+
         # ---------
         # Metrics
         self.log(TEST_LOSS, loss, on_epoch=True)
         self.log(TEST_ELBO, -loss, on_epoch=True)
+        self.log(
+            TEST_MLLK, torch.sum(m_p.log_prob(y)), on_epoch=True
+        )  # i.i.d assumption
 
         # Mean fit
         self.log(TEST_MEAN_FIT_MAE, F.l1_loss(y_pred, y), on_epoch=True)
@@ -454,8 +461,15 @@ class Regressor(pl.LightningModule):
         )
 
         # Sample fit
-        lbds = tcd.Gamma(α_x, β_x).sample((1,))
-        samples_y = tcd.Normal(μ_x, 1 / torch.sqrt(lbds)).sample((1,)).reshape(y.shape)
+        ancestral = False
+        if ancestral:
+            lbds = tcd.Gamma(α_x, β_x).sample((1,))
+            samples_y = (
+                tcd.Normal(μ_x, 1 / torch.sqrt(lbds)).sample((1,)).reshape(y.shape)
+            )
+        else:
+            samples_y = m_p.sample((1,)).reshape(y.shape)
+
         self.log(TEST_SAMPLE_FIT_MAE, F.l1_loss(samples_y, y), on_epoch=True)
         self.log(
             TEST_SAMPLE_FIT_RMSE, torch.sqrt(F.mse_loss(samples_y, y)), on_epoch=True

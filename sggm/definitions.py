@@ -185,6 +185,7 @@ EVAL_LOSS = f"eval_loss{DOWN_METRIC_INDICATOR}"
 
 TEST_LOSS = f"test_loss{DOWN_METRIC_INDICATOR}"
 TEST_ELBO = f"test_elbo{UP_METRIC_INDICATOR}"
+TEST_MLLK = f"test_marginal_log_likelihood{UP_METRIC_INDICATOR}"
 TEST_MEAN_FIT_MAE = f"test_mean_fit_mae{DOWN_METRIC_INDICATOR}"
 TEST_MEAN_FIT_RMSE = f"test_mean_fit_rmse{DOWN_METRIC_INDICATOR}"
 TEST_VARIANCE_FIT_MAE = f"test_variance_fit_mae{DOWN_METRIC_INDICATOR}"
@@ -197,7 +198,7 @@ NOISE_ELLK = f"noise_expected_log_likelihood{DOWN_METRIC_INDICATOR}"
 NOISE_KL = f"noise_kl_divergence{DOWN_METRIC_INDICATOR}"
 
 COMPARISON_METRICS = [
-    TEST_LOSS,
+    TEST_MLLK,
     TEST_ELBO,
     TEST_MEAN_FIT_MAE,
     TEST_MEAN_FIT_RMSE,
