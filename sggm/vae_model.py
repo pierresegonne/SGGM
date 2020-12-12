@@ -22,6 +22,11 @@ from sggm.definitions import (
     F_RELU,
     F_SIGMOID,
 )
+from sggm.definitions import (
+    ENCODER_TYPE,
+    ENCODER_CONVOLUTIONAL,
+    ENCODER_FULLY_CONNECTED,
+)
 
 
 def activation_function(activation_function_name: str) -> nn.Module:
@@ -39,62 +44,58 @@ def activation_function(activation_function_name: str) -> nn.Module:
     return f
 
 
-def encoder(
-    input_dims: int, hidden_dims: List, activation_function_name: str
+def encoder_dense(
+    input_dim: int, output_dim: int, activation_function: str, batch_norm: bool = False
 ) -> nn.Module:
-    f = activation_function(activation_function_name)
+    # TODO can i do that?
+    f = activation_function(activation_function)
     modules = []
-    for h_dim in hidden_dims:
-        print(h_dim)
-        modules.append(
-            nn.Sequential(
-                nn.Conv2d(
-                    input_dims, out_channels=h_dim, kernel_size=3, stride=2, padding=1
-                ),
-                nn.BatchNorm2d(h_dim),
-                f,
-            )
-        )
-        input_dims = h_dim
+
+    modules.append(nn.Flatten())
+    modules.append(nn.Linear(input_dim, 512))
+    if batch_norm:
+        pass
+    modules.append(f)
+
+    modules.append(nn.Linear(512, 256))
+    if batch_norm:
+        pass
+    modules.append(f)
+
+    modules.append(nn.Linear(256, 128))
+    if batch_norm:
+        pass
+    modules.append(f)
+
+    modules.append(nn.Linear(256, output_dim))
+
     return nn.Sequential(*modules)
 
 
-def decoder(hidden_dims: List, activation_function_name: str):
-    f = activation_function(activation_function_name)
+def decoder_dense(
+    input_dim: int, output_dim: int, activation_function: str, batch_norm: bool = False
+) -> nn.Module:
+    f = activation_function(activation_function)
     modules = []
-    for i in range(len(hidden_dims) - 1):
-        modules.append(
-            nn.Sequential(
-                nn.ConvTranspose2d(
-                    hidden_dims[i],
-                    hidden_dims[i + 1],
-                    kernel_size=3,
-                    stride=2,
-                    padding=1,
-                    output_padding=1,
-                ),
-                nn.BatchNorm2d(hidden_dims[i + 1]),
-                f,
-            )
-        )
+
+    modules.append(nn.Linear(input_dim, 128))
+    if batch_norm:
+        pass
+    modules.append(f)
+
+    modules.append(nn.Linear(128, 256))
+    if batch_norm:
+        pass
+    modules.append(f)
+
+    modules.append(nn.Linear(256, 512))
+    if batch_norm:
+        pass
+    modules.append(f)
+
+    modules.append(nn.Linear(512, output_dim))
+
     return nn.Sequential(*modules)
-
-
-def final_layer(hidden_dims: List) -> nn.Module:
-    return nn.Sequential(
-        nn.ConvTranspose2d(
-            hidden_dims[-1],
-            hidden_dims[-1],
-            kernel_size=3,
-            stride=2,
-            padding=1,
-            output_padding=1,
-        ),
-        nn.BatchNorm2d(hidden_dims[-1]),
-        nn.LeakyReLU(),
-        nn.Conv2d(hidden_dims[-1], out_channels=3, kernel_size=3, padding=1),
-        nn.Tanh(),
-    )
 
 
 class BaseVAE(pl.LightningModule):
@@ -110,17 +111,18 @@ class VanillaVAE(pl.LightningModule):
 
     def __init__(
         self,
-        input_dim: int = 28,
+        input_dim: int,
+        activation_function: str = F_ELU,
+        encoder_type: str = vanilla_vae_parameters[ENCODER_TYPE].default,
         latent_dim: int = 10,
         enc_out_dim: int = 128,
-        activation_function_name: str = F_ELU,
     ):
         super(VanillaVAE, self).__init__()
 
         self.input_dim = input_dim
         self.latent_dim = latent_dim
         self.enc_out_dim = enc_out_dim
-        self.activation_function_name = activation_function_name
+        self.activation_function = activation_function
 
         self.lr = 1e-4
 
@@ -128,13 +130,15 @@ class VanillaVAE(pl.LightningModule):
         first_conv = False
         maxpool1 = False
 
-        self.encoder = resnet18_encoder(first_conv, maxpool1)
+        # self.encoder = resnet18_encoder(first_conv, maxpool1)
+        self.encoder = encoder_dense(input_dim, enc_out_dim, activation_function)
         self.μ_θ = nn.Linear(self.enc_out_dim, self.latent_dim)
         self.log_var = nn.Linear(self.enc_out_dim, self.latent_dim)
 
-        self.decoder = resnet18_decoder(
-            self.latent_dim, self.input_dim, first_conv, maxpool1
-        )
+        # self.decoder = resnet18_decoder(
+        #     self.latent_dim, self.input_dim, first_conv, maxpool1
+        # )
+        self.decoder = decoder_dense(latent_dim, input_dim, activation_function)
 
     @staticmethod
     def ellk(x, x_hat):
@@ -202,15 +206,10 @@ class VanillaVAE(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):
-        parser = ArgumentParser(
-            parents=[parent_parser], add_help=False, conflict_handler="resolve"
-        )
-        for parameter in generative_parameters.values():
-            parser.add_argument(
-                f"--{parameter.name}", default=parameter.default, type=parameter.type_
-            )
-        return parser
+        return model_specific_args(vanilla_vae_parameters, parent_parser)
 
 
 class V3AE(BaseVAE):
-    pass
+    @staticmethod
+    def add_model_specific_args(parent_parser: ArgumentParser):
+        return model_specific_args(v3ae_parameters, parent_parser)

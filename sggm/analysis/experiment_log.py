@@ -44,6 +44,7 @@ class VersionLog:
 
 
 class ExperimentLog:
+    # TODO handle generative
     def __init__(self, experiment_name, name, save_dir="../lightning_logs"):
         self.experiment_name = experiment_name
         self.name = name

@@ -106,9 +106,6 @@ class ShiftLayer(nn.Module):
 
 
 class Regressor(pl.LightningModule):
-    def __init__(self, **kwargs):
-        super(Regressor, self).__init__()
-
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):
         return model_specific_args(regressor_parameters, parent_parser)

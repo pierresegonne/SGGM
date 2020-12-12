@@ -1,5 +1,6 @@
 - name: test
   experiment_name: mnist
+  model_name: vanilla_vae
   # hparams
   batch_size: 256
   # pl trainer

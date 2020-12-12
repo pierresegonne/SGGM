@@ -120,7 +120,8 @@ class Experiment:
 
     @property
     def model(self):
-        # Note: _model is never set, is there a reason for it?
+        # Note: _model is never set,
+        # This is because we want to recreate a model everytime it's called
         if self._model is not None:
             return self._model
         else:
@@ -149,9 +150,10 @@ class Experiment:
                     )
             elif self.experiment_name in generative_experiments:
                 if self.model_name == VANILLA_VAE:
-                    return "TODO"
+                    return VanillaVAE()
                 elif self.model_name == V3AE:
-                    return "TODO"
+                    exit("TODO")
+                    return V3AE()
                 else:
                     raise NotImplementedError(
                         f"Model {self.model_name} not implemented"
@@ -181,8 +183,11 @@ class Experiment:
 
     @property
     def trainer(self):
-        if self._trainer is None:
-
+        # Note: _trainer is never set,
+        # This is because we want to recreate a model everytime it's called
+        if self._trainer is not None:
+            return self._trainer
+        else:
             # If max_epochs is set to -1, pass on automatic mode
             if self.max_epochs == -1:
                 self.max_epochs = self.datamodule.max_epochs
@@ -204,17 +209,16 @@ class Experiment:
                 save_dir=f"lightning_logs/{self.experiment_name}",
                 name=self.name,
             )
-            self._trainer = pl.Trainer.from_argparse_args(
+            return pl.Trainer.from_argparse_args(
                 trainer_args,
                 callbacks=self.callbacks + default_callbacks,
                 logger=logger,
                 profiler=False,
             )
-        return self._trainer
 
 
 def get_experiments_config(parsed_args: Namespace) -> List[dict]:
-    """TODO
+    """From the parsed args generate a full experiment config
 
     Args:
         parsed_args (Namespace): parsed arguments
@@ -252,9 +256,9 @@ def get_experiment_base_model(experiment_config: dict) -> pl.LightningModule:
     Returns:
         pl.LightningModule: base model for experiment
     """
-    assert (
-        EXPERIMENT_NAME in experiment_config.keys()
-    ), f"Experiment {json.dumps(experiment_config)} was not supplied any experiment name"
+    assert (EXPERIMENT_NAME in experiment_config.keys()) & (
+        experiment_config[EXPERIMENT_NAME] is not None
+    ), f"Experiment {experiment_config} was not supplied any experiment name"
     experiment_name = experiment_config[EXPERIMENT_NAME]
     if experiment_name in regression_experiments:
         base_model = Regressor
@@ -264,9 +268,9 @@ def get_experiment_base_model(experiment_config: dict) -> pl.LightningModule:
 
 
 def get_model(experiment_config: dict) -> pl.LightningModule:
-    assert (
-        MODEL_NAME in experiment_config.keys()
-    ), f"Experiment {json.dumps(experiment_config)} was not supplied any model name"
+    assert (MODEL_NAME in experiment_config.keys()) & (
+        experiment_config[MODEL_NAME] is not None
+    ), f"Experiment {experiment_config} was not supplied any model name"
     model_name = experiment_config[MODEL_NAME]
     if model_name == VARIATIONAL_REGRESSOR:
         model = VariationalRegressor
