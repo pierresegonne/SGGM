@@ -6,7 +6,7 @@ import yaml
 
 from sggm.definitions import regression_experiments, TEST_LOSS
 from sggm.experiment import activation_function
-from sggm.regression_model import Regressor
+from sggm.regression_model import VariationalRegressor
 
 
 def version_dir(path):
@@ -55,7 +55,7 @@ class ExperimentLog:
 
         # Attribute the right PL Module for loading
         if self.experiment_name in regression_experiments:
-            pl_module = Regressor
+            pl_module = VariationalRegressor
 
         self.versions = [
             VersionLog(

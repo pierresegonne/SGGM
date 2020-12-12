@@ -7,7 +7,11 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 
-from sggm.definitions import regressor_parameters
+from sggm.definitions import (
+    model_specific_args,
+    regressor_parameters,
+    variational_regressor_parameters,
+)
 from sggm.definitions import (
     β_ELBO,
     β_OOD,
@@ -99,25 +103,36 @@ class ShiftLayer(nn.Module):
 # Model
 # ----------
 # Note that the default values are provided to ease exploration, they are actually not used.
+
+
 class Regressor(pl.LightningModule):
+    def __init__(self, **kwargs):
+        super(Regressor, self).__init__()
+
+    @staticmethod
+    def add_model_specific_args(parent_parser: ArgumentParser):
+        return model_specific_args(regressor_parameters, parent_parser)
+
+
+class VariationalRegressor(pl.LightningModule):
     def __init__(
         self,
         input_dim: int,
         hidden_dim: int,
         activation_function: str,
-        prior_α: float = regressor_parameters[PRIOR_α].default,
-        prior_β: float = regressor_parameters[PRIOR_β].default,
-        β_elbo: float = regressor_parameters[β_ELBO].default,
-        β_ood: float = regressor_parameters[β_OOD].default,
-        ood_x_generation_method: str = regressor_parameters[
+        prior_α: float = variational_regressor_parameters[PRIOR_α].default,
+        prior_β: float = variational_regressor_parameters[PRIOR_β].default,
+        β_elbo: float = variational_regressor_parameters[β_ELBO].default,
+        β_ood: float = variational_regressor_parameters[β_OOD].default,
+        ood_x_generation_method: str = variational_regressor_parameters[
             OOD_X_GENERATION_METHOD
         ].default,
-        eps: float = regressor_parameters[EPS].default,
-        n_mc_samples: int = regressor_parameters[N_MC_SAMPLES].default,
+        eps: float = variational_regressor_parameters[EPS].default,
+        n_mc_samples: int = variational_regressor_parameters[N_MC_SAMPLES].default,
         y_mean: float = 0.0,  # Not in regressor parameters as it is infered from data
         y_std: float = 1.0,  # Not in regressor parameters as it is infered from data
     ):
-        super(Regressor, self).__init__()
+        super(VariationalRegressor, self).__init__()
 
         # ---------
         # Parameters
@@ -513,11 +528,4 @@ class Regressor(pl.LightningModule):
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):
-        parser = ArgumentParser(
-            parents=[parent_parser], add_help=False, conflict_handler="resolve"
-        )
-        for parameter in regressor_parameters.values():
-            parser.add_argument(
-                f"--{parameter.name}", default=parameter.default, type=parameter.type_
-            )
-        return parser
+        return model_specific_args(variational_regressor_parameters, parent_parser)

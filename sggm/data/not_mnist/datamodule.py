@@ -21,6 +21,7 @@ class NotMNISTDataModule(pl.LightningDataModule):
         n_workers: int,
         train_val_split: float = 0.9,
         test_split: float = 0.1667,
+        **kwargs,
     ):
         super().__init__()
 

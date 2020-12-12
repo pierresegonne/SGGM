@@ -6,15 +6,18 @@ import yaml
 import torch
 
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from torch.utils.data import DataLoader, random_split
 
 from sggm.callbacks import callbacks
 from sggm.definitions import (
     experiment_names,
     generative_experiments,
+    generative_models,
+    model_names,
     parameters,
     regression_experiments,
+    regression_models,
     regressor_parameters,
 )
 from sggm.definitions import (
@@ -31,15 +34,24 @@ from sggm.definitions import (
     FASHION_MNIST,
     NOT_MNIST,
 )
+from sggm.definitions import (
+    VARIATIONAL_REGRESSOR,
+    VANILLA_VAE,
+    VV_VAE,
+)
 from sggm.definitions import ACTIVATION_FUNCTIONS, F_ELU, F_SIGMOID
 from sggm.definitions import (
     EVAL_LOSS,
     EXPERIMENT_NAME,
     EXPERIMENTS_CONFIG,
+    MODEL_NAME,
     OOD_X_GENERATION_AVAILABLE_METHODS,
 )
 from sggm.data import datamodules
-from sggm.regression_model import Regressor
+from sggm.regression_model import Regressor, VariationalRegressor
+from sggm.vae_model import BaseVAE, VanillaVAE, V3AE
+
+from sggm.types_ import List
 
 
 def clean_dict(dic: dict) -> dict:
@@ -99,6 +111,7 @@ class Experiment:
         self._datamodule = None
         self._model = None
         self._callbacks = None
+        self._trainer = None
 
     def add_default_params(self, params):
         for parameter in params.values():
@@ -107,33 +120,45 @@ class Experiment:
 
     @property
     def model(self):
+        # Note: _model is never set, is there a reason for it?
         if self._model is not None:
             return self._model
         else:
             if self.experiment_name in regression_experiments:
-                input_dim = self.datamodule.dims
-                return Regressor(
-                    input_dim=input_dim,
-                    hidden_dim=self.hidden_dim,
-                    activation_function=activation_function(self.experiment_name),
-                    prior_α=self.prior_alpha,
-                    prior_β=self.prior_beta,
-                    β_elbo=self.beta_elbo,
-                    β_ood=self.beta_ood,
-                    ood_x_generation_method=check_ood_x_generation_method(
-                        self.ood_x_generation_method
-                    ),
-                    eps=self.eps,
-                    n_mc_samples=self.n_mc_samples,
-                    y_mean=self.datamodule.y_mean,
-                    y_std=self.datamodule.y_std,
-                )
+                if self.model_name == VARIATIONAL_REGRESSOR:
+                    input_dim = self.datamodule.dims
+                    return VariationalRegressor(
+                        input_dim=input_dim,
+                        hidden_dim=self.hidden_dim,
+                        activation_function=activation_function(self.experiment_name),
+                        prior_α=self.prior_alpha,
+                        prior_β=self.prior_beta,
+                        β_elbo=self.beta_elbo,
+                        β_ood=self.beta_ood,
+                        ood_x_generation_method=check_ood_x_generation_method(
+                            self.ood_x_generation_method
+                        ),
+                        eps=self.eps,
+                        n_mc_samples=self.n_mc_samples,
+                        y_mean=self.datamodule.y_mean,
+                        y_std=self.datamodule.y_std,
+                    )
+                else:
+                    raise NotImplementedError(
+                        f"Model {self.model_name} not implemented"
+                    )
             elif self.experiment_name in generative_experiments:
-                print("TODO")
-                exit()
+                if self.model_name == VANILLA_VAE:
+                    return "TODO"
+                elif self.model_name == V3AE:
+                    return "TODO"
+                else:
+                    raise NotImplementedError(
+                        f"Model {self.model_name} not implemented"
+                    )
             else:
                 raise NotImplementedError(
-                    "Experiment does not have a model implemented"
+                    f"Experiment {self.experiment_name} is not supported"
                 )
 
     @property
@@ -154,16 +179,102 @@ class Experiment:
             ]
         return self._callbacks
 
+    @property
+    def trainer(self):
+        if self._trainer is None:
 
-def get_experiments_config(parsed_args):
+            # If max_epochs is set to -1, pass on automatic mode
+            if self.max_epochs == -1:
+                self.max_epochs = self.datamodule.max_epochs
+
+            # Hack to override trainer arguments
+            class TrainerArgs:
+                def __init__(self, args):
+                    self.__dict__ = args
+
+            trainer_args = TrainerArgs(clean_dict(self.__dict__))
+
+            default_callbacks = [
+                pl.callbacks.EarlyStopping(
+                    EVAL_LOSS, patience=self.early_stopping_patience
+                ),
+            ]
+            # Note that checkpointing is handled by default
+            logger = pl.loggers.TensorBoardLogger(
+                save_dir=f"lightning_logs/{self.experiment_name}",
+                name=self.name,
+            )
+            self._trainer = pl.Trainer.from_argparse_args(
+                trainer_args,
+                callbacks=self.callbacks + default_callbacks,
+                logger=logger,
+                profiler=False,
+            )
+        return self._trainer
+
+
+def get_experiments_config(parsed_args: Namespace) -> List[dict]:
+    """TODO
+
+    Args:
+        parsed_args (Namespace): parsed arguments
+
+    Returns:
+        List[dict]: List of experiment configs
+    """
+    experiments_config = [{}]
     if parsed_args.experiments_config:
         with open(parsed_args.experiments_config) as config_file:
             experiments_config = yaml.load(config_file, Loader=yaml.FullLoader)
-    else:
-        _parsed_args = copy.deepcopy(vars(parsed_args))
-        del _parsed_args[f"{EXPERIMENTS_CONFIG}"]
-        experiments_config = [_parsed_args]
+
+    parsed_args = vars(parsed_args)
+    del parsed_args[f"{EXPERIMENTS_CONFIG}"]
+
+    def _update(a: dict, b: dict) -> dict:
+        a.update(b)
+        return a
+
+    experiments_config = [
+        _update(parsed_args, experiment_config)
+        for experiment_config in experiments_config
+    ]
+
     return experiments_config
+
+
+def get_experiment_base_model(experiment_config: dict) -> pl.LightningModule:
+    """Extracts experiment name from the experiment config
+    and provide base model for that experiment
+
+    Args:
+        experiment_config (dict): config of the experiment
+
+    Returns:
+        pl.LightningModule: base model for experiment
+    """
+    assert (
+        EXPERIMENT_NAME in experiment_config.keys()
+    ), f"Experiment {json.dumps(experiment_config)} was not supplied any experiment name"
+    experiment_name = experiment_config[EXPERIMENT_NAME]
+    if experiment_name in regression_experiments:
+        base_model = Regressor
+    if experiment_name in generative_experiments:
+        base_model = BaseVAE
+    return base_model
+
+
+def get_model(experiment_config: dict) -> pl.LightningModule:
+    assert (
+        MODEL_NAME in experiment_config.keys()
+    ), f"Experiment {json.dumps(experiment_config)} was not supplied any model name"
+    model_name = experiment_config[MODEL_NAME]
+    if model_name == VARIATIONAL_REGRESSOR:
+        model = VariationalRegressor
+    elif model_name == VANILLA_VAE:
+        model = VanillaVAE
+    elif model_name == VV_VAE:
+        model = V3AE
+    return model
 
 
 def cli_main():
@@ -174,6 +285,7 @@ def cli_main():
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
     parser.add_argument(f"--{EXPERIMENT_NAME}", choices=experiment_names)
+    parser.add_argument(f"--{MODEL_NAME}", choices=model_names)
     parser.add_argument(f"--{EXPERIMENTS_CONFIG}", type=str)
     # Project wide parameters
     for parameter in parameters.values():
@@ -192,19 +304,24 @@ def cli_main():
     # ------------
     for experiment_idx, experiment_config in enumerate(experiments_config):
 
+        _experiments_config = copy.deepcopy(experiments_config)
+        _experiment_config = copy.deepcopy(experiment_config)
         # Add support for experiment specific arguments
-        if EXPERIMENT_NAME not in experiment_config.keys():
-            raise Exception(
-                f"Experiment {json.dumps(experiment_config)} was not supplied any experiment name"
-            )
-        else:
-            if experiment_config[EXPERIMENT_NAME] in regression_experiments:
-                parser = Regressor.add_model_specific_args(parser)
-
+        base_model = get_experiment_base_model(_experiment_config)
+        parser = base_model.add_model_specific_args(parser)
+        # Reparse with experiment specific arguments
         args, unknown_args = parser.parse_known_args()
-        full_experiments_config = get_experiments_config(args)
+        _experiments_config = get_experiments_config(args)
 
-        experiment = Experiment(full_experiments_config[experiment_idx])
+        _experiment_config = _experiments_config[experiment_idx]
+        # Add support for model specific arguments
+        model = get_model(_experiment_config)
+        parser = model.add_model_specific_args(parser)
+        # Reparse with model specific arguments
+        args, unknown_args = parser.parse_known_args()
+        _experiments_config = get_experiments_config(args)
+
+        experiment = Experiment(_experiments_config[experiment_idx])
         print(f"--- Starting Experiment {clean_dict(experiment.__dict__)}")
         for n_t in range(experiment.n_trials):
 
@@ -221,37 +338,7 @@ def cli_main():
             # ------------
             # training
             # ------------
-
-            # Hack to override trainer arguments
-            class TrainerArgs:
-                def __init__(self, args):
-                    self.__dict__ = args
-
-            trainer_args = vars(args)
-            trainer_args.update(experiment.__dict__)
-            trainer_args = TrainerArgs(trainer_args)
-
-            # If max_epochs is set to -1, pass on automatic mode
-            if trainer_args.max_epochs == -1:
-                trainer_args.max_epochs = datamodule.max_epochs
-
-            default_callbacks = [
-                pl.callbacks.EarlyStopping(
-                    EVAL_LOSS, patience=trainer_args.early_stopping_patience
-                ),
-            ]
-            # Note that checkpointing is handled by default
-            logger = pl.loggers.TensorBoardLogger(
-                save_dir=f"lightning_logs/{experiment.experiment_name}",
-                name=experiment.name,
-            )
-            trainer = pl.Trainer.from_argparse_args(
-                trainer_args,
-                callbacks=experiment.callbacks + default_callbacks,
-                logger=logger,
-                profiler=False,
-            )
-
+            trainer = experiment.trainer
             trainer.fit(model, datamodule)
 
             # ------------

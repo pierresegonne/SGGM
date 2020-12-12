@@ -16,6 +16,7 @@ class FashionMNISTDataModule(pl.LightningDataModule):
         batch_size: int,
         n_workers: int,
         train_val_split: float = 0.9,
+        **kwargs,
     ):
         super().__init__()
 
