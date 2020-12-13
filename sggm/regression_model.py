@@ -67,15 +67,15 @@ def check_available_methods(method):
     ), f"Unvalid method {method}, choices {available_methods}"
 
 
-def BaseMLP(input_dim, hidden_dim, activation_function):
+def BaseMLP(input_dim, hidden_dim, activation):
     assert (
-        activation_function in ACTIVATION_FUNCTIONS
-    ), f"activation_function={activation_function} is not in {ACTIVATION_FUNCTIONS}"
-    if activation_function == F_ELU:
+        activation in ACTIVATION_FUNCTIONS
+    ), f"activation_function={activation} is not in {ACTIVATION_FUNCTIONS}"
+    if activation == F_ELU:
         f = nn.ELU()
-    elif activation_function == F_RELU:
+    elif activation == F_RELU:
         f = nn.ReLU()
-    elif activation_function == F_SIGMOID:
+    elif activation == F_SIGMOID:
         f = nn.Sigmoid()
     return nn.Sequential(
         nn.Linear(input_dim, hidden_dim),
@@ -84,8 +84,8 @@ def BaseMLP(input_dim, hidden_dim, activation_function):
     )
 
 
-def BaseMLPSoftPlus(input_dim, hidden_dim, activation_function):
-    mod = BaseMLP(input_dim, hidden_dim, activation_function)
+def BaseMLPSoftPlus(input_dim, hidden_dim, activation):
+    mod = BaseMLP(input_dim, hidden_dim, activation)
     mod.add_module("softplus", nn.Softplus())
     return mod
 
@@ -116,7 +116,7 @@ class VariationalRegressor(pl.LightningModule):
         self,
         input_dim: int,
         hidden_dim: int,
-        activation_function: str,
+        activation: str,
         prior_α: float = variational_regressor_parameters[PRIOR_α].default,
         prior_β: float = variational_regressor_parameters[PRIOR_β].default,
         β_elbo: float = variational_regressor_parameters[β_ELBO].default,
@@ -137,7 +137,7 @@ class VariationalRegressor(pl.LightningModule):
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
 
-        self.activation_function = activation_function
+        self.activation = activation
 
         self.eps = eps
         self.n_mc_samples = n_mc_samples

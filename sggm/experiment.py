@@ -149,8 +149,9 @@ class Experiment:
                         f"Model {self.model_name} not implemented"
                     )
             elif self.experiment_name in generative_experiments:
+
                 if self.model_name == VANILLA_VAE:
-                    return VanillaVAE()
+                    return VanillaVAE(self.datamodule.dims)
                 elif self.model_name == V3AE:
                     exit("TODO")
                     return V3AE()

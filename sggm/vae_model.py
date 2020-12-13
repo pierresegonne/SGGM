@@ -5,10 +5,9 @@ import torch.distributions as tcd
 import torch.nn as nn
 import torch.nn.functional as F
 
-from sggm.types_ import List, Tensor
 from argparse import ArgumentParser
+from functools import reduce
 from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
-
 from sggm.definitions import (
     model_specific_args,
     vae_parameters,
@@ -27,6 +26,7 @@ from sggm.definitions import (
     ENCODER_CONVOLUTIONAL,
     ENCODER_FULLY_CONNECTED,
 )
+from sggm.types_ import List, Tensor
 
 
 def activation_function(activation_function_name: str) -> nn.Module:
@@ -45,10 +45,9 @@ def activation_function(activation_function_name: str) -> nn.Module:
 
 
 def encoder_dense(
-    input_dim: int, output_dim: int, activation_function: str, batch_norm: bool = False
+    input_dim: int, output_dim: int, activation: str, batch_norm: bool = False
 ) -> nn.Module:
-    # TODO can i do that?
-    f = activation_function(activation_function)
+    f = activation_function(activation)
     modules = []
 
     modules.append(nn.Flatten())
@@ -67,15 +66,15 @@ def encoder_dense(
         pass
     modules.append(f)
 
-    modules.append(nn.Linear(256, output_dim))
+    modules.append(nn.Linear(128, output_dim))
 
     return nn.Sequential(*modules)
 
 
 def decoder_dense(
-    input_dim: int, output_dim: int, activation_function: str, batch_norm: bool = False
+    input_dim: int, output_dim: int, activation: str, batch_norm: bool = False
 ) -> nn.Module:
-    f = activation_function(activation_function)
+    f = activation_function(activation)
     modules = []
 
     modules.append(nn.Linear(input_dim, 128))
@@ -111,34 +110,31 @@ class VanillaVAE(pl.LightningModule):
 
     def __init__(
         self,
-        input_dim: int,
-        activation_function: str = F_ELU,
-        encoder_type: str = vanilla_vae_parameters[ENCODER_TYPE].default,
+        input_dims: tuple,
+        activation: str = F_ELU,
+        encoder_type: str = vae_parameters[ENCODER_TYPE].default,
         latent_dim: int = 10,
         enc_out_dim: int = 128,
     ):
         super(VanillaVAE, self).__init__()
 
-        self.input_dim = input_dim
+        self.input_dims = input_dims
         self.latent_dim = latent_dim
         self.enc_out_dim = enc_out_dim
-        self.activation_function = activation_function
+        self.activation = activation
 
         self.lr = 1e-4
 
-        # Default
-        first_conv = False
-        maxpool1 = False
-
         # self.encoder = resnet18_encoder(first_conv, maxpool1)
-        self.encoder = encoder_dense(input_dim, enc_out_dim, activation_function)
+        flattened_dim = reduce(lambda x, y: x * y, input_dims)
+        self.encoder = encoder_dense(flattened_dim, enc_out_dim, activation)
         self.μ_θ = nn.Linear(self.enc_out_dim, self.latent_dim)
         self.log_var = nn.Linear(self.enc_out_dim, self.latent_dim)
 
         # self.decoder = resnet18_decoder(
         #     self.latent_dim, self.input_dim, first_conv, maxpool1
         # )
-        self.decoder = decoder_dense(latent_dim, input_dim, activation_function)
+        self.decoder = decoder_dense(latent_dim, flattened_dim, activation)
 
     @staticmethod
     def ellk(x, x_hat):
@@ -157,14 +153,15 @@ class VanillaVAE(pl.LightningModule):
         μ = self.μ_θ(x)
         log_var = self.log_var(x)
         p, q, z = self.sample(μ, log_var)
-        return self.decoder(z)
+        x_hat = self.decoder(z).view(-1, *self.input_dims)
+        return x_hat
 
     def _run_step(self, x):
         x = self.encoder(x)
         mu = self.μ_θ(x)
         log_var = self.log_var(x)
         p, q, z = self.sample(mu, log_var)
-        return z, self.decoder(z), p, q
+        return z, self.decoder(z).view(-1, *self.input_dims), p, q
 
     def sample(self, mu, log_var):
         std = torch.exp(log_var / 2)
