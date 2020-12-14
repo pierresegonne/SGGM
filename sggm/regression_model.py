@@ -170,12 +170,12 @@ class VariationalRegressor(pl.LightningModule):
         # ---------
         # Inference Networks
         # ---------
-        self.μ = BaseMLP(input_dim, hidden_dim, activation_function)
+        self.μ = BaseMLP(input_dim, hidden_dim, activation)
 
-        self.α = BaseMLPSoftPlus(input_dim, hidden_dim, activation_function)
+        self.α = BaseMLPSoftPlus(input_dim, hidden_dim, activation)
         self.α.add_module("shift", ShiftLayer(1))
 
-        self.β = BaseMLPSoftPlus(input_dim, hidden_dim, activation_function)
+        self.β = BaseMLPSoftPlus(input_dim, hidden_dim, activation)
 
         # ---------
         # Misc
@@ -407,15 +407,9 @@ class VariationalRegressor(pl.LightningModule):
             expected_log_likelihood_out = torch.zeros((1,)).type_as(x)
             kl_divergence_out = torch.zeros((1,)).type_as(x)
 
-        KL_ONLY = True
-        if KL_ONLY:
-            loss = -self.elbo(
-                expected_log_likelihood, kl_divergence
-            ) + self.β_ood * torch.mean(kl_divergence_out)
-        else:
-            loss = -self.elbo(
-                expected_log_likelihood, kl_divergence
-            ) - self.β_ood * self.elbo(expected_log_likelihood_out, kl_divergence_out)
+        loss = -self.elbo(
+            expected_log_likelihood, kl_divergence
+        ) + self.β_ood * torch.mean(kl_divergence_out)
 
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
             self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)

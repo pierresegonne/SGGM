@@ -23,7 +23,7 @@ class VersionLog:
         # model
         checkpoint_name = glob.glob(f"{version_path}/checkpoints/*")[-1]
         self.model = pl_module.load_from_checkpoint(
-            checkpoint_name, activation_function=activation_function(experiment_name)
+            checkpoint_name, activation=activation_function(experiment_name)
         )
         # performance
         self.results = torch.load(f"{version_path}/results.pkl")
