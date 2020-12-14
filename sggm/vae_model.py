@@ -7,7 +7,8 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 from functools import reduce
-from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
+
+# from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
 from sggm.definitions import (
     model_specific_args,
     vae_parameters,
