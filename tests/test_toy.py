@@ -8,7 +8,7 @@ def test_toy():
 
     seed_everything(1234)
     model = VariationalRegressor(
-        input_dim=1, hidden_dim=50, activation_function=F_SIGMOID
+        input_dim=1, hidden_dim=50, activation=F_SIGMOID
     )
     datamodule = ToyDataModule(128, 0)
     trainer = Trainer(max_epochs=5)
