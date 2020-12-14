@@ -236,6 +236,8 @@ def get_experiments_config(parsed_args: Namespace) -> List[dict]:
     del parsed_args[f"{EXPERIMENTS_CONFIG}"]
 
     def _update(a: dict, b: dict) -> dict:
+        # The copy is required otherwise all the `a` will point to the same object
+        a = copy.deepcopy(a)
         a.update(b)
         return a
 
