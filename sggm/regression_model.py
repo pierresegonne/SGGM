@@ -262,13 +262,15 @@ class VariationalRegressor(pl.LightningModule):
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            kl_grad_unit = kl_grad / torch.norm(kl_grad, dim=1, keepdim=True)
-            return x + self.ood_generator_v * kl_grad_unit
+            normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
+            return x + self.ood_generator_v * normed_kl_grad
 
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            return x + self.ood_generator_v * torch.sign(kl_grad)
+            # By default norm 2 or fro
+            normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
+            return x + self.ood_generator_v * normed_kl_grad
 
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_KL_GA:
 
@@ -333,12 +335,14 @@ class VariationalRegressor(pl.LightningModule):
         if self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
+            normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
 
             with torch.no_grad():
                 v_available = [0.0001, 0.001, 0.01, 0.1, 1, 2, 3, 5, 10, 25, 100]
                 v_, kl_ = None, -np.inf
                 for v_proposal in v_available:
-                    _, α, β = self(x + v_proposal * torch.sign(kl_grad))
+                    
+                    _, α, β = self(x + v_proposal * normed_kl_grad)
                     kl_proposal = torch.mean(self.kl(α, β, self.prior_α, self.prior_β))
                     if (kl_proposal > kl_) & (kl_proposal < 1e10):
                         kl_ = kl_proposal
