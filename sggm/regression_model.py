@@ -321,7 +321,9 @@ class VariationalRegressor(pl.LightningModule):
             )
 
         elif self.ood_x_generation_method == OPTIMISED_X_OOD_BRUTE_FORCE:
-            x_ood_proposal = torch.reshape(torch.linspace(-25, 35, 4000), (4000, 1))
+            x_ood_proposal = torch.reshape(
+                torch.linspace(-25, 35, 4000), (4000, 1)
+            ).type_as(x)
             _, alpha_ood, beta_ood = self(x_ood_proposal)
             kl = self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β)
             # Top K and then subsample
@@ -341,7 +343,7 @@ class VariationalRegressor(pl.LightningModule):
                 v_available = [0.0001, 0.001, 0.01, 0.1, 1, 2, 3, 5, 10, 25, 100]
                 v_, kl_ = None, -np.inf
                 for v_proposal in v_available:
-                    
+
                     _, α, β = self(x + v_proposal * normed_kl_grad)
                     kl_proposal = torch.mean(self.kl(α, β, self.prior_α, self.prior_β))
                     if (kl_proposal > kl_) & (kl_proposal < 1e10):
