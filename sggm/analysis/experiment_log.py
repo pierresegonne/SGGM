@@ -62,7 +62,10 @@ class ExperimentLog:
             VersionLog(
                 experiment_name, version_dir(version_path), version_path, pl_module
             )
-            for version_path in glob.glob(f"{save_dir}/{experiment_name}/{name}/*/")
+            for version_path in sorted(
+                glob.glob(f"{save_dir}/{experiment_name}/{name}/*/"),
+                key=lambda v: int(v.split("/")[-2].split("_")[-1]),
+            )
         ]
         self.idx_best_version = np.argmin(
             [v.results[0][TEST_LOSS] for v in self.versions]

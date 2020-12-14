@@ -131,7 +131,7 @@ class Experiment:
                     return VariationalRegressor(
                         input_dim=input_dim,
                         hidden_dim=self.hidden_dim,
-                        activation_function=activation_function(self.experiment_name),
+                        activation=activation_function(self.experiment_name),
                         prior_α=self.prior_alpha,
                         prior_β=self.prior_beta,
                         β_elbo=self.beta_elbo,

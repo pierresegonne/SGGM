@@ -1,4 +1,4 @@
-- name: test
+- name: test_test_loss_1
   experiment_name: toy
   # hparams
   batch_size: 1024

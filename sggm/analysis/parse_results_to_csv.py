@@ -10,7 +10,10 @@ from sggm.definitions import experiment_names
 def parse_results(experiment_name, names, save_dir, **kwargs):
     for name in names:
         # Get all versions
-        version_folders = glob.glob(f"{save_dir}/{experiment_name}/{name}/*/")
+        version_folders = sorted(
+            glob.glob(f"{save_dir}/{experiment_name}/{name}/*/"),
+            key=lambda v: int(v.split("/")[-2].split("_")[-1]),
+        )
         assert (
             len(version_folders) > 0
         ), f"No versions found for experiment {save_dir}/{experiment_name}/{name}"
