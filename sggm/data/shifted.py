@@ -59,14 +59,11 @@ def generate_shift(
 
     # Sample p_k% of training samples to serve as center for hyperballs
     K = max(int(shifting_proportion_k * x_train.shape[0]), 1)
-    print(K)
-    exit()
     idx_k = torch.multinomial(torch.ones_like(x_train).flatten(), K, replacement=False)
     x_k = x_train[idx_k]
 
     # Determine average distance between points
     dist = radius(shifting_proportion_total, shifting_proportion_k, x_train)
-    print("dist", dist)
 
     # Any point laying inside any hyperball gets affected to test
     in_any_b_k = torch.where(

@@ -15,7 +15,6 @@ def plot(experiment_log, methods):
     with no_grad():
         best_model = experiment_log.best_version.model
         best_training_dataset = experiment_log.best_version.train_dataset.tensors
-        print(best_training_dataset[0].shape)
 
         fig, [data_ax, std_ax, misc_ax] = plt.subplots(
             3, 1, figsize=(12, 9), sharex=True

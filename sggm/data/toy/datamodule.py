@@ -117,13 +117,7 @@ class ToyDataModuleShifted(ToyDataModule):
             self.train_dataset.dataset.tensors,
             self.test_dataset.tensors,
         )
-        print(train[0].shape)
 
         self.train_dataset = TensorDataset(*train)
         self.setup_train_val_datasets(self.train_dataset)
         self.test_dataset = TensorDataset(*test)
-
-        print(
-            self.test_dataset.tensors[0].shape,
-            self.train_dataset.dataset.tensors[0].shape,
-        )
