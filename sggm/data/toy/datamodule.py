@@ -3,6 +3,7 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader
 
 from sggm.data.regression_datamodule import RegressionDataModule
+from sggm.data.shifted import density, radius
 from sggm.definitions import TOY_MAX_BATCH_ITERATIONS
 
 
@@ -100,6 +101,8 @@ class ToyDataModuleShifted(ToyDataModule):
         N_train: int = 625,
         N_test: int = 1000,
         train_val_split: float = 0.9,
+        shifting_proportion_k: float = 1e-2,
+        shifting_proportion_total: float = 0.1,
         **kwargs,
     ):
         super(ToyDataModuleShifted, self).__init__(
@@ -111,6 +114,9 @@ class ToyDataModuleShifted(ToyDataModule):
             **kwargs,
         )
 
+        self.shifting_proportion_k = shifting_proportion_k
+        self.shifting_proportion_total = shifting_proportion_total
+
     def setup(self, stage: str = None):
         super(ToyDataModuleShifted, self).setup(stage)
 
@@ -118,21 +124,24 @@ class ToyDataModuleShifted(ToyDataModule):
         x_test, y_test = self.test_dataset.tensors
 
         # Sample 1% of training samples to serve as center for hyperballs
-        K = int(1e-2 * self.N_train)
+        K = int(self.shifting_proportion_k * self.N_train)
         idx_k = torch.multinomial(
             torch.ones_like(x_train).flatten(), K, replacement=False
         )
         x_k = x_train[idx_k]
 
         # Determine average distance between points
-        dist = 0.5
+        dist = radius(
+            self.shifting_proportion_total, self.shifting_proportion_k, x_train
+        )
 
         # Any point laying inside any hyperball gets affected to test
         in_any_b_k = torch.where(
-            torch.where(torch.cdist(x_train, x_k) < dist, 1, 0).sum(dim=1) > 1,
+            torch.where(torch.cdist(x_train, x_k) < dist, 1, 0).sum(dim=1) >= 1,
             1,
             0,
         )
+
         x_test = torch.cat((x_test, x_train[in_any_b_k == 1]), dim=0)
         y_test = torch.cat((y_test, y_train[in_any_b_k == 1]), dim=0)
 
