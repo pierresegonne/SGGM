@@ -22,6 +22,7 @@ from sggm.definitions import (
 )
 from sggm.definitions import (
     TOY,
+    TOY_SHIFTED,
     TOY_2D,
     UCI_CCPP,
     UCI_CONCRETE,
@@ -63,7 +64,7 @@ def clean_dict(dic: dict) -> dict:
 
 
 def activation_function(experiment_name):
-    if experiment_name in [TOY, TOY_2D]:
+    if experiment_name in [TOY, TOY_SHIFTED, TOY_2D]:
         return F_SIGMOID
     elif experiment_name in [
         UCI_CCPP,

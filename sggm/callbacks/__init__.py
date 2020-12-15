@@ -1,5 +1,6 @@
 from sggm.definitions import (
     TOY,
+    TOY_SHIFTED,
     TOY_2D,
     UCI_CCPP,
     UCI_CONCRETE,
@@ -20,6 +21,7 @@ from sggm.callbacks.loss_printer import LossPrinter
 
 callbacks = {
     TOY: [DataSaver, LossPrinter],
+    TOY_SHIFTED: [DataSaver, LossPrinter],
     TOY_2D: [DataSaver, LossPrinter],
     UCI_CCPP: [LossPrinter],
     UCI_CONCRETE: [LossPrinter],

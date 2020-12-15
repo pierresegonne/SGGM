@@ -1,16 +1,16 @@
-- name: test_bf
-  experiment_name: toy
+- name: test_shift
+  experiment_name: toy_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 1
-  beta_ood: 1
+  beta_ood: 0
   prior_alpha: 1.025
   prior_beta: 0.5
-  ood_x_generation_method: optimised_x_ood_brute_force
+  # ood_x_generation_method: optimised_x_ood_brute_force
   # pl trainer
   early_stopping_patience: 250
-  n_trials: 3
+  n_trials: 1
   max_epochs: -1
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc

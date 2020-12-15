@@ -177,8 +177,8 @@ def plot(experiment_log, methods, index):
         var_ax.legend()
 
         save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
-        # plt.tight_layout()
-        # plt.savefig(f"{save_folder}/_i{index}.png")
+        plt.tight_layout()
+        plt.savefig(f"{save_folder}/_i{index}.png")
 
         # Interpolation plot
         fig, int_ax = plt.subplots(1, 1, figsize=(12, 5))

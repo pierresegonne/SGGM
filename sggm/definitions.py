@@ -156,8 +156,10 @@ def model_specific_args(params, parent_parser):
 # Experiment Names
 # -------------
 
+SHIFTED = "_shifted"
 # Regression
 TOY = "toy"
+TOY_SHIFTED = TOY + SHIFTED
 TOY_2D = "toy_2d"
 UCI_CCPP = "uci_ccpp"
 UCI_CONCRETE = "uci_concrete"
@@ -173,6 +175,7 @@ NOT_MNIST = "not_mnist"
 
 experiment_names = [
     TOY,
+    TOY_SHIFTED,
     TOY_2D,
     UCI_CONCRETE,
     UCI_CCPP,
@@ -186,6 +189,7 @@ experiment_names = [
 ]
 regression_experiments = [
     TOY,
+    TOY_SHIFTED,
     TOY_2D,
     UCI_CONCRETE,
     UCI_CCPP,

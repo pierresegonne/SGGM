@@ -1,4 +1,4 @@
-from sggm.data.toy import ToyDataModule
+from sggm.data.toy import ToyDataModule, ToyDataModuleShifted
 from sggm.data.toy_2d import Toy2DDataModule
 from sggm.data.uci_ccpp import UCICCPPDataModule
 from sggm.data.uci_concrete import UCIConcreteDataModule
@@ -13,6 +13,7 @@ from sggm.data.not_mnist import NotMNISTDataModule
 
 from sggm.definitions import (
     TOY,
+    TOY_SHIFTED,
     TOY_2D,
     UCI_CCPP,
     UCI_CONCRETE,
@@ -28,6 +29,7 @@ from sggm.definitions import (
 
 datamodules = {
     TOY: ToyDataModule,
+    TOY_SHIFTED: ToyDataModuleShifted,
     TOY_2D: Toy2DDataModule,
     UCI_CCPP: UCICCPPDataModule,
     UCI_CONCRETE: UCIConcreteDataModule,

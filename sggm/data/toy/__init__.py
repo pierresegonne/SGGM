@@ -1,1 +1,1 @@
-from sggm.data.toy.datamodule import ToyDataModule
+from sggm.data.toy.datamodule import ToyDataModule, ToyDataModuleShifted
