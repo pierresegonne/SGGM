@@ -6,6 +6,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from typing import List
 
 from sggm.data.regression_datamodule import RegressionDataModule
+from sggm.data.shifted import DataModuleShifted
 from sggm.definitions import TOY_2D_MAX_BATCH_ITERATIONS
 
 pi = torch.tensor([np.pi])
@@ -21,11 +22,11 @@ class Toy2DDataModule(RegressionDataModule):
         train_val_split: float = 0.9,
         **kwargs,
     ):
-        super(Toy2DDataModule, self).__init__(
+        RegressionDataModule.__init__(
+            self,
             batch_size,
             n_workers,
             train_val_split,
-            **kwargs,
         )
         self.N_train = N_train
         self.N_test = N_test
@@ -107,3 +108,32 @@ class Toy2DDataModule(RegressionDataModule):
             central_std = 0
         inc_sin_std = torch.abs(0.3 * torch.sqrt(1 + r * r))
         return central_std + inc_sin_std
+
+
+class Toy2DDataModuleShifted(Toy2DDataModule, DataModuleShifted):
+    def __init__(
+        self,
+        batch_size: int,
+        n_workers: int,
+        N_train: int = 2000,
+        N_test: int = 1000,
+        train_val_split: float = 0.9,
+        shifting_proportion_total: float = 0.1,
+        shifting_proportion_k: float = 1e-2,
+        **kwargs,
+    ):
+        Toy2DDataModule.__init__(
+            self,
+            batch_size,
+            n_workers,
+            N_train,
+            N_test,
+            train_val_split,
+        )
+        DataModuleShifted.__init__(
+            self, shifting_proportion_total, shifting_proportion_k
+        )
+
+    def setup(self, stage: str = None):
+        Toy2DDataModule.setup(self, stage)
+        DataModuleShifted.setup(self)

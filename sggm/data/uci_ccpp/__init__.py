@@ -1,1 +1,1 @@
-from sggm.data.uci_ccpp.datamodule import UCICCPPDataModule
+from sggm.data.uci_ccpp.datamodule import UCICCPPDataModule, UCICCPPDataModuleShifted

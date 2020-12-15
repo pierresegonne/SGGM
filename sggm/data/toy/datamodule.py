@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader
 
 from sggm.data.regression_datamodule import RegressionDataModule
-from sggm.data.shifted import generate_shift
+from sggm.data.shifted import DataModuleShifted
 from sggm.definitions import TOY_MAX_BATCH_ITERATIONS
 
 
@@ -85,7 +85,7 @@ class ToyDataModule(RegressionDataModule):
         return torch.abs(0.3 * torch.sqrt(1 + x * x))
 
 
-class ToyDataModuleShifted(ToyDataModule):
+class ToyDataModuleShifted(ToyDataModule, DataModuleShifted):
     def __init__(
         self,
         batch_size: int,
@@ -105,19 +105,10 @@ class ToyDataModuleShifted(ToyDataModule):
             N_test,
             train_val_split,
         )
-
-        self.shifting_proportion_k = shifting_proportion_k
-        self.shifting_proportion_total = shifting_proportion_total
+        DataModuleShifted.__init__(
+            self, shifting_proportion_total, shifting_proportion_k
+        )
 
     def setup(self, stage: str = None):
         ToyDataModule.setup(self, stage)
-
-        train, test = generate_shift(
-            (self.shifting_proportion_total, self.shifting_proportion_k),
-            self.train_dataset.dataset.tensors,
-            self.test_dataset.tensors,
-        )
-
-        self.train_dataset = TensorDataset(*train)
-        self.setup_train_val_datasets(self.train_dataset)
-        self.test_dataset = TensorDataset(*test)
+        DataModuleShifted.setup(self)

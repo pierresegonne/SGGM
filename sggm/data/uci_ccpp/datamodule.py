@@ -2,6 +2,7 @@ import pandas as pd
 import pathlib
 
 from sggm.data.uci import UCIDataModule
+from sggm.data.shifted import DataModuleShifted
 
 DATA_FILENAME = "ccpp.csv"
 """
@@ -21,12 +22,12 @@ class UCICCPPDataModule(UCIDataModule):
         test_split: float = 0.1,
         **kwargs,
     ):
-        super(UCICCPPDataModule, self).__init__(
+        UCIDataModule.__init__(
+            self,
             batch_size,
             n_workers,
             train_val_split,
             test_split,
-            **kwargs,
         )
 
         # Manual as we know it
@@ -40,7 +41,34 @@ class UCICCPPDataModule(UCIDataModule):
         x = df.drop(columns=[Y_LABEL]).values
         y = df[Y_LABEL].values
 
-        super(UCICCPPDataModule, self).setup(x, y)
+        UCIDataModule.setup(self, x, y)
+
+
+class UCICCPPDataModuleShifted(UCICCPPDataModule, DataModuleShifted):
+    def __init__(
+        self,
+        batch_size: int,
+        n_workers: int,
+        train_val_split: float = 0.9,
+        test_split: float = 0.1,
+        shifting_proportion_total: float = 0.1,
+        shifting_proportion_k: float = 1e-2,
+        **kwargs,
+    ):
+        UCICCPPDataModule.__init__(
+            self,
+            batch_size,
+            n_workers,
+            train_val_split,
+            test_split,
+        )
+        DataModuleShifted.__init__(
+            self, shifting_proportion_total, shifting_proportion_k
+        )
+
+    def setup(self, stage: str = None):
+        UCICCPPDataModule.setup(self, stage)
+        DataModuleShifted.setup(self)
 
 
 if __name__ == "__main__":

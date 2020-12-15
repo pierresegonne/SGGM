@@ -24,12 +24,19 @@ from sggm.definitions import (
     TOY,
     TOY_SHIFTED,
     TOY_2D,
+    TOY_2D_SHIFTED,
     UCI_CCPP,
+    UCI_CCPP_SHIFTED,
     UCI_CONCRETE,
+    UCI_CONCRETE_SHIFTED,
     UCI_SUPERCONDUCT,
+    UCI_SUPERCONDUCT_SHIFTED,
     UCI_WINE_RED,
+    UCI_WINE_RED_SHIFTED,
     UCI_WINE_WHITE,
+    UCI_WINE_WHITE_SHIFTED,
     UCI_YACHT,
+    UCI_YACHT_SHIFTED,
     #
     MNIST,
     FASHION_MNIST,
@@ -64,15 +71,21 @@ def clean_dict(dic: dict) -> dict:
 
 
 def activation_function(experiment_name):
-    if experiment_name in [TOY, TOY_SHIFTED, TOY_2D]:
+    if experiment_name in [TOY, TOY_SHIFTED, TOY_2D, TOY_2D_SHIFTED]:
         return F_SIGMOID
     elif experiment_name in [
         UCI_CCPP,
+        UCI_CCPP_SHIFTED,
         UCI_CONCRETE,
+        UCI_CONCRETE_SHIFTED,
         UCI_SUPERCONDUCT,
+        UCI_SUPERCONDUCT_SHIFTED,
         UCI_WINE_RED,
+        UCI_WINE_RED_SHIFTED,
         UCI_WINE_WHITE,
+        UCI_WINE_WHITE_SHIFTED,
         UCI_YACHT,
+        UCI_YACHT_SHIFTED,
     ]:
         return F_ELU
 

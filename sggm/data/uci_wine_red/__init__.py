@@ -1,1 +1,4 @@
-from sggm.data.uci_wine_red.datamodule import UCIWineRedDataModule
+from sggm.data.uci_wine_red.datamodule import (
+    UCIWineRedDataModule,
+    UCIWineRedDataModuleShifted,
+)

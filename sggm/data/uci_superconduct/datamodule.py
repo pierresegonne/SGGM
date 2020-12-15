@@ -2,6 +2,7 @@ import pandas as pd
 import pathlib
 
 from sggm.data.uci import UCIDataModule
+from sggm.data.shifted import DataModuleShifted
 
 DATA_FILENAME = "raw.csv"
 """
@@ -39,3 +40,30 @@ class UCISuperConductDataModule(UCIDataModule):
         y = df[Y_LABEL].values
 
         super(UCISuperConductDataModule, self).setup(x, y)
+
+
+class UCISuperConductDataModuleShifted(UCISuperConductDataModule, DataModuleShifted):
+    def __init__(
+        self,
+        batch_size: int,
+        n_workers: int,
+        train_val_split: float = 0.9,
+        test_split: float = 0.1,
+        shifting_proportion_total: float = 0.1,
+        shifting_proportion_k: float = 1e-2,
+        **kwargs,
+    ):
+        UCISuperConductDataModule.__init__(
+            self,
+            batch_size,
+            n_workers,
+            train_val_split,
+            test_split,
+        )
+        DataModuleShifted.__init__(
+            self, shifting_proportion_total, shifting_proportion_k
+        )
+
+    def setup(self, stage: str = None):
+        UCISuperConductDataModule.setup(self, stage)
+        DataModuleShifted.setup(self)

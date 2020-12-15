@@ -79,3 +79,31 @@ def generate_shift(
     y_train = y_train[in_any_b_k == 0]
 
     return (x_train, y_train), (x_test, y_test)
+
+
+class DataModuleShifted:
+    """
+    Add-on class to introduce shift between the training and testing distibutions.
+    [NOTE]: Implicitely assumes that is used in combinaison with a children of another DataModule
+    """
+
+    def __init__(
+        self,
+        shifting_proportion_total: float = 0.1,
+        shifting_proportion_k: float = 1e-2,
+        *args,
+        **kwargs
+    ):
+        self.shifting_proportion_total = shifting_proportion_total
+        self.shifting_proportion_k = shifting_proportion_k
+
+    def setup(self):
+        train, test = generate_shift(
+            (self.shifting_proportion_total, self.shifting_proportion_k),
+            self.train_dataset.dataset.tensors,
+            self.test_dataset.tensors,
+        )
+
+        self.train_dataset = TensorDataset(*train)
+        self.setup_train_val_datasets(self.train_dataset)
+        self.test_dataset = TensorDataset(*test)

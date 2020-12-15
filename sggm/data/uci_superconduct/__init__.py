@@ -1,1 +1,4 @@
-from sggm.data.uci_superconduct.datamodule import UCISuperConductDataModule
+from sggm.data.uci_superconduct.datamodule import (
+    UCISuperConductDataModule,
+    UCISuperConductDataModuleShifted,
+)
