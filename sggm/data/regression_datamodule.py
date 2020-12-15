@@ -2,6 +2,8 @@ import multiprocessing
 import numpy as np
 import pytorch_lightning as pl
 
+from torch.utils.data import random_split
+
 """
 Abstraction level for all regression datamodules
 """
@@ -16,9 +18,8 @@ class RegressionDataModule(pl.LightningDataModule):
         n_workers: int,
         train_val_split: float = 0.9,
         test_split: float = 0.1,
-        **kwargs,
     ):
-        super(RegressionDataModule, self).__init__()
+        pl.LightningDataModule.__init__(self)
         self.batch_size = batch_size
         self.train_val_split = train_val_split
         self.test_split = test_split
@@ -34,6 +35,14 @@ class RegressionDataModule(pl.LightningDataModule):
         assert hasattr(
             self, "train_dataset"
         ), "max_batch_iterations can only be accessed once the datamodule has been setup."
+
+    def setup_train_val_datasets(self, train_dataset):
+        N_train = train_dataset.tensors[0].shape[0]
+        train_size = int(N_train * self.train_val_split)
+        val_size = N_train - train_size
+        self.train_dataset, self.val_dataset = random_split(
+            train_dataset, [train_size, val_size]
+        )
 
     @property
     def max_epochs(self):

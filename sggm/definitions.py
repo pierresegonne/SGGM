@@ -42,6 +42,9 @@ N_TRIALS = "n_trials"
 N_MC_SAMPLES = "n_mc_samples"
 N_WORKERS = "n_workers"  # num workers for data loading set to None will take N_cpus
 
+SHIFTING_PROPORTION_TOTAL = "shifting_proportion_total"
+SHIFTING_PROPORTION_K = "shifting_proportion_k"
+
 ENCODER_TYPE = "encoder_type"
 # Options for ENCODER_TYPE
 ENCODER_FULLY_CONNECTED = "encoder_fully_connected"
@@ -98,6 +101,9 @@ parameters = {
     N_TRIALS: Param(N_TRIALS, 1, int),
     N_WORKERS: Param(N_WORKERS, 0, none_or_int),
     EARLY_STOPPING_PATIENCE: Param(EARLY_STOPPING_PATIENCE, 50, int),
+    #
+    SHIFTING_PROPORTION_TOTAL: Param(SHIFTING_PROPORTION_TOTAL, 1e-1, float),
+    SHIFTING_PROPORTION_K: Param(SHIFTING_PROPORTION_K, 1e-2, float),
 }
 
 # -------------

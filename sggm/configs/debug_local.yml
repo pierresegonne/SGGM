@@ -10,6 +10,8 @@
   # ood_x_generation_method: optimised_x_ood_brute_force
   # pl trainer
   early_stopping_patience: 250
+  shifting_proportion_total: 0.5
+  shifting_proportion_k: 0.004
   n_trials: 1
   max_epochs: -1
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)

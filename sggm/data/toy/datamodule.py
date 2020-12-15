@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader
 
 from sggm.data.regression_datamodule import RegressionDataModule
-from sggm.data.shifted import density, radius
+from sggm.data.shifted import generate_shift
 from sggm.definitions import TOY_MAX_BATCH_ITERATIONS
 
 
@@ -17,11 +17,11 @@ class ToyDataModule(RegressionDataModule):
         train_val_split: float = 0.9,
         **kwargs,
     ):
-        super(ToyDataModule, self).__init__(
+        RegressionDataModule.__init__(
+            self,
             batch_size,
             n_workers,
             train_val_split,
-            **kwargs,
         )
         self.N_train = N_train
         self.N_test = N_test
@@ -51,14 +51,6 @@ class ToyDataModule(RegressionDataModule):
         self.train_dataset = TensorDataset(x_train, y_train)
         self.setup_train_val_datasets(self.train_dataset)
         self.test_dataset = TensorDataset(x_test, y_test)
-
-    def setup_train_val_datasets(self, train_dataset):
-        N_train = train_dataset.tensors[0].shape[0]
-        train_size = int(N_train * self.train_val_split)
-        val_size = N_train - train_size
-        self.train_dataset, self.val_dataset = torch.utils.data.random_split(
-            train_dataset, [train_size, val_size]
-        )
 
     def train_dataloader(self):
         return DataLoader(
@@ -101,53 +93,37 @@ class ToyDataModuleShifted(ToyDataModule):
         N_train: int = 625,
         N_test: int = 1000,
         train_val_split: float = 0.9,
-        shifting_proportion_k: float = 1e-2,
         shifting_proportion_total: float = 0.1,
+        shifting_proportion_k: float = 1e-2,
         **kwargs,
     ):
-        super(ToyDataModuleShifted, self).__init__(
+        ToyDataModule.__init__(
+            self,
             batch_size,
             n_workers,
             N_train,
             N_test,
             train_val_split,
-            **kwargs,
         )
 
         self.shifting_proportion_k = shifting_proportion_k
         self.shifting_proportion_total = shifting_proportion_total
 
     def setup(self, stage: str = None):
-        super(ToyDataModuleShifted, self).setup(stage)
+        ToyDataModule.setup(self, stage)
 
-        x_train, y_train = self.train_dataset.dataset.tensors
-        x_test, y_test = self.test_dataset.tensors
-
-        # Sample 1% of training samples to serve as center for hyperballs
-        K = int(self.shifting_proportion_k * self.N_train)
-        idx_k = torch.multinomial(
-            torch.ones_like(x_train).flatten(), K, replacement=False
+        train, test = generate_shift(
+            (self.shifting_proportion_total, self.shifting_proportion_k),
+            self.train_dataset.dataset.tensors,
+            self.test_dataset.tensors,
         )
-        x_k = x_train[idx_k]
+        print(train[0].shape)
 
-        # Determine average distance between points
-        dist = radius(
-            self.shifting_proportion_total, self.shifting_proportion_k, x_train
-        )
-
-        # Any point laying inside any hyperball gets affected to test
-        in_any_b_k = torch.where(
-            torch.where(torch.cdist(x_train, x_k) < dist, 1, 0).sum(dim=1) >= 1,
-            1,
-            0,
-        )
-
-        x_test = torch.cat((x_test, x_train[in_any_b_k == 1]), dim=0)
-        y_test = torch.cat((y_test, y_train[in_any_b_k == 1]), dim=0)
-
-        x_train = x_train[in_any_b_k == 0]
-        y_train = y_train[in_any_b_k == 0]
-
-        self.train_dataset = TensorDataset(x_train, y_train)
+        self.train_dataset = TensorDataset(*train)
         self.setup_train_val_datasets(self.train_dataset)
-        self.test_dataset = TensorDataset(x_test, y_test)
+        self.test_dataset = TensorDataset(*test)
+
+        print(
+            self.test_dataset.tensors[0].shape,
+            self.train_dataset.dataset.tensors[0].shape,
+        )
