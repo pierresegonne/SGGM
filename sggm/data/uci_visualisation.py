@@ -7,7 +7,11 @@ import seaborn as sns
 import torch
 
 from sklearn.decomposition import PCA
-from sggm.data.uci_ccpp.datamodule import UCICCPPDataModule, COLUMNS as uci_ccpp_columns
+from sggm.data.uci_ccpp.datamodule import (
+    UCICCPPDataModule,
+    UCICCPPDataModuleShifted,
+    COLUMNS as uci_ccpp_columns,
+)
 from sggm.data.uci_concrete.datamodule import (
     UCIConcreteDataModule,
     COLUMNS as uci_concrete_columns,
@@ -36,10 +40,19 @@ from sggm.definitions import (
 
 def main(experiment_name, with_pca=False):
 
+    # Investigate shift effect on pairplot
+    SHIFTED = True
+
     # Get correct datamodule
     bs = 10000
     if experiment_name == UCI_CCPP:
-        dm = UCICCPPDataModule(bs, 0)
+        dm = (
+            UCICCPPDataModuleShifted(
+                bs, 0, shifting_proportion_total=0.99, shifting_proportion_k=0.0001
+            )
+            if SHIFTED
+            else UCICCPPDataModule(bs, 0)
+        )
         columns = uci_ccpp_columns
     elif experiment_name == UCI_CONCRETE:
         dm = UCIConcreteDataModule(bs, 0)
@@ -64,7 +77,14 @@ def main(experiment_name, with_pca=False):
     df_columns = columns + ["dataset"]
     df = pd.DataFrame(columns=df_columns)
 
-    for idx_ds, ds in enumerate([train, val, test]):
+    TEST_FIRST = True
+    if TEST_FIRST:
+        dataset_order = [test, val, train]
+        dataset_names = ["test", "val", "train"]
+    else:
+        dataset_order = [train, val, test]
+        dataset_names = ["test", "val", "train"]
+    for idx_ds, ds in enumerate(dataset_order):
         x, y = ds
         dump = np.concatenate(
             (x.numpy(), y.numpy(), idx_ds * torch.ones_like(y).numpy()), axis=1
@@ -73,7 +93,7 @@ def main(experiment_name, with_pca=False):
         df = df.append(update_df, ignore_index=True)
 
     # correct dataset name
-    dataset_names = ["train", "val", "test"]
+
     df["dataset"] = df["dataset"].map({i: v for i, v in enumerate(dataset_names)})
 
     sns.pairplot(
