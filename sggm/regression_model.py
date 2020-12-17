@@ -184,7 +184,7 @@ class VariationalRegressor(pl.LightningModule):
         self.example_input_array = torch.rand((10, self.input_dim))
 
         self._marginal_loss = False
-        self._ood_ellk = True
+        self._ood_ellk = False
 
         # Save hparams
         self.save_hyperparameters(
