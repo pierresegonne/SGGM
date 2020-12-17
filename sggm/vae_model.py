@@ -27,6 +27,11 @@ from sggm.definitions import (
     ENCODER_CONVOLUTIONAL,
     ENCODER_FULLY_CONNECTED,
 )
+from sggm.definitions import (
+    TRAIN_LOSS,
+    EVAL_LOSS,
+    TEST_LOSS,
+)
 from sggm.types_ import List, Tensor
 
 
@@ -181,7 +186,7 @@ class VanillaVAE(pl.LightningModule):
         loss = -self.elbo(expected_log_likelihood, kl_divergence)
 
         logs = {
-            "recon_loss": expected_log_likelihood,
+            "ellk": expected_log_likelihood,
             "kl": kl_divergence,
             "loss": loss,
         }
@@ -189,14 +194,17 @@ class VanillaVAE(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        self.log_dict(
-            {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
-        )
+        self.log(TRAIN_LOSS, loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        self.log_dict({f"val_{k}": v for k, v in logs.items()})
+        self.log(EVAL_LOSS, loss)
+        return loss
+    
+    def test_step(self, batch, batch_idx):
+        loss, logs = self.step(batch, batch_idx)
+        self.log(TEST_LOSS, loss)
         return loss
 
     def configure_optimizers(self):
