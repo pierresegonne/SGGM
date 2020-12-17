@@ -4,9 +4,16 @@ import os
 import torch
 import yaml
 
-from sggm.definitions import regression_experiments, TEST_LOSS
+from sggm.definitions import (
+    generative_experiments,
+    regression_experiments,
+    TEST_LOSS,
+    VANILLA_VAE,
+    VV_VAE,
+)
 from sggm.experiment import activation_function
 from sggm.regression_model import VariationalRegressor
+from sggm.vae_model import VanillaVAE, V3AE
 
 
 def version_dir(path):
@@ -44,11 +51,14 @@ class VersionLog:
 
 
 class ExperimentLog:
-    # TODO handle generative
-    def __init__(self, experiment_name, name, save_dir="../lightning_logs"):
+    def __init__(
+        self, experiment_name, name, model_name=None, save_dir="../lightning_logs"
+    ):
         self.experiment_name = experiment_name
         self.name = name
+        self.model_name = model_name
         self.save_dir = save_dir
+
         # Verify the existence of log
         assert os.path.exists(
             f"{save_dir}/{experiment_name}/{name}"
@@ -57,6 +67,17 @@ class ExperimentLog:
         # Attribute the right PL Module for loading
         if self.experiment_name in regression_experiments:
             pl_module = VariationalRegressor
+        elif self.experiment_name in generative_experiments:
+            if self.model_name == VANILLA_VAE:
+                pl_module = VanillaVAE
+            elif self.model_name == VV_VAE:
+                pl_module = V3AE
+            else:
+                raise NotImplementedError(f"Model {self.model_name} not implemented")
+        else:
+            raise NotImplementedError(
+                f"Experiment {self.experiment_name} is not supported"
+            )
 
         self.versions = [
             VersionLog(

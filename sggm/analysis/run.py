@@ -2,42 +2,74 @@ import argparse
 
 from sggm.analysis.experiment_log import ExperimentLog
 from sggm.analysis.parse_results_to_csv import parse_results
+
+from sggm.analysis.mnist import mnist_plot
 from sggm.analysis.toy import toy_plot
 from sggm.analysis.toy_2d import toy_2d_plot
 from sggm.analysis.uci import uci_plot
-from sggm.definitions import experiment_names, TOY, TOY_SHIFTED, TOY_2D
+
 from sggm.definitions import (
-    UCI_CONCRETE,
+    experiment_names,
+    TOY,
+    TOY_SHIFTED,
+    TOY_2D,
+    TOY_2D_SHIFTED,
     UCI_CCPP,
+    UCI_CCPP_SHIFTED,
+    UCI_CONCRETE,
+    UCI_CONCRETE_SHIFTED,
     UCI_SUPERCONDUCT,
+    UCI_SUPERCONDUCT_SHIFTED,
     UCI_WINE_RED,
+    UCI_WINE_RED_SHIFTED,
     UCI_WINE_WHITE,
+    UCI_WINE_WHITE_SHIFTED,
     UCI_YACHT,
+    UCI_YACHT_SHIFTED,
+    #
+    MNIST,
+    FASHION_MNIST,
+    NOT_MNIST,
 )
 from sggm.regression_model import check_available_methods, MARGINAL
 
 UCI = [
-    UCI_CONCRETE,
     UCI_CCPP,
+    UCI_CCPP_SHIFTED,
+    UCI_CONCRETE,
+    UCI_CONCRETE_SHIFTED,
     UCI_SUPERCONDUCT,
+    UCI_SUPERCONDUCT_SHIFTED,
     UCI_WINE_RED,
+    UCI_WINE_RED_SHIFTED,
     UCI_WINE_WHITE,
+    UCI_WINE_WHITE_SHIFTED,
     UCI_YACHT,
+    UCI_YACHT_SHIFTED,
+]
+MNIST = [
+    MNIST,
+    FASHION_MNIST,
+    NOT_MNIST,
 ]
 
 
-def run_analysis(experiment_name, names, save_dir, **kwargs):
+def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
     for name in names:
-        experiment_log = ExperimentLog(experiment_name, name, save_dir=save_dir)
+        experiment_log = ExperimentLog(
+            experiment_name, name, model_name=model_name, save_dir=save_dir
+        )
         print(
             f"-- Best version: {experiment_log.versions[experiment_log.idx_best_version].version_id}"
         )
         if experiment_name in [TOY, TOY_SHIFTED]:
             toy_plot(experiment_log, **kwargs)
-        elif experiment_name == TOY_2D:
+        elif experiment_name == [TOY_2D, TOY_2D_SHIFTED]:
             toy_2d_plot(experiment_log, **kwargs)
         elif experiment_name in UCI:
             uci_plot(experiment_log, **kwargs)
+        elif experiment_name in MNIST:
+            mnist_plot(experiment_log, **kwargs)
 
 
 def add_experiment_args(parser, experiment_name):
@@ -75,6 +107,7 @@ if __name__ == "__main__":
         required=True,
         help="Comma delimited list of names, ex 'test1,test2'",
     )
+    parser.add_argument("--model_name", type=str, default=None)
     parser.add_argument("--save_dir", type=str, default="../lightning_logs")
     args, unknown_args = parser.parse_known_args()
 

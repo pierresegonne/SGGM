@@ -87,6 +87,9 @@ def activation_function(experiment_name):
         UCI_WINE_WHITE_SHIFTED,
         UCI_YACHT,
         UCI_YACHT_SHIFTED,
+        MNIST,
+        FASHION_MNIST,
+        NOT_MNIST,
     ]:
         return F_ELU
 

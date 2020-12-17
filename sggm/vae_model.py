@@ -124,7 +124,7 @@ class VanillaVAE(pl.LightningModule):
     ):
         super(VanillaVAE, self).__init__()
 
-        self.input_dims = input_dims
+        self.input_dims = list(input_dims)
         self.latent_dim = latent_dim
         self.enc_out_dim = enc_out_dim
         self.activation = activation
@@ -141,6 +141,15 @@ class VanillaVAE(pl.LightningModule):
         #     self.latent_dim, self.input_dim, first_conv, maxpool1
         # )
         self.decoder = decoder_dense(latent_dim, flattened_dim, activation)
+
+        # Save hparams
+        # TODO this might bug due to input dims type
+        self.save_hyperparameters(
+            "input_dims",
+            "latent_dim",
+            "enc_out_dim",
+            "encoder_type",
+        )
 
     @staticmethod
     def ellk(x, x_hat):
@@ -201,7 +210,7 @@ class VanillaVAE(pl.LightningModule):
         loss, logs = self.step(batch, batch_idx)
         self.log(EVAL_LOSS, loss)
         return loss
-    
+
     def test_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
         self.log(TEST_LOSS, loss)

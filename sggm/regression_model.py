@@ -190,6 +190,8 @@ class VariationalRegressor(pl.LightningModule):
         self.save_hyperparameters(
             "input_dim",
             "hidden_dim",
+            "lr",
+            "activation",
             "prior_α",
             "prior_β",
             "β_elbo",
