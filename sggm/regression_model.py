@@ -421,7 +421,7 @@ class VariationalRegressor(pl.LightningModule):
         ) + self.β_ood * torch.mean(kl_divergence_out)
 
         if self._ood_ellk:
-            nellk_out = - expected_log_likelihood_out
+            nellk_out = -expected_log_likelihood_out
             loss = -self.elbo(
                 expected_log_likelihood, kl_divergence
             ) - self.β_ood * self.elbo(nellk_out, kl_divergence_out)
@@ -459,6 +459,7 @@ class VariationalRegressor(pl.LightningModule):
         self.log(EVAL_LOSS, loss, on_epoch=True)
         if self.ood_generator_v is not None:
             self.log("ood_generator_v", self.ood_generator_v, on_epoch=True)
+        return loss
 
     def test_step(self, batch, batch_idx):
         x, y = batch
@@ -528,6 +529,7 @@ class VariationalRegressor(pl.LightningModule):
 
         # Noise KL
         self.log(NOISE_KL, torch.mean(kl_divergence), on_epoch=True)
+        return loss
 
     # ---------
     def configure_optimizers(self):
