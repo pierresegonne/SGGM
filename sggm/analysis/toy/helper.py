@@ -21,7 +21,7 @@ data_range_plot = [-10, 20]
 data_range_training = [0, 10]
 
 
-def get_plot_dataset(N: int = 1000) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def get_plot_dataset(N: int = 5000) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     x = torch.linspace(*data_range_plot, steps=N)[:, None]
 
     return x, ToyDataModule.data_mean(x), ToyDataModule.data_std(x)
