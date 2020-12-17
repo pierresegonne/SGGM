@@ -14,18 +14,22 @@ from sggm.data.uci_ccpp.datamodule import (
 )
 from sggm.data.uci_concrete.datamodule import (
     UCIConcreteDataModule,
+    UCIConcreteDataModuleShifted,
     COLUMNS as uci_concrete_columns,
 )
 from sggm.data.uci_wine_red.datamodule import (
     UCIWineRedDataModule,
+    UCIWineRedDataModuleShifted,
     COLUMNS as uci_wine_red_columns,
 )
 from sggm.data.uci_wine_white.datamodule import (
     UCIWineWhiteDataModule,
+    UCIWineWhiteDataModuleShifted,
     COLUMNS as uci_wine_white_columns,
 )
 from sggm.data.uci_yacht.datamodule import (
     UCIYachtDataModule,
+    UCIYachtDataModuleShifted,
     COLUMNS as uci_yacht_columns,
 )
 from sggm.definitions import (
@@ -40,31 +44,61 @@ from sggm.definitions import (
 
 def main(experiment_name, with_pca=False):
 
+    # Order of plotting
+    TEST_FIRST = True
+
     # Investigate shift effect on pairplot
     SHIFTED = True
+    sp_tot = 0.5
+    sp_k = 0.003
+    TEST_FIRST = True if SHIFTED else TEST_FIRST
 
     # Get correct datamodule
     bs = 10000
     if experiment_name == UCI_CCPP:
         dm = (
             UCICCPPDataModuleShifted(
-                bs, 0, shifting_proportion_total=0.99, shifting_proportion_k=0.0001
+                bs, 0, shifting_proportion_total=sp_tot, shifting_proportion_k=sp_k
             )
             if SHIFTED
             else UCICCPPDataModule(bs, 0)
         )
         columns = uci_ccpp_columns
     elif experiment_name == UCI_CONCRETE:
-        dm = UCIConcreteDataModule(bs, 0)
+        dm = (
+            UCIConcreteDataModuleShifted(
+                bs, 0, shifting_proportion_total=sp_tot, shifting_proportion_k=sp_k
+            )
+            if SHIFTED
+            else UCIConcreteDataModule(bs, 0)
+        )
         columns = uci_concrete_columns
     elif experiment_name == UCI_WINE_RED:
-        dm = UCIWineRedDataModule(bs, 0)
+        dm = (
+            UCIWineRedDataModuleShifted(
+                bs, 0, shifting_proportion_total=sp_tot, shifting_proportion_k=sp_k
+            )
+            if SHIFTED
+            else UCIWineRedDataModule(bs, 0)
+        )
         columns = uci_wine_red_columns
     elif experiment_name == UCI_WINE_WHITE:
-        dm = UCIWineWhiteDataModule(bs, 0)
+        dm = (
+            UCIWineWhiteDataModuleShifted(
+                bs, 0, shifting_proportion_total=sp_tot, shifting_proportion_k=sp_k
+            )
+            if SHIFTED
+            else UCIWineWhiteDataModule(bs, 0)
+        )
         columns = uci_wine_white_columns
     elif experiment_name == UCI_YACHT:
-        dm = UCIYachtDataModule(bs, 0)
+        dm = (
+            UCIYachtDataModuleShifted(
+                bs, 0, shifting_proportion_total=sp_tot, shifting_proportion_k=sp_k
+            )
+            if SHIFTED
+            else UCIYachtDataModule(bs, 0)
+        )
         columns = uci_yacht_columns
     dm.setup()
 
@@ -77,7 +111,6 @@ def main(experiment_name, with_pca=False):
     df_columns = columns + ["dataset"]
     df = pd.DataFrame(columns=df_columns)
 
-    TEST_FIRST = True
     if TEST_FIRST:
         dataset_order = [test, val, train]
         dataset_names = ["test", "val", "train"]
