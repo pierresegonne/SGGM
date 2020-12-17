@@ -10,6 +10,7 @@ MODEL_NAME = "model_name"
 # -------------
 
 # All parameters for an experiment must be defined here
+SEED = "seed"
 BATCH_SIZE = "batch_size"
 β_ELBO = "beta_elbo"
 β_OOD = "beta_ood"
@@ -101,6 +102,7 @@ parameters = {
     N_TRIALS: Param(N_TRIALS, 1, int),
     N_WORKERS: Param(N_WORKERS, 0, none_or_int),
     EARLY_STOPPING_PATIENCE: Param(EARLY_STOPPING_PATIENCE, 50, int),
+    SEED: Param(SEED, None, none_or_int),
     #
     SHIFTING_PROPORTION_TOTAL: Param(SHIFTING_PROPORTION_TOTAL, 1e-1, float),
     SHIFTING_PROPORTION_K: Param(SHIFTING_PROPORTION_K, 1e-2, float),

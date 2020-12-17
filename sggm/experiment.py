@@ -1,10 +1,11 @@
 import copy
 import json
+import numpy as np
 import os
 import pytorch_lightning as pl
-import yaml
+import random
 import torch
-
+import yaml
 
 from argparse import ArgumentParser, Namespace
 from torch.utils.data import DataLoader, random_split
@@ -345,6 +346,11 @@ def cli_main():
         experiment = Experiment(_experiments_config[experiment_idx])
         print(f"--- Starting Experiment {clean_dict(experiment.__dict__)}")
         for n_t in range(experiment.n_trials):
+
+            if isinstance(experiment.seed, int):
+                torch.manual_seed(experiment.seed)
+                np.random.seed(experiment.seed)
+                random.seed(experiment.seed)
 
             # ------------
             # data

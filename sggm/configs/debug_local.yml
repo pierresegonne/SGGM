@@ -1,5 +1,6 @@
-- name: test_min_ellk_out_2
-  experiment_name: toy
+- name: test_seeding
+  experiment_name: toy_shifted
+  seed: 0
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -10,8 +11,28 @@
   ood_x_generation_method: gaussian_noise_around_x
   # pl trainer
   early_stopping_patience: 250
-  n_trials: 5
-  max_epochs: -1
+  n_trials: 1
+  max_epochs: 500
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: test_seeding_2
+  experiment_name: toy_shifted
+  seed: 0
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.025
+  prior_beta: 0.5
+  ood_x_generation_method: gaussian_noise_around_x
+  # pl trainer
+  early_stopping_patience: 250
+  n_trials: 1
+  max_epochs: 500
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
