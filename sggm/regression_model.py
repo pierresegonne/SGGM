@@ -183,6 +183,8 @@ class VariationalRegressor(pl.LightningModule):
         self.pp = tcd.Gamma(prior_α, prior_β)
         self.example_input_array = torch.rand((10, self.input_dim))
 
+        self._marginal_loss = False
+
         # Save hparams
         self.save_hyperparameters(
             "input_dim",
@@ -413,13 +415,16 @@ class VariationalRegressor(pl.LightningModule):
             expected_log_likelihood_out = torch.zeros((1,)).type_as(x)
             kl_divergence_out = torch.zeros((1,)).type_as(x)
 
-        # loss = -self.elbo(
-        #     expected_log_likelihood, kl_divergence
-        # ) + self.β_ood * torch.mean(kl_divergence_out)
+        loss = -self.elbo(
+            expected_log_likelihood, kl_divergence
+        ) + self.β_ood * torch.mean(kl_divergence_out)
 
         # Define the marginal y|x
-        m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
-        loss = -torch.mean(m_p.log_prob(y)) + self.β_ood * torch.mean(kl_divergence_out)
+        if self._marginal_loss:
+            m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
+            loss = -torch.mean(m_p.log_prob(y)) + self.β_ood * torch.mean(
+                kl_divergence_out
+            )
 
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
             self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
@@ -437,11 +442,12 @@ class VariationalRegressor(pl.LightningModule):
             # Avoid exploding gradients
             self.tune_on_validation(x, kl=kl_divergence)
         # --
-        # loss = -self.elbo(log_likelihood, kl_divergence, train=False)
+        loss = -self.elbo(log_likelihood, kl_divergence, train=False)
 
         # Define the marginal y|x
-        m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
-        loss = -torch.mean(m_p.log_prob(y))
+        if self._marginal_loss:
+            m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
+            loss = -torch.mean(m_p.log_prob(y))
 
         self.log(EVAL_LOSS, loss, on_epoch=True)
         if self.ood_generator_v is not None:
@@ -452,12 +458,13 @@ class VariationalRegressor(pl.LightningModule):
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.ellk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-        # loss = -self.elbo(log_likelihood, kl_divergence, train=False)
+        loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         y_pred = self.predictive_mean(x)
 
         # Define the marginal y|x
-        m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
-        loss = -torch.mean(m_p.log_prob(y))
+        if self._marginal_loss:
+            m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
+            loss = -torch.mean(m_p.log_prob(y))
         # ---------
         # Metrics
         self.log(TEST_LOSS, loss, on_epoch=True)

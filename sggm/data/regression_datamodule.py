@@ -10,9 +10,6 @@ Abstraction level for all regression datamodules
 
 N_cpus = multiprocessing.cpu_count()
 
-import inspect
-
-
 class RegressionDataModule(pl.LightningDataModule):
     def __init__(
         self,
@@ -21,7 +18,6 @@ class RegressionDataModule(pl.LightningDataModule):
         train_val_split: float = 0.9,
         test_split: float = 0.1,
     ):
-        print(inspect.signature(pl.LightningDataModule.__init__))
         pl.LightningDataModule.__init__(self)
         self.batch_size = batch_size
         self.train_val_split = train_val_split
