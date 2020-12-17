@@ -184,6 +184,7 @@ class VariationalRegressor(pl.LightningModule):
         self.example_input_array = torch.rand((10, self.input_dim))
 
         self._marginal_loss = False
+        self._ood_ellk = True
 
         # Save hparams
         self.save_hyperparameters(
@@ -419,6 +420,12 @@ class VariationalRegressor(pl.LightningModule):
             expected_log_likelihood, kl_divergence
         ) + self.β_ood * torch.mean(kl_divergence_out)
 
+        if self._ood_ellk:
+            nellk_out = - expected_log_likelihood_out
+            loss = -self.elbo(
+                expected_log_likelihood, kl_divergence
+            ) - self.β_ood * self.elbo(nellk_out, kl_divergence_out)
+
         # Define the marginal y|x
         if self._marginal_loss:
             m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
@@ -461,9 +468,9 @@ class VariationalRegressor(pl.LightningModule):
         loss = -self.elbo(log_likelihood, kl_divergence, train=False)
         y_pred = self.predictive_mean(x)
 
+        m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
         # Define the marginal y|x
         if self._marginal_loss:
-            m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
             loss = -torch.mean(m_p.log_prob(y))
         # ---------
         # Metrics
