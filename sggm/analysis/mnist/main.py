@@ -47,50 +47,32 @@ def plot(experiment_log):
 
     # Figures
     n_display = 3
-    train_fig = plt.figure(figsize=(8, 6))
-    train_fig.suptitle("Train")
-    train_gs = train_fig.add_gridspec(n_display, 2)
-    train_gs.update(wspace=0.05, hspace=0.05)
 
-    for n in range(n_display):
-        for k in range(2):
-            train_ax = plt.subplot(train_gs[n, k])
-            # Original
-            if k == 0:
-                train_ax.imshow(x_train[n, :][0], cmap="binary")
-            # Reconstructed
-            elif k == 1:
-                train_ax.imshow(x_hat_train[n, :][0], cmap="binary")
-            train_ax = disable_ticks(train_ax)
+    def plot_comparison(n_display, title, x_og, x_hat):
+        fig = plt.figure(figsize=(8, 6))
+        fig.suptitle(title)
+        gs = fig.add_gridspec(n_display, 2)
+        gs.update(wspace=0.05, hspace=0.05)
 
-            if n == n_display - 1:
+        for n in range(n_display):
+            for k in range(2):
+                ax = plt.subplot(gs[n, k])
+                # Original
                 if k == 0:
-                    train_ax.set_xlabel("Original")
+                    ax.imshow(x_og[n, :][0], cmap="binary")
+                # Reconstructed
                 elif k == 1:
-                    train_ax.set_xlabel("Reconstructed")
+                    ax.imshow(x_hat[n, :][0], cmap="binary")
+                ax = disable_ticks(ax)
 
-    test_fig = plt.figure(figsize=(8, 6))
-    test_fig.suptitle("Test")
-    test_gs = test_fig.add_gridspec(n_display, 2)
-    test_gs.update(wspace=0.05, hspace=0.05)
+                if n == n_display - 1:
+                    if k == 0:
+                        ax.set_xlabel("Original")
+                    elif k == 1:
+                        ax.set_xlabel("Reconstructed")
 
-    for n in range(n_display):
-        for k in range(2):
-            test_ax = plt.subplot(test_gs[n, k])
-            # Original
-            if k == 0:
-                test_ax.imshow(x_test[n, :][0], cmap="binary")
-            # Reconstructed
-            elif k == 1:
-                test_ax.imshow(x_hat_test[n, :][0], cmap="binary")
-            test_ax = disable_ticks(test_ax)
-
-            if n == n_display - 1:
-                if k == 0:
-                    test_ax.set_xlabel("Original")
-                elif k == 1:
-                    test_ax.set_xlabel("Reconstructed")
+    plot_comparison(n_display, "Train", x_train, x_hat_train)
+    plot_comparison(n_display, "Test", x_test, x_hat_test)
 
     plt.tight_layout()
-
     plt.show()
