@@ -119,7 +119,7 @@ regressor_parameters = {
 variational_regressor_parameters = {
     β_ELBO: Param(β_ELBO, 1, float),
     β_OOD: Param(β_OOD, 1, float),
-    LEARNING_RATE: Param(LEARNING_RATE, 1e-3, float),
+    LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
     EPS: Param(EPS, 1e-10, float),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
     N_MC_SAMPLES: Param(N_MC_SAMPLES, 20, int),
