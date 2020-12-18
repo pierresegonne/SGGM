@@ -17,6 +17,7 @@ from sggm.definitions import (
     β_OOD,
     GAUSSIAN_NOISE_AROUND_X,
     EPS,
+    LEARNING_RATE,
     OOD_X_GENERATION_METHOD,
     OPTIMISED_X_OOD_V_PARAM,
     OPTIMISED_X_OOD_V_OPTIMISED,
@@ -117,6 +118,7 @@ class VariationalRegressor(pl.LightningModule):
         input_dim: int,
         hidden_dim: int,
         activation: str,
+        learning_rate: float = variational_regressor_parameters[LEARNING_RATE].default,
         prior_α: float = variational_regressor_parameters[PRIOR_α].default,
         prior_β: float = variational_regressor_parameters[PRIOR_β].default,
         β_elbo: float = variational_regressor_parameters[β_ELBO].default,
@@ -163,7 +165,7 @@ class VariationalRegressor(pl.LightningModule):
         self.β_ood = β_ood
         self.β_elbo = β_elbo
 
-        self.lr = 1e-2
+        self.learning_rate = learning_rate
         self.lr_v = 1e-2
         self.lr_ga_kl = 1
 
@@ -190,7 +192,7 @@ class VariationalRegressor(pl.LightningModule):
         self.save_hyperparameters(
             "input_dim",
             "hidden_dim",
-            "lr",
+            "learning_rate",
             "activation",
             "prior_α",
             "prior_β",
@@ -546,7 +548,7 @@ class VariationalRegressor(pl.LightningModule):
             ]
         optimizer = torch.optim.Adam(
             params,
-            lr=self.lr,
+            lr=self.learning_rate,
         )
         return optimizer
 

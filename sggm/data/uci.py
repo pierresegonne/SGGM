@@ -32,7 +32,6 @@ class UCIDataModule(RegressionDataModule):
             n_workers,
             train_val_split,
             test_split,
-            **kwargs,
         )
 
     def setup(self, x: np.ndarray, y: np.ndarray):

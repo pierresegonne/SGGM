@@ -97,7 +97,6 @@ class Param:
 
 parameters = {
     BATCH_SIZE: Param(BATCH_SIZE, 32, int),
-    LEARNING_RATE: Param(LEARNING_RATE, 1e-3, float),
     NAME: Param(NAME, "unnamed", str),
     N_TRIALS: Param(N_TRIALS, 1, int),
     N_WORKERS: Param(N_WORKERS, 0, none_or_int),
@@ -118,17 +117,18 @@ regressor_parameters = {
     ),
 }
 variational_regressor_parameters = {
-    HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
     β_ELBO: Param(β_ELBO, 1, float),
     β_OOD: Param(β_OOD, 1, float),
+    LEARNING_RATE: Param(LEARNING_RATE, 1e-3, float),
+    EPS: Param(EPS, 1e-10, float),
+    HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
+    N_MC_SAMPLES: Param(N_MC_SAMPLES, 20, int),
     OOD_X_GENERATION_METHOD: Param(
         OOD_X_GENERATION_METHOD,
         None,
         none_or_str,
         choices=OOD_X_GENERATION_AVAILABLE_METHODS,
     ),
-    EPS: Param(EPS, 1e-10, float),
-    N_MC_SAMPLES: Param(N_MC_SAMPLES, 20, int),
     PRIOR_α: Param(PRIOR_α, 1.05, float),
     PRIOR_β: Param(PRIOR_β, 1.0, float),
 }
