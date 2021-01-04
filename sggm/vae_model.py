@@ -203,17 +203,17 @@ class VanillaVAE(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        self.log(TRAIN_LOSS, loss)
+        self.log(TRAIN_LOSS, loss, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        self.log(EVAL_LOSS, loss)
+        self.log(EVAL_LOSS, loss, on_epoch=True)
         return loss
 
     def test_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        self.log(TEST_LOSS, loss)
+        self.log(TEST_LOSS, loss, on_epoch=True)
         return loss
 
     def configure_optimizers(self):

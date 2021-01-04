@@ -5,7 +5,7 @@
 ### -- set the job Name --
 #BSUB -J benchmark_toy_shifted
 ### -- ask for number of cores (default: 1) --
-#BSUB -n 2
+#BSUB -n 4
 #BSUB -R "span[hosts=1]"
 ### -- Select the resources: 1 gpu in exclusive process mode --
 #BSUB -gpu "num=1:mode=exclusive_process"
@@ -37,4 +37,4 @@ python3 -m venv env
 source env/bin/activate
 python3 -m pip install -r requirements.txt
 export PYTHONIOENCODING=utf8
-cd sggm/ && python experiment.py --experiments_config configs/benchmarks_shifted.yml --gpus -1
+cd sggm/ && python experiment.py --experiments_config configs/debug_local_vae.yml --gpus -1
