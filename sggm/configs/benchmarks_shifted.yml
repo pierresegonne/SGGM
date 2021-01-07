@@ -376,26 +376,26 @@
 ## ===================
 ## UCI SUPERCONDUCT
 
-- name: benchmark_mle
-  experiment_name: uci_superconduct_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0
-  beta_ood: 0
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.00005
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_mle
+#   experiment_name: uci_superconduct_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0
+#   beta_ood: 0
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.00005
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_standard_elbo
   experiment_name: uci_superconduct_shifted
@@ -411,301 +411,301 @@
   shifting_proportion_total: 0.5
   shifting_proportion_k: 0.00005
   # pl trainer
-  n_trials: 11
+  n_trials: 9
   max_epochs: -1
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_gaussian_noise
-  experiment_name: uci_superconduct_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 1
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  ood_x_generation_method: gaussian_noise
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.00005
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_gaussian_noise
+#   experiment_name: uci_superconduct_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 1
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   ood_x_generation_method: gaussian_noise
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.00005
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_v_optimised
-  experiment_name: uci_superconduct_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 1
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  ood_x_generation_method: adversarial
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.00005
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_v_optimised
+#   experiment_name: uci_superconduct_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 1
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   ood_x_generation_method: adversarial
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.00005
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-## ===================
-## UCI WINE RED
+# ## ===================
+# ## UCI WINE RED
 
-- name: benchmark_mle
-  experiment_name: uci_wine_red_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0
-  beta_ood: 0
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.001
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_mle
+#   experiment_name: uci_wine_red_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0
+#   beta_ood: 0
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.001
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_standard_elbo
-  experiment_name: uci_wine_red_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 0
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.001
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_standard_elbo
+#   experiment_name: uci_wine_red_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 0
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.001
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_gaussian_noise
-  experiment_name: uci_wine_red_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 1
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  ood_x_generation_method: gaussian_noise
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.001
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_gaussian_noise
+#   experiment_name: uci_wine_red_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 1
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   ood_x_generation_method: gaussian_noise
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.001
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_v_optimised
-  experiment_name: uci_wine_red_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 1
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  ood_x_generation_method: adversarial
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.001
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_v_optimised
+#   experiment_name: uci_wine_red_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 1
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   ood_x_generation_method: adversarial
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.001
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-## ===================
-## UCI WINE WHITE
+# ## ===================
+# ## UCI WINE WHITE
 
-- name: benchmark_mle
-  experiment_name: uci_wine_white_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0
-  beta_ood: 0
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.0004
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_mle
+#   experiment_name: uci_wine_white_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0
+#   beta_ood: 0
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.0004
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_standard_elbo
-  experiment_name: uci_wine_white_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 0
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.0004
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_standard_elbo
+#   experiment_name: uci_wine_white_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 0
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.0004
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_gaussian_noise
-  experiment_name: uci_wine_white_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 1
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  ood_x_generation_method: gaussian_noise
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.0004
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_gaussian_noise
+#   experiment_name: uci_wine_white_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 1
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   ood_x_generation_method: gaussian_noise
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.0004
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_v_optimised
-  experiment_name: uci_wine_white_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 1
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  ood_x_generation_method: adversarial
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.0004
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_v_optimised
+#   experiment_name: uci_wine_white_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 1
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   ood_x_generation_method: adversarial
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.0004
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# ===================
-# UCI YACHT
+# # ===================
+# # UCI YACHT
 
-- name: benchmark_mle
-  experiment_name: uci_yacht_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0
-  beta_ood: 0
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.006
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_mle
+#   experiment_name: uci_yacht_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0
+#   beta_ood: 0
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.006
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_standard_elbo
-  experiment_name: uci_yacht_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 0
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.006
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_standard_elbo
+#   experiment_name: uci_yacht_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 0
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.006
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_gaussian_noise
-  experiment_name: uci_yacht_shifted
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 1
-  prior_alpha: 1.05
-  prior_beta: 0.5
-  ood_x_generation_method: gaussian_noise
-  # shift
-  seed: 2
-  shifting_proportion_total: 0.5
-  shifting_proportion_k: 0.006
-  # pl trainer
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_gaussian_noise
+#   experiment_name: uci_yacht_shifted
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 1
+#   prior_alpha: 1.05
+#   prior_beta: 0.5
+#   ood_x_generation_method: gaussian_noise
+#   # shift
+#   seed: 2
+#   shifting_proportion_total: 0.5
+#   shifting_proportion_k: 0.006
+#   # pl trainer
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_v_optimised
   experiment_name: uci_yacht_shifted
