@@ -154,7 +154,7 @@ class VariationalRegressor(pl.LightningModule):
         if self.ood_x_generation_method == ADVERSARIAL:
             self.ood_generator_v = 1
         elif self.ood_x_generation_method == ADVERSARIAL_MULTISTEP:
-            self.ood_generator_v = adversarial_multistep_learning_rate
+            self.ood_generator_v = float(adversarial_multistep_learning_rate)
         elif self.ood_x_generation_method == V_PARAM:
             v_ini = nn.Parameter(
                 0.1 * torch.ones((1, self.input_dim)), requires_grad=True
@@ -312,7 +312,7 @@ class VariationalRegressor(pl.LightningModule):
                         with torch.no_grad():
                             x_ood = x_ood + step_lr * (
                                 x_ood.grad
-                                / torch.linalg.norm(x_ood.grad, dim=1)[:, None]
+                                / (torch.linalg.norm(x_ood.grad, dim=1)[:, None])
                             )
                         x_ood.requires_grad = True
 
