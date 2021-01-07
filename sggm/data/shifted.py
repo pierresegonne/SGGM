@@ -8,7 +8,11 @@ Helper for shifted datamodules
 """
 
 
-def density(x: torch.Tensor) -> torch.Tensor:
+def t_log(x: float) -> torch.Tensor:
+    return torch.log(torch.Tensor([x]))
+
+
+def log_density(x: torch.Tensor) -> torch.Tensor:
     """Computes the density of points for a set of points
 
     Args:
@@ -20,11 +24,11 @@ def density(x: torch.Tensor) -> torch.Tensor:
     hypercube_min, _ = torch.min(x, dim=0)
     hypercube_max, _ = torch.max(x, dim=0)
 
-    vol = torch.prod(hypercube_max - hypercube_min, 0)
-    return x.shape[0] / vol
+    log_vol = torch.sum(torch.log(hypercube_max - hypercube_min), 0)
+    return torch.log(torch.Tensor([x.shape[0]])) - log_vol
 
 
-def radius(p_tot: float, p_k: float, x: torch.Tensor) -> torch.Tensor:
+def log_radius(p_tot: float, p_k: float, x: torch.Tensor) -> torch.Tensor:
     """Computes the radius of the holes to introduce in the training data
 
     Args:
@@ -35,16 +39,26 @@ def radius(p_tot: float, p_k: float, x: torch.Tensor) -> torch.Tensor:
     Returns:
         torch.Tensor: radius of any B_k
     """
-    d = density(x)
+    log_d = log_density(x)
     D = x.shape[1]
 
-    r = torch.pow(
-        (p_tot / p_k)
-        * torch.lgamma(torch.Tensor([D / 2 + 1])).exp()
-        / (d * (pi ** (D / 2))),
-        1 / D,
+    # log_r = torch.pow(
+    #     (p_tot / p_k)
+    #     * (torch.lgamma(torch.Tensor([D / 2 + 1])) - log_d).exp()
+    #     / (pi ** (D / 2)),
+    #     1 / D,
+    # )
+    log_r = (
+        1
+        / D
+        * (
+            t_log(p_tot / p_k)
+            + torch.lgamma(torch.Tensor([D / 2 + 1]))
+            - log_d
+            - t_log(pi ** (D / 2))
+        )
     )
-    return r
+    return log_r
 
 
 def generate_shift(
@@ -65,11 +79,12 @@ def generate_shift(
     x_k = x_train[idx_k]
 
     # Determine average distance between points
-    dist = radius(shifting_proportion_total, shifting_proportion_k, x_train)
+    log_dist = log_radius(shifting_proportion_total, shifting_proportion_k, x_train)
 
     # Any point laying inside any hyperball gets affected to test
     in_any_b_k = torch.where(
-        torch.where(torch.cdist(x_train, x_k) < dist, 1, 0).sum(dim=1) >= 1,
+        torch.where(torch.log(torch.cdist(x_train, x_k)) < log_dist, 1, 0).sum(dim=1)
+        >= 1,
         1,
         0,
     )

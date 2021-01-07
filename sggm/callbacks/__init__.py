@@ -24,6 +24,7 @@ from sggm.callbacks.data_saver import DataSaver
 from sggm.callbacks.fit_saver import FitSaver
 from sggm.callbacks.kl_saver import KLSaver
 from sggm.callbacks.loss_printer import LossPrinter
+from sggm.callbacks.img_generated_saver import IMGGeneratedSaver
 
 
 callbacks = {
@@ -44,7 +45,7 @@ callbacks = {
     UCI_YACHT: [LossPrinter],
     UCI_YACHT_SHIFTED: [LossPrinter],
     #
-    MNIST: [],
+    MNIST: [IMGGeneratedSaver],
     FASHION_MNIST: [],
     NOT_MNIST: [],
 }
