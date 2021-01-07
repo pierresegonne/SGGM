@@ -15,18 +15,20 @@ from sggm.definitions import (
 from sggm.definitions import (
     β_ELBO,
     β_OOD,
-    GAUSSIAN_NOISE_AROUND_X,
-    EPS,
-    LEARNING_RATE,
-    OOD_X_GENERATION_METHOD,
-    OPTIMISED_X_OOD_V_PARAM,
-    OPTIMISED_X_OOD_V_OPTIMISED,
-    OPTIMISED_X_OOD_KL_GA,
-    OPTIMISED_X_OOD_BRUTE_FORCE,
     N_MC_SAMPLES,
     PRIOR_α,
     PRIOR_β,
-    UNIFORM_X_OOD,
+    EPS,
+    LEARNING_RATE,
+    ADVERSARIAL_MULTISTEP_LEARNING_RATE,
+    #
+    OOD_X_GENERATION_METHOD,
+    ADVERSARIAL,
+    ADVERSARIAL_MULTISTEP,
+    BRUTE_FORCE,
+    GAUSSIAN_NOISE,
+    UNIFORM,
+    V_PARAM,
 )
 from sggm.definitions import (
     ACTIVATION_FUNCTIONS,
@@ -128,6 +130,9 @@ class VariationalRegressor(pl.LightningModule):
         ].default,
         eps: float = variational_regressor_parameters[EPS].default,
         n_mc_samples: int = variational_regressor_parameters[N_MC_SAMPLES].default,
+        adversarial_multistep_learning_rate: float = variational_regressor_parameters[
+            ADVERSARIAL_MULTISTEP_LEARNING_RATE
+        ].default,
         y_mean: float = 0.0,  # Not in regressor parameters as it is infered from data
         y_std: float = 1.0,  # Not in regressor parameters as it is infered from data
     ):
@@ -146,13 +151,15 @@ class VariationalRegressor(pl.LightningModule):
 
         # OOD
         self.ood_x_generation_method = ood_x_generation_method
-        if self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
+        if self.ood_x_generation_method == ADVERSARIAL:
+            self.ood_generator_v = 1
+        elif self.ood_x_generation_method == ADVERSARIAL_MULTISTEP:
+            self.ood_generator_v = adversarial_multistep_learning_rate
+        elif self.ood_x_generation_method == V_PARAM:
             v_ini = nn.Parameter(
                 0.1 * torch.ones((1, self.input_dim)), requires_grad=True
             )
             self.register_parameter("ood_generator_v", v_ini)
-        elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
-            self.ood_generator_v = 1
         else:
             self.ood_generator_v = None
 
@@ -262,24 +269,24 @@ class VariationalRegressor(pl.LightningModule):
         return pred_std
 
     def ood_x(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
-        if self.ood_x_generation_method == GAUSSIAN_NOISE_AROUND_X:
+        if self.ood_x_generation_method == GAUSSIAN_NOISE:
             noise_std = torch.std(x) * 3  # 3 is Arbitrary
             return x + noise_std * torch.randn_like(x)
 
-        elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
+        elif self.ood_x_generation_method == V_PARAM:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
             return x + self.ood_generator_v * normed_kl_grad
 
-        elif self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
+        elif self.ood_x_generation_method == ADVERSARIAL:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             # By default norm 2 or fro
             normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
             return x + self.ood_generator_v * normed_kl_grad
 
-        elif self.ood_x_generation_method == OPTIMISED_X_OOD_KL_GA:
+        elif self.ood_x_generation_method == ADVERSARIAL_MULTISTEP:
 
             # -------------------
             with torch.no_grad():
@@ -290,11 +297,12 @@ class VariationalRegressor(pl.LightningModule):
                     x_ood.requires_grad = True
 
                     # hparams
-                    K_max = 200
-                    eps = 1e-5
-                    k = 0
+                    K_max = 10
+                    eps = 1e-3
+                    step_lr = self.ood_generator_v
 
                     # initial evaluation
+                    k = 0
                     _, α_ood, β_ood = self(x_ood)
                     kl = torch.mean(self.kl(α_ood, β_ood, self.prior_α, self.prior_β))
                     kl.backward()
@@ -302,7 +310,10 @@ class VariationalRegressor(pl.LightningModule):
 
                     while (k < K_max) and (torch.abs(kl - kl_prev) > eps):
                         with torch.no_grad():
-                            x_ood = x_ood + x_ood.shape[0] * x_ood.grad
+                            x_ood = x_ood + step_lr * (
+                                x_ood.grad
+                                / torch.linalg.norm(x_ood.grad, dim=1)[:, None]
+                            )
                         x_ood.requires_grad = True
 
                         kl_prev = kl.detach().clone()
@@ -322,12 +333,12 @@ class VariationalRegressor(pl.LightningModule):
                     return x_ood
             # -------------------
 
-        elif self.ood_x_generation_method == UNIFORM_X_OOD:
+        elif self.ood_x_generation_method == UNIFORM:
             raise NotImplementedError(
                 "Uniform X ood generation must be implemented per use case."
             )
 
-        elif self.ood_x_generation_method == OPTIMISED_X_OOD_BRUTE_FORCE:
+        elif self.ood_x_generation_method == BRUTE_FORCE:
             x_ood_proposal = torch.reshape(
                 torch.linspace(-25, 35, 4000), (4000, 1)
             ).type_as(x)
@@ -341,7 +352,7 @@ class VariationalRegressor(pl.LightningModule):
         return torch.empty(0, 0)
 
     def tune_on_validation(self, x: torch.Tensor, **kwargs):
-        if self.ood_x_generation_method == OPTIMISED_X_OOD_V_OPTIMISED:
+        if self.ood_x_generation_method == ADVERSARIAL:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
@@ -360,10 +371,6 @@ class VariationalRegressor(pl.LightningModule):
                 # Prevent divergence
                 if (kl_ > -np.inf) & (v_ is not None):
                     self.ood_generator_v = v_
-
-            # TODO remove if indeed useless
-            # if hasattr(self, "trainer") and self.trainer is not None:
-            #     self.optimizers().zero_grad()
 
     @staticmethod
     def ellk(
@@ -542,7 +549,7 @@ class VariationalRegressor(pl.LightningModule):
             {"params": self.α.parameters()},
             {"params": self.β.parameters()},
         ]
-        if self.ood_x_generation_method == OPTIMISED_X_OOD_V_PARAM:
+        if self.ood_x_generation_method == V_PARAM:
             params += [
                 {"params": self.ood_generator_v, "lr": self.lr_v},
             ]

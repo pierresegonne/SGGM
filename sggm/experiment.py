@@ -159,6 +159,7 @@ class Experiment:
                         ),
                         eps=self.eps,
                         n_mc_samples=self.n_mc_samples,
+                        adversarial_multistep_learning_rate=self.adversarial_multistep_learning_rate,
                         y_mean=self.datamodule.y_mean,
                         y_std=self.datamodule.y_std,
                     )

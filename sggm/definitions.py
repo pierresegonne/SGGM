@@ -18,20 +18,20 @@ PRIOR_α = "prior_alpha"
 PRIOR_β = "prior_beta"
 OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 # Options for OOD_X_GENERATION_METHOD
-GAUSSIAN_NOISE_AROUND_X = "gaussian_noise_around_x"
-OPTIMISED_X_OOD_V_PARAM = "optimised_x_ood_v_param"
-OPTIMISED_X_OOD_V_OPTIMISED = "optimised_x_ood_v_optimised"
-OPTIMISED_X_OOD_KL_GA = "optimised_x_ood_kl_ga"
-OPTIMISED_X_OOD_BRUTE_FORCE = "optimised_x_ood_brute_force"
-UNIFORM_X_OOD = "uniform_x_ood"
+GAUSSIAN_NOISE = "gaussian_noise"
+V_PARAM = "v_param"
+ADVERSARIAL = "adversarial"
+ADVERSARIAL_MULTISTEP = "adversarial_multistep"
+BRUTE_FORCE = "brute_force"
+UNIFORM = "uniform"
 
 OOD_X_GENERATION_AVAILABLE_METHODS = [
-    GAUSSIAN_NOISE_AROUND_X,
-    OPTIMISED_X_OOD_V_PARAM,
-    OPTIMISED_X_OOD_V_OPTIMISED,
-    OPTIMISED_X_OOD_KL_GA,
-    OPTIMISED_X_OOD_BRUTE_FORCE,
-    UNIFORM_X_OOD,
+    GAUSSIAN_NOISE,
+    V_PARAM,
+    ADVERSARIAL,
+    ADVERSARIAL_MULTISTEP,
+    BRUTE_FORCE,
+    UNIFORM,
 ]
 
 EPS = "eps"
@@ -42,6 +42,8 @@ NAME = "name"
 N_TRIALS = "n_trials"
 N_MC_SAMPLES = "n_mc_samples"
 N_WORKERS = "n_workers"  # num workers for data loading set to None will take N_cpus
+
+ADVERSARIAL_MULTISTEP_LEARNING_RATE = "adversarial_multistep_learning_rate"
 
 SHIFTING_PROPORTION_TOTAL = "shifting_proportion_total"
 SHIFTING_PROPORTION_K = "shifting_proportion_k"
@@ -131,6 +133,7 @@ variational_regressor_parameters = {
     ),
     PRIOR_α: Param(PRIOR_α, 1.05, float),
     PRIOR_β: Param(PRIOR_β, 1.0, float),
+    ADVERSARIAL_MULTISTEP_LEARNING_RATE: Param(ADVERSARIAL_MULTISTEP_LEARNING_RATE, 1e-2, float),
 }
 regression_models = [VARIATIONAL_REGRESSOR]
 
