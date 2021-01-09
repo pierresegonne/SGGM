@@ -2,6 +2,8 @@ import argparse
 import os
 import pandas as pd
 
+from warnings import warn
+
 from sggm.definitions import (
     experiment_names,
     COMPARISON_METRICS,
@@ -65,7 +67,14 @@ def compare(experiment_name, names, save_dir):
         os.makedirs(compare_directory)
 
     # Dump
-    df.to_csv(f"{compare_directory}/{'-'.join(names)}.csv", index=False)
+    try:
+        df.to_csv(f"{compare_directory}/{'-'.join(names)}.csv", index=False)
+    except OSError:
+        warn(
+            "Too long name for comparison csv file, fallback on `_undef_.csv`",
+            UserWarning,
+        )
+        df.to_csv(f"{compare_directory}/_undef_.csv", index=False)
 
 
 def add_experiment_args(parser, experiment_name):
