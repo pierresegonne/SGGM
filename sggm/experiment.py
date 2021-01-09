@@ -56,6 +56,11 @@ from sggm.definitions import (
     MODEL_NAME,
     OOD_X_GENERATION_AVAILABLE_METHODS,
 )
+from sggm.definitions import (
+    SEED,
+    SHIFTING_PROPORTION_K,
+    SHIFTING_PROPORTION_TOTAL,
+)
 from sggm.data import datamodules
 from sggm.regression_model import Regressor, VariationalRegressor
 from sggm.vae_model import BaseVAE, VanillaVAE, V3AE
@@ -377,7 +382,18 @@ def cli_main():
             # ------------
             results = trainer.test()
 
+            # ------------
+            # saving
+            # ------------
             torch.save(results, f"{trainer.logger.log_dir}/results.pkl")
+            misc = {}
+            if isinstance(experiment.seed, int):
+                misc[SEED] = experiment.seed
+            if isinstance(experiment.shifting_proportion_k, float):
+                misc[SHIFTING_PROPORTION_K] = experiment.shifting_proportion_k
+            if isinstance(experiment.shifting_proportion_total, float):
+                misc[SHIFTING_PROPORTION_TOTAL] = experiment.shifting_proportion_total
+            torch.save(misc, f"{trainer.logger.log_dir}/misc.pkl")
 
 
 if __name__ == "__main__":

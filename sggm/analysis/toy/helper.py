@@ -14,6 +14,9 @@ from sggm.regression_model import (
 )
 from sggm.styles_ import colours, colours_rgb
 
+# TODO remove once investigation for llk is completed
+from sklearn.mixture import GaussianMixture
+
 # ------------
 # Plot data definition
 # ------------
@@ -218,6 +221,10 @@ def kl_grad_shift_plot(ax, model, training_dataset):
         ellk = model.ellk(μ_x, α_x, β_x, torch.Tensor(y_plot))
         mllk = tcd.StudentT(2 * α_x, μ_x, torch.sqrt(β_x / α_x)).log_prob(y_plot)
 
+        gm = GaussianMixture(n_components=5).fit(x_train.reshape(-1, 1))
+        llk = np.exp(gm.score_samples(x_plot.reshape(-1, 1))).reshape(-1, 1)
+        kl_llk = kl - llk
+
     ax.plot(
         x_plot,
         kl,
@@ -247,6 +254,27 @@ def kl_grad_shift_plot(ax, model, training_dataset):
         markerfacecolor=(*colours_rgb["red"], 0.6),
         markeredgewidth=1,
         markeredgecolor=(*colours_rgb["red"], 0.1),
+    )
+
+    ax.plot(
+        x_plot,
+        kl_llk,
+        "o",
+        label=r"KL(x)-LLK(x)",
+        markersize=2,
+        markerfacecolor=(*colours_rgb["brightGreen"], 0.6),
+        markeredgewidth=1,
+        markeredgecolor=(*colours_rgb["brightGreen"], 0.1),
+    )
+    ax.plot(
+        x_plot,
+        llk,
+        "o",
+        label=r"LLK(x)",
+        markersize=2,
+        markerfacecolor=(*colours_rgb["purple"], 0.6),
+        markeredgewidth=1,
+        markeredgecolor=(*colours_rgb["purple"], 0.1),
     )
 
     # Gamma parameters

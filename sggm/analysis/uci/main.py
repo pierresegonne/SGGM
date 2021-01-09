@@ -1,22 +1,43 @@
 import matplotlib.pyplot as plt
+import numpy as np
+import random
 import torch
 
 from torch import no_grad
 
 from sggm.analysis.toy.helper import get_colour_for_method
-from sggm.data.uci_ccpp.datamodule import UCICCPPDataModule
-from sggm.data.uci_concrete import UCIConcreteDataModule
-from sggm.data.uci_superconduct import UCISuperConductDataModule
-from sggm.data.uci_wine_red import UCIWineRedDataModule
-from sggm.data.uci_wine_white import UCIWineWhiteDataModule
-from sggm.data.uci_yacht import UCIYachtDataModule
+from sggm.data.uci_ccpp.datamodule import UCICCPPDataModule, UCICCPPDataModuleShifted
+from sggm.data.uci_concrete import UCIConcreteDataModule, UCIConcreteDataModuleShifted
+from sggm.data.uci_superconduct import (
+    UCISuperConductDataModule,
+    UCISuperConductDataModuleShifted,
+)
+from sggm.data.uci_wine_red import UCIWineRedDataModule, UCIWineRedDataModuleShifted
+from sggm.data.uci_wine_white import (
+    UCIWineWhiteDataModule,
+    UCIWineWhiteDataModuleShifted,
+)
+from sggm.data.uci_yacht import UCIYachtDataModule, UCIYachtDataModuleShifted
 from sggm.definitions import (
-    UCI_CONCRETE,
     UCI_CCPP,
+    UCI_CONCRETE,
     UCI_SUPERCONDUCT,
     UCI_WINE_RED,
     UCI_WINE_WHITE,
     UCI_YACHT,
+)
+from sggm.definitions import (
+    UCI_CCPP_SHIFTED,
+    UCI_CONCRETE_SHIFTED,
+    UCI_SUPERCONDUCT_SHIFTED,
+    UCI_WINE_RED_SHIFTED,
+    UCI_WINE_WHITE_SHIFTED,
+    UCI_YACHT_SHIFTED,
+)
+from sggm.definitions import (
+    SEED,
+    SHIFTING_PROPORTION_K,
+    SHIFTING_PROPORTION_TOTAL,
 )
 from sggm.styles_ import colours, colours_rgb, random_rgb_colour
 
@@ -40,6 +61,66 @@ def plot(experiment_log, methods, index):
             dm = UCIWineWhiteDataModule(bs, 0)
         elif experiment_name == UCI_YACHT:
             dm = UCIYachtDataModule(bs, 0)
+        # Shifted
+        elif "_shifted" in experiment_name:
+
+            assert (
+                experiment_log.best_version.misc is not None
+            ), f"Missing misc dictionary for {experiment_log.best_version.version_path}"
+            seed = experiment_log.best_version.misc[SEED]
+            shifting_proportion_k = experiment_log.best_version.misc[
+                SHIFTING_PROPORTION_K
+            ]
+            shifting_proportion_total = experiment_log.best_version.misc[
+                SHIFTING_PROPORTION_TOTAL
+            ]
+
+            torch.manual_seed(seed)
+            np.random.seed(seed)
+            random.seed(seed)
+
+            if experiment_name == UCI_CCPP_SHIFTED:
+                dm = UCICCPPDataModuleShifted(
+                    bs,
+                    0,
+                    shifting_proportion_total=shifting_proportion_total,
+                    shifting_proportion_k=shifting_proportion_k,
+                )
+            elif experiment_name == UCI_CONCRETE_SHIFTED:
+                dm = UCIConcreteDataModuleShifted(
+                    bs,
+                    0,
+                    shifting_proportion_total=shifting_proportion_total,
+                    shifting_proportion_k=shifting_proportion_k,
+                )
+            elif experiment_name == UCI_SUPERCONDUCT_SHIFTED:
+                dm = UCISuperConductDataModuleShifted(
+                    bs,
+                    0,
+                    shifting_proportion_total=shifting_proportion_total,
+                    shifting_proportion_k=shifting_proportion_k,
+                )
+            elif experiment_name == UCI_WINE_RED_SHIFTED:
+                dm = UCIWineRedDataModuleShifted(
+                    bs,
+                    0,
+                    shifting_proportion_total=shifting_proportion_total,
+                    shifting_proportion_k=shifting_proportion_k,
+                )
+            elif experiment_name == UCI_WINE_WHITE_SHIFTED:
+                dm = UCIWineWhiteDataModuleShifted(
+                    bs,
+                    0,
+                    shifting_proportion_total=shifting_proportion_total,
+                    shifting_proportion_k=shifting_proportion_k,
+                )
+            elif experiment_name == UCI_YACHT_SHIFTED:
+                dm = UCIYachtDataModuleShifted(
+                    bs,
+                    0,
+                    shifting_proportion_total=shifting_proportion_total,
+                    shifting_proportion_k=shifting_proportion_k,
+                )
         dm.setup()
 
         # Plot training points for reference

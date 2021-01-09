@@ -7,6 +7,9 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 
+# TODO remove if likelihood penalty is inconclusive
+from sklearn.mixture import GaussianMixture
+
 from sggm.definitions import (
     model_specific_args,
     regressor_parameters,
@@ -343,9 +346,16 @@ class VariationalRegressor(pl.LightningModule):
                 torch.linspace(-25, 35, 4000), (4000, 1)
             ).type_as(x)
             _, alpha_ood, beta_ood = self(x_ood_proposal)
-            kl = self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β)
+            kl = self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β).detach()
+
+            # density likelihood penalty
+            gm = GaussianMixture(n_components=5).fit(x.detach())
+            llk = np.exp(gm.score_samples(x_ood_proposal.detach()).reshape(-1, 1))
+
+            objective = kl - 2 * llk
+
             # Top K and then subsample
-            _, idx = torch.topk(kl, 1000, dim=0, sorted=False)
+            _, idx = torch.topk(objective, 1000, dim=0, sorted=False)
             x_ood = x_ood_proposal[idx][::2]
             return torch.reshape(x_ood, (500, 1))
 

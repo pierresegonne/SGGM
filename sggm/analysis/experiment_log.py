@@ -48,6 +48,12 @@ class VersionLog:
         # hparams
         with open(f"{version_path}/hparams.yaml") as hparams_file:
             self.hparams = yaml.load(hparams_file, Loader=yaml.FullLoader)
+        # misc
+        self.misc = (
+            torch.load(f"{version_path}/misc.pkl")
+            if os.path.exists(f"{version_path}/misc.pkl")
+            else None
+        )
 
 
 class ExperimentLog:
