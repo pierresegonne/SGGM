@@ -330,7 +330,7 @@ class VariationalRegressor(pl.LightningModule):
 
                     # make sure to start anew the computational graph for x_ood
                     x_ood = x_ood.detach().clone()
-                    # empty the gradients of the opt, note that this line will fail if there are more than 1 opt.
+                    # empty the gradients of the opt, NOTE that this line will fail if there are more than 1 opt.
                     if hasattr(self, "trainer") and self.trainer is not None:
                         self.optimizers().zero_grad()
                     return x_ood
@@ -349,6 +349,7 @@ class VariationalRegressor(pl.LightningModule):
             kl = self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β).detach()
 
             # density likelihood penalty
+            # TODO remove once investigation completed
             gm = GaussianMixture(n_components=5).fit(x.detach().cpu())
             llk = gm.score_samples(x_ood_proposal.detach().cpu()).reshape(-1, 1)
             llk = torch.Tensor(llk).to(self.device)
@@ -382,6 +383,62 @@ class VariationalRegressor(pl.LightningModule):
                 # Prevent divergence
                 if (kl_ > -np.inf) & (v_ is not None):
                     self.ood_generator_v = v_
+
+        elif self.ood_x_generation_method == ADVERSARIAL_MULTISTEP:
+
+            # hparams
+            K_max = 10
+            eps = 1e-3
+
+            lr_, kl_ = None, -np.inf
+            lr_available = [0.0001, 0.001, 0.01, 0.1, 1, 2, 3, 5, 10, 25, 100]
+
+            for lr_proposal in lr_available:
+                with torch.no_grad():
+                    with torch.enable_grad():
+
+                        # clone x
+                        x_proposal = x.detach().clone()
+                        x_proposal.requires_grad = True
+
+                        # initial evaluation
+                        k = 0
+                        _, α_ood, β_ood = self(x_proposal)
+                        kl = torch.mean(
+                            self.kl(α_ood, β_ood, self.prior_α, self.prior_β)
+                        )
+                        kl.backward()
+                        kl_prev = -1e10 * torch.ones_like(kl).type_as(kl)
+
+                        while (k < K_max) and (torch.abs(kl - kl_prev) > eps):
+                            with torch.no_grad():
+                                x_proposal = x_proposal + lr_proposal * (
+                                    x_proposal.grad
+                                    / (
+                                        torch.linalg.norm(x_proposal.grad, dim=1)[
+                                            :, None
+                                        ]
+                                    )
+                                )
+                            x_proposal.requires_grad = True
+
+                            kl_prev = kl.detach().clone()
+                            _, α_ood, β_ood = self(x_proposal)
+                            kl = torch.mean(
+                                self.kl(α_ood, β_ood, self.prior_α, self.prior_β)
+                            )
+                            kl.backward()
+
+                            k += 1
+
+                _, α, β = self(x_proposal)
+                kl_proposal = torch.mean(self.kl(α, β, self.prior_α, self.prior_β))
+                if (kl_proposal > kl_) & (kl_proposal < 1e10):
+                    kl_ = kl_proposal
+                    lr_ = lr_proposal
+
+            if (kl_ > -np.inf) & (lr_ is not None):
+                self.ood_generator_v = lr_
 
     @staticmethod
     def ellk(
