@@ -350,7 +350,7 @@ class VariationalRegressor(pl.LightningModule):
 
             # density likelihood penalty
             gm = GaussianMixture(n_components=5).fit(x.detach().cpu())
-            llk = np.exp(gm.score_samples(x_ood_proposal.detach().cpu()).reshape(-1, 1))
+            llk = gm.score_samples(x_ood_proposal.detach().cpu()).reshape(-1, 1)
             llk = torch.Tensor(llk).to(self.device)
 
             objective = kl - llk
