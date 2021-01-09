@@ -32,7 +32,7 @@ class Toy2DDataModule(RegressionDataModule):
         self.N_test = N_test
 
         self.training_range = [2.5, 12.5]
-        self.testing_range = [0, 15]
+        self.testing_range = [0, 13]
 
         # Manual as we know it
         self.dims = 2
