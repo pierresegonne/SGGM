@@ -67,7 +67,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_v_optimised
+- name: benchmark_adversarial
   experiment_name: toy_shifted
   # hparams
   batch_size: 1024
@@ -174,7 +174,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_v_optimised
+# - name: benchmark_adversarial
 #   experiment_name: toy_2d
 #   N_train: 10000
 #   N_test: 1000
@@ -261,7 +261,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_v_optimised
+- name: benchmark_adversarial
   experiment_name: uci_ccpp_shifted
   # hparams
   batch_size: 1024
@@ -351,7 +351,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_v_optimised
+- name: benchmark_adversarial
   experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
@@ -440,7 +440,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_v_optimised
+- name: benchmark_adversarial
   experiment_name: uci_superconduct_shifted
   # hparams
   batch_size: 1024
@@ -529,7 +529,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_v_optimised
+- name: benchmark_adversarial
   experiment_name: uci_wine_red_shifted
   # hparams
   batch_size: 1024
@@ -618,7 +618,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_v_optimised
+- name: benchmark_adversarial
   experiment_name: uci_wine_white_shifted
   # hparams
   batch_size: 1024
@@ -707,7 +707,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_v_optimised
+- name: benchmark_adversarial
   experiment_name: uci_yacht_shifted
   # hparams
   batch_size: 1024
