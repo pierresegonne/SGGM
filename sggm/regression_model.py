@@ -296,11 +296,12 @@ class VariationalRegressor(pl.LightningModule):
 
             # density likelihood penalty
             # TODO remove once investigation completed
-            gm = GaussianMixture(n_components=5).fit(x.detach().cpu())
-            llk = gm.score_samples(x_ood_proposal.detach().cpu()).reshape(-1, 1)
-            llk = torch.Tensor(llk).to(self.device)
+            # gm = GaussianMixture(n_components=5).fit(x.detach().cpu())
+            # llk = gm.score_samples(x_ood_proposal.detach().cpu()).reshape(-1, 1)
+            # llk = torch.Tensor(llk).to(self.device)
 
-            objective = kl - llk
+            # objective = kl - llk
+            objective = kl
 
             # Top K and then subsample
             _, idx = torch.topk(objective, 1000, dim=0, sorted=False)
