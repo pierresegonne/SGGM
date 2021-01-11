@@ -111,8 +111,8 @@ class DataModuleShifted:
         *args,
         **kwargs
     ):
-        self.shifting_proportion_total = shifting_proportion_total
-        self.shifting_proportion_k = shifting_proportion_k
+        self.shifting_proportion_total = float(shifting_proportion_total)
+        self.shifting_proportion_k = float(shifting_proportion_k)
 
     def setup(self):
         train, test = generate_shift(
