@@ -21,7 +21,6 @@ OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 GAUSSIAN_NOISE = "gaussian_noise"
 V_PARAM = "v_param"
 ADVERSARIAL = "adversarial"
-ADVERSARIAL_MULTISTEP = "adversarial_multistep"
 BRUTE_FORCE = "brute_force"
 UNIFORM = "uniform"
 
@@ -29,7 +28,6 @@ OOD_X_GENERATION_AVAILABLE_METHODS = [
     GAUSSIAN_NOISE,
     V_PARAM,
     ADVERSARIAL,
-    ADVERSARIAL_MULTISTEP,
     BRUTE_FORCE,
     UNIFORM,
 ]
@@ -42,8 +40,6 @@ NAME = "name"
 N_TRIALS = "n_trials"
 N_MC_SAMPLES = "n_mc_samples"
 N_WORKERS = "n_workers"  # num workers for data loading set to None will take N_cpus
-
-ADVERSARIAL_MULTISTEP_LEARNING_RATE = "adversarial_multistep_learning_rate"
 
 SHIFTING_PROPORTION_TOTAL = "shifting_proportion_total"
 SHIFTING_PROPORTION_K = "shifting_proportion_k"
@@ -133,7 +129,6 @@ variational_regressor_parameters = {
     ),
     PRIOR_α: Param(PRIOR_α, 1.05, float),
     PRIOR_β: Param(PRIOR_β, 1.0, float),
-    ADVERSARIAL_MULTISTEP_LEARNING_RATE: Param(ADVERSARIAL_MULTISTEP_LEARNING_RATE, 1e-2, float),
 }
 regression_models = [VARIATIONAL_REGRESSOR]
 

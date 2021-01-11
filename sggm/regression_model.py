@@ -23,11 +23,9 @@ from sggm.definitions import (
     PRIOR_β,
     EPS,
     LEARNING_RATE,
-    ADVERSARIAL_MULTISTEP_LEARNING_RATE,
     #
     OOD_X_GENERATION_METHOD,
     ADVERSARIAL,
-    ADVERSARIAL_MULTISTEP,
     BRUTE_FORCE,
     GAUSSIAN_NOISE,
     UNIFORM,
@@ -133,9 +131,6 @@ class VariationalRegressor(pl.LightningModule):
         ].default,
         eps: float = variational_regressor_parameters[EPS].default,
         n_mc_samples: int = variational_regressor_parameters[N_MC_SAMPLES].default,
-        adversarial_multistep_learning_rate: float = variational_regressor_parameters[
-            ADVERSARIAL_MULTISTEP_LEARNING_RATE
-        ].default,
         y_mean: float = 0.0,  # Not in regressor parameters as it is infered from data
         y_std: float = 1.0,  # Not in regressor parameters as it is infered from data
     ):
@@ -156,8 +151,6 @@ class VariationalRegressor(pl.LightningModule):
         self.ood_x_generation_method = ood_x_generation_method
         if self.ood_x_generation_method == ADVERSARIAL:
             self.ood_generator_v = 1
-        elif self.ood_x_generation_method == ADVERSARIAL_MULTISTEP:
-            self.ood_generator_v = float(adversarial_multistep_learning_rate)
         elif self.ood_x_generation_method == V_PARAM:
             v_ini = nn.Parameter(
                 0.1 * torch.ones((1, self.input_dim)), requires_grad=True
@@ -289,53 +282,6 @@ class VariationalRegressor(pl.LightningModule):
             normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
             return x + self.ood_generator_v * normed_kl_grad
 
-        elif self.ood_x_generation_method == ADVERSARIAL_MULTISTEP:
-
-            # -------------------
-            with torch.no_grad():
-                with torch.enable_grad():
-
-                    # https://stackoverflow.com/questions/55266154/pytorch-preferred-way-to-copy-a-tensor
-                    x_ood = x.detach().clone()
-                    x_ood.requires_grad = True
-
-                    # hparams
-                    K_max = 10
-                    eps = 1e-3
-                    step_lr = self.ood_generator_v
-
-                    # initial evaluation
-                    k = 0
-                    _, α_ood, β_ood = self(x_ood)
-                    kl = torch.mean(self.kl(α_ood, β_ood, self.prior_α, self.prior_β))
-                    kl.backward()
-                    kl_prev = -1e10 * torch.ones_like(kl).type_as(kl)
-
-                    while (k < K_max) and (torch.abs(kl - kl_prev) > eps):
-                        with torch.no_grad():
-                            x_ood = x_ood + step_lr * (
-                                x_ood.grad
-                                / (torch.linalg.norm(x_ood.grad, dim=1)[:, None])
-                            )
-                        x_ood.requires_grad = True
-
-                        kl_prev = kl.detach().clone()
-                        _, α_ood, β_ood = self(x_ood)
-                        kl = torch.mean(
-                            self.kl(α_ood, β_ood, self.prior_α, self.prior_β)
-                        )
-                        kl.backward()
-
-                        k += 1
-
-                    # make sure to start anew the computational graph for x_ood
-                    x_ood = x_ood.detach().clone()
-                    # empty the gradients of the opt, NOTE that this line will fail if there are more than 1 opt.
-                    if hasattr(self, "trainer") and self.trainer is not None:
-                        self.optimizers().zero_grad()
-                    return x_ood
-            # -------------------
-
         elif self.ood_x_generation_method == UNIFORM:
             raise NotImplementedError(
                 "Uniform X ood generation must be implemented per use case."
@@ -383,62 +329,6 @@ class VariationalRegressor(pl.LightningModule):
                 # Prevent divergence
                 if (kl_ > -np.inf) & (v_ is not None):
                     self.ood_generator_v = v_
-
-        elif self.ood_x_generation_method == ADVERSARIAL_MULTISTEP:
-
-            # hparams
-            K_max = 10
-            eps = 1e-3
-
-            lr_, kl_ = None, -np.inf
-            lr_available = [0.0001, 0.001, 0.01, 0.1, 1, 2, 3, 5, 10, 25, 100]
-
-            for lr_proposal in lr_available:
-                with torch.no_grad():
-                    with torch.enable_grad():
-
-                        # clone x
-                        x_proposal = x.detach().clone()
-                        x_proposal.requires_grad = True
-
-                        # initial evaluation
-                        k = 0
-                        _, α_ood, β_ood = self(x_proposal)
-                        kl = torch.mean(
-                            self.kl(α_ood, β_ood, self.prior_α, self.prior_β)
-                        )
-                        kl.backward()
-                        kl_prev = -1e10 * torch.ones_like(kl).type_as(kl)
-
-                        while (k < K_max) and (torch.abs(kl - kl_prev) > eps):
-                            with torch.no_grad():
-                                x_proposal = x_proposal + lr_proposal * (
-                                    x_proposal.grad
-                                    / (
-                                        torch.linalg.norm(x_proposal.grad, dim=1)[
-                                            :, None
-                                        ]
-                                    )
-                                )
-                            x_proposal.requires_grad = True
-
-                            kl_prev = kl.detach().clone()
-                            _, α_ood, β_ood = self(x_proposal)
-                            kl = torch.mean(
-                                self.kl(α_ood, β_ood, self.prior_α, self.prior_β)
-                            )
-                            kl.backward()
-
-                            k += 1
-
-                _, α, β = self(x_proposal)
-                kl_proposal = torch.mean(self.kl(α, β, self.prior_α, self.prior_β))
-                if (kl_proposal > kl_) & (kl_proposal < 1e10):
-                    kl_ = kl_proposal
-                    lr_ = lr_proposal
-
-            if (kl_ > -np.inf) & (lr_ is not None):
-                self.ood_generator_v = lr_
 
     @staticmethod
     def ellk(
