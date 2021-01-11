@@ -338,6 +338,7 @@ def cli_main():
         _experiments_config = copy.deepcopy(experiments_config)
         _experiment_config = copy.deepcopy(experiment_config)
         # Add support for experiment specific arguments
+        print(_experiment_config)
         base_model = get_experiment_base_model(_experiment_config)
         parser = base_model.add_model_specific_args(parser)
         # Reparse with experiment specific arguments
@@ -357,14 +358,16 @@ def cli_main():
         for n_t in range(experiment.n_trials):
 
             if isinstance(experiment.seed, int):
-                torch.manual_seed(experiment.seed)
-                np.random.seed(experiment.seed)
-                random.seed(experiment.seed)
+                seed = experiment.seed + n_t
+                torch.manual_seed(seed)
+                np.random.seed(seed)
+                random.seed(seed)
 
             # ------------
             # data
             # ------------
             datamodule = experiment.datamodule
+            datamodule.setup()
 
             # ------------
             # model

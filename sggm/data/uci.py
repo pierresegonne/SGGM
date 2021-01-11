@@ -38,7 +38,7 @@ class UCIDataModule(RegressionDataModule):
 
         # First split test away
         test_size = int(x.shape[0] * self.test_split)
-        x, x_test, y, y_test = train_test_split(x, y, test_size=test_size)
+        x, x_test, y, y_test = train_test_split(x, y, test_size=test_size, shuffle=True)
         y, y_test = y[:, None], y_test[:, None]
 
         # Standardise
@@ -59,7 +59,8 @@ class UCIDataModule(RegressionDataModule):
         train_size = int(x_train.shape[0] * self.train_val_split)
         val_size = x_train.shape[0] - train_size
         self.train_dataset, self.val_dataset = torch.utils.data.random_split(
-            self.train_dataset, [train_size, val_size]
+            self.train_dataset,
+            [train_size, val_size],
         )
         self.test_dataset = TensorDataset(x_test, y_test)
 
@@ -69,6 +70,7 @@ class UCIDataModule(RegressionDataModule):
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
+            shuffle=True,
         )
 
     def val_dataloader(self):
