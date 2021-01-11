@@ -1,59 +1,62 @@
-# ## TOY
+## TOY
 
-# - name: benchmark_mle
-#   experiment_name: toy
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 0
-#   beta_ood: 0
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
-#   # pl trainer
-#   early_stopping_patience: 250
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_mle
+  experiment_name: toy
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 0
+  beta_ood: 0
+  prior_alpha: 1.025
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  early_stopping_patience: 250
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_standard_elbo
-#   experiment_name: toy
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 0
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
-#   # pl trainer
-#   early_stopping_patience: 250
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_standard_elbo
+  experiment_name: toy
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 0
+  prior_alpha: 1.025
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  early_stopping_patience: 250
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_gaussian_noise
-#   experiment_name: toy
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
-#   ood_x_generation_method: gaussian_noise
-#   # pl trainer
-#   early_stopping_patience: 250
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_gaussian_noise
+  experiment_name: toy
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.025
+  prior_beta: 0.5
+  ood_x_generation_method: gaussian_noise
+  seed: 2
+  # pl trainer
+  early_stopping_patience: 250
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_adversarial_llk
   experiment_name: toy
@@ -65,6 +68,7 @@
   prior_alpha: 1.025
   prior_beta: 0.5
   ood_x_generation_method: adversarial
+  seed: 2
   # pl trainer
   early_stopping_patience: 250
   n_trials: 20
@@ -74,541 +78,570 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_brute_force
-#   experiment_name: toy
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
-#   ood_x_generation_method: brute_force
-#   # pl trainer
-#   early_stopping_patience: 250
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# # ## ===================
-# # ## TOY 2D
-
-# - name: benchmark_mle
-#   experiment_name: toy_2d
-#   N_train: 10000
-#   N_test: 1000
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 0
-#   beta_ood: 0
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# - name: benchmark_standard_elbo
-#   experiment_name: toy_2d
-#   N_train: 10000
-#   N_test: 1000
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 0
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# - name: benchmark_gaussian_noise
-#   experiment_name: toy_2d
-#   N_train: 10000
-#   N_test: 1000
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
-#   ood_x_generation_method: gaussian_noise
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# - name: benchmark_v_optimised
-#   experiment_name: toy_2d
-#   N_train: 10000
-#   N_test: 1000
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
-#   ood_x_generation_method: adversarial
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_brute_force
+  experiment_name: toy
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.025
+  prior_beta: 0.5
+  ood_x_generation_method: brute_force
+  seed: 2
+  # pl trainer
+  early_stopping_patience: 250
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
 # ## ===================
-# ## UCI CCPP
+# ## TOY 2D
 
-# - name: benchmark_mle
-#   experiment_name: uci_ccpp
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 0
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_mle
+  experiment_name: toy_2d
+  N_train: 10000
+  N_test: 1000
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 0
+  beta_ood: 0
+  prior_alpha: 1.025
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_standard_elbo
-#   experiment_name: uci_ccpp
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_standard_elbo
+  experiment_name: toy_2d
+  N_train: 10000
+  N_test: 1000
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 0
+  prior_alpha: 1.025
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_gaussian_noise
-#   experiment_name: uci_ccpp
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: gaussian_noise
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_gaussian_noise
+  experiment_name: toy_2d
+  N_train: 10000
+  N_test: 1000
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.025
+  prior_beta: 0.5
+  ood_x_generation_method: gaussian_noise
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_v_optimised
-#   experiment_name: uci_ccpp
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: adversarial
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
+- name: benchmark_v_optimised
+  experiment_name: toy_2d
+  N_train: 10000
+  N_test: 1000
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.025
+  prior_beta: 0.5
+  ood_x_generation_method: adversarial
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
 ## ===================
-## UCI CONCRETE
+## UCI CCPP
 
-# - name: benchmark_mle
-#   experiment_name: uci_concrete
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 0
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_mle
+  experiment_name: uci_ccpp
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 0
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_standard_elbo
-#   experiment_name: uci_concrete
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_standard_elbo
+  experiment_name: uci_ccpp
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_gaussian_noise
-#   experiment_name: uci_concrete
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: gaussian_noise
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_gaussian_noise
+  experiment_name: uci_ccpp
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: gaussian_noise
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_v_optimised
-#   experiment_name: uci_concrete
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: adversarial
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_v_optimised
+  experiment_name: uci_ccpp
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: adversarial
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# ## ===================
-# ## UCI SUPERCONDUCT
 
-# - name: benchmark_mle
-#   experiment_name: uci_superconduct
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 0
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+# ===================
+# UCI CONCRETE
 
-# - name: benchmark_standard_elbo
-#   experiment_name: uci_superconduct
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 11
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_mle
+  experiment_name: uci_concrete
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 0
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_gaussian_noise
-#   experiment_name: uci_superconduct
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: gaussian_noise
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_standard_elbo
+  experiment_name: uci_concrete
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_v_optimised
-#   experiment_name: uci_superconduct
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: adversarial
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_gaussian_noise
+  experiment_name: uci_concrete
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: gaussian_noise
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# ## ===================
-# ## UCI WINE RED
-
-# - name: benchmark_mle
-#   experiment_name: uci_wine_red
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 0
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# - name: benchmark_standard_elbo
-#   experiment_name: uci_wine_red
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# - name: benchmark_gaussian_noise
-#   experiment_name: uci_wine_red
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: gaussian_noise
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# - name: benchmark_v_optimised
-#   experiment_name: uci_wine_red
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: adversarial
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# ## ===================
-# ## UCI WINE WHITE
-
-# - name: benchmark_mle
-#   experiment_name: uci_wine_white
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 0
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# - name: benchmark_standard_elbo
-#   experiment_name: uci_wine_white
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# - name: benchmark_gaussian_noise
-#   experiment_name: uci_wine_white
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: gaussian_noise
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# - name: benchmark_v_optimised
-#   experiment_name: uci_wine_white
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: adversarial
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_v_optimised
+  experiment_name: uci_concrete
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: adversarial
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
 ## ===================
-## UCI YACHT
+## UCI SUPERCONDUCT
 
-# - name: benchmark_mle
-#   experiment_name: uci_yacht
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 0
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_mle
+  experiment_name: uci_superconduct
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 0
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_standard_elbo
-#   experiment_name: uci_yacht
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_standard_elbo
+  experiment_name: uci_superconduct
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 11
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_gaussian_noise
-#   experiment_name: uci_yacht
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: gaussian_noise
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_gaussian_noise
+  experiment_name: uci_superconduct
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: gaussian_noise
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_v_optimised
-#   experiment_name: uci_yacht
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   beta_elbo: 1
-#   beta_ood: 1
-#   prior_alpha: 1.05
-#   prior_beta: 0.5
-#   ood_x_generation_method: adversarial
-#   # pl trainer
-#   n_trials: 20
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: benchmark_v_optimised
+  experiment_name: uci_superconduct
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: adversarial
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+## ===================
+## UCI WINE RED
+
+- name: benchmark_mle
+  experiment_name: uci_wine_red
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 0
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: benchmark_standard_elbo
+  experiment_name: uci_wine_red
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: benchmark_gaussian_noise
+  experiment_name: uci_wine_red
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: gaussian_noise
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: benchmark_v_optimised
+  experiment_name: uci_wine_red
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: adversarial
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+## ===================
+## UCI WINE WHITE
+
+- name: benchmark_mle
+  experiment_name: uci_wine_white
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 0
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: benchmark_standard_elbo
+  experiment_name: uci_wine_white
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: benchmark_gaussian_noise
+  experiment_name: uci_wine_white
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: gaussian_noise
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: benchmark_v_optimised
+  experiment_name: uci_wine_white
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: adversarial
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+# ===================
+# UCI YACHT
+
+- name: benchmark_mle
+  experiment_name: uci_yacht
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 0
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: benchmark_standard_elbo
+  experiment_name: uci_yacht
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 0
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: benchmark_gaussian_noise
+  experiment_name: uci_yacht
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: gaussian_noise
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: benchmark_v_optimised
+  experiment_name: uci_yacht
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 1
+  beta_ood: 1
+  prior_alpha: 1.05
+  prior_beta: 0.5
+  ood_x_generation_method: adversarial
+  seed: 2
+  # pl trainer
+  n_trials: 20
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
