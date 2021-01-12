@@ -224,7 +224,7 @@ class VariationalRegressor(pl.LightningModule):
             precision = torch.mean(samples_precision, 0, True)
             σ = 1 / torch.sqrt(precision)
         return σ
-    
+
     def prior_std(self, x: torch.Tensor) -> torch.Tensor:
         α = self.prior_α * torch.ones_like(x)
         β = self.prior_β * torch.ones_like(x)
@@ -391,22 +391,22 @@ class VariationalRegressor(pl.LightningModule):
             expected_log_likelihood_out = torch.zeros((1,)).type_as(x)
             kl_divergence_out = torch.zeros((1,)).type_as(x)
 
-        loss = -self.elbo(
+        loss = -(1 - self.β_ood) * self.elbo(
             expected_log_likelihood, kl_divergence
         ) + self.β_ood * torch.mean(kl_divergence_out)
 
         if self._ood_ellk:
             nellk_out = -expected_log_likelihood_out
-            loss = -self.elbo(
+            loss = -(1 - self.β_ood) * self.elbo(
                 expected_log_likelihood, kl_divergence
             ) - self.β_ood * self.elbo(nellk_out, kl_divergence_out)
 
         # Define the marginal y|x
         if self._marginal_loss:
             m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
-            loss = -torch.mean(m_p.log_prob(y)) + self.β_ood * torch.mean(
-                kl_divergence_out
-            )
+            loss = -(1 - self.β_ood) * torch.mean(
+                m_p.log_prob(y)
+            ) - self.β_ood * torch.mean(kl_divergence_out)
 
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
             self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
