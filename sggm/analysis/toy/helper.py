@@ -5,12 +5,16 @@ import seaborn as sns
 import torch
 import torch.distributions as tcd
 
-from typing import Tuple
+from matplotlib.axes import Axes
+from sggm.types_ import Tuple, List
 from scipy.stats import norm
+from sggm.analysis.experiment_log import ExperimentLog
 from sggm.data.toy import ToyDataModule
 from sggm.regression_model import (
     MARGINAL,
     POSTERIOR,
+    #
+    VariationalRegressor,
 )
 from sggm.styles_ import colours, colours_rgb
 
@@ -33,7 +37,7 @@ def get_plot_dataset(N: int = 5000) -> Tuple[torch.Tensor, torch.Tensor, torch.T
 plot_dataset = get_plot_dataset()
 
 
-def get_colour_for_method(method):
+def get_colour_for_method(method: str) -> str:
     if method == MARGINAL:
         return colours["orange"]
     elif method == POSTERIOR:
@@ -44,15 +48,15 @@ def get_colour_for_method(method):
 # Plot methods
 # ------------
 def base_plot(
-    data_ax,
-    std_ax,
-    data=plot_dataset,
-    range_=data_range_training,
+    data_ax: Axes,
+    std_ax: Axes,
+    data: Tuple[torch.Tensor] = plot_dataset,
+    range_: List[float] = data_range_training,
     plot_lims={
         "data_ax": [-25, 25],
         "std_ax": [0, 5],
     },
-):
+) -> Tuple[Axes]:
 
     # Unpack plot dataset
     x_plot, y_plot, y_std_plot = data
@@ -100,7 +104,7 @@ def base_plot(
     return data_ax, std_ax
 
 
-def training_points_plot(data_ax, training_dataset):
+def training_points_plot(data_ax: Axes, training_dataset: Tuple[torch.Tensor]) -> Axes:
     x_train, y_train = training_dataset
     data_ax.plot(
         x_train,
@@ -114,12 +118,24 @@ def training_points_plot(data_ax, training_dataset):
     return data_ax
 
 
-def best_model_plot(data_ax, model, method):
+def best_model_plot(data_ax: Axes, model: VariationalRegressor, method: str) -> Axes:
     x_plot = plot_dataset[0]
     colour = get_colour_for_method(method)
     best_mean = model.predictive_mean(x_plot, method).flatten()
     best_std = model.predictive_std(x_plot, method).flatten()
+    prior_std = model.prior_std(x_plot).flatten()
 
+    # Prior plot
+    data_ax.fill_between(
+        x_plot.flatten(),
+        best_mean + 1.96 * prior_std,
+        best_mean - 1.96 * prior_std,
+        facecolor=colours["grey"],
+        alpha=0.65,
+        label=r"$\mu_{%s}(x) \pm 1.96 \,\sigma_{%s}(x)$" % (method, method),
+    )
+
+    # Model plot
     data_ax.plot(x_plot, best_mean, "-", color=colour, alpha=0.55)
     data_ax.fill_between(
         x_plot.flatten(),
@@ -127,11 +143,15 @@ def best_model_plot(data_ax, model, method):
         best_mean - 1.96 * best_std,
         facecolor=colour,
         alpha=0.3,
+        label=r"$\mu_{%s}(x) \pm 1.96 \,\sigma_{prior}(x)$" % method,
     )
+
+    data_ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
+
     return data_ax
 
 
-def mean_models_plot(std_ax, experiment_log, method):
+def mean_models_plot(std_ax: Axes, experiment_log: ExperimentLog, method: str) -> Axes:
     # Get df for all trials for the std
     colour = get_colour_for_method(method)
     std_df = get_std_trials_df(experiment_log.versions, method)
@@ -143,11 +163,26 @@ def mean_models_plot(std_ax, experiment_log, method):
         ax=std_ax,
         color=colour,
         alpha=0.55,
+        label=r"$\sigma_{%s}$" % method,
     )
+
+    # Add prior level
+    x_plot_prior = torch.Tensor(std_df["x"].values)
+    std_prior = experiment_log.best_version.model.prior_std(x_plot_prior)
+    std_ax.plot(
+        x_plot_prior,
+        std_prior,
+        color=colours["grey"],
+        alpha=0.65,
+        label=r"$\sigma_{prior}$",
+    )
+
+    std_ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
+
     return std_ax
 
 
-def get_std_trials_df(versions, method):
+def get_std_trials_df(versions, method: str) -> pd.DataFrame:
     with torch.no_grad():
         x_plot, _, _ = plot_dataset
 
@@ -169,7 +204,9 @@ def get_std_trials_df(versions, method):
 # ------------
 
 
-def kl_grad_shift_plot(ax, model, training_dataset):
+def kl_grad_shift_plot(
+    ax: Axes, model: VariationalRegressor, training_dataset: Tuple[torch.Tensor]
+) -> Axes:
     # Unpacking
     x_plot, y_plot, _ = plot_dataset
     x_train, _ = training_dataset
@@ -221,6 +258,7 @@ def kl_grad_shift_plot(ax, model, training_dataset):
         ellk = model.ellk(μ_x, α_x, β_x, torch.Tensor(y_plot))
         mllk = tcd.StudentT(2 * α_x, μ_x, torch.sqrt(β_x / α_x)).log_prob(y_plot)
 
+        # TODO likelihood remove once study over
         gm = GaussianMixture(n_components=5).fit(x_train.reshape(-1, 1))
         llk = np.exp(gm.score_samples(x_plot.reshape(-1, 1))).reshape(-1, 1)
         kl_llk = kl - llk
