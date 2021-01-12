@@ -1,4 +1,5 @@
 from sggm.definitions import (
+    SANITY_CHECK,
     TOY,
     TOY_SHIFTED,
     TOY_2D,
@@ -28,6 +29,7 @@ from sggm.callbacks.img_generated_saver import IMGGeneratedSaver
 
 
 callbacks = {
+    SANITY_CHECK: [DataSaver, LossPrinter],
     TOY: [DataSaver, LossPrinter],
     TOY_SHIFTED: [DataSaver, LossPrinter],
     TOY_2D: [DataSaver, LossPrinter],

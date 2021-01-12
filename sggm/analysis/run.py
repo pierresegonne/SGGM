@@ -4,12 +4,14 @@ from sggm.analysis.experiment_log import ExperimentLog
 from sggm.analysis.parse_results_to_csv import parse_results
 
 from sggm.analysis.mnist import mnist_plot
+from sggm.analysis.sanity_check import sanity_check_plot
 from sggm.analysis.toy import toy_plot
 from sggm.analysis.toy_2d import toy_2d_plot
 from sggm.analysis.uci import uci_plot
 
 from sggm.definitions import (
     experiment_names,
+    SANITY_CHECK,
     TOY,
     TOY_SHIFTED,
     TOY_2D,
@@ -62,7 +64,9 @@ def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
         print(
             f"-- Best version: {experiment_log.versions[experiment_log.idx_best_version].version_id}"
         )
-        if experiment_name in [TOY, TOY_SHIFTED]:
+        if experiment_name in [SANITY_CHECK]:
+            sanity_check_plot(experiment_log, **kwargs)
+        elif experiment_name in [TOY, TOY_SHIFTED]:
             toy_plot(experiment_log, **kwargs)
         elif experiment_name == [TOY_2D, TOY_2D_SHIFTED]:
             toy_2d_plot(experiment_log, **kwargs)
@@ -73,7 +77,7 @@ def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
 
 
 def add_experiment_args(parser, experiment_name):
-    if experiment_name in [TOY, TOY_SHIFTED, TOY_2D, *UCI]:
+    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, *UCI]:
         parser.add_argument(
             "--methods",
             type=str,
@@ -89,7 +93,7 @@ def add_experiment_args(parser, experiment_name):
 
 def parse_experiment_args(args):
     experiment_name = args.experiment_name
-    if experiment_name in [TOY, TOY_SHIFTED, TOY_2D, *UCI]:
+    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, *UCI]:
         args.methods = [item for item in args.methods.split(",")]
     args.names = [name for name in args.names.split(",")]
     return args

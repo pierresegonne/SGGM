@@ -164,6 +164,7 @@ def model_specific_args(params, parent_parser):
 
 SHIFTED = "_shifted"
 # Regression
+SANITY_CHECK = "sanity_check"
 TOY = "toy"
 TOY_SHIFTED = TOY + SHIFTED
 TOY_2D = "toy_2d"
@@ -187,6 +188,7 @@ NOT_MNIST = "not_mnist"
 
 
 experiment_names = [
+    SANITY_CHECK,
     TOY,
     TOY_SHIFTED,
     TOY_2D,
@@ -208,6 +210,7 @@ experiment_names = [
     NOT_MNIST,
 ]
 regression_experiments = [
+    SANITY_CHECK,
     TOY,
     TOY_SHIFTED,
     TOY_2D,
@@ -231,6 +234,7 @@ generative_experiments = [MNIST, FASHION_MNIST, NOT_MNIST]
 # -------------
 # Max batch iterations
 # -------------
+SANITY_CHECK_MAX_BATCH_ITERATIONS = 6e3
 TOY_MAX_BATCH_ITERATIONS = 6e3
 TOY_2D_MAX_BATCH_ITERATIONS = 1e4
 UCI_LARGE_MAX_BATCH_ITERATIONS = 1e5

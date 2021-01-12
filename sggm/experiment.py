@@ -22,6 +22,7 @@ from sggm.definitions import (
     regressor_parameters,
 )
 from sggm.definitions import (
+    SANITY_CHECK,
     TOY,
     TOY_SHIFTED,
     TOY_2D,
@@ -77,7 +78,7 @@ def clean_dict(dic: dict) -> dict:
 
 
 def activation_function(experiment_name):
-    if experiment_name in [TOY, TOY_SHIFTED, TOY_2D, TOY_2D_SHIFTED]:
+    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, TOY_2D_SHIFTED]:
         return F_SIGMOID
     elif experiment_name in [
         UCI_CCPP,

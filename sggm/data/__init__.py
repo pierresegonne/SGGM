@@ -1,3 +1,4 @@
+from sggm.data.sanity_check import SanityCheckDataModule
 from sggm.data.toy import ToyDataModule, ToyDataModuleShifted
 from sggm.data.toy_2d import Toy2DDataModule, Toy2DDataModuleShifted
 from sggm.data.uci_ccpp import UCICCPPDataModule, UCICCPPDataModuleShifted
@@ -18,6 +19,7 @@ from sggm.data.fashion_mnist import FashionMNISTDataModule
 from sggm.data.not_mnist import NotMNISTDataModule
 
 from sggm.definitions import (
+    SANITY_CHECK,
     TOY,
     TOY_SHIFTED,
     TOY_2D,
@@ -41,6 +43,7 @@ from sggm.definitions import (
 )
 
 datamodules = {
+    SANITY_CHECK: SanityCheckDataModule,
     TOY: ToyDataModule,
     TOY_SHIFTED: ToyDataModuleShifted,
     TOY_2D: Toy2DDataModule,

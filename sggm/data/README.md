@@ -56,3 +56,7 @@ callbacks = {
     DM: DMDataModule,
 }
 ```
+
+5. Define the activation function
+
+In the function `activation_function` in `experiment.py`
