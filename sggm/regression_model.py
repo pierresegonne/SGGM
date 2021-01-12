@@ -94,6 +94,25 @@ def BaseMLPSoftPlus(input_dim, hidden_dim, activation):
     return mod
 
 
+def normalise_kl_grad(kl_grad: torch.Tensor) -> torch.Tensor:
+    """Normalise and handle NaNs caused by norm division.
+
+    Args:
+        kl_grad (torch.Tensor): KL gradient
+
+    Returns:
+        torch.Tensor: Normalised KL gradient
+    """
+    normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
+    if torch.isnan(normed_kl_grad).any():
+        normed_kl_grad = torch.where(
+            torch.isnan(normed_kl_grad),
+            torch.zeros_like(normed_kl_grad),
+            normed_kl_grad,
+        )
+    return normed_kl_grad
+
+
 class ShiftLayer(nn.Module):
     def __init__(self, shift_factor):
         super(ShiftLayer, self).__init__()
@@ -277,14 +296,14 @@ class VariationalRegressor(pl.LightningModule):
         elif self.ood_x_generation_method == V_PARAM:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
+            normed_kl_grad = normalise_kl_grad(kl_grad)
             return x + self.ood_generator_v * normed_kl_grad
 
         elif self.ood_x_generation_method == ADVERSARIAL:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
             # By default norm 2 or fro
-            normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
+            normed_kl_grad = normalise_kl_grad(kl_grad)
             return x + self.ood_generator_v * normed_kl_grad
 
         elif self.ood_x_generation_method == UNIFORM:
@@ -319,7 +338,7 @@ class VariationalRegressor(pl.LightningModule):
         if self.ood_x_generation_method == ADVERSARIAL:
             kl = torch.mean(kwargs["kl"])
             kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            normed_kl_grad = kl_grad / torch.linalg.norm(kl_grad, dim=1)[:, None]
+            normed_kl_grad = normalise_kl_grad(kl_grad)
 
             with torch.no_grad():
                 v_available = [0.0001, 0.001, 0.01, 0.1, 1, 2, 3, 5, 10, 25, 100]
@@ -409,11 +428,11 @@ class VariationalRegressor(pl.LightningModule):
             ) - self.β_ood * torch.mean(kl_divergence_out)
 
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
-            try: 
+            try:
                 self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
             except ValueError:
-                print('Value Error!')
-                print(x_out)
+                print("Value Error!")
+                print(x_out[0, :3])
                 exit()
 
         return loss
