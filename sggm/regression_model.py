@@ -409,7 +409,12 @@ class VariationalRegressor(pl.LightningModule):
             ) - self.β_ood * torch.mean(kl_divergence_out)
 
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
-            self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
+            try: 
+                self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
+            except ValueError:
+                print('Value Error!')
+                print(x_out)
+                exit()
 
         return loss
 
