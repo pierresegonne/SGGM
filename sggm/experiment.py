@@ -358,9 +358,7 @@ def cli_main():
 
             if isinstance(experiment.seed, int):
                 seed = experiment.seed + n_t
-                torch.manual_seed(seed)
-                np.random.seed(seed)
-                random.seed(seed)
+                pl.seed_everything(seed)
 
             # ------------
             # data
