@@ -366,6 +366,21 @@ def cli_main():
             datamodule = experiment.datamodule
             datamodule.setup()
 
+            # checks for shift uci
+            # TODO remove
+            print("\n\nUCI CHECK")
+            print(datamodule.train_dataset[0][0])
+            prop = (
+                len(datamodule.train_dataset)
+                / (
+                    len(datamodule.train_dataset)
+                    + len(datamodule.test_dataset)
+                    + len(datamodule.val_dataset)
+                )
+                * 100
+            )
+            print(f"train represents {prop}% of all")
+
             # ------------
             # model
             # ------------

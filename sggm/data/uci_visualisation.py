@@ -6,6 +6,7 @@ import pathlib
 import seaborn as sns
 import torch
 
+from pytorch_lightning import seed_everything
 from sklearn.decomposition import PCA
 from sggm.data.uci_ccpp.datamodule import (
     UCICCPPDataModule,
@@ -49,9 +50,11 @@ def main(experiment_name, with_pca=False):
 
     # Investigate shift effect on pairplot
     SHIFTED = True
-    sp_tot = 0.5
-    sp_k = 0.003
-    TEST_FIRST = True if SHIFTED else TEST_FIRST
+    sp_tot = 0.3
+    sp_k = 0.0002
+    TEST_FIRST = False if SHIFTED else TEST_FIRST
+
+    seed_everything(123)
 
     # Get correct datamodule
     bs = 10000
@@ -107,6 +110,10 @@ def main(experiment_name, with_pca=False):
     val = next(iter(dm.val_dataloader()))
     test = next(iter(dm.test_dataloader()))
 
+    print(
+        f"N_train={len(dm.train_dataset)}, N_val={len(dm.val_dataset)}, N_test={len(dm.test_dataset)}"
+    )
+
     # 1 = train, 2 = val, 3 = test
     df_columns = columns + ["dataset"]
     df = pd.DataFrame(columns=df_columns)
@@ -116,7 +123,7 @@ def main(experiment_name, with_pca=False):
         dataset_names = ["test", "val", "train"]
     else:
         dataset_order = [train, val, test]
-        dataset_names = ["test", "val", "train"]
+        dataset_names = ["train", "val", "test"]
     for idx_ds, ds in enumerate(dataset_order):
         x, y = ds
         dump = np.concatenate(
@@ -126,7 +133,6 @@ def main(experiment_name, with_pca=False):
         df = df.append(update_df, ignore_index=True)
 
     # correct dataset name
-
     df["dataset"] = df["dataset"].map({i: v for i, v in enumerate(dataset_names)})
 
     sns.pairplot(
