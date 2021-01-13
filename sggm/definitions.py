@@ -21,6 +21,7 @@ OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 GAUSSIAN_NOISE = "gaussian_noise"
 V_PARAM = "v_param"
 ADVERSARIAL = "adversarial"
+ADVERSARIAL_KL_LK = "adversarial_kl-lk"
 BRUTE_FORCE = "brute_force"
 UNIFORM = "uniform"
 
@@ -28,6 +29,7 @@ OOD_X_GENERATION_AVAILABLE_METHODS = [
     GAUSSIAN_NOISE,
     V_PARAM,
     ADVERSARIAL,
+    ADVERSARIAL_KL_LK,
     BRUTE_FORCE,
     UNIFORM,
 ]
