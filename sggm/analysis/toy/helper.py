@@ -216,7 +216,12 @@ def kl_grad_shift_plot(
         x_train.requires_grad = True
         μ_x, α_x, β_x = model(x_train)
         kl_divergence = model.kl(α_x, β_x, model.prior_α, model.prior_β)
-        x_out = model.ood_x(x_train, kl=kl_divergence)
+        density_lk = model.gmm_density(x_train).log_prob(x_train).exp()
+        x_out = model.ood_x(
+            x_train,
+            kl=kl_divergence,
+            density_lk=density_lk,
+        )
         x_train, x_out = (
             x_train.detach().numpy().flatten(),
             x_out.detach().numpy().flatten(),
