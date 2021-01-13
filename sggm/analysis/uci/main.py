@@ -3,6 +3,7 @@ import numpy as np
 import random
 import torch
 
+from pytorch_lightning import seed_everything
 from torch import no_grad
 
 from sggm.analysis.toy.helper import get_colour_for_method
@@ -74,10 +75,7 @@ def plot(experiment_log, methods, index):
             shifting_proportion_total = experiment_log.best_version.misc[
                 SHIFTING_PROPORTION_TOTAL
             ]
-
-            torch.manual_seed(seed)
-            np.random.seed(seed)
-            random.seed(seed)
+            seed_everything(seed)
 
             if experiment_name == UCI_CCPP_SHIFTED:
                 dm = UCICCPPDataModuleShifted(

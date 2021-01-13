@@ -4,6 +4,7 @@ import numpy as np
 import os
 import pytorch_lightning as pl
 import random
+import re
 import torch
 import yaml
 
@@ -114,7 +115,12 @@ class Experiment:
     def __init__(self, configuration: object):
 
         # Set dynamically provided configuration attributes
+        # Support for config item in 1e-3 notation
+        scientific_not_re = re.compile(r"\b-?[1-9](?:\.\d+)?[Ee][-+]?\d+\b")
         for k, v in configuration.items():
+            if isinstance(v, str):
+                if scientific_not_re.match(v):
+                    v = float(v)
             self.__dict__[k] = v
 
         # Otherwise load default values
