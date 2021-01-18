@@ -293,6 +293,7 @@ class VariationalRegressor(pl.LightningModule):
         """
         Estimates density on x
         """
+        print("estimate density")
         # Sklearn to get params
         gm_sklearn = GaussianMixture(n_components=max(1, int(x.shape[0] / 20))).fit(
             x.detach().cpu()
@@ -386,7 +387,7 @@ class VariationalRegressor(pl.LightningModule):
                 if (kl_ > -np.inf) & (v_ is not None):
                     self.ood_generator_v = v_
 
-        if self.ood_x_generation_method == ADVERSARIAL_KL_LK:
+        elif self.ood_x_generation_method == ADVERSARIAL_KL_LK:
             # Setup
             kl = torch.mean(kwargs["kl"])
             gmm_density = kwargs["gmm_density"]

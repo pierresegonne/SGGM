@@ -382,7 +382,6 @@ def cli_main():
             # training
             # ------------
             if experiment.split_training:
-                print("split training baybe")
                 (
                     experiment,
                     model,

@@ -13,14 +13,14 @@ def split_mean_uncertainty_training(
 
     # Set mode to standard ELBO
     original_β_OOD = model.β_ood
-    setattr(model, β_OOD, 0)
+    model.β_ood = 0
 
     # Normal fit
     trainer = experiment.trainer
     trainer.fit(model, datamodule)
 
     # Reset ELBO params
-    setattr(model, β_OOD, original_β_OOD)
+    model.β_ood = original_β_OOD
     # Freeze mean network
     # print(next(model.μ.parameters())[:5])
     # print(next(model.α.parameters())[:5])
