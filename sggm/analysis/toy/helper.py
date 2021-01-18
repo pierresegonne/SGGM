@@ -268,64 +268,90 @@ def kl_grad_shift_plot(
         llk = np.exp(gm.score_samples(x_plot.reshape(-1, 1))).reshape(-1, 1)
         kl_llk = kl - llk
 
-    ax.plot(
-        x_plot,
-        kl,
-        "o",
-        label=r"KL(q($\lambda\mid$x)$\Vert$p($\lambda$))",
-        markersize=2,
-        markerfacecolor=(*colours_rgb["navyBlue"], 0.6),
-        markeredgewidth=1,
-        markeredgecolor=(*colours_rgb["navyBlue"], 0.1),
-    )
-    ax.plot(
-        x_plot,
-        ellk,
-        "o",
-        label=r"ELLK(x,y,$\lambda$)",
-        markersize=2,
-        markerfacecolor=(*colours_rgb["orange"], 0.6),
-        markeredgewidth=1,
-        markeredgecolor=(*colours_rgb["orange"], 0.1),
-    )
-    ax.plot(
-        x_plot,
-        mllk,
-        "o",
-        label=r"MLLK(x,y)",
-        markersize=2,
-        markerfacecolor=(*colours_rgb["red"], 0.6),
-        markeredgewidth=1,
-        markeredgecolor=(*colours_rgb["red"], 0.1),
-    )
-
-    ax.plot(
-        x_plot,
-        kl_llk,
-        "o",
-        label=r"KL(x)-LLK(x)",
-        markersize=2,
-        markerfacecolor=(*colours_rgb["brightGreen"], 0.6),
-        markeredgewidth=1,
-        markeredgecolor=(*colours_rgb["brightGreen"], 0.1),
-    )
-    ax.plot(
-        x_plot,
-        llk,
-        "o",
-        label=r"LLK(x)",
-        markersize=2,
-        markerfacecolor=(*colours_rgb["purple"], 0.6),
-        markeredgewidth=1,
-        markeredgecolor=(*colours_rgb["purple"], 0.1),
-    )
+    # KL
+    # ax.plot(
+    #     x_plot,
+    #     kl,
+    #     "o",
+    #     label=r"KL(q($\lambda\mid$x)$\Vert$p($\lambda$))",
+    #     markersize=2,
+    #     markerfacecolor=(*colours_rgb["navyBlue"], 0.6),
+    #     markeredgewidth=1,
+    #     markeredgecolor=(*colours_rgb["navyBlue"], 0.1),
+    # )
+    # # ELLK
+    # ax.plot(
+    #     x_plot,
+    #     ellk,
+    #     "o",
+    #     label=r"ELLK(x,y,$\lambda$)",
+    #     markersize=2,
+    #     markerfacecolor=(*colours_rgb["orange"], 0.6),
+    #     markeredgewidth=1,
+    #     markeredgecolor=(*colours_rgb["orange"], 0.1),
+    # )
+    # # MLLK
+    # ax.plot(
+    #     x_plot,
+    #     mllk,
+    #     "o",
+    #     label=r"MLLK(x,y)",
+    #     markersize=2,
+    #     markerfacecolor=(*colours_rgb["red"], 0.6),
+    #     markeredgewidth=1,
+    #     markeredgecolor=(*colours_rgb["red"], 0.1),
+    # )
+    # # KL penalised by density llk
+    # ax.plot(
+    #     x_plot,
+    #     kl_llk,
+    #     "o",
+    #     label=r"KL(x)-LLK(x)",
+    #     markersize=2,
+    #     markerfacecolor=(*colours_rgb["brightGreen"], 0.6),
+    #     markeredgewidth=1,
+    #     markeredgecolor=(*colours_rgb["brightGreen"], 0.1),
+    # )
+    # # Density likelihood
+    # ax.plot(
+    #     x_plot,
+    #     llk,
+    #     "o",
+    #     label=r"LLK(x)",
+    #     markersize=2,
+    #     markerfacecolor=(*colours_rgb["purple"], 0.6),
+    #     markeredgewidth=1,
+    #     markeredgecolor=(*colours_rgb["purple"], 0.1),
+    # )
 
     # Gamma parameters
+    # ax.plot(
+    #     x_plot,
+    #     α_x,
+    #     "o",
+    #     label=r"$\alpha$(x)",
+    #     markersize=2,
+    #     markerfacecolor=(*colours_rgb["pink"], 0.6),
+    #     markeredgewidth=1,
+    #     markeredgecolor=(*colours_rgb["pink"], 0.1),
+    # )
+    # ax.plot(
+    #     x_plot,
+    #     β_x,
+    #     "o",
+    #     label=r"$\beta$(x)",
+    #     markersize=2,
+    #     markerfacecolor=(*colours_rgb["purple"], 0.6),
+    #     markeredgewidth=1,
+    #     markeredgecolor=(*colours_rgb["purple"], 0.1),
+    # )
+
+    # Gamma split aleatoric epistemic
     ax.plot(
         x_plot,
-        α_x,
+        β_x / α_x,
         "o",
-        label=r"$\alpha$(x)",
+        label=r"$\sigma_{aleatoric}(x) = \frac{\beta(x)}{\alpha(x)}$",
         markersize=2,
         markerfacecolor=(*colours_rgb["pink"], 0.6),
         markeredgewidth=1,
@@ -333,9 +359,9 @@ def kl_grad_shift_plot(
     )
     ax.plot(
         x_plot,
-        β_x,
+        α_x / (α_x - 1),
         "o",
-        label=r"$\beta$(x)",
+        label=r"$\sigma_{epistemic}(x) = \frac{\alpha(x)}{\alpha(x) - 1}$",
         markersize=2,
         markerfacecolor=(*colours_rgb["purple"], 0.6),
         markeredgewidth=1,
