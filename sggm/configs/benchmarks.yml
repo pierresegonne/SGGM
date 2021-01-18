@@ -19,24 +19,24 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_standard_elbo_st
-  experiment_name: toy
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 0
-  prior_alpha: 1.025
-  prior_beta: 0.5
-  seed: 2
-  # pl trainer
-  early_stopping_patience: 250
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_standard_elbo_st
+#   experiment_name: toy
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 0
+#   prior_alpha: 1.025
+#   prior_beta: 0.5
+#   seed: 2
+#   # pl trainer
+#   early_stopping_patience: 250
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 # - name: benchmark_gaussian_noise
 #   experiment_name: toy
@@ -98,25 +98,25 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_brute_force_st
-  experiment_name: toy
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 1
-  beta_ood: 0.5
-  prior_alpha: 1.025
-  prior_beta: 0.5
-  ood_x_generation_method: brute_force
-  seed: 2
-  # pl trainer
-  early_stopping_patience: 250
-  n_trials: 20
-  max_epochs: -1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+# - name: benchmark_brute_force_st
+#   experiment_name: toy
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 1
+#   beta_ood: 0.5
+#   prior_alpha: 1.025
+#   prior_beta: 0.5
+#   ood_x_generation_method: brute_force
+#   seed: 2
+#   # pl trainer
+#   early_stopping_patience: 250
+#   n_trials: 20
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_brute_force_st_true
   experiment_name: toy
@@ -134,6 +134,7 @@
   early_stopping_patience: 250
   n_trials: 20
   max_epochs: -1
+  min_epochs: 500
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
