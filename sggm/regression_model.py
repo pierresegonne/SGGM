@@ -298,11 +298,11 @@ class VariationalRegressor(pl.LightningModule):
             x.detach().cpu()
         )
         # Translate to pytorch mixture
-        mix = tcd.Categorical(torch.Tensor(gm_sklearn.weights_))
+        mix = tcd.Categorical(torch.Tensor(gm_sklearn.weights_).type_as(x))
         comp = tcd.Independent(
             tcd.MultivariateNormal(
-                loc=torch.Tensor(gm_sklearn.means_),
-                covariance_matrix=torch.Tensor(gm_sklearn.covariances_),
+                loc=torch.Tensor(gm_sklearn.means_).type_as(x),
+                covariance_matrix=torch.Tensor(gm_sklearn.covariances_).type_as(x),
             ),
             0,
         )
