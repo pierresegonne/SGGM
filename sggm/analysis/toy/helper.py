@@ -122,6 +122,7 @@ def best_model_plot(data_ax: Axes, model: VariationalRegressor, method: str) -> 
     x_plot = plot_dataset[0]
     colour = get_colour_for_method(method)
     best_mean = model.predictive_mean(x_plot, method).flatten()
+    print(best_mean)
     best_std = model.predictive_std(x_plot, method).flatten()
     prior_std = model.prior_std(x_plot).flatten()
 
@@ -366,6 +367,16 @@ def kl_grad_shift_plot(
         markerfacecolor=(*colours_rgb["purple"], 0.6),
         markeredgewidth=1,
         markeredgecolor=(*colours_rgb["purple"], 0.1),
+    )
+    ax.plot(
+        x_plot,
+        α_x / β_x,
+        "o",
+        label=r"$\frac{\alpha(x)}{\beta(x)}$",
+        markersize=2,
+        markerfacecolor=(*colours_rgb["primaryRed"], 0.6),
+        markeredgewidth=1,
+        markeredgecolor=(*colours_rgb["primaryRed"], 0.1),
     )
 
     # Misc
