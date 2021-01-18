@@ -46,6 +46,8 @@ N_WORKERS = "n_workers"  # num workers for data loading set to None will take N_
 SHIFTING_PROPORTION_TOTAL = "shifting_proportion_total"
 SHIFTING_PROPORTION_K = "shifting_proportion_k"
 
+SPLIT_TRAINING = "split_training"
+
 ENCODER_TYPE = "encoder_type"
 # Options for ENCODER_TYPE
 ENCODER_FULLY_CONNECTED = "encoder_fully_connected"
@@ -105,6 +107,8 @@ parameters = {
     #
     SHIFTING_PROPORTION_TOTAL: Param(SHIFTING_PROPORTION_TOTAL, 1e-1, float),
     SHIFTING_PROPORTION_K: Param(SHIFTING_PROPORTION_K, 1e-2, float),
+    #
+    SPLIT_TRAINING: Param(SPLIT_TRAINING, False, bool),
 }
 
 # -------------

@@ -45,6 +45,6 @@ def plot(experiment_log, methods):
         # plt.legend()
         save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
         plt.tight_layout()
-        plt.savefig(f"{save_folder}/_.png")
-        plt.savefig(f"{save_folder}/_.pdf")
+        plt.savefig(f"{save_folder}/_.png", dpi=300)
+        plt.savefig(f"{save_folder}/_.svg")
         plt.show()

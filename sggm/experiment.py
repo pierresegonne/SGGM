@@ -64,6 +64,7 @@ from sggm.definitions import (
     SHIFTING_PROPORTION_TOTAL,
 )
 from sggm.data import datamodules
+from sggm.experiment_helper import split_mean_uncertainty_training
 from sggm.regression_model import Regressor, VariationalRegressor
 from sggm.vae_model import BaseVAE, VanillaVAE, V3AE
 
@@ -372,21 +373,6 @@ def cli_main():
             datamodule = experiment.datamodule
             datamodule.setup()
 
-            # checks for shift uci
-            # TODO remove
-            print("\n\nUCI CHECK")
-            print(datamodule.train_dataset[0][0])
-            prop = (
-                len(datamodule.train_dataset)
-                / (
-                    len(datamodule.train_dataset)
-                    + len(datamodule.test_dataset)
-                    + len(datamodule.val_dataset)
-                )
-                * 100
-            )
-            print(f"train represents {prop}% of all")
-
             # ------------
             # model
             # ------------
@@ -395,8 +381,17 @@ def cli_main():
             # ------------
             # training
             # ------------
-            trainer = experiment.trainer
-            trainer.fit(model, datamodule)
+            if experiment.split_training:
+                print("split training baybe")
+                (
+                    experiment,
+                    model,
+                    datamodule,
+                    trainer,
+                ) = split_mean_uncertainty_training(experiment, model, datamodule)
+            else:
+                trainer = experiment.trainer
+                trainer.fit(model, datamodule)
 
             # ------------
             # testing
