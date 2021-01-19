@@ -511,7 +511,9 @@ class VariationalRegressor(pl.LightningModule):
             μ_x, α_x, β_x = self(x)
             log_likelihood = self.ellk(μ_x, α_x, β_x, y)
             kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-            gmm_density = self.gmm_density(x)
+            gmm_density = None
+            if self.ood_x_generation_method == ADVERSARIAL_KL_LK:
+                gmm_density = self.gmm_density(x)
             # --
             # Avoid exploding gradients
             self.tune_on_validation(x, kl=kl_divergence, gmm_density=gmm_density)
