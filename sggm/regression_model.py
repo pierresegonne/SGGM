@@ -185,8 +185,11 @@ class VariationalRegressor(pl.LightningModule):
         self.prior_α = prior_α
         self.prior_β = prior_β
 
-        self.β_ood = β_ood
+        # To do once β_elbo becomes a proper mixture proportion.
+        assert (β_elbo >= 0) & (β_elbo <= 1), "Invalid β_elbo"
         self.β_elbo = β_elbo
+        assert (β_ood >= 0) & (β_ood <= 1), "Invalid β_ood"
+        self.β_ood = β_ood
 
         self.learning_rate = learning_rate
         self.lr_v = 1e-2
@@ -310,58 +313,60 @@ class VariationalRegressor(pl.LightningModule):
         return gmm
 
     def ood_x(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
-        if self.ood_x_generation_method == GAUSSIAN_NOISE:
-            noise_std = torch.std(x) * 3  # 3 is Arbitrary
-            return x + noise_std * torch.randn_like(x)
+        # Skip generation if we're not going to see it used
+        if self.β_ood > 0:
+            if self.ood_x_generation_method == GAUSSIAN_NOISE:
+                noise_std = torch.std(x) * 3  # 3 is Arbitrary
+                return x + noise_std * torch.randn_like(x)
 
-        elif self.ood_x_generation_method == V_PARAM:
-            kl = torch.mean(kwargs["kl"])
-            kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            normed_kl_grad = normalise_grad(kl_grad)
-            return x + self.ood_generator_v * normed_kl_grad
+            elif self.ood_x_generation_method == V_PARAM:
+                kl = torch.mean(kwargs["kl"])
+                kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
+                normed_kl_grad = normalise_grad(kl_grad)
+                return x + self.ood_generator_v * normed_kl_grad
 
-        elif self.ood_x_generation_method == ADVERSARIAL:
-            kl = torch.mean(kwargs["kl"])
-            kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            # By default norm 2 or fro
-            normed_kl_grad = normalise_grad(kl_grad)
-            return x + self.ood_generator_v * normed_kl_grad
+            elif self.ood_x_generation_method == ADVERSARIAL:
+                kl = torch.mean(kwargs["kl"])
+                kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
+                # By default norm 2 or fro
+                normed_kl_grad = normalise_grad(kl_grad)
+                return x + self.ood_generator_v * normed_kl_grad
 
-        elif self.ood_x_generation_method == ADVERSARIAL_KL_LK:
-            # KL term
-            kl = torch.mean(kwargs["kl"])
-            # LK term
-            density_lk = torch.mean(kwargs["density_lk"])
-            obj = kl - density_lk
-            obj_grad = torch.autograd.grad(obj, x, retain_graph=True)[0]
-            normed_obj_grad = normalise_grad(obj_grad)
-            return x + self.ood_generator_v * normed_obj_grad
+            elif self.ood_x_generation_method == ADVERSARIAL_KL_LK:
+                # KL term
+                kl = torch.mean(kwargs["kl"])
+                # LK term
+                density_lk = torch.mean(kwargs["density_lk"])
+                obj = kl - density_lk
+                obj_grad = torch.autograd.grad(obj, x, retain_graph=True)[0]
+                normed_obj_grad = normalise_grad(obj_grad)
+                return x + self.ood_generator_v * normed_obj_grad
 
-        elif self.ood_x_generation_method == UNIFORM:
-            raise NotImplementedError(
-                "Uniform X ood generation must be implemented per use case."
-            )
+            elif self.ood_x_generation_method == UNIFORM:
+                raise NotImplementedError(
+                    "Uniform X ood generation must be implemented per use case."
+                )
 
-        elif self.ood_x_generation_method == BRUTE_FORCE:
-            x_ood_proposal = torch.reshape(
-                torch.linspace(-25, 35, 4000), (4000, 1)
-            ).type_as(x)
-            _, alpha_ood, beta_ood = self(x_ood_proposal)
-            kl = self.kl(alpha_ood, beta_ood, self.prior_α, self.prior_β).detach()
+            elif self.ood_x_generation_method == BRUTE_FORCE:
+                x_ood_proposal = torch.reshape(
+                    torch.linspace(-25, 35, 4000), (4000, 1)
+                ).type_as(x)
+                _, alpha_ood, β_ood = self(x_ood_proposal)
+                kl = self.kl(alpha_ood, β_ood, self.prior_α, self.prior_β).detach()
 
-            # density likelihood penalty
-            # TODO remove once investigation completed
-            # gm = GaussianMixture(n_components=5).fit(x.detach().cpu())
-            # llk = gm.score_samples(x_ood_proposal.detach().cpu()).reshape(-1, 1)
-            # llk = torch.Tensor(llk).to(self.device)
+                # density likelihood penalty
+                # TODO remove once investigation completed
+                # gm = GaussianMixture(n_components=5).fit(x.detach().cpu())
+                # llk = gm.score_samples(x_ood_proposal.detach().cpu()).reshape(-1, 1)
+                # llk = torch.Tensor(llk).to(self.device)
 
-            # objective = kl - llk
-            objective = kl
+                # objective = kl - llk
+                objective = kl
 
-            # Top K and then subsample
-            _, idx = torch.topk(objective, 1000, dim=0, sorted=False)
-            x_ood = x_ood_proposal[idx][::2]
-            return torch.reshape(x_ood, (500, 1))
+                # Top K and then subsample
+                _, idx = torch.topk(objective, 1000, dim=0, sorted=False)
+                x_ood = x_ood_proposal[idx][::2]
+                return torch.reshape(x_ood, (500, 1))
 
         return torch.empty(0, 0)
 
@@ -447,8 +452,8 @@ class VariationalRegressor(pl.LightningModule):
     def elbo(
         self, ellk: torch.Tensor, kl: torch.Tensor, train: bool = True
     ) -> torch.Tensor:
-        β = self.β_elbo if train else 1
-        return torch.mean(ellk - β * kl)
+        β = self.β_elbo if train else 0.5
+        return torch.mean((1 - β) * ellk - β * kl)
 
     def training_step(self, batch, batch_idx):
 
@@ -483,7 +488,7 @@ class VariationalRegressor(pl.LightningModule):
             nellk_out = -expected_log_likelihood_out
             loss = -(1 - self.β_ood) * self.elbo(
                 expected_log_likelihood, kl_divergence
-            ) - self.β_ood * self.elbo(nellk_out, kl_divergence_out)
+            ) + self.β_ood * self.elbo(nellk_out, kl_divergence_out)
 
         # Define the marginal y|x
         if self._marginal_loss:
@@ -491,7 +496,7 @@ class VariationalRegressor(pl.LightningModule):
             m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
             loss = -(1 - self.β_ood) * torch.mean(
                 m_p.log_prob(y)
-            ) - self.β_ood * torch.mean(kl_divergence_out)
+            ) + self.β_ood * torch.mean(kl_divergence_out)
 
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
             try:

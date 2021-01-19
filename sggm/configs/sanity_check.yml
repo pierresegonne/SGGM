@@ -3,7 +3,7 @@
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
-#   beta_elbo: 1
+#   beta_elbo: 0.5
 #   beta_ood: 0
 #   prior_alpha: 1.025
 #   prior_beta: 0.5
@@ -22,7 +22,7 @@
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
-#   beta_elbo: 1
+#   beta_elbo: 0.5
 #   beta_ood: 0.5
 #   prior_alpha: 1.025
 #   prior_beta: 0.5
@@ -42,7 +42,7 @@
   # hparams
   batch_size: 1024
   hidden_dim: 50
-  beta_elbo: 1
+  beta_elbo: 0.5
   beta_ood: 0.5
   prior_alpha: 1.025
   prior_beta: 0.5
@@ -62,7 +62,7 @@
   # hparams
   batch_size: 1024
   hidden_dim: 50
-  beta_elbo: 1
+  beta_elbo: 0.5
   beta_ood: 0.5
   prior_alpha: 1.025
   prior_beta: 0.5
