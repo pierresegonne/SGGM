@@ -130,7 +130,6 @@
   ood_x_generation_method: brute_force
   seed: 2
   split_training: True
-  min_epochs: 500
   # pl trainer
   early_stopping_patience: 250
   n_trials: 20
