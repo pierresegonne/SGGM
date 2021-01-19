@@ -1,3 +1,4 @@
+import glob
 import matplotlib.pyplot as plt
 import os
 import pytorch_lightning as pl
@@ -66,13 +67,23 @@ class FitSaver(pl.callbacks.Callback):
             ax.grid(True)
             ax.set_xlim([-5, 15])
             ax.set_ylim([-25, 25])
-            ax.set_xlabel("x")
-            ax.set_ylabel("y|x")
+            ax.set_xlabel(r"$x$")
+            ax.set_ylabel(r"$y|x$")
 
             # save
             log_dir = trainer.logger.log_dir
             save_dir = f"{log_dir}/fit_saves/"
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
-            plt.savefig(f"{save_dir}/img{trainer.current_epoch}.png")
+            # Check if img already exists, if yes then offset by highest number
+            img_name = f"{save_dir}/img{trainer.current_epoch}.png"
+            if os.path.exists(img_name):
+                offset = max(
+                    [
+                        int(imgname.split("/")[-1].split(".")[0].split("+")[0][3:])
+                        for imgname in glob.glob(f"{save_dir}/*.png")
+                    ]
+                )
+                img_name = f"{save_dir}/img{offset}+{trainer.current_epoch}.png"
+            plt.savefig(img_name)
             plt.close()

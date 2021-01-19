@@ -122,7 +122,6 @@ def best_model_plot(data_ax: Axes, model: VariationalRegressor, method: str) -> 
     x_plot = plot_dataset[0]
     colour = get_colour_for_method(method)
     best_mean = model.predictive_mean(x_plot, method).flatten()
-    print(best_mean)
     best_std = model.predictive_std(x_plot, method).flatten()
     prior_std = model.prior_std(x_plot).flatten()
 
@@ -270,27 +269,27 @@ def kl_grad_shift_plot(
         kl_llk = kl - llk
 
     # KL
-    # ax.plot(
-    #     x_plot,
-    #     kl,
-    #     "o",
-    #     label=r"KL(q($\lambda\mid$x)$\Vert$p($\lambda$))",
-    #     markersize=2,
-    #     markerfacecolor=(*colours_rgb["navyBlue"], 0.6),
-    #     markeredgewidth=1,
-    #     markeredgecolor=(*colours_rgb["navyBlue"], 0.1),
-    # )
+    ax.plot(
+        x_plot,
+        kl,
+        "o",
+        label=r"KL(q($\lambda\mid$x)$\Vert$p($\lambda$))",
+        markersize=2,
+        markerfacecolor=(*colours_rgb["navyBlue"], 0.6),
+        markeredgewidth=1,
+        markeredgecolor=(*colours_rgb["navyBlue"], 0.1),
+    )
     # # ELLK
-    # ax.plot(
-    #     x_plot,
-    #     ellk,
-    #     "o",
-    #     label=r"ELLK(x,y,$\lambda$)",
-    #     markersize=2,
-    #     markerfacecolor=(*colours_rgb["orange"], 0.6),
-    #     markeredgewidth=1,
-    #     markeredgecolor=(*colours_rgb["orange"], 0.1),
-    # )
+    ax.plot(
+        x_plot,
+        ellk,
+        "o",
+        label=r"ELLK(x,y,$\lambda$)",
+        markersize=2,
+        markerfacecolor=(*colours_rgb["orange"], 0.6),
+        markeredgewidth=1,
+        markeredgecolor=(*colours_rgb["orange"], 0.1),
+    )
     # # MLLK
     # ax.plot(
     #     x_plot,
@@ -348,36 +347,36 @@ def kl_grad_shift_plot(
     # )
 
     # Gamma split aleatoric epistemic
-    ax.plot(
-        x_plot,
-        β_x / α_x,
-        "o",
-        label=r"$\sigma_{aleatoric}(x) = \frac{\beta(x)}{\alpha(x)}$",
-        markersize=2,
-        markerfacecolor=(*colours_rgb["pink"], 0.6),
-        markeredgewidth=1,
-        markeredgecolor=(*colours_rgb["pink"], 0.1),
-    )
-    ax.plot(
-        x_plot,
-        α_x / (α_x - 1),
-        "o",
-        label=r"$\sigma_{epistemic}(x) = \frac{\alpha(x)}{\alpha(x) - 1}$",
-        markersize=2,
-        markerfacecolor=(*colours_rgb["purple"], 0.6),
-        markeredgewidth=1,
-        markeredgecolor=(*colours_rgb["purple"], 0.1),
-    )
-    ax.plot(
-        x_plot,
-        α_x / β_x,
-        "o",
-        label=r"$\frac{\alpha(x)}{\beta(x)}$",
-        markersize=2,
-        markerfacecolor=(*colours_rgb["primaryRed"], 0.6),
-        markeredgewidth=1,
-        markeredgecolor=(*colours_rgb["primaryRed"], 0.1),
-    )
+    # ax.plot(
+    #     x_plot,
+    #     β_x / α_x,
+    #     "o",
+    #     label=r"$\sigma_{aleatoric}(x) = \frac{\beta(x)}{\alpha(x)}$",
+    #     markersize=2,
+    #     markerfacecolor=(*colours_rgb["pink"], 0.6),
+    #     markeredgewidth=1,
+    #     markeredgecolor=(*colours_rgb["pink"], 0.1),
+    # )
+    # ax.plot(
+    #     x_plot,
+    #     α_x / (α_x - 1),
+    #     "o",
+    #     label=r"$\sigma_{epistemic}(x) = \frac{\alpha(x)}{\alpha(x) - 1}$",
+    #     markersize=2,
+    #     markerfacecolor=(*colours_rgb["purple"], 0.6),
+    #     markeredgewidth=1,
+    #     markeredgecolor=(*colours_rgb["purple"], 0.1),
+    # )
+    # ax.plot(
+    #     x_plot,
+    #     α_x / β_x,
+    #     "o",
+    #     label=r"$\frac{\alpha(x)}{\beta(x)}$",
+    #     markersize=2,
+    #     markerfacecolor=(*colours_rgb["primaryRed"], 0.6),
+    #     markeredgewidth=1,
+    #     markeredgecolor=(*colours_rgb["primaryRed"], 0.1),
+    # )
 
     # Misc
     ax.grid(True)

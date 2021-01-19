@@ -293,7 +293,6 @@ class VariationalRegressor(pl.LightningModule):
         """
         Estimates density on x
         """
-        print("estimate density")
         # Sklearn to get params
         gm_sklearn = GaussianMixture(n_components=max(1, int(x.shape[0] / 20))).fit(
             x.detach().cpu()
