@@ -506,6 +506,8 @@ class VariationalRegressor(pl.LightningModule):
                 print(x_out[0, :3])
                 exit()
 
+        self.log(TRAIN_LOSS, loss, on_epoch=True)
+
         return loss
 
     def validation_step(self, batch, batch_idx):
