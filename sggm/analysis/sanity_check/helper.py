@@ -21,7 +21,7 @@ from sggm.styles_ import colours, colours_rgb
 # ------------
 # Plot data definition
 # ------------
-data_range_plot = [-10, 20]
+data_range_plot = [-15, 25]
 data_range_training = [0, 10]
 
 

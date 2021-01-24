@@ -53,6 +53,7 @@ def plot(experiment_log, methods):
             misc_ax,
             best_model,
             best_training_dataset,
+            plot_dataset=plot_dataset,
         )
 
         # plt.legend()

@@ -343,9 +343,10 @@ class VariationalRegressor(pl.LightningModule):
                 return x + self.ood_generator_v * normed_obj_grad
 
             elif self.ood_x_generation_method == UNIFORM:
-                raise NotImplementedError(
-                    "Uniform X ood generation must be implemented per use case."
-                )
+                N = x.shape[0]
+                x_right = torch.FloatTensor(int(N / 2), 1).uniform_(100, 102)
+                x_left = torch.FloatTensor(int(N / 2), 1).uniform_(-102, -100)
+                return torch.cat((x_right, x_left), dim=0)
 
             elif self.ood_x_generation_method == BRUTE_FORCE:
                 x_ood_proposal = torch.reshape(

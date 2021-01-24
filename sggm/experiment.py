@@ -50,7 +50,7 @@ from sggm.definitions import (
     VANILLA_VAE,
     VV_VAE,
 )
-from sggm.definitions import ACTIVATION_FUNCTIONS, F_ELU, F_SIGMOID
+from sggm.definitions import ACTIVATION_FUNCTIONS, F_ELU, F_RELU, F_SIGMOID
 from sggm.definitions import (
     EVAL_LOSS,
     EXPERIMENT_NAME,
@@ -99,6 +99,9 @@ def activation_function(experiment_name):
         FASHION_MNIST,
         NOT_MNIST,
     ]:
+        # Match VV
+        return F_RELU
+        # Supposed to be best
         return F_ELU
 
 

@@ -205,7 +205,10 @@ def get_std_trials_df(versions, method: str) -> pd.DataFrame:
 
 
 def kl_grad_shift_plot(
-    ax: Axes, model: VariationalRegressor, training_dataset: Tuple[torch.Tensor]
+    ax: Axes,
+    model: VariationalRegressor,
+    training_dataset: Tuple[torch.Tensor],
+    plot_dataset: Tuple[torch.Tensor] = plot_dataset,
 ) -> Axes:
     # Unpacking
     x_plot, y_plot, _ = plot_dataset

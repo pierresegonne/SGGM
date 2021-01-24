@@ -67,3 +67,13 @@ class UCISuperConductDataModuleShifted(UCISuperConductDataModule, DataModuleShif
     def setup(self, stage: str = None):
         UCISuperConductDataModule.setup(self, stage)
         DataModuleShifted.setup(self)
+
+
+if __name__ == "__main__":
+
+    dm = UCISuperConductDataModule(1024, 0)
+    dm.setup()
+
+    # Info about the data
+    print(dm.y_std)
+    # 34.16975968
