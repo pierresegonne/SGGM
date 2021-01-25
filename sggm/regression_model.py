@@ -7,7 +7,6 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 
-# TODO remove if likelihood penalty is inconclusive
 from sklearn.mixture import GaussianMixture
 
 from sggm.definitions import (
@@ -352,12 +351,6 @@ class VariationalRegressor(pl.LightningModule):
                 _, alpha_ood, β_ood = self(x_ood_proposal)
                 kl = self.kl(alpha_ood, β_ood, self.prior_α, self.prior_β).detach()
 
-                # density likelihood penalty
-                # TODO remove once investigation completed
-                # gm = GaussianMixture(n_components=5).fit(x.detach().cpu())
-                # llk = gm.score_samples(x_ood_proposal.detach().cpu()).reshape(-1, 1)
-                # llk = torch.Tensor(llk).to(self.device)
-
                 # objective = kl - llk
                 objective = kl
 
@@ -460,29 +453,33 @@ class VariationalRegressor(pl.LightningModule):
 
         μ_x, α_x, β_x = self(x)
 
-        expected_log_likelihood = self.ellk(μ_x, α_x, β_x, y)
-        kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-
-        density_lk = None
-        if self.ood_x_generation_method == ADVERSARIAL_KL_LK:
-            density_lk = self.gmm_density(x).log_prob(x).exp()
-
-        x_out = self.ood_x(x, kl=kl_divergence, density_lk=density_lk)
-        x.requires_grad = False
-        if torch.numel(x_out) > 0:
-            μ_x_out, α_x_out, β_x_out = self(x_out)
-            expected_log_likelihood_out = self.ellk(μ_x_out, α_x_out, β_x_out, μ_x_out)
-            kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
+        # Split training only mse
+        if self.mse_mode:
+            loss = 
         else:
-            expected_log_likelihood_out = torch.zeros((1,)).type_as(x)
-            kl_divergence_out = torch.zeros((1,)).type_as(x)
+            expected_log_likelihood = self.ellk(μ_x, α_x, β_x, y)
+            kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
 
-        loss = -(1 - self.β_ood) * self.elbo(
-            expected_log_likelihood, kl_divergence
-        ) + self.β_ood * torch.mean(kl_divergence_out)
+            density_lk = None
+            if self.ood_x_generation_method == ADVERSARIAL_KL_LK:
+                density_lk = self.gmm_density(x).log_prob(x).exp()
 
-        if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
-            self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
+            x_out = self.ood_x(x, kl=kl_divergence, density_lk=density_lk)
+            x.requires_grad = False
+            if torch.numel(x_out) > 0:
+                μ_x_out, α_x_out, β_x_out = self(x_out)
+                expected_log_likelihood_out = self.ellk(μ_x_out, α_x_out, β_x_out, μ_x_out)
+                kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
+            else:
+                expected_log_likelihood_out = torch.zeros((1,)).type_as(x)
+                kl_divergence_out = torch.zeros((1,)).type_as(x)
+
+            loss = -(1 - self.β_ood) * self.elbo(
+                expected_log_likelihood, kl_divergence
+            ) + self.β_ood * torch.mean(kl_divergence_out)
+
+            if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
+                self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
 
         self.log(TRAIN_LOSS, loss, on_epoch=True)
 
