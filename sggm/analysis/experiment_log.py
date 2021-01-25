@@ -97,5 +97,4 @@ class ExperimentLog:
         self.idx_best_version = np.argmin(
             [v.results[0][TEST_LOSS] for v in self.versions]
         )
-        self.idx_best_version = 8
         self.best_version = self.versions[self.idx_best_version]
