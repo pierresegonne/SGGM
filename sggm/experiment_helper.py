@@ -14,6 +14,7 @@ def split_mean_uncertainty_training(
     # Heuristic = Purely Eng
 
     # Set mode to standard ELBO
+    # This effectively creates a new var not only a reference
     original_β_OOD = model.β_ood
     model.β_ood = 0
 

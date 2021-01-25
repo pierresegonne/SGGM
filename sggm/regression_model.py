@@ -211,9 +211,6 @@ class VariationalRegressor(pl.LightningModule):
         self.pp = tcd.Gamma(prior_α, prior_β)
         self.example_input_array = torch.rand((10, self.input_dim))
 
-        self._marginal_loss = False
-        self._ood_ellk = False
-
         # Save hparams
         self.save_hyperparameters(
             "input_dim",
@@ -484,28 +481,8 @@ class VariationalRegressor(pl.LightningModule):
             expected_log_likelihood, kl_divergence
         ) + self.β_ood * torch.mean(kl_divergence_out)
 
-        if self._ood_ellk:
-            # use of full ELBO ood
-            nellk_out = -expected_log_likelihood_out
-            loss = -(1 - self.β_ood) * self.elbo(
-                expected_log_likelihood, kl_divergence
-            ) + self.β_ood * self.elbo(nellk_out, kl_divergence_out)
-
-        # Define the marginal y|x
-        if self._marginal_loss:
-            # Use directly the evidence not its lower bound
-            m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
-            loss = -(1 - self.β_ood) * torch.mean(
-                m_p.log_prob(y)
-            ) + self.β_ood * torch.mean(kl_divergence_out)
-
         if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
-            try:
-                self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
-            except ValueError:
-                print("Value Error!")
-                print(x_out[0, :3])
-                exit()
+            self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
 
         self.log(TRAIN_LOSS, loss, on_epoch=True)
 

@@ -100,7 +100,7 @@ def activation_function(experiment_name):
         NOT_MNIST,
     ]:
         # Match VV
-        return F_RELU
+        # return F_RELU
         # Supposed to be best
         return F_ELU
 
