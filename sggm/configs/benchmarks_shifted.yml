@@ -274,6 +274,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.3
@@ -297,6 +298,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.3
@@ -366,6 +368,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.7
@@ -389,6 +392,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.7
@@ -457,6 +461,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.01
@@ -480,6 +485,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.01
@@ -548,6 +554,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.002
@@ -571,6 +578,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.002
@@ -639,6 +647,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.0001
@@ -662,6 +671,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.0001
@@ -730,6 +740,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.95
@@ -753,6 +764,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   # shift
   seed: 2
   shifting_proportion_total: 0.95

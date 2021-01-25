@@ -274,6 +274,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -294,6 +295,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -354,6 +356,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -374,6 +377,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -433,6 +437,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -453,6 +458,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -513,6 +519,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -533,6 +540,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -593,6 +601,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -613,6 +622,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -673,6 +683,7 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
@@ -693,6 +704,7 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
+  split_training_mode: split_training_std_vv_mean
   seed: 2
   # pl trainer
   n_trials: 20
