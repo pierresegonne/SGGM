@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import pytorch_lightning as pl
 import torch
@@ -17,12 +18,14 @@ def split_mean_uncertainty_training(
     # Set mode to standard ELBO
     # This effectively creates a new var not only a reference
     # Old
-    # original_β_OOD = model.β_ood
-    # model.β_ood = 0
+    original_β_OOD = model.β_ood
+    model.β_ood = 0
     # New
-    model.mse_mode = True
+    # model.mse_mode = True
     # Predict prior uncertainty
     original_α, original_β = model.α, model.β
+    original_α_state_dict = copy.deepcopy(model.α.state_dict())
+    original_β_state_dict = copy.deepcopy(model.β.state_dict())
 
     class new_α(nn.Module):
         def __init__(self):
@@ -38,8 +41,8 @@ def split_mean_uncertainty_training(
         def forward(self, x):
             return torch.ones_like(x) * model.prior_β
 
-    model.α = new_α()
-    model.β = new_β()
+    # model.α = new_α()
+    # model.β = new_β()
 
     # Normal fit
     trainer = experiment.trainer
@@ -53,11 +56,11 @@ def split_mean_uncertainty_training(
     # Reset ELBO params
     # Very hacky!
     # Old
-    # model.β_ood = original_β_OOD
+    model.β_ood = original_β_OOD
     # New
     model.mse_mode = False
-    model.α = original_α
-    model.β = original_β
+    model.α.load_state_dict(original_α_state_dict)
+    model.β.load_state_dict(original_β_state_dict)
     # ES
     es.best_score = torch.tensor(np.Inf)
     es.wait_count = 0

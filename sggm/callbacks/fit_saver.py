@@ -68,7 +68,7 @@ class FitSaver(pl.callbacks.Callback):
             ax.set_xlim([-5, 15])
             ax.set_ylim([-25, 25])
             ax.set_xlabel(r"$x$")
-            ax.set_ylabel(r"$y|x$")
+            ax.set_ylabel(r"$y$")
 
             # save
             log_dir = trainer.logger.log_dir
