@@ -88,3 +88,4 @@ if __name__ == "__main__":
 
     # Info about the data
     print(dm.y_std)
+    # 15.23262565 log = 2.73
