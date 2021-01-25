@@ -23,6 +23,8 @@ from sggm.definitions import (
     EPS,
     LEARNING_RATE,
     #
+    SPLIT_TRAINING_MODE,
+    #
     OOD_X_GENERATION_METHOD,
     ADVERSARIAL,
     ADVERSARIAL_KL_LK,
@@ -152,6 +154,9 @@ class VariationalRegressor(pl.LightningModule):
         n_mc_samples: int = variational_regressor_parameters[N_MC_SAMPLES].default,
         y_mean: float = 0.0,  # Not in regressor parameters as it is infered from data
         y_std: float = 1.0,  # Not in regressor parameters as it is infered from data
+        split_training_mode: str = variational_regressor_parameters[
+            SPLIT_TRAINING_MODE
+        ].default,
     ):
         super(VariationalRegressor, self).__init__()
 
@@ -210,6 +215,7 @@ class VariationalRegressor(pl.LightningModule):
         self.pp = tcd.Gamma(prior_α, prior_β)
         self.example_input_array = torch.rand((10, self.input_dim))
 
+        self.split_training_mode = split_training_mode
         self.mse_mode = False
 
         # Save hparams
@@ -225,6 +231,7 @@ class VariationalRegressor(pl.LightningModule):
             "ood_x_generation_method",
             "eps",
             "n_mc_samples",
+            "split_training_mode"
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

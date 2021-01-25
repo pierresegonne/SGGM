@@ -47,6 +47,10 @@ SHIFTING_PROPORTION_TOTAL = "shifting_proportion_total"
 SHIFTING_PROPORTION_K = "shifting_proportion_k"
 
 SPLIT_TRAINING = "split_training"
+SPLIT_TRAINING_MODE = "split_training_mode"
+# Modes
+SPLIT_TRAINING_MSE_MEAN = "split_training_mse_mean"
+SPLIT_TRAINING_STD_VV_MEAN = "split_training_std_vv_mean"
 
 ENCODER_TYPE = "encoder_type"
 # Options for ENCODER_TYPE
@@ -135,6 +139,8 @@ variational_regressor_parameters = {
     ),
     PRIOR_α: Param(PRIOR_α, 1.05, float),
     PRIOR_β: Param(PRIOR_β, 1.0, float),
+    #
+    SPLIT_TRAINING_MODE: Param(SPLIT_TRAINING_MODE, None, str),
 }
 regression_models = [VARIATIONAL_REGRESSOR]
 

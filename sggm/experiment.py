@@ -177,6 +177,7 @@ class Experiment:
                         n_mc_samples=self.n_mc_samples,
                         y_mean=self.datamodule.y_mean,
                         y_std=self.datamodule.y_std,
+                        split_training_mode=self.split_training_mode,
                     )
                 else:
                     raise NotImplementedError(
