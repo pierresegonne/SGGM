@@ -9,6 +9,8 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   seed: 2
+  shifting_proportion_total: 0.5
+  shifting_proportion_k: 0.003
   split_training: True
   # fit saver
   save_every_n_steps: 100
@@ -32,6 +34,8 @@
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   seed: 2
+  shifting_proportion_total: 0.5
+  shifting_proportion_k: 0.003
   split_training: True
   # fit saver
   save_every_n_steps: 100
@@ -55,6 +59,8 @@
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   seed: 2
+  shifting_proportion_total: 0.5
+  shifting_proportion_k: 0.003
   split_training: True
   # fit saver
   save_every_n_steps: 100
