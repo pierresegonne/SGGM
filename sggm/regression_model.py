@@ -210,6 +210,8 @@ class VariationalRegressor(pl.LightningModule):
         self.pp = tcd.Gamma(prior_α, prior_β)
         self.example_input_array = torch.rand((10, self.input_dim))
 
+        self.mse_mode = False
+
         # Save hparams
         self.save_hyperparameters(
             "input_dim",
@@ -455,7 +457,8 @@ class VariationalRegressor(pl.LightningModule):
 
         # Split training only mse
         if self.mse_mode:
-            loss = 
+            # default reduction is mean
+            loss = F.mse_loss(μ_x, y)
         else:
             expected_log_likelihood = self.ellk(μ_x, α_x, β_x, y)
             kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
@@ -468,8 +471,12 @@ class VariationalRegressor(pl.LightningModule):
             x.requires_grad = False
             if torch.numel(x_out) > 0:
                 μ_x_out, α_x_out, β_x_out = self(x_out)
-                expected_log_likelihood_out = self.ellk(μ_x_out, α_x_out, β_x_out, μ_x_out)
-                kl_divergence_out = self.kl(α_x_out, β_x_out, self.prior_α, self.prior_β)
+                expected_log_likelihood_out = self.ellk(
+                    μ_x_out, α_x_out, β_x_out, μ_x_out
+                )
+                kl_divergence_out = self.kl(
+                    α_x_out, β_x_out, self.prior_α, self.prior_β
+                )
             else:
                 expected_log_likelihood_out = torch.zeros((1,)).type_as(x)
                 kl_divergence_out = torch.zeros((1,)).type_as(x)
@@ -487,28 +494,29 @@ class VariationalRegressor(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        with torch.set_grad_enabled(True):
-            x.requires_grad = True
-            μ_x, α_x, β_x = self(x)
-            log_likelihood = self.ellk(μ_x, α_x, β_x, y)
-            kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-            gmm_density = None
-            if self.ood_x_generation_method == ADVERSARIAL_KL_LK:
-                gmm_density = self.gmm_density(x)
-            # --
-            # Avoid exploding gradients
-            self.tune_on_validation(x, kl=kl_divergence, gmm_density=gmm_density)
-        # --
-        loss = -self.elbo(log_likelihood, kl_divergence, train=False)
 
-        # Define the marginal y|x
-        if self._marginal_loss:
-            m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
-            loss = -torch.mean(m_p.log_prob(y))
+        if self.mse_mode:
+            μ_x, _, _ = self(x)
+            loss = F.mse_loss(μ_x, y)
+        else:
+            with torch.set_grad_enabled(True):
+                x.requires_grad = True
+                μ_x, α_x, β_x = self(x)
+                log_likelihood = self.ellk(μ_x, α_x, β_x, y)
+                kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
+                gmm_density = None
+                if self.ood_x_generation_method == ADVERSARIAL_KL_LK:
+                    gmm_density = self.gmm_density(x)
+                # --
+                # Avoid exploding gradients
+                self.tune_on_validation(x, kl=kl_divergence, gmm_density=gmm_density)
+            # --
+            loss = -self.elbo(log_likelihood, kl_divergence, train=False)
 
         self.log(EVAL_LOSS, loss, on_epoch=True)
         if self.ood_generator_v is not None:
             self.log("ood_generator_v", self.ood_generator_v, on_epoch=True)
+
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -516,13 +524,16 @@ class VariationalRegressor(pl.LightningModule):
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.ellk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
-        loss = -self.elbo(log_likelihood, kl_divergence, train=False)
+
+        if self.mse_mode:
+            loss = F.mse_loss(μ_x, y)
+        else:
+            loss = -self.elbo(log_likelihood, kl_divergence, train=False)
+
         y_pred = self.predictive_mean(x)
 
         m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
-        # Define the marginal y|x
-        if self._marginal_loss:
-            loss = -torch.mean(m_p.log_prob(y))
+
         # ---------
         # Metrics
         self.log(TEST_LOSS, loss, on_epoch=True)

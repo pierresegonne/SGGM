@@ -3,6 +3,7 @@ import pytorch_lightning as pl
 import torch
 
 from sggm.definitions import β_OOD
+from torch import nn
 from typing import Any
 
 
@@ -15,8 +16,30 @@ def split_mean_uncertainty_training(
 
     # Set mode to standard ELBO
     # This effectively creates a new var not only a reference
-    original_β_OOD = model.β_ood
-    model.β_ood = 0
+    # Old
+    # original_β_OOD = model.β_ood
+    # model.β_ood = 0
+    # New
+    model.mse_mode = True
+    # Predict prior uncertainty
+    original_α, original_β = model.α, model.β
+
+    class new_α(nn.Module):
+        def __init__(self):
+            super().__init__()
+
+        def forward(self, x):
+            return torch.ones_like(x) * model.prior_α
+
+    class new_β(nn.Module):
+        def __init__(self):
+            super().__init__()
+
+        def forward(self, x):
+            return torch.ones_like(x) * model.prior_β
+
+    model.α = new_α()
+    model.β = new_β()
 
     # Normal fit
     trainer = experiment.trainer
@@ -29,11 +52,17 @@ def split_mean_uncertainty_training(
 
     # Reset ELBO params
     # Very hacky!
-    model.β_ood = original_β_OOD
+    # Old
+    # model.β_ood = original_β_OOD
+    # New
+    model.mse_mode = False
+    model.α = original_α
+    model.β = original_β
+    # ES
     es.best_score = torch.tensor(np.Inf)
     es.wait_count = 0
     es.stopped_epoch = 0
-    es.patience = es.patience * 2
+    # es.patience = es.patience * 2 # Should not be necessary if ST works..
     trainer.should_stop = False
 
     # Freeze mean network

@@ -77,13 +77,15 @@ class FitSaver(pl.callbacks.Callback):
                 os.makedirs(save_dir)
             # Check if img already exists, if yes then offset by highest number
             img_name = f"{save_dir}/img{trainer.current_epoch}.png"
-            if os.path.exists(img_name):
+            if os.path.exists(img_name) and not hasattr(trainer, "fit_save_offset"):
                 offset = max(
                     [
                         int(imgname.split("/")[-1].split(".")[0].split("+")[0][3:])
                         for imgname in glob.glob(f"{save_dir}/*.png")
                     ]
                 )
-                img_name = f"{save_dir}/img{offset}+{trainer.current_epoch}.png"
+                trainer.fit_save_offset = offset
+            if hasattr(trainer, "fit_save_offset"):
+                img_name = f"{save_dir}/img{trainer.fit_save_offset}+{trainer.current_epoch}.png"
             plt.savefig(img_name)
             plt.close()
