@@ -6,7 +6,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from argparse import ArgumentParser
-from functools import reduce
 
 # from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
 from sggm.definitions import (
@@ -32,7 +31,8 @@ from sggm.definitions import (
     EVAL_LOSS,
     TEST_LOSS,
 )
-from sggm.types_ import List, Tensor
+from sggm.types_ import List, Tensor, Tuple
+from sggm.vae_model_helper import batch_flatten, batch_reshape, reduce_int_list
 
 
 def activation_function(activation_function_name: str) -> nn.Module:
@@ -50,57 +50,40 @@ def activation_function(activation_function_name: str) -> nn.Module:
     return f
 
 
-def encoder_dense(
-    input_dim: int, output_dim: int, activation: str, batch_norm: bool = False
+def encoder_dense_base(
+    input_size: int,
+    latent_size: int,
+    activation: str,
 ) -> nn.Module:
     f = activation_function(activation)
-    modules = []
 
-    modules.append(nn.Flatten())
-    modules.append(nn.Linear(input_dim, 512))
-    if batch_norm:
-        pass
-    modules.append(f)
-
-    modules.append(nn.Linear(512, 256))
-    if batch_norm:
-        pass
-    modules.append(f)
-
-    modules.append(nn.Linear(256, 128))
-    if batch_norm:
-        pass
-    modules.append(f)
-
-    modules.append(nn.Linear(128, output_dim))
-
-    return nn.Sequential(*modules)
+    return nn.Sequential(
+        nn.Linear(input_size, 512),
+        nn.BatchNorm1d(512),
+        f,
+        nn.Linear(512, 256),
+        nn.BatchNorm1d(256),
+        f,
+        nn.Linear(256, latent_size),
+    )
 
 
-def decoder_dense(
-    input_dim: int, output_dim: int, activation: str, batch_norm: bool = False
+def decoder_dense_base(
+    latent_size: int,
+    output_size: int,
+    activation: str,
 ) -> nn.Module:
     f = activation_function(activation)
-    modules = []
 
-    modules.append(nn.Linear(input_dim, 128))
-    if batch_norm:
-        pass
-    modules.append(f)
-
-    modules.append(nn.Linear(128, 256))
-    if batch_norm:
-        pass
-    modules.append(f)
-
-    modules.append(nn.Linear(256, 512))
-    if batch_norm:
-        pass
-    modules.append(f)
-
-    modules.append(nn.Linear(512, output_dim))
-
-    return nn.Sequential(*modules)
+    return nn.Sequential(
+        nn.Linear(latent_size, 256),
+        nn.BatchNorm1d(256),
+        nn.LeakyReLU(),
+        nn.Linear(256, 512),
+        nn.BatchNorm1d(512),
+        nn.LeakyReLU(),
+        nn.Linear(512, output_size),
+    )
 
 
 class BaseVAE(pl.LightningModule):
@@ -117,98 +100,145 @@ class VanillaVAE(pl.LightningModule):
     def __init__(
         self,
         input_dims: tuple,
-        activation: str = F_ELU,
-        encoder_type: str = vae_parameters[ENCODER_TYPE].default,
-        latent_dim: int = 10,
-        enc_out_dim: int = 128,
+        activation: str = F_LEAKY_RELU,
+        # encoder_type: str = vae_parameters[ENCODER_TYPE].default,
+        latent_dims: Tuple[int] = (10,),
     ):
         super(VanillaVAE, self).__init__()
 
         self.input_dims = list(input_dims)
-        self.latent_dim = latent_dim
-        self.enc_out_dim = enc_out_dim
+        self.input_size = reduce_int_list(self.input_dims)
+        self.latent_dims = list(latent_dims)
+        self.latent_size = reduce_int_list(self.latent_dims)
         self.activation = activation
 
-        self.lr = 1e-4
+        self.lr = 1e-3
 
-        # self.encoder = resnet18_encoder(first_conv, maxpool1)
-        flattened_dim = reduce(lambda x, y: x * y, input_dims)
-        self.encoder = encoder_dense(flattened_dim, enc_out_dim, activation)
-        self.μ_θ = nn.Linear(self.enc_out_dim, self.latent_dim)
-        self.log_var = nn.Linear(self.enc_out_dim, self.latent_dim)
+        self.encoder_μ = encoder_dense_base(
+            self.input_size, self.latent_size, self.activation
+        )
+        self.encoder_log_var = nn.Sequential(
+            encoder_dense_base(self.input_size, self.latent_size, self.activation),
+            nn.Softplus(),
+        )
 
-        # self.decoder = resnet18_decoder(
-        #     self.latent_dim, self.input_dim, first_conv, maxpool1
-        # )
-        self.decoder = decoder_dense(latent_dim, flattened_dim, activation)
+        self.decoder_μ = nn.Sequential(
+            decoder_dense_base(self.latent_size, self.input_size, self.activation),
+            nn.Sigmoid(),
+        )
+        self.decoder_log_var = nn.Sequential(
+            decoder_dense_base(self.latent_size, self.input_size, self.activation),
+            nn.Softplus(),
+        )
 
         # Save hparams
-        # TODO this might bug due to input dims type
         self.save_hyperparameters(
+            "activation",
+            # "lr",
             "input_dims",
-            "latent_dim",
-            "enc_out_dim",
-            "encoder_type",
+            "latent_dims",
         )
 
     @staticmethod
     def ellk(x, x_hat):
-        return -F.mse_loss(x_hat, x, reduction="mean")
+        # Careful,
+        x, x_hat = batch_flatten(x), batch_flatten(x_hat)
+        return (1 / x_hat.shape[0]) * torch.sum(
+            -F.mse_loss(x_hat, x, reduction="none"), dim=1
+        )
+        # Same results but averages over the batch size too
+        # return -F.mse_loss(x_hat, x, reduction="mean")
 
     @staticmethod
-    def kl(q, p):
-        return torch.mean(tcd.kl_divergence(q, p))
+    def kl(q, p, mc_integration: int = 0):
+        # Approximate the kl with mc_integration
+        if mc_integration >= 1:
+            z = q.rsample(torch.Size([mc_integration]))
+            return torch.mean(q.log_prob(z) - p.log_prob(z), dim=0)
+        return tcd.kl_divergence(q, p)
 
     @staticmethod
-    def elbo(ellk, kl):
-        return ellk - kl
+    def elbo(ellk, kl, β_kl: float = 1):
+        return ellk - β_kl * kl
 
     def forward(self, x: Tensor) -> Tensor:
-        x = self.encoder(x)
-        μ = self.μ_θ(x)
-        log_var = self.log_var(x)
-        p, q, z = self.sample(μ, log_var)
-        x_hat = self.decoder(z).view(-1, *self.input_dims)
-        return x_hat
+        # Reconstruction
+        # To define what I want to use it for ?
+        # returns a sample from the decoder, along with its parameters
+        x = batch_flatten(x)
+        μ_x = self.encoder_μ(x)
+        log_var_x = self.encoder_log_var(x)
+        z, _, _ = self.sample_latent(μ_x, log_var_x)
+        μ_z, log_var_z = self.decoder_μ(z), self.decoder_log_var(z)
+        x_hat, p_x = self.sample_generative(μ_z, log_var_z)
+        return x_hat, p_x
 
     def _run_step(self, x):
-        x = self.encoder(x)
-        mu = self.μ_θ(x)
-        log_var = self.log_var(x)
-        p, q, z = self.sample(mu, log_var)
-        return z, self.decoder(z).view(-1, *self.input_dims), p, q
+        # All relevant information for a training step
+        # Both latent and generated samples and parameters are returned
+        x = batch_flatten(x)
+        μ_x = self.encoder_μ(x)
+        log_var_x = self.encoder_log_var(x)
+        z, q_z_x, p_z = self.sample_latent(μ_x, log_var_x)
+        μ_z, log_var_z = self.decoder_μ(z), self.decoder_log_var(z)
+        x_hat, p_x_z = self.sample_generative(μ_z, log_var_z)
+        x_hat = batch_reshape(x_hat, self.input_dims)
+        return x_hat, p_x_z, z, q_z_x, p_z
 
-    def sample(self, mu, log_var):
+    def sample_latent(self, mu, log_var):
         std = torch.exp(log_var / 2)
-        p = tcd.Normal(torch.zeros_like(mu), torch.ones_like(std))
-        q = tcd.Normal(mu, std)
+        # batch_shape [batch_shape] event_shape [latent_size]
+        q = tcd.Independent(tcd.Normal(mu, std), 1)
         z = q.rsample()  # rsample implies reparametrisation
-        return p, q, z
+        p = tcd.Independent(tcd.Normal(torch.zeros_like(z), torch.ones_like(z)), 1)
+        return z, q, p
+
+    def sample_generative(self, mu, log_var):
+        std = torch.exp(log_var / 2)
+        # batch_shape [batch_shape] event_shape [input_size]
+        # p = tcd.Independent(tcd.Normal(mu, log_var), 1)
+        p = tcd.Independent(tcd.Bernoulli(mu), 1)
+        # x = p.rsample()
+        x = p.sample()
+        return x, p
 
     def step(self, batch, batch_idx):
         x, y = batch
-        z, x_hat, p, q = self._run_step(x)
+        x_hat, p_x_z, z, q_z_x, p_z = self._run_step(x)
+        # Just learning the mean
+        x_hat = batch_reshape(p_x_z.mean, self.input_dims)
 
-        expected_log_likelihood = self.ellk(x, x_hat)
-        kl_divergence = self.kl(q, p)
+        # expected_log_likelihood = self.ellk(x, x_hat)
+        expected_log_likelihood = p_x_z.log_prob(batch_flatten(x))
+        kl_divergence = self.kl(q_z_x, p_z)
 
-        loss = -self.elbo(expected_log_likelihood, kl_divergence)
+        loss = -self.elbo(expected_log_likelihood, kl_divergence).mean()
 
         logs = {
-            "ellk": expected_log_likelihood,
-            "kl": kl_divergence,
+            "ellk": expected_log_likelihood.mean(),
+            "kl": kl_divergence.mean(),
             "loss": loss,
         }
         return loss, logs
 
     def training_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
-        self.log(TRAIN_LOSS, loss, on_epoch=True)
+        # self.log(TRAIN_LOSS, loss, on_epoch=True)
+        self.log_dict(
+            {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
+        )
         return loss
 
     def validation_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
+        # Needed for Early stopping?
         self.log(EVAL_LOSS, loss, on_epoch=True)
+        self.log_dict(
+            {f"val_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
+        )
+        # Histogram of weights
+        for name, weight in self.named_parameters():
+            self.logger.experiment.add_histogram(name, weight, self.current_epoch)
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -217,6 +247,8 @@ class VanillaVAE(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
+        # TODO
+        # Does self.parameters include children modules parameters?
         return torch.optim.Adam(self.parameters(), lr=self.lr)
 
     @staticmethod

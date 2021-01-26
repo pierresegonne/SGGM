@@ -3,6 +3,8 @@ import torchvision
 
 from pytorch_lightning import Callback, Trainer, LightningModule
 
+from sggm.vae_model_helper import batch_reshape
+
 """
 Callback to log generated images
 """
@@ -24,15 +26,15 @@ class IMGGeneratedSaver(pl.callbacks.Callback):
             trainer.current_epoch % self.save_every_epochs == 0
         ):
             x, y = next(iter(pl_module.test_dataloader()))
-            x_hat = pl_module(x)
-            print(x_hat.shape)
-            exit()
+            x_hat, p_x = pl_module(x)
+
+            # Show only mean
+            x_show = batch_reshape(p_x.mean, pl_module.input_dims)
 
             img_list = [x[i] for i in range(self.num_images)] + [
-                x_hat[i] for i in range(self.num_images)
+                x_show[i] for i in range(self.num_images)
             ]
             grid = torchvision.utils.make_grid(img_list, nrow=self.num_images)
-            print(grid.shape)
 
             str_title = f"{pl_module.__class__.__name__}_images"
             trainer.logger.experiment.add_image(

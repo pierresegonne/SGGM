@@ -31,6 +31,8 @@ class MNISTDataModule(pl.LightningDataModule):
         # Manual
         self.x_mean = 0.1307
         self.x_std = 0.3081
+        self.x_mean = 0.0
+        self.x_std = 1
         self.range = 255
         self.dims = (1, 28, 28)
 
@@ -68,6 +70,7 @@ class MNISTDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
+            shuffle=True,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -76,6 +79,7 @@ class MNISTDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
+            shuffle=True
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -84,6 +88,7 @@ class MNISTDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
+            shuffle=True
         )
 
 
