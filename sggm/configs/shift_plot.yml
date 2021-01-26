@@ -1,7 +1,7 @@
 
 # No shift - OK
 # - name: benchmark_standard_elbo_st
-#   experiment_name: uci_superconduct
+#   experiment_name: uci_concrete
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
@@ -22,7 +22,7 @@
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 # - name: benchmark_adversarial_st
-#   experiment_name: uci_superconduct
+#   experiment_name: uci_concrete
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
@@ -45,7 +45,7 @@
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 # - name: benchmark_gaussian_noise_st
-#   experiment_name: uci_superconduct
+#   experiment_name: uci_concrete
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
@@ -69,7 +69,7 @@
 
 # 1e-64
 - name: benchmark_standard_elbo_1e-64_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -90,7 +90,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_gaussian_noise_1e-64_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -114,7 +114,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_adversarial_1e-64_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -139,7 +139,7 @@
 
 # 1e-32
 - name: benchmark_standard_elbo_1e-32_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -160,7 +160,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_gaussian_noise_1e-32_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -184,7 +184,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_adversarial_1e-32_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -209,7 +209,7 @@
 
 # 1e-16
 - name: benchmark_standard_elbo_1e-16_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -230,7 +230,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_gaussian_noise_1e-16_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -254,7 +254,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_adversarial_1e-16_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -279,7 +279,7 @@
 
 # 1e-4
 - name: benchmark_standard_elbo_1e-4_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -300,7 +300,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_gaussian_noise_1e-4_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -324,7 +324,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_adversarial_1e-4_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -349,7 +349,7 @@
 
 # 1e-2
 - name: benchmark_standard_elbo_1e-2_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -370,7 +370,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_gaussian_noise_1e-2_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -394,7 +394,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_adversarial_1e-2_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -419,7 +419,7 @@
 
 # 1e3
 - name: benchmark_standard_elbo_1e3_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -440,7 +440,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_gaussian_noise_1e3_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -464,7 +464,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: benchmark_adversarial_1e3_st
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_concrete_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
