@@ -231,7 +231,7 @@ class VariationalRegressor(pl.LightningModule):
             "ood_x_generation_method",
             "eps",
             "n_mc_samples",
-            "split_training_mode"
+            "split_training_mode",
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -606,10 +606,6 @@ class VariationalRegressor(pl.LightningModule):
             {"params": self.α.parameters()},
             {"params": self.β.parameters()},
         ]
-        if self.ood_x_generation_method == V_PARAM:
-            params += [
-                {"params": self.ood_generator_v, "lr": self.lr_v},
-            ]
         optimizer = torch.optim.Adam(
             params,
             lr=self.learning_rate,
