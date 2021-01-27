@@ -84,10 +84,6 @@ def add_experiment_args(parser, experiment_name):
             default=MARGINAL,
             help="Comma delimited list input, ex 'marginal,posterior'",
         )
-    if experiment_name in UCI:
-        parser.add_argument(
-            "--index", type=int, required=True, help="index of the feature to plot"
-        )
     return parser
 
 

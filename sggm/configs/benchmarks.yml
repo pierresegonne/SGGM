@@ -1,6 +1,6 @@
 ## TOY
 
-# - name: benchmark_mle
+# - name: mle
 #   experiment_name: toy
 #   # hparams
 #   batch_size: 1024
@@ -19,7 +19,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_standard_elbo_st
+# - name: standard_elbo_st
 #   experiment_name: toy
 #   # hparams
 #   batch_size: 1024
@@ -38,7 +38,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_gaussian_noise
+# - name: gaussian_noise
 #   experiment_name: toy
 #   # hparams
 #   batch_size: 1024
@@ -58,7 +58,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_adversarial
+# - name: adversarial
 #   experiment_name: toy
 #   # hparams
 #   batch_size: 1024
@@ -78,7 +78,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_adversarial_kl-lk
+# - name: adversarial_kl-lk
 #   experiment_name: toy
 #   # hparams
 #   batch_size: 1024
@@ -98,7 +98,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_brute_force_st
+# - name: brute_force_st
 #   experiment_name: toy
 #   # hparams
 #   batch_size: 1024
@@ -118,7 +118,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_brute_force_st_true
+# - name: brute_force_st_true
 #   experiment_name: toy
 #   # hparams
 #   batch_size: 1024
@@ -142,7 +142,7 @@
 # ## ===================
 # ## TOY 2D
 
-# - name: benchmark_mle
+# - name: mle
 #   experiment_name: toy_2d
 #   N_train: 10000
 #   N_test: 1000
@@ -162,7 +162,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_standard_elbo
+# - name: standard_elbo
 #   experiment_name: toy_2d
 #   N_train: 10000
 #   N_test: 1000
@@ -182,7 +182,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_gaussian_noise
+# - name: gaussian_noise
 #   experiment_name: toy_2d
 #   N_train: 10000
 #   N_test: 1000
@@ -203,7 +203,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: benchmark_adversarial
+# - name: adversarial
 #   experiment_name: toy_2d
 #   N_train: 10000
 #   N_test: 1000
@@ -227,14 +227,14 @@
 ## ===================
 ## UCI CCPP
 
-# - name: benchmark_mle
+# - name: mle
 #   experiment_name: uci_ccpp
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   beta_ood: 0
-#   prior_alpha: 1.05
+#   prior_alpha: 1.5
 #   prior_beta: 0.5
 #   seed: 2
 #   # pl trainer
@@ -245,14 +245,14 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_standard_elbo
+- name: standard_elbo
   experiment_name: uci_ccpp
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   seed: 2
   # pl trainer
@@ -263,14 +263,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_gaussian_noise_st
+- name: gaussian_noise
   experiment_name: uci_ccpp
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
@@ -284,14 +284,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_adversarial_st
+- name: adversarial
   experiment_name: uci_ccpp
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
@@ -309,14 +309,14 @@
 # ===================
 # UCI CONCRETE
 
-# - name: benchmark_mle
+# - name: mle
 #   experiment_name: uci_concrete
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   beta_ood: 0
-#   prior_alpha: 1.05
+#   prior_alpha: 1.5
 #   prior_beta: 0.5
 #   seed: 2
 #   # pl trainer
@@ -327,14 +327,14 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_standard_elbo
+- name: standard_elbo
   experiment_name: uci_concrete
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   seed: 2
   # pl trainer
@@ -345,14 +345,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_gaussian_noise_st
+- name: gaussian_noise
   experiment_name: uci_concrete
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
@@ -366,14 +366,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_adversarial_st
+- name: adversarial
   experiment_name: uci_concrete
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
@@ -390,14 +390,14 @@
 ## ===================
 ## UCI SUPERCONDUCT
 
-# - name: benchmark_mle
+# - name: mle
 #   experiment_name: uci_superconduct
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   beta_ood: 0
-#   prior_alpha: 1.05
+#   prior_alpha: 1.5
 #   prior_beta: 0.5
 #   seed: 2
 #   # pl trainer
@@ -408,14 +408,14 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_standard_elbo
+- name: standard_elbo
   experiment_name: uci_superconduct
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   seed: 2
   # pl trainer
@@ -426,14 +426,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_gaussian_noise_st
+- name: gaussian_noise
   experiment_name: uci_superconduct
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
@@ -447,14 +447,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_adversarial_st
+- name: adversarial
   experiment_name: uci_superconduct
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
@@ -472,14 +472,14 @@
 ## ===================
 ## UCI WINE RED
 
-# - name: benchmark_mle
+# - name: mle
 #   experiment_name: uci_wine_red
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   beta_ood: 0
-#   prior_alpha: 1.05
+#   prior_alpha: 1.5
 #   prior_beta: 0.5
 #   seed: 2
 #   # pl trainer
@@ -490,14 +490,14 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_standard_elbo
+- name: standard_elbo
   experiment_name: uci_wine_red
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   seed: 2
   # pl trainer
@@ -508,14 +508,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_gaussian_noise_st
+- name: gaussian_noise
   experiment_name: uci_wine_red
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
@@ -529,14 +529,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_adversarial_st
+- name: adversarial
   experiment_name: uci_wine_red
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
@@ -554,14 +554,14 @@
 ## ===================
 ## UCI WINE WHITE
 
-# - name: benchmark_mle
+# - name: mle
 #   experiment_name: uci_wine_white
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   beta_ood: 0
-#   prior_alpha: 1.05
+#   prior_alpha: 1.5
 #   prior_beta: 0.5
 #   seed: 2
 #   # pl trainer
@@ -572,14 +572,14 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_standard_elbo
+- name: standard_elbo
   experiment_name: uci_wine_white
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   seed: 2
   # pl trainer
@@ -590,14 +590,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_gaussian_noise_st
+- name: gaussian_noise
   experiment_name: uci_wine_white
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
@@ -611,14 +611,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_adversarial_st
+- name: adversarial
   experiment_name: uci_wine_white
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
@@ -636,14 +636,14 @@
 # ===================
 # UCI YACHT
 
-# - name: benchmark_mle
+# - name: mle
 #   experiment_name: uci_yacht
 #   # hparams
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   beta_ood: 0
-#   prior_alpha: 1.05
+#   prior_alpha: 1.5
 #   prior_beta: 0.5
 #   seed: 2
 #   # pl trainer
@@ -654,14 +654,14 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_standard_elbo
+- name: standard_elbo
   experiment_name: uci_yacht
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   seed: 2
   # pl trainer
@@ -672,14 +672,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_gaussian_noise_st
+- name: gaussian_noise
   experiment_name: uci_yacht
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
   split_training: True
@@ -693,14 +693,14 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: benchmark_adversarial_st
+- name: adversarial
   experiment_name: uci_yacht
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   beta_ood: 0.5
-  prior_alpha: 1.05
+  prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
   split_training: True
