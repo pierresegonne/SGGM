@@ -33,6 +33,7 @@ def plot_comparison(n_display, title, x_og, p_x, input_dims):
     x_hat = batch_reshape(p_x.sample(), input_dims)
     x_mu = batch_reshape(p_x.mean, input_dims)
     x_var = batch_reshape(p_x.variance, input_dims)
+    # print(x_og[0, :], x_var[0, :])
 
     for n in range(n_display):
         for k in range(4):
@@ -40,16 +41,16 @@ def plot_comparison(n_display, title, x_og, p_x, input_dims):
             ax = disable_ticks(ax)
             # Original
             if k == 0:
-                ax.imshow(x_og[n, :][0], cmap="binary")
+                ax.imshow(x_og[n, :][0], cmap="binary", vmin=0, vmax=1)
             # Mean
             elif k == 1:
-                ax.imshow(x_mu[n, :][0], cmap="binary")
+                ax.imshow(x_mu[n, :][0], cmap="binary", vmin=0, vmax=1)
             # Variance
             elif k == 2:
                 ax.imshow(x_var[n, :][0], cmap="binary")
             # Sample
             elif k == 3:
-                ax.imshow(x_hat[n, :][0], cmap="binary")
+                ax.imshow(x_hat[n, :][0], cmap="binary", vmin=0, vmax=1)
 
     return fig
 

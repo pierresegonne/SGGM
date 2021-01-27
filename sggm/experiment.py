@@ -74,7 +74,7 @@ from sggm.types_ import List
 def clean_dict(dic: dict) -> dict:
     clean_dic = {}
     for k, v in dic.items():
-        if type(v) in [str, int, float, object, None]:
+        if type(v) in [str, int, bool, float, object, None]:
             clean_dic[k] = v
     return clean_dic
 
@@ -245,11 +245,15 @@ class Experiment:
                 save_dir=f"lightning_logs/{self.experiment_name}",
                 name=self.name,
             )
+            automatic_optimization = True
+            if self.experiment_name in generative_experiments:
+                automatic_optimization = False
             return pl.Trainer.from_argparse_args(
                 trainer_args,
                 callbacks=self.callbacks + default_callbacks,
                 logger=logger,
                 profiler=False,
+                automatic_optimization=automatic_optimization,
             )
 
 
