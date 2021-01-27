@@ -58,14 +58,14 @@ def plot_comparison(n_display, title, x_og, p_x, input_dims):
 def input_to_latent(model, x):
     x = batch_flatten(x)
     μ_x = model.encoder_μ(x)
-    log_var_x = model.encoder_log_var(x)
-    z, _, _ = model.sample_latent(μ_x, log_var_x)
+    std_x = model.encoder_std(x)
+    z, _, _ = model.sample_latent(μ_x, std_x)
     return z
 
 
 def latent_to_mean(model, z):
-    μ_z, log_var_z = model.decoder_μ(z), model.decoder_log_var(z)
-    _, p_x_z = model.sample_generative(μ_z, log_var_z)
+    μ_z, std_z = model.decoder_μ(z), model.decoder_std(z)
+    _, p_x_z = model.sample_generative(μ_z, std_z)
     return batch_reshape(p_x_z.mean, model.input_dims)
 
 

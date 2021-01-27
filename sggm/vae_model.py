@@ -181,7 +181,7 @@ class VanillaVAE(BaseVAE):
             input_dims, activation=activation, latent_dims=latent_dims
         )
 
-        self.lr = 1e-3
+        self.lr = 1e-4
         self.epsilon_std_encoder = 1e-4
         self.β_elbo = 1
         self._switch_to_decoder_var = False
@@ -277,8 +277,6 @@ class VanillaVAE(BaseVAE):
 
         x, y = batch
         x_hat, p_x_z, z, q_z_x, p_z = self._run_step(x)
-        # Just learning the mean
-        x_hat = batch_reshape(p_x_z.mean, self.input_dims)
 
         expected_log_likelihood = self.ellk(p_x_z, x)
         kl_divergence = self.kl(q_z_x, p_z)
@@ -419,7 +417,6 @@ class V3AE(BaseVAE):
 
     def sample_generative(self, mu, alpha, beta):
         # batch_shape [batch_shape] event_shape [input_size]
-
         if self._student_t_decoder:
             p = tcd.Independent(
                 tcd.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
@@ -431,6 +428,27 @@ class V3AE(BaseVAE):
             x = p.sample()
 
         return x, p
+
+    def step(self, batch, batch_idx, train=False):
+
+        self.update_hacks()
+
+        x, y = batch
+        x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
+
+        # TODO, what's our loss here?
+        expected_log_likelihood = self.ellk(p_x_z, x)
+        kl_divergence = self.kl(q_z_x, p_z)
+
+        loss = -self.elbo(expected_log_likelihood, kl_divergence, train=train).mean()
+
+        logs = {
+            "llk": expected_log_likelihood.sum(),
+            "ellk": expected_log_likelihood.mean(),
+            "kl": kl_divergence.mean(),
+            "loss": loss,
+        }
+        return loss, logs
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):

@@ -13,7 +13,7 @@ Callback to log generated images
 class IMGGeneratedSaver(pl.callbacks.Callback):
     def __init__(
         self,
-        num_images: int = 3,
+        num_images: int = 4,
         save_every_epochs: int = 1,
         **kwargs,
     ):
@@ -29,11 +29,16 @@ class IMGGeneratedSaver(pl.callbacks.Callback):
             x_hat, p_x = pl_module(x)
 
             # Show only mean
-            x_show = batch_reshape(p_x.mean, pl_module.input_dims)
+            x_hat = batch_reshape(x_hat, pl_module.input_dims)
+            x_mean = batch_reshape(p_x.mean, pl_module.input_dims)
+            x_var = batch_reshape(p_x.variance, pl_module.input_dims)
 
-            img_list = [x[i] for i in range(self.num_images)] + [
-                x_show[i] for i in range(self.num_images)
-            ]
+            img_list = (
+                [x[i] for i in range(self.num_images)]
+                + [x_mean[i] for i in range(self.num_images)]
+                + [x_var[i] for i in range(self.num_images)]
+                + [x_hat[i] for i in range(self.num_images)]
+            )
             grid = torchvision.utils.make_grid(img_list, nrow=self.num_images)
 
             str_title = f"{pl_module.__class__.__name__}_images"
