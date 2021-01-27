@@ -131,16 +131,16 @@ def plot(experiment_log, methods, index):
         x_train, y_train = training_dataset
         x_test, y_test = test_dataset
 
-        mean_ax.plot(
-            x_train[:, index],
-            y_train,
-            "o",
-            markersize=3,
-            markerfacecolor=(*colours_rgb["navyBlue"], 0.6),
-            markeredgewidth=1,
-            markeredgecolor=(*colours_rgb["navyBlue"], 0.1),
-            label="Train",
-        )
+        # mean_ax.plot(
+        #     x_train[:, index],
+        #     y_train,
+        #     "o",
+        #     markersize=3,
+        #     markerfacecolor=(*colours_rgb["navyBlue"], 0.6),
+        #     markeredgewidth=1,
+        #     markeredgecolor=(*colours_rgb["navyBlue"], 0.1),
+        #     label="Train",
+        # )
         mean_ax.plot(
             x_test[:, index],
             y_test,
@@ -180,17 +180,17 @@ def plot(experiment_log, methods, index):
                 best_model.predictive_mean(x_test, method).flatten(),
             )
 
-            mean_ax.errorbar(
-                x_train[:, index],
-                mean_train,
-                yerr=1.96 * std_train,
-                fmt="o",
-                color=colour,
-                markersize=3,
-                elinewidth=1,
-                alpha=0.55,
-                label=r"$\mu(x) \pm 1.96\sigma(x)$",
-            )
+            # mean_ax.errorbar(
+            #     x_train[:, index],
+            #     mean_train,
+            #     yerr=1.96 * std_train,
+            #     fmt="o",
+            #     color=colour,
+            #     markersize=3,
+            #     elinewidth=1,
+            #     alpha=0.55,
+            #     label=r"$\mu(x) \pm 1.96\sigma(x)$",
+            # )
             mean_ax.errorbar(
                 x_test[:, index],
                 mean_test,
@@ -202,15 +202,15 @@ def plot(experiment_log, methods, index):
                 alpha=0.55,
             )
 
-            var_ax.plot(
-                x_train[:, index],
-                torch.sqrt((y_train.flatten() - mean_train) ** 2),
-                "o",
-                markersize=3,
-                markerfacecolor=(*colours_rgb["black"], 0.6),
-                markeredgewidth=1,
-                markeredgecolor=(*colours_rgb["black"], 0.1),
-            )
+            # var_ax.plot(
+            #     x_train[:, index],
+            #     torch.sqrt((y_train.flatten() - mean_train) ** 2),
+            #     "o",
+            #     markersize=3,
+            #     markerfacecolor=(*colours_rgb["black"], 0.6),
+            #     markeredgewidth=1,
+            #     markeredgecolor=(*colours_rgb["black"], 0.1),
+            # )
             var_ax.plot(
                 x_test[:, index],
                 torch.sqrt((y_test.flatten() - mean_test) ** 2),
@@ -221,9 +221,19 @@ def plot(experiment_log, methods, index):
                 markeredgecolor=(*colours_rgb["black"], 0.1),
                 label=r"$\sqrt{(\mu(x)-y)^{2}}$",
             )
+            # var_ax.plot(
+            #     x_train[:, index],
+            #     std_train,
+            #     "o",
+            #     markersize=3,
+            #     markerfacecolor=(*colours_rgb["orange"], 0.6),
+            #     markeredgewidth=1,
+            #     markeredgecolor=(*colours_rgb["orange"], 0.1),
+            #     label=r"$\sigma(x)$",
+            # )
             var_ax.plot(
-                x_train[:, index],
-                std_train,
+                x_test[:, index],
+                std_test,
                 "o",
                 markersize=3,
                 markerfacecolor=(*colours_rgb["orange"], 0.6),
@@ -233,13 +243,16 @@ def plot(experiment_log, methods, index):
             )
             var_ax.plot(
                 x_test[:, index],
-                std_test,
+                best_model.prior_std(x_test),
                 "o",
                 markersize=3,
-                markerfacecolor=(*colours_rgb["orange"], 0.6),
+                markerfacecolor=(*colours_rgb["black"], 0.4),
                 markeredgewidth=1,
-                markeredgecolor=(*colours_rgb["orange"], 0.1),
+                markeredgecolor=(*colours_rgb["black"], 0.1),
+                label=r"$\sigma_{prior}(x)$",
             )
+        
+            print(f"Average test uncertainty= {std_test.mean():.3f}")
 
         mean_ax.set_ylabel("y")
         y_max, _ = torch.max(y_train, dim=0)

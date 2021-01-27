@@ -254,8 +254,8 @@ class VariationalRegressor(pl.LightningModule):
         return σ
 
     def prior_std(self, x: torch.Tensor) -> torch.Tensor:
-        α = self.prior_α * torch.ones_like(x)
-        β = self.prior_β * torch.ones_like(x)
+        α = self.prior_α * torch.ones((x.shape[0], 1))
+        β = self.prior_β * torch.ones((x.shape[0], 1))
         return torch.sqrt(β / (α - 1))
 
     def marginal_predictive_mean(self, x: torch.Tensor) -> torch.Tensor:
