@@ -142,13 +142,6 @@ class VanillaVAE(pl.LightningModule):
     @staticmethod
     def ellk(p_x_z, x):
         return p_x_z.log_prob(batch_flatten(x))
-        # Legacy reconstruction loss and not proper likelihood,
-        # x, x_hat = batch_flatten(x), batch_flatten(x_hat)
-        # return (1 / x_hat.shape[0]) * torch.sum(
-        #     -F.mse_loss(x_hat, x, reduction="none"), dim=1
-        # )
-        # Same results but averages over the batch size too
-        # return -F.mse_loss(x_hat, x, reduction="mean")
 
     @staticmethod
     def kl(q, p, mc_integration: int = 0):
