@@ -26,6 +26,7 @@ class IMGGeneratedSaver(pl.callbacks.Callback):
             trainer.current_epoch % self.save_every_epochs == 0
         ):
             x, y = next(iter(pl_module.test_dataloader()))
+            x, y = x.to(pl_module.device), y.to(pl_module.device)
             x_hat, p_x = pl_module(x)
 
             # Show only mean
