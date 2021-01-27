@@ -191,7 +191,7 @@ class VanillaVAE(BaseVAE):
         self.encoder_μ = encoder_dense_base(
             self.input_size, self.latent_size, self.activation
         )
-        self.encoder_log_var = nn.Sequential(
+        self.encoder_std = nn.Sequential(
             encoder_dense_base(self.input_size, self.latent_size, self.activation),
             nn.Softplus(),
         )
@@ -200,7 +200,7 @@ class VanillaVAE(BaseVAE):
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
             nn.Sigmoid(),
         )
-        self.decoder_log_var = nn.Sequential(
+        self.decoder_std = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
             nn.Softplus(),
         )
@@ -220,10 +220,10 @@ class VanillaVAE(BaseVAE):
     def forward(self, x):
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
-        log_var_x = self.encoder_log_var(x)
-        z, _, _ = self.sample_latent(μ_x, log_var_x)
-        μ_z, log_var_z = self.decoder_μ(z), self.decoder_log_var(z)
-        x_hat, p_x = self.sample_generative(μ_z, log_var_z)
+        std_x = self.encoder_log_var(x)
+        z, _, _ = self.sample_latent(μ_x, std_x)
+        μ_z, std_z = self.decoder_μ(z), self.decoder_log_var(z)
+        x_hat, p_x = self.sample_generative(μ_z, std_z)
         return x_hat, p_x
 
     def _run_step(self, x):
@@ -231,25 +231,22 @@ class VanillaVAE(BaseVAE):
         # Both latent and generated samples and parameters are returned
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
-        log_var_x = self.encoder_log_var(x)
-        z, q_z_x, p_z = self.sample_latent(μ_x, log_var_x)
-        μ_z, log_var_z = self.decoder_μ(z), self.decoder_log_var(z)
-        x_hat, p_x_z = self.sample_generative(μ_z, log_var_z)
+        std_x = self.encoder_std(x)
+        z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
+        μ_z, std_z = self.decoder_μ(z), self.decoder_log_var(z)
+        x_hat, p_x_z = self.sample_generative(μ_z, std_z)
         x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x_z, z, q_z_x, p_z
 
-    def sample_latent(self, mu, log_var):
-        std = torch.exp(log_var / 2)
+    def sample_latent(self, mu, std):
         # batch_shape [batch_shape] event_shape [latent_size]
         q = tcd.Independent(tcd.Normal(mu, std + self.epsilon_std_encoder), 1)
         z = q.rsample()  # rsample implies reparametrisation
         p = tcd.Independent(tcd.Normal(torch.zeros_like(z), torch.ones_like(z)), 1)
         return z, q, p
 
-    def sample_generative(self, mu, log_var):
-        std = torch.exp(log_var / 2)
+    def sample_generative(self, mu, std):
         # batch_shape [batch_shape] event_shape [input_size]
-
         if self._gaussian_decoder:
             p = tcd.Independent(tcd.Normal(mu, std), 1)
             x = p.rsample()
@@ -355,7 +352,7 @@ class V3AE(BaseVAE):
         self.encoder_μ = encoder_dense_base(
             self.input_size, self.latent_size, self.activation
         )
-        self.encoder_log_var = nn.Sequential(
+        self.encoder_std = nn.Sequential(
             encoder_dense_base(self.input_size, self.latent_size, self.activation),
             nn.Softplus(),
         )
@@ -385,8 +382,8 @@ class V3AE(BaseVAE):
     def forward(self, x):
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
-        log_var_x = self.encoder_log_var(x)
-        z, _, _ = self.sample_latent(μ_x, log_var_x)
+        std_x = self.encoder_log_var(x)
+        z, _, _ = self.sample_latent(μ_x, std_x)
         μ_z, α_z, β_z = self.decoder_μ(z), self.decoder_α(z), self.decoder_β(z)
         λ, _, _ = self.sample_precision(α_z, β_z)
         x_hat, p_x = self.sample_generative(μ_z, λ)
@@ -397,18 +394,17 @@ class V3AE(BaseVAE):
         # Both latent and generated samples and parameters are returned
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
-        log_var_x = self.encoder_log_var(x)
-        z, q_z_x, p_z = self.sample_latent(μ_x, log_var_x)
+        std_x = self.encoder_log_var(x)
+        z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
         μ_z = self.decoder_μ(z)
         α_z = self.decoder_α(z)
         β_z = self.decoder_β(z)
         λ, q_λ_z, p_λ = self.sample_precision(α_z, β_z)
-        x_hat, p_x_z = self.sample_generative(μ_z, λ)
+        x_hat, p_x_z = self.sample_generative(μ_z, α_z, β_z)
         x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z
 
-    def sample_latent(self, mu, log_var):
-        std = torch.exp(log_var / 2)
+    def sample_latent(self, mu, std):
         # batch_shape [batch_shape] event_shape [latent_size]
         q = tcd.Independent(tcd.Normal(mu, std + self.epsilon_std_encoder), 1)
         z = q.rsample()  # rsample implies reparametrisation
