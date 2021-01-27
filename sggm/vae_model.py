@@ -7,12 +7,16 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 
-# from pl_bolts.models.autoencoders.components import resnet18_encoder, resnet18_decoder
 from sggm.definitions import (
     model_specific_args,
     vae_parameters,
     vanilla_vae_parameters,
     v3ae_parameters,
+    LEARNING_RATE,
+    PRIOR_α,
+    PRIOR_β,
+    EPS,
+    N_MC_SAMPLES,
 )
 from sggm.definitions import (
     ACTIVATION_FUNCTIONS,
@@ -95,8 +99,11 @@ class BaseVAE(pl.LightningModule):
     def __init__(
         self,
         input_dims: tuple,
-        activation: str = F_LEAKY_RELU,
-        latent_dims: Tuple[int] = (10,),
+        activation: str,
+        latent_dims: Tuple[int],
+        learning_rate: float = vae_parameters[LEARNING_RATE].default,
+        eps: float = vae_parameters[EPS].default,
+        n_mc_samples: int = vae_parameters[N_MC_SAMPLES].default,
     ):
         super().__init__()
 
@@ -106,15 +113,22 @@ class BaseVAE(pl.LightningModule):
         self.latent_size = reduce_int_list(self.latent_dims)
         self.activation = activation
 
+        self.example_input_array = torch.rand((10, *self.input_dims))
+
+        self.learning_rate = learning_rate
+
+        self.eps = eps
+        self.n_mc_samples = n_mc_samples
+
     @staticmethod
     def ellk(p_x_z, x):
         return p_x_z.log_prob(batch_flatten(x))
 
     @staticmethod
-    def kl(q, p, mc_integration: int = 0):
+    def kl(q, p, mc_integration: bool = False):
         # Approximate the kl with mc_integration
-        if mc_integration >= 1:
-            z = q.rsample(torch.Size([mc_integration]))
+        if mc_integration:
+            z = q.rsample(torch.Size([self.n_mc_samples]))
             return torch.mean(q.log_prob(z) - p.log_prob(z), dim=0)
         return tcd.kl_divergence(q, p)
 
@@ -173,16 +187,22 @@ class VanillaVAE(BaseVAE):
     def __init__(
         self,
         input_dims: tuple,
-        activation: str = F_LEAKY_RELU,
+        activation: str,
+        latent_dims: Tuple[int],
+        learning_rate: float = vae_parameters[LEARNING_RATE].default,
+        eps: float = vae_parameters[EPS].default,
+        n_mc_samples: int = vae_parameters[N_MC_SAMPLES].default,
         # encoder_type: str = vae_parameters[ENCODER_TYPE].default,
-        latent_dims: Tuple[int] = (10,),
     ):
         super(VanillaVAE, self).__init__(
-            input_dims, activation=activation, latent_dims=latent_dims
+            input_dims,
+            activation,
+            latent_dims=latent_dims,
+            learning_rate=learning_rate,
+            eps=eps,
+            n_mc_samples=n_mc_samples,
         )
 
-        self.lr = 1e-4
-        self.epsilon_std_encoder = 1e-4
         self.β_elbo = 1
         self._switch_to_decoder_var = False
         self._gaussian_decoder = True
@@ -208,9 +228,11 @@ class VanillaVAE(BaseVAE):
         # Save hparams
         self.save_hyperparameters(
             "activation",
-            # "lr",
             "input_dims",
             "latent_dims",
+            "learning_rate",
+            "eps",
+            "n_mc_samples",
         )
 
     @property
@@ -240,7 +262,7 @@ class VanillaVAE(BaseVAE):
 
     def sample_latent(self, mu, std):
         # batch_shape [batch_shape] event_shape [latent_size]
-        q = tcd.Independent(tcd.Normal(mu, std + self.epsilon_std_encoder), 1)
+        q = tcd.Independent(tcd.Normal(mu, std + self.eps), 1)
         z = q.rsample()  # rsample implies reparametrisation
         p = tcd.Independent(tcd.Normal(torch.zeros_like(z), torch.ones_like(z)), 1)
         return z, q, p
@@ -310,8 +332,10 @@ class VanillaVAE(BaseVAE):
         return loss
 
     def configure_optimizers(self):
-        model_opt = torch.optim.Adam(self.parameters(), lr=self.lr)
-        decoder_var_opt = torch.optim.Adam(self.decoder_std.parameters(), lr=self.lr)
+        model_opt = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        decoder_var_opt = torch.optim.Adam(
+            self.decoder_std.parameters(), lr=self.learning_rate
+        )
         return [model_opt, decoder_var_opt], []
 
     @staticmethod
@@ -327,16 +351,24 @@ class V3AE(BaseVAE):
     def __init__(
         self,
         input_dims: tuple,
-        activation: str = F_LEAKY_RELU,
+        activation: str,
+        latent_dims: Tuple[int],
+        learning_rate: float = vae_parameters[LEARNING_RATE].default,
+        prior_α: float = v3ae_parameters[PRIOR_α].default,
+        prior_β: float = v3ae_parameters[PRIOR_β].default,
+        eps: float = vae_parameters[EPS].default,
+        n_mc_samples: int = vae_parameters[N_MC_SAMPLES].default,
         # encoder_type: str = vae_parameters[ENCODER_TYPE].default,
-        latent_dims: Tuple[int] = (10,),
     ):
         super(V3AE, self).__init__(
-            input_dims, activation=activation, latent_dims=latent_dims
+            input_dims,
+            activation,
+            latent_dims=latent_dims,
+            learning_rate=learning_rate,
+            eps=eps,
+            n_mc_samples=n_mc_samples,
         )
 
-        self.lr = 1e-3
-        self.epsilon_std_encoder = 1e-4
         self.β_elbo = 1
         self._switch_to_decoder_var = False
         self._student_t_decoder = True
@@ -364,12 +396,19 @@ class V3AE(BaseVAE):
             nn.Softplus(),
         )
 
+        self.prior_α = prior_α
+        self.prior_β = prior_β
+
         # Save hparams
         self.save_hyperparameters(
             "activation",
-            # "lr",
             "input_dims",
             "latent_dims",
+            "learning_rate",
+            "eps",
+            "n_mc_samples",
+            "prior_α",
+            "prior_β",
         )
 
     def forward(self, x):
@@ -399,7 +438,7 @@ class V3AE(BaseVAE):
 
     def sample_latent(self, mu, std):
         # batch_shape [batch_shape] event_shape [latent_size]
-        q = tcd.Independent(tcd.Normal(mu, std + self.epsilon_std_encoder), 1)
+        q = tcd.Independent(tcd.Normal(mu, std + self.eps), 1)
         z = q.rsample()  # rsample implies reparametrisation
         p = tcd.Independent(tcd.Normal(torch.zeros_like(z), torch.ones_like(z)), 1)
         return z, q, p

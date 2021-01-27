@@ -50,7 +50,13 @@ from sggm.definitions import (
     VANILLA_VAE,
     VV_VAE,
 )
-from sggm.definitions import ACTIVATION_FUNCTIONS, F_ELU, F_RELU, F_SIGMOID
+from sggm.definitions import (
+    ACTIVATION_FUNCTIONS,
+    F_ELU,
+    F_LEAKY_RELU,
+    F_RELU,
+    F_SIGMOID,
+)
 from sggm.definitions import (
     EVAL_LOSS,
     EXPERIMENT_NAME,
@@ -95,14 +101,27 @@ def activation_function(experiment_name):
         UCI_WINE_WHITE_SHIFTED,
         UCI_YACHT,
         UCI_YACHT_SHIFTED,
-        MNIST,
-        FASHION_MNIST,
-        NOT_MNIST,
     ]:
         # Match VV
         # return F_RELU
         # Supposed to be best
         return F_ELU
+    elif experiment_name in [
+        MNIST,
+        FASHION_MNIST,
+        NOT_MNIST,
+    ]:
+        # Match Martin & Nicki
+        return F_LEAKY_RELU
+
+
+def latent_dims(experiment_name):
+    if experiment_name == MNIST:
+        return (10,)
+    elif experiment_name == FASHION_MNIST:
+        return (10,)
+    elif experiment_name == NOT_MNIST:
+        return (10,)
 
 
 def check_ood_x_generation_method(method):
@@ -166,6 +185,7 @@ class Experiment:
                         input_dim=input_dim,
                         hidden_dim=self.hidden_dim,
                         activation=activation_function(self.experiment_name),
+                        learning_rate=self.learning_rate,
                         prior_α=self.prior_alpha,
                         prior_β=self.prior_beta,
                         β_elbo=self.beta_elbo,
@@ -186,7 +206,14 @@ class Experiment:
             elif self.experiment_name in generative_experiments:
 
                 if self.model_name == VANILLA_VAE:
-                    return VanillaVAE(self.datamodule.dims)
+                    return VanillaVAE(
+                        input_dims=self.datamodule.dims,
+                        activation=activation_function(self.experiment_name),
+                        latent_dims=latent_dims(self.experiment_name),
+                        learning_rate=self.learning_rate,
+                        eps=self.eps,
+                        n_mc_samples=self.n_mc_samples,
+                    )
                 elif self.model_name == V3AE:
                     exit("TODO")
                     return V3AE()

@@ -147,12 +147,18 @@ regression_models = [VARIATIONAL_REGRESSOR]
 VANILLA_VAE = "vanilla_vae"
 VV_VAE = "v3ae"
 vae_parameters = {
+    LEARNING_RATE: Param(LEARNING_RATE, 1e-3, float),
+    EPS: Param(EPS, 1e-4, float),
+    N_MC_SAMPLES: Param(N_MC_SAMPLES, 20, int),
     ENCODER_TYPE: Param(
         ENCODER_TYPE, ENCODER_FULLY_CONNECTED, str, choices=ENCODER_AVAILABLE_TYPES
     ),
 }
 vanilla_vae_parameters = {}
-v3ae_parameters = {}
+v3ae_parameters = {
+    PRIOR_α: Param(PRIOR_α, 1.05, float),
+    PRIOR_β: Param(PRIOR_β, 1.0, float),
+}
 generative_models = [VANILLA_VAE, VV_VAE]
 
 
