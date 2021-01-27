@@ -123,13 +123,13 @@ class BaseVAE(pl.LightningModule):
         return ellk - β * kl
 
     def sample_latent(
-        self, mu: torch.Tensor, log_var: torch.Tensor
+        self, mu: torch.Tensor, std: torch.Tensor
     ) -> Tuple[torch.Tensor, tcd.Distribution, tcd.Distribution]:
         # Returns latent_samples, posterior, prior
         raise NotImplementedError("Method must be overriden by child VAE model")
 
     def sample_generative(
-        self, mu: torch.Tensor, log_var: torch.Tensor
+        self, mu: torch.Tensor, std: torch.Tensor
     ) -> Tuple[torch.Tensor, tcd.Distribution]:
         # Returns generated_samples, decoder
         raise NotImplementedError("Method must be overriden by child VAE model")
@@ -220,9 +220,9 @@ class VanillaVAE(BaseVAE):
     def forward(self, x):
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
-        std_x = self.encoder_log_var(x)
+        std_x = self.encoder_std(x)
         z, _, _ = self.sample_latent(μ_x, std_x)
-        μ_z, std_z = self.decoder_μ(z), self.decoder_log_var(z)
+        μ_z, std_z = self.decoder_μ(z), self.decoder_std(z)
         x_hat, p_x = self.sample_generative(μ_z, std_z)
         return x_hat, p_x
 
@@ -233,7 +233,7 @@ class VanillaVAE(BaseVAE):
         μ_x = self.encoder_μ(x)
         std_x = self.encoder_std(x)
         z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
-        μ_z, std_z = self.decoder_μ(z), self.decoder_log_var(z)
+        μ_z, std_z = self.decoder_μ(z), self.decoder_std(z)
         x_hat, p_x_z = self.sample_generative(μ_z, std_z)
         x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x_z, z, q_z_x, p_z
@@ -294,7 +294,6 @@ class VanillaVAE(BaseVAE):
         return loss, logs
 
     def training_step(self, batch, batch_idx, optimizer_idx):
-        # print(f"Training step, opt idx: {optimizer_idx}, batch_idx: {batch_idx}")
         (model_opt, decoder_var_opt) = self.optimizers()
         if not self._switch_to_decoder_var:
             opt = model_opt
@@ -310,14 +309,11 @@ class VanillaVAE(BaseVAE):
         self.log_dict(
             {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
         )
-        # print("  ", loss, opt)
         return loss
 
     def configure_optimizers(self):
         model_opt = torch.optim.Adam(self.parameters(), lr=self.lr)
-        decoder_var_opt = torch.optim.Adam(
-            self.decoder_log_var.parameters(), lr=self.lr
-        )
+        decoder_var_opt = torch.optim.Adam(self.decoder_std.parameters(), lr=self.lr)
         return [model_opt, decoder_var_opt], []
 
     @staticmethod
@@ -345,10 +341,9 @@ class V3AE(BaseVAE):
         self.epsilon_std_encoder = 1e-4
         self.β_elbo = 1
         self._switch_to_decoder_var = False
-        self._gaussian_decoder = True
+        self._student_t_decoder = True
         self._bernouilli_decoder = False
 
-        # TODO change parametrisation
         self.encoder_μ = encoder_dense_base(
             self.input_size, self.latent_size, self.activation
         )
@@ -382,7 +377,7 @@ class V3AE(BaseVAE):
     def forward(self, x):
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
-        std_x = self.encoder_log_var(x)
+        std_x = self.encoder_std(x)
         z, _, _ = self.sample_latent(μ_x, std_x)
         μ_z, α_z, β_z = self.decoder_μ(z), self.decoder_α(z), self.decoder_β(z)
         λ, _, _ = self.sample_precision(α_z, β_z)
@@ -394,7 +389,7 @@ class V3AE(BaseVAE):
         # Both latent and generated samples and parameters are returned
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
-        std_x = self.encoder_log_var(x)
+        std_x = self.encoder_std(x)
         z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
         μ_z = self.decoder_μ(z)
         α_z = self.decoder_α(z)
