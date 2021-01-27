@@ -30,7 +30,12 @@ from sggm.definitions import (
     TRAIN_LOSS,
     EVAL_LOSS,
     TEST_LOSS,
+    TEST_ELBO,
+    TEST_ELLK,
+    TEST_KL,
+    TEST_LLK,
 )
+from sggm.model_helper import ShiftLayer
 from sggm.types_ import List, Tensor, Tuple
 from sggm.vae_model_helper import batch_flatten, batch_reshape, reduce_int_list
 
@@ -129,16 +134,10 @@ class BaseVAE(pl.LightningModule):
         # Returns generated_samples, decoder
         raise NotImplementedError("Method must be overriden by child VAE model")
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> Tuple[torch.Tensor, tcd.Distribution]:
         # Reconstruction
-        # returns a sample from the decoder, along with its parameters
-        x = batch_flatten(x)
-        μ_x = self.encoder_μ(x)
-        log_var_x = self.encoder_log_var(x)
-        z, _, _ = self.sample_latent(μ_x, log_var_x)
-        μ_z, log_var_z = self.decoder_μ(z), self.decoder_log_var(z)
-        x_hat, p_x = self.sample_generative(μ_z, log_var_z)
-        return x_hat, p_x
+        # Returns generated_samples, decoder
+        raise NotImplementedError("Method must be overriden by child VAE model")
 
     def validation_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
@@ -155,6 +154,10 @@ class BaseVAE(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
         self.log(TEST_LOSS, loss, on_epoch=True)
+        self.log(TEST_ELBO, -loss, on_epoch=True)
+        self.log(TEST_ELLK, logs["ellk"], on_epoch=True)
+        self.log(TEST_KL, logs["kl"], on_epoch=True)
+        self.log(TEST_LLK, logs["llk"], on_epoch=True)
         return loss
 
     @staticmethod
@@ -214,6 +217,15 @@ class VanillaVAE(BaseVAE):
     def automatic_optimization(self) -> bool:
         return False
 
+    def forward(self, x):
+        x = batch_flatten(x)
+        μ_x = self.encoder_μ(x)
+        log_var_x = self.encoder_log_var(x)
+        z, _, _ = self.sample_latent(μ_x, log_var_x)
+        μ_z, log_var_z = self.decoder_μ(z), self.decoder_log_var(z)
+        x_hat, p_x = self.sample_generative(μ_z, log_var_z)
+        return x_hat, p_x
+
     def _run_step(self, x):
         # All relevant information for a training step
         # Both latent and generated samples and parameters are returned
@@ -239,7 +251,7 @@ class VanillaVAE(BaseVAE):
         # batch_shape [batch_shape] event_shape [input_size]
 
         if self._gaussian_decoder:
-            p = tcd.Independent(tcd.Normal(mu, log_var), 1)
+            p = tcd.Independent(tcd.Normal(mu, std), 1)
             x = p.rsample()
 
         if self._bernouilli_decoder:
@@ -277,6 +289,7 @@ class VanillaVAE(BaseVAE):
         loss = -self.elbo(expected_log_likelihood, kl_divergence, train=train).mean()
 
         logs = {
+            "llk": expected_log_likelihood.sum(),
             "ellk": expected_log_likelihood.mean(),
             "kl": kl_divergence.mean(),
             "loss": loss,
@@ -316,6 +329,118 @@ class VanillaVAE(BaseVAE):
 
 
 class V3AE(BaseVAE):
+    """
+    V3AE
+    """
+
+    def __init__(
+        self,
+        input_dims: tuple,
+        activation: str = F_LEAKY_RELU,
+        # encoder_type: str = vae_parameters[ENCODER_TYPE].default,
+        latent_dims: Tuple[int] = (10,),
+    ):
+        super(V3AE, self).__init__(
+            input_dims, activation=activation, latent_dims=latent_dims
+        )
+
+        self.lr = 1e-3
+        self.epsilon_std_encoder = 1e-4
+        self.β_elbo = 1
+        self._switch_to_decoder_var = False
+        self._gaussian_decoder = True
+        self._bernouilli_decoder = False
+
+        # TODO change parametrisation
+        self.encoder_μ = encoder_dense_base(
+            self.input_size, self.latent_size, self.activation
+        )
+        self.encoder_log_var = nn.Sequential(
+            encoder_dense_base(self.input_size, self.latent_size, self.activation),
+            nn.Softplus(),
+        )
+
+        self.decoder_μ = nn.Sequential(
+            decoder_dense_base(self.latent_size, self.input_size, self.activation),
+            nn.Sigmoid(),
+        )
+        self.decoder_α = nn.Sequential(
+            decoder_dense_base(self.latent_size, self.input_size, self.activation),
+            nn.Softplus(),
+            ShiftLayer(1),
+        )
+        self.decoder_β = nn.Sequential(
+            decoder_dense_base(self.latent_size, self.input_size, self.activation),
+            nn.Softplus(),
+        )
+
+        # Save hparams
+        self.save_hyperparameters(
+            "activation",
+            # "lr",
+            "input_dims",
+            "latent_dims",
+        )
+
+    def forward(self, x):
+        x = batch_flatten(x)
+        μ_x = self.encoder_μ(x)
+        log_var_x = self.encoder_log_var(x)
+        z, _, _ = self.sample_latent(μ_x, log_var_x)
+        μ_z, α_z, β_z = self.decoder_μ(z), self.decoder_α(z), self.decoder_β(z)
+        λ, _, _ = self.sample_precision(α_z, β_z)
+        x_hat, p_x = self.sample_generative(μ_z, λ)
+        return x_hat, p_x
+
+    def _run_step(self, x):
+        # All relevant information for a training step
+        # Both latent and generated samples and parameters are returned
+        x = batch_flatten(x)
+        μ_x = self.encoder_μ(x)
+        log_var_x = self.encoder_log_var(x)
+        z, q_z_x, p_z = self.sample_latent(μ_x, log_var_x)
+        μ_z = self.decoder_μ(z)
+        α_z = self.decoder_α(z)
+        β_z = self.decoder_β(z)
+        λ, q_λ_z, p_λ = self.sample_precision(α_z, β_z)
+        x_hat, p_x_z = self.sample_generative(μ_z, λ)
+        x_hat = batch_reshape(x_hat, self.input_dims)
+        return x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z
+
+    def sample_latent(self, mu, log_var):
+        std = torch.exp(log_var / 2)
+        # batch_shape [batch_shape] event_shape [latent_size]
+        q = tcd.Independent(tcd.Normal(mu, std + self.epsilon_std_encoder), 1)
+        z = q.rsample()  # rsample implies reparametrisation
+        p = tcd.Independent(tcd.Normal(torch.zeros_like(z), torch.ones_like(z)), 1)
+        return z, q, p
+
+    def sample_precision(self, alpha, beta):
+        # batch_shape [batch_shape] event_shape [input_size]
+        q = tcd.Independent(tcd.Gamma(alpha, beta), 1)
+        lbd = q.rsample()
+        p = tcd.Independent(
+            tcd.Gamma(self.prior_α * torch.ones_like(alpha), self.prior_β)
+            * torch.ones_like(beta),
+            1,
+        )
+        return lbd, q, p
+
+    def sample_generative(self, mu, alpha, beta):
+        # batch_shape [batch_shape] event_shape [input_size]
+
+        if self._student_t_decoder:
+            p = tcd.Independent(
+                tcd.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
+            )
+            x = p.rsample()
+
+        if self._bernouilli_decoder:
+            p = tcd.Independent(tcd.Bernoulli(mu), 1)
+            x = p.sample()
+
+        return x, p
+
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):
         return model_specific_args(v3ae_parameters, parent_parser)

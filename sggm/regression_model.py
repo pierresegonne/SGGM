@@ -56,6 +56,7 @@ from sggm.definitions import (
     NOISE_ELLK,
     NOISE_KL,
 )
+from sggm.model_helper import ShiftLayer
 from sggm.regression_model_helper import generate_noise_for_model_test
 
 # ----------
@@ -113,15 +114,6 @@ def normalise_grad(grad: torch.Tensor) -> torch.Tensor:
             normed_grad,
         )
     return normed_grad
-
-
-class ShiftLayer(nn.Module):
-    def __init__(self, shift_factor):
-        super(ShiftLayer, self).__init__()
-        self.shift_factor = shift_factor
-
-    def forward(self, x):
-        return self.shift_factor + x
 
 
 # ----------
