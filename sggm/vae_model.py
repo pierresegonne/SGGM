@@ -140,12 +140,13 @@ class VanillaVAE(pl.LightningModule):
         )
 
     @staticmethod
-    def ellk(x, x_hat):
-        # Careful,
-        x, x_hat = batch_flatten(x), batch_flatten(x_hat)
-        return (1 / x_hat.shape[0]) * torch.sum(
-            -F.mse_loss(x_hat, x, reduction="none"), dim=1
-        )
+    def ellk(p_x_z, x):
+        return p_x_z.log_prob(batch_flatten(x))
+        # Legacy reconstruction loss and not proper likelihood,
+        # x, x_hat = batch_flatten(x), batch_flatten(x_hat)
+        # return (1 / x_hat.shape[0]) * torch.sum(
+        #     -F.mse_loss(x_hat, x, reduction="none"), dim=1
+        # )
         # Same results but averages over the batch size too
         # return -F.mse_loss(x_hat, x, reduction="mean")
 
@@ -208,8 +209,7 @@ class VanillaVAE(pl.LightningModule):
         # Just learning the mean
         x_hat = batch_reshape(p_x_z.mean, self.input_dims)
 
-        # expected_log_likelihood = self.ellk(x, x_hat)
-        expected_log_likelihood = p_x_z.log_prob(batch_flatten(x))
+        expected_log_likelihood = self.ellk(p_x_z, x)
         kl_divergence = self.kl(q_z_x, p_z)
 
         loss = -self.elbo(expected_log_likelihood, kl_divergence).mean()
