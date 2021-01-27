@@ -1,4 +1,9 @@
+import numpy as np
+import torch
+
 from torch import nn
+
+log_2_pi = float(torch.log(2 * torch.tensor([np.pi])))
 
 
 class ShiftLayer(nn.Module):

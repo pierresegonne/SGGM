@@ -56,13 +56,13 @@ from sggm.definitions import (
     NOISE_ELLK,
     NOISE_KL,
 )
-from sggm.model_helper import ShiftLayer
+from sggm.model_helper import log_2_pi, ShiftLayer
 from sggm.regression_model_helper import generate_noise_for_model_test
 
 # ----------
 # Model definitions
 # ----------
-log_2_pi = float(torch.log(2 * torch.tensor([np.pi])))
+
 MARGINAL = "marginal"
 POSTERIOR = "posterior"
 available_methods = [MARGINAL, POSTERIOR]

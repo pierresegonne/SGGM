@@ -30,9 +30,10 @@ class IMGGeneratedSaver(pl.callbacks.Callback):
             x_hat, p_x = pl_module(x)
 
             # Show only mean
-            x_hat = batch_reshape(x_hat, pl_module.input_dims)
-            x_mean = batch_reshape(p_x.mean, pl_module.input_dims)
-            x_var = batch_reshape(p_x.variance, pl_module.input_dims)
+            x = 1 - x
+            x_hat = 1 - batch_reshape(x_hat, pl_module.input_dims)
+            x_mean = 1 - batch_reshape(p_x.mean, pl_module.input_dims)
+            x_var = 1 - batch_reshape(p_x.variance, pl_module.input_dims)
 
             img_list = (
                 [x[i] for i in range(self.num_images)]

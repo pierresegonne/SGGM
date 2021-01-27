@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from argparse import ArgumentParser
+from itertools import chain
 
 from sggm.definitions import (
     model_specific_args,
@@ -39,7 +40,7 @@ from sggm.definitions import (
     TEST_KL,
     TEST_LLK,
 )
-from sggm.model_helper import ShiftLayer
+from sggm.model_helper import log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple
 from sggm.vae_model_helper import batch_flatten, batch_reshape, reduce_int_list
 
@@ -113,7 +114,7 @@ class BaseVAE(pl.LightningModule):
         self.latent_size = reduce_int_list(self.latent_dims)
         self.activation = activation
 
-        self.example_input_array = torch.rand((10, *self.input_dims))
+        self.example_input_array = torch.rand((16, *self.input_dims))
 
         self.learning_rate = learning_rate
 
@@ -158,15 +159,6 @@ class BaseVAE(pl.LightningModule):
         # Histogram of weights
         for name, weight in self.named_parameters():
             self.logger.experiment.add_histogram(name, weight, self.current_epoch)
-        return loss
-
-    def test_step(self, batch, batch_idx):
-        loss, logs = self.step(batch, batch_idx)
-        self.log(TEST_LOSS, loss, on_epoch=True)
-        self.log(TEST_ELBO, -loss, on_epoch=True)
-        self.log(TEST_ELLK, logs["ellk"], on_epoch=True)
-        self.log(TEST_KL, logs["kl"], on_epoch=True)
-        self.log(TEST_LLK, logs["llk"], on_epoch=True)
         return loss
 
     @staticmethod
@@ -276,9 +268,10 @@ class VanillaVAE(BaseVAE):
 
     @staticmethod
     def ellk(p_x_z, x):
+        x = batch_flatten(x)
         # 1 sample MC integration
         # Seems to work in practice
-        return p_x_z.log_prob(batch_flatten(x))
+        return p_x_z.log_prob(x)
 
     def update_hacks(self):
         # Switches
@@ -330,6 +323,15 @@ class VanillaVAE(BaseVAE):
         self.log_dict(
             {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
         )
+        return loss
+    
+    def test_step(self, batch, batch_idx):
+        loss, logs = self.step(batch, batch_idx)
+        self.log(TEST_LOSS, loss, on_epoch=True)
+        self.log(TEST_ELBO, -loss, on_epoch=True)
+        self.log(TEST_ELLK, logs["ellk"], on_epoch=True)
+        self.log(TEST_KL, logs["kl"], on_epoch=True)
+        self.log(TEST_LLK, logs["llk"], on_epoch=True)
         return loss
 
     def configure_optimizers(self):
@@ -418,8 +420,7 @@ class V3AE(BaseVAE):
         std_x = self.encoder_std(x)
         z, _, _ = self.sample_latent(μ_x, std_x)
         μ_z, α_z, β_z = self.decoder_μ(z), self.decoder_α(z), self.decoder_β(z)
-        λ, _, _ = self.sample_precision(α_z, β_z)
-        x_hat, p_x = self.sample_generative(μ_z, λ)
+        x_hat, p_x = self.sample_generative(μ_z, α_z, β_z)
         return x_hat, p_x
 
     def _run_step(self, x):
@@ -449,14 +450,17 @@ class V3AE(BaseVAE):
         q = tcd.Independent(tcd.Gamma(alpha, beta), 1)
         lbd = q.rsample()
         p = tcd.Independent(
-            tcd.Gamma(self.prior_α * torch.ones_like(alpha), self.prior_β)
-            * torch.ones_like(beta),
+            tcd.Gamma(
+                self.prior_α * torch.ones_like(alpha),
+                self.prior_β * torch.ones_like(beta),
+            ),
             1,
         )
         return lbd, q, p
 
     def sample_generative(self, mu, alpha, beta):
         # batch_shape [batch_shape] event_shape [input_size]
+        beta = beta + self.eps
         if self._student_t_decoder:
             p = tcd.Independent(
                 tcd.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
@@ -469,17 +473,39 @@ class V3AE(BaseVAE):
 
         return x, p
 
-    def ellk(self, x, q_λ_z, p_λ):
-        # If bernouilli, not
-        pass
-
-        # kl_divergence_lbd = self.kl(q_λ_z, p_λ)
-
-        # return expected_log_likelihood, ellk_lbd, kl_divergence_lbd
+    def ellk(self, p_x_z, x, q_λ_z, p_λ):
+        x = batch_flatten(x)
+        if self._student_t_decoder:
+            μ_z = p_x_z.mean
+            α_z = p_x_z.base_dist.df / 2
+            β_z = (p_x_z.base_dist.scale ** 2) * α_z
+            expected_log_lambda = torch.digamma(α_z) - torch.log(β_z)
+            expected_lambda = α_z / β_z
+            ellk_lbd = torch.sum(
+                (1 / 2)
+                * (expected_log_lambda - log_2_pi - expected_lambda * ((x - μ_z) ** 2)),
+                dim=1,
+            )
+            kl_divergence_lbd = self.kl(q_λ_z, p_λ)
+            return (
+                ellk_lbd - kl_divergence_lbd,
+                ellk_lbd,
+                kl_divergence_lbd,
+            )
+        elif self._bernouilli_decoder:
+            return (
+                p_x_z.log_prob(x),
+                torch.zeros((x.shape[0], 1)),
+                torch.zeros((x.shape[0], 1)),
+            )
 
     def update_hacks(self):
-        # TODO
-        pass
+        self._switch_to_decoder_var = (
+            True if self.current_epoch > self.trainer.max_epochs / 2 else False
+        )
+        self._student_t_decoder = self._switch_to_decoder_var
+        self._bernouilli_decoder = not self._switch_to_decoder_var
+        self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2))
 
     def step(self, batch, batch_idx, train=False):
 
@@ -488,19 +514,57 @@ class V3AE(BaseVAE):
         x, y = batch
         x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
 
-        # TODO, what's our loss here?
-        expected_log_likelihood, ellk_lbd, kl_divergence_lbd = self.ellk(p_x_z, x)
+        expected_log_likelihood, ellk_lbd, kl_divergence_lbd = self.ellk(
+            p_x_z, x, q_λ_z, p_λ
+        )
         kl_divergence_z = self.kl(q_z_x, p_z)
 
-        loss = -self.elbo(expected_log_likelihood, kl_divergence, train=train).mean()
+        loss = -self.elbo(expected_log_likelihood, kl_divergence_z, train=train).mean()
 
         logs = {
             "llk": expected_log_likelihood.sum(),
             "ellk": expected_log_likelihood.mean(),
-            "kl_z": kl_divergence.mean(),
+            "kl_z": kl_divergence_z.mean(),
+            "ellk_lbd": ellk_lbd.mean(),
+            "kl_lbd": kl_divergence_lbd.mean(),
             "loss": loss,
         }
         return loss, logs
+
+    def training_step(self, batch, batch_idx, optimizer_idx):
+        (model_opt, decoder_var_opt) = self.optimizers()
+        if not self._switch_to_decoder_var:
+            opt = model_opt
+        else:
+            opt = decoder_var_opt
+        opt.zero_grad()
+        loss, logs = self.step(batch, batch_idx, train=True)
+
+        self.manual_backward(loss, opt)
+        opt.step()
+
+        self.log(TRAIN_LOSS, loss, on_epoch=True)
+        self.log_dict(
+            {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
+        )
+        return loss
+    
+    def test_step(self, batch, batch_idx):
+        loss, logs = self.step(batch, batch_idx)
+        self.log(TEST_LOSS, loss, on_epoch=True)
+        self.log(TEST_ELBO, -loss, on_epoch=True)
+        self.log(TEST_ELLK, logs["ellk"], on_epoch=True)
+        self.log(TEST_KL, logs["kl_z"], on_epoch=True)
+        self.log(TEST_LLK, logs["llk"], on_epoch=True)
+        return loss
+
+    def configure_optimizers(self):
+        model_opt = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        decoder_var_opt = torch.optim.Adam(
+            chain(self.decoder_α.parameters(), self.decoder_β.parameters()),
+            lr=self.learning_rate,
+        )
+        return [model_opt, decoder_var_opt], []
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):

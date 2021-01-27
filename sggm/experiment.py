@@ -214,9 +214,17 @@ class Experiment:
                         eps=self.eps,
                         n_mc_samples=self.n_mc_samples,
                     )
-                elif self.model_name == V3AE:
-                    exit("TODO")
-                    return V3AE()
+                elif self.model_name == VV_VAE:
+                    return V3AE(
+                        input_dims=self.datamodule.dims,
+                        activation=activation_function(self.experiment_name),
+                        latent_dims=latent_dims(self.experiment_name),
+                        learning_rate=self.learning_rate,
+                        prior_α=self.prior_alpha,
+                        prior_β=self.prior_beta,
+                        eps=self.eps,
+                        n_mc_samples=self.n_mc_samples,
+                    )
                 else:
                     raise NotImplementedError(
                         f"Model {self.model_name} not implemented"
