@@ -120,12 +120,7 @@ class BaseVAE(pl.LightningModule):
         self.eps = eps
         self.n_mc_samples = n_mc_samples
 
-    @staticmethod
-    def ellk(p_x_z, x):
-        return p_x_z.log_prob(batch_flatten(x))
-
-    @staticmethod
-    def kl(q, p, mc_integration: bool = False):
+    def kl(self, q, p, mc_integration: bool = False):
         # Approximate the kl with mc_integration
         if mc_integration:
             z = q.rsample(torch.Size([self.n_mc_samples]))
@@ -278,6 +273,12 @@ class VanillaVAE(BaseVAE):
             x = p.sample()
 
         return x, p
+
+    @staticmethod
+    def ellk(p_x_z, x):
+        # 1 sample MC integration
+        # Seems to work in practice
+        return p_x_z.log_prob(batch_flatten(x))
 
     def update_hacks(self):
         # Switches
@@ -468,6 +469,18 @@ class V3AE(BaseVAE):
 
         return x, p
 
+    def ellk(self, x, q_λ_z, p_λ):
+        # If bernouilli, not
+        pass
+
+        # kl_divergence_lbd = self.kl(q_λ_z, p_λ)
+
+        # return expected_log_likelihood, ellk_lbd, kl_divergence_lbd
+
+    def update_hacks(self):
+        # TODO
+        pass
+
     def step(self, batch, batch_idx, train=False):
 
         self.update_hacks()
@@ -476,15 +489,15 @@ class V3AE(BaseVAE):
         x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
 
         # TODO, what's our loss here?
-        expected_log_likelihood = self.ellk(p_x_z, x)
-        kl_divergence = self.kl(q_z_x, p_z)
+        expected_log_likelihood, ellk_lbd, kl_divergence_lbd = self.ellk(p_x_z, x)
+        kl_divergence_z = self.kl(q_z_x, p_z)
 
         loss = -self.elbo(expected_log_likelihood, kl_divergence, train=train).mean()
 
         logs = {
             "llk": expected_log_likelihood.sum(),
             "ellk": expected_log_likelihood.mean(),
-            "kl": kl_divergence.mean(),
+            "kl_z": kl_divergence.mean(),
             "loss": loss,
         }
         return loss, logs
