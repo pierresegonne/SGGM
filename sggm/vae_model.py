@@ -289,7 +289,8 @@ class VanillaVAE(BaseVAE):
 
     def step(self, batch, batch_idx, train=False):
 
-        self.update_hacks()
+        if not self.eval:
+            self.update_hacks()
 
         x, y = batch
         x_hat, p_x_z, z, q_z_x, p_z = self._run_step(x)
@@ -324,7 +325,7 @@ class VanillaVAE(BaseVAE):
             {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
         )
         return loss
-    
+
     def test_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
         self.log(TEST_LOSS, loss, on_epoch=True)
@@ -509,7 +510,8 @@ class V3AE(BaseVAE):
 
     def step(self, batch, batch_idx, train=False):
 
-        self.update_hacks()
+        if not self.eval:
+            self.update_hacks()
 
         x, y = batch
         x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
@@ -548,7 +550,7 @@ class V3AE(BaseVAE):
             {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
         )
         return loss
-    
+
     def test_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx)
         self.log(TEST_LOSS, loss, on_epoch=True)

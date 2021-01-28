@@ -416,6 +416,11 @@ def cli_main():
             datamodule = experiment.datamodule
             datamodule.setup()
 
+            print(
+                f"{len(datamodule.train_dataset)};{len(datamodule.val_dataset)};{len(datamodule.test_dataset)}"
+            )
+            continue
+
             # ------------
             # model
             # ------------

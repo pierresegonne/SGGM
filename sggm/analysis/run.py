@@ -49,7 +49,7 @@ UCI = [
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
 ]
-MNIST = [
+MNIST_L = [
     MNIST,
     FASHION_MNIST,
     NOT_MNIST,
@@ -72,7 +72,7 @@ def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
             toy_2d_plot(experiment_log, **kwargs)
         elif experiment_name in UCI:
             uci_plot(experiment_log, **kwargs)
-        elif experiment_name in MNIST:
+        elif experiment_name in MNIST_L:
             mnist_plot(experiment_log, **kwargs)
 
 
@@ -84,6 +84,13 @@ def add_experiment_args(parser, experiment_name):
             default=MARGINAL,
             help="Comma delimited list input, ex 'marginal,posterior'",
         )
+    if experiment_name in MNIST_L:
+        parser.add_argument(
+            "--others",
+            type=str,
+            default=None,
+            help="Comma delimited list input, ex 'not_mnist,fashion_mnist'",
+        )
     return parser
 
 
@@ -91,6 +98,12 @@ def parse_experiment_args(args):
     experiment_name = args.experiment_name
     if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, *UCI]:
         args.methods = [item for item in args.methods.split(",")]
+    if experiment_name in MNIST_L:
+        args.others = (
+            [item for item in args.others.split(",")]
+            if args.others is not None
+            else None
+        )
     args.names = [name for name in args.names.split(",")]
     return args
 

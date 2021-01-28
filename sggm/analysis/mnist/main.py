@@ -2,6 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+from pytorch_lightning import Trainer
 from torch import no_grad
 
 from sggm.data.mnist import MNISTDataModule
@@ -13,6 +14,7 @@ from sggm.definitions import (
     NOT_MNIST,
 )
 from sggm.vae_model_helper import batch_flatten, batch_reshape
+from sggm.types_ import List
 
 
 def disable_ticks(ax: matplotlib.axes.Axes) -> matplotlib.axes.Axes:
@@ -33,7 +35,6 @@ def plot_comparison(n_display, title, x_og, p_x, input_dims):
     x_hat = batch_reshape(p_x.sample(), input_dims)
     x_mu = batch_reshape(p_x.mean, input_dims)
     x_var = batch_reshape(p_x.variance, input_dims)
-    # print(x_og[0, :], x_var[0, :])
 
     for n in range(n_display):
         for k in range(4):
@@ -107,8 +108,56 @@ def plot_interpolation(model, img1, img2):
     return fig
 
 
-def plot(experiment_log):
+def compute_all_mnist_metrics(model, others_mnist: List[str]):
+    if others_mnist is None:
+        return
+    for other in others_mnist:
+        ds = None
+        bs = 256
+        if other == FASHION_MNIST:
+            ds = FashionMNISTDataModule(bs, 0)
+        elif other == NOT_MNIST:
+            ds = NotMNISTDataModule(bs, 0)
+        else:
+            raise NotImplementedError(f"{other} is not a correct mnist dataset")
+        ds.setup()
+
+        trainer = Trainer()
+        model.eval()
+        res = trainer.test(model, datamodule=ds)
+        print(f"  [{other}]:", res)
+
+
+def plot_others_mnist(model, others_mnist: List[str], save_folder):
+    if others_mnist is None:
+        return
+    for other in others_mnist:
+        dm = None
+        bs = 16
+        if other == FASHION_MNIST:
+            dm = FashionMNISTDataModule(bs, 0)
+        elif other == NOT_MNIST:
+            dm = NotMNISTDataModule(bs, 0)
+        else:
+            raise NotImplementedError(f"{other} is not a correct mnist dataset")
+        dm.setup()
+
+        test_dataset = next(iter(dm.test_dataloader()))
+        x_test, y_test = test_dataset
+
+        model.eval()
+        with no_grad():
+            x_hat_test, p_x_test = model(x_test)
+
+        plot_comparison(5, "Test", x_test, p_x_test, model.input_dims)
+        plt.savefig(f"{save_folder}/_main_{other}.png", dpi=300)
+        plt.savefig(f"{save_folder}/_main_{other}.svg")
+        plt.show()
+
+
+def plot(experiment_log, **kwargs):
     best_model = experiment_log.best_version.model
+    save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
 
     # Get correct datamodule
     bs = 16
@@ -139,6 +188,8 @@ def plot(experiment_log):
     fig_test = plot_comparison(
         n_display, "Test", x_test, p_x_test, best_model.input_dims
     )
+    plt.savefig(f"{save_folder}/_main.png", dpi=300)
+    plt.savefig(f"{save_folder}/_main.svg")
     plt.show()
 
     # Interpolation
@@ -149,5 +200,11 @@ def plot(experiment_log):
         if sum(len(d) for d in digits) >= 100:
             break
 
-    plot_interpolation(best_model, digits[1][0], digits[3][0])
+    fig_interpolation = plot_interpolation(best_model, digits[1][0], digits[3][0])
+
+    plt.savefig(f"{save_folder}/_interpolation.png", dpi=300)
+    plt.savefig(f"{save_folder}/_interpolation.svg")
     plt.show()
+
+    compute_all_mnist_metrics(best_model, kwargs["others"])
+    plot_others_mnist(best_model, kwargs["others"], save_folder)
