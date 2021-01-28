@@ -1,18 +1,19 @@
-- name: mc_int_ellk
+- name: vv_match
   experiment_name: mnist
   model_name: v3ae
   n_workers: 0
   # hparams
   batch_size: 256
-  learning_rate: 1e-3
-  eps: 1e-2
-  prior_alpha: 0.3929040963118296
-  prior_beta: 0.0010652638066318415
+  learning_rate: 1e-4
+  eps: 1e-3
+  # From prior_gamma_per_pixel - for MNIST only
+  prior_alpha: 0.3927581767454884
+  prior_beta: 0.0010704155012337458
   # misc
-  n_mc_samples: 1
+  n_mc_samples: 20
   n_trials: 1
   seed: 3
-  max_epochs: 10
+  max_epochs: 100
   # pl trainer
   early_stopping_patience: 100
   log_every_n_steps: 3 # How often to log within steps (defaults to every 50 steps)
