@@ -420,8 +420,13 @@ class V3AE(BaseVAE):
         μ_x = self.encoder_μ(x)
         std_x = self.encoder_std(x)
         z, _, _ = self.sample_latent(μ_x, std_x)
+        z = torch.reshape(z, [-1, *self.latent_dims])
         μ_z, α_z, β_z = self.decoder_μ(z), self.decoder_α(z), self.decoder_β(z)
+        μ_z = torch.reshape(μ_z, [-1, x.shape[0], self.input_size])
+        α_z = torch.reshape(α_z, [-1, x.shape[0], self.input_size])
+        β_z = torch.reshape(α_z, [-1, x.shape[0], self.input_size])
         x_hat, p_x = self.sample_generative(μ_z, α_z, β_z)
+        x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x
 
     def _run_step(self, x):
@@ -444,7 +449,7 @@ class V3AE(BaseVAE):
         β_z = torch.reshape(α_z, [-1, x.shape[0], self.input_size])
         # [self.n_mc_samples, BS, self.input_size]
         λ, q_λ_z, p_λ = self.sample_precision(α_z, β_z)
-        # [1, BS, self.input_size]
+        # [BS, self.input_size], [n_mc_sample, BS, self.input_size]
         x_hat, p_x_z = self.sample_generative(μ_z, α_z, β_z)
         # [BS, *self.input_dims]
         x_hat = batch_reshape(x_hat, self.input_dims)
@@ -454,7 +459,9 @@ class V3AE(BaseVAE):
         # batch_shape [batch_shape] event_shape [latent_size]
         q = tcd.Independent(tcd.Normal(mu, std + self.eps), 1)
         z = (
-            q.rsample(torch.Size([self.n_mc_samples])) if mc_samples else q.rsample()
+            q.rsample(torch.Size([self.n_mc_samples]))
+            if mc_samples
+            else q.rsample(torch.Size([1]))
         )  # rsample implies reparametrisation
         p = tcd.Independent(tcd.Normal(torch.zeros_like(z), torch.ones_like(z)), 1)
         return z, q, p
@@ -480,13 +487,13 @@ class V3AE(BaseVAE):
                 tcd.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
             )
             x = p.rsample()
-            # If we draw multiple latent z samples, only keep the reconstructed from the first draw
-            if x.shape[0] > 1:
-                x = x[0][None, :]
 
         if self._bernouilli_decoder:
             p = tcd.Independent(tcd.Bernoulli(mu), 1)
             x = p.sample()
+
+        # first dim is num of latent z samples, only keep the reconstructed from the first draw
+        x = x[0]
 
         return x, p
 
@@ -528,6 +535,7 @@ class V3AE(BaseVAE):
         self._switch_to_decoder_var = (
             True if self.current_epoch > self.trainer.max_epochs / 2 else False
         )
+        self._switch_to_decoder_var = True
         self._student_t_decoder = self._switch_to_decoder_var
         self._bernouilli_decoder = not self._switch_to_decoder_var
         self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2))

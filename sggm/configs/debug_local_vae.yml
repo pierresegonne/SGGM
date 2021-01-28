@@ -10,7 +10,7 @@
   prior_alpha: 0.3927581767454884
   prior_beta: 0.0010704155012337458
   # misc
-  n_mc_samples: 20
+  n_mc_samples: 3
   n_trials: 1
   seed: 3
   max_epochs: 100
