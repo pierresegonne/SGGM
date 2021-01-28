@@ -1,5 +1,5 @@
 - name: standard_elbo_1e3
-  experiment_name: uci_superconduct_shifted
+  experiment_name: uci_wine_white_shifted
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -9,8 +9,8 @@
   prior_beta: 0.5
   # shift
   seed: 3
-  shifting_proportion_total: 5e10
-  shifting_proportion_k: 0.00005
+  shifting_proportion_total: 1e-8
+  shifting_proportion_k: 0.0004
   # pl trainer
   n_trials: 20
   max_epochs: -1
