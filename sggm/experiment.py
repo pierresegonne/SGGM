@@ -287,7 +287,7 @@ class Experiment:
                 trainer_args,
                 callbacks=self.callbacks + default_callbacks,
                 logger=logger,
-                profiler=True,
+                profiler=False,
                 automatic_optimization=automatic_optimization,
             )
 

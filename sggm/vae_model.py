@@ -289,7 +289,6 @@ class VanillaVAE(BaseVAE):
 
     def step(self, batch, batch_idx, train=False):
 
-        # TODO check
         if self.training:
             self.update_hacks()
 
@@ -431,24 +430,37 @@ class V3AE(BaseVAE):
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
         std_x = self.encoder_std(x)
-        z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
+        z, q_z_x, p_z = self.sample_latent(
+            μ_x, std_x, mc_samples=self._student_t_decoder
+        )
+        # [self.n_mc_samples, BS, *self.latent_dims] -> [self.n_mc_samples * BS, *self.latent_dims]
+        z = torch.reshape(z, [-1, *self.latent_dims])
         μ_z = self.decoder_μ(z)
         α_z = self.decoder_α(z)
         β_z = self.decoder_β(z)
+        # [self.n_mc_samples * BS, self.input_size] -> [self.n_mc_samples, BS, self.input_size]
+        μ_z = torch.reshape(μ_z, [-1, x.shape[0], self.input_size])
+        α_z = torch.reshape(α_z, [-1, x.shape[0], self.input_size])
+        β_z = torch.reshape(α_z, [-1, x.shape[0], self.input_size])
+        # [self.n_mc_samples, BS, self.input_size]
         λ, q_λ_z, p_λ = self.sample_precision(α_z, β_z)
+        # [1, BS, self.input_size]
         x_hat, p_x_z = self.sample_generative(μ_z, α_z, β_z)
+        # [BS, *self.input_dims]
         x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z
 
-    def sample_latent(self, mu, std):
+    def sample_latent(self, mu, std, mc_samples: bool = False):
         # batch_shape [batch_shape] event_shape [latent_size]
         q = tcd.Independent(tcd.Normal(mu, std + self.eps), 1)
-        z = q.rsample()  # rsample implies reparametrisation
+        z = (
+            q.rsample(torch.Size([self.n_mc_samples])) if mc_samples else q.rsample()
+        )  # rsample implies reparametrisation
         p = tcd.Independent(tcd.Normal(torch.zeros_like(z), torch.ones_like(z)), 1)
         return z, q, p
 
     def sample_precision(self, alpha, beta):
-        # batch_shape [batch_shape] event_shape [input_size]
+        # batch_shape [n_mc_samples, BS] event_shape [input_size]
         q = tcd.Independent(tcd.Gamma(alpha, beta), 1)
         lbd = q.rsample()
         p = tcd.Independent(
@@ -461,13 +473,16 @@ class V3AE(BaseVAE):
         return lbd, q, p
 
     def sample_generative(self, mu, alpha, beta):
-        # batch_shape [batch_shape] event_shape [input_size]
+        # batch_shape [n_mc_samples, BS] event_shape [input_size]
         beta = beta + self.eps
         if self._student_t_decoder:
             p = tcd.Independent(
                 tcd.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
             )
             x = p.rsample()
+            # If we draw multiple latent z samples, only keep the reconstructed from the first draw
+            if x.shape[0] > 1:
+                x = x[0][None, :]
 
         if self._bernouilli_decoder:
             p = tcd.Independent(tcd.Bernoulli(mu), 1)
@@ -478,17 +493,25 @@ class V3AE(BaseVAE):
     def ellk(self, p_x_z, x, q_λ_z, p_λ):
         x = batch_flatten(x)
         if self._student_t_decoder:
+            # [n_mc_sample, BS, self.input_size]
             μ_z = p_x_z.mean
             α_z = p_x_z.base_dist.df / 2
             β_z = (p_x_z.base_dist.scale ** 2) * α_z
             expected_log_lambda = torch.digamma(α_z) - torch.log(β_z)
             expected_lambda = α_z / β_z
+            # [n_mc_sample, self.input_size]
             ellk_lbd = torch.sum(
                 (1 / 2)
                 * (expected_log_lambda - log_2_pi - expected_lambda * ((x - μ_z) ** 2)),
-                dim=1,
+                dim=2,
             )
+            # [self.input_size]
+            ellk_lbd = torch.mean(ellk_lbd, dim=0)
+
+            # [n_mc_sample, self.input_size]
             kl_divergence_lbd = self.kl(q_λ_z, p_λ)
+            # [self.input_size]
+            kl_divergence_lbd = torch.mean(kl_divergence_lbd, dim=0)
             return (
                 ellk_lbd - kl_divergence_lbd,
                 ellk_lbd,

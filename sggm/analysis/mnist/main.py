@@ -13,6 +13,7 @@ from sggm.definitions import (
     FASHION_MNIST,
     NOT_MNIST,
 )
+from sggm.vae_model import V3AE, VanillaVAE
 from sggm.vae_model_helper import batch_flatten, batch_reshape
 from sggm.types_ import List
 
@@ -65,8 +66,12 @@ def input_to_latent(model, x):
 
 
 def latent_to_mean(model, z):
-    μ_z, std_z = model.decoder_μ(z), model.decoder_std(z)
-    _, p_x_z = model.sample_generative(μ_z, std_z)
+    if isinstance(model, VanillaVAE):
+        μ_z, std_z = model.decoder_μ(z), model.decoder_std(z)
+        _, p_x_z = model.sample_generative(μ_z, std_z)
+    elif isinstance(model, V3AE):
+        μ_z, α_z, β_z = model.decoder_μ(z), model.decoder_α(z), model.decoder_β(z)
+        _, p_x_z = model.sample_generative(μ_z, α_z, β_z)
     return batch_reshape(p_x_z.mean, model.input_dims)
 
 

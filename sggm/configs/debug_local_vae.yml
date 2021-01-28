@@ -1,16 +1,19 @@
-- name: vanilla_vae_llk_test
+- name: mc_int_ellk
   experiment_name: mnist
-  model_name: vanilla_vae
+  model_name: v3ae
   n_workers: 0
   # hparams
   batch_size: 256
-  # pl trainer
-  learning_rate: 1e-4
+  learning_rate: 1e-3
   eps: 1e-2
-  n_mc_samples: 50
+  prior_alpha: 0.3929040963118296
+  prior_beta: 0.0010652638066318415
+  # misc
+  n_mc_samples: 1
   n_trials: 1
   seed: 3
-  max_epochs: 100
+  max_epochs: 10
+  # pl trainer
   early_stopping_patience: 100
   log_every_n_steps: 3 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
