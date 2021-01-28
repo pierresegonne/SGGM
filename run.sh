@@ -3,7 +3,7 @@
 ### specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J full_run_vanilla_vae
+#BSUB -J vv_match
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 4
 #BSUB -R "span[hosts=1]"
