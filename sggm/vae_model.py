@@ -535,7 +535,6 @@ class V3AE(BaseVAE):
         self._switch_to_decoder_var = (
             True if self.current_epoch > self.trainer.max_epochs / 2 else False
         )
-        self._switch_to_decoder_var = True
         self._student_t_decoder = self._switch_to_decoder_var
         self._bernouilli_decoder = not self._switch_to_decoder_var
         self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2))

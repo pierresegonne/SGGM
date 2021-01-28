@@ -1,6 +1,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 
 from pytorch_lightning import Trainer
 from torch import no_grad
@@ -70,7 +71,12 @@ def latent_to_mean(model, z):
         μ_z, std_z = model.decoder_μ(z), model.decoder_std(z)
         _, p_x_z = model.sample_generative(μ_z, std_z)
     elif isinstance(model, V3AE):
+        batch_size = z.shape[1]
+        z = torch.reshape(z, [-1, *model.latent_dims])
         μ_z, α_z, β_z = model.decoder_μ(z), model.decoder_α(z), model.decoder_β(z)
+        μ_z = torch.reshape(μ_z, [-1, batch_size, model.input_size])
+        α_z = torch.reshape(α_z, [-1, batch_size, model.input_size])
+        β_z = torch.reshape(α_z, [-1, batch_size, model.input_size])
         _, p_x_z = model.sample_generative(μ_z, α_z, β_z)
     return batch_reshape(p_x_z.mean, model.input_dims)
 
