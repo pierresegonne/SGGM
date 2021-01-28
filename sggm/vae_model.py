@@ -257,7 +257,7 @@ class VanillaVAE(BaseVAE):
     def sample_generative(self, mu, std):
         # batch_shape [batch_shape] event_shape [input_size]
         if self._gaussian_decoder:
-            p = tcd.Independent(tcd.Normal(mu, std), 1)
+            p = tcd.Independent(tcd.Normal(mu, std + self.eps), 1)
             x = p.rsample()
 
         if self._bernouilli_decoder:
@@ -289,7 +289,8 @@ class VanillaVAE(BaseVAE):
 
     def step(self, batch, batch_idx, train=False):
 
-        if not self.eval:
+        # TODO check
+        if self.training:
             self.update_hacks()
 
         x, y = batch
@@ -510,7 +511,7 @@ class V3AE(BaseVAE):
 
     def step(self, batch, batch_idx, train=False):
 
-        if not self.eval:
+        if self.training:
             self.update_hacks()
 
         x, y = batch
