@@ -446,7 +446,7 @@ class V3AE(BaseVAE):
         # [self.n_mc_samples * BS, self.input_size] -> [self.n_mc_samples, BS, self.input_size]
         μ_z = torch.reshape(μ_z, [-1, x.shape[0], self.input_size])
         α_z = torch.reshape(α_z, [-1, x.shape[0], self.input_size])
-        β_z = torch.reshape(α_z, [-1, x.shape[0], self.input_size])
+        β_z = torch.reshape(β_z, [-1, x.shape[0], self.input_size])
         # [self.n_mc_samples, BS, self.input_size]
         λ, q_λ_z, p_λ = self.sample_precision(α_z, β_z)
         # [BS, self.input_size], [n_mc_sample, BS, self.input_size]
@@ -504,6 +504,7 @@ class V3AE(BaseVAE):
             μ_z = p_x_z.mean
             α_z = p_x_z.base_dist.df / 2
             β_z = (p_x_z.base_dist.scale ** 2) * α_z
+
             expected_log_lambda = torch.digamma(α_z) - torch.log(β_z)
             expected_lambda = α_z / β_z
             # [n_mc_sample, self.input_size]
@@ -524,6 +525,7 @@ class V3AE(BaseVAE):
                 ellk_lbd,
                 kl_divergence_lbd,
             )
+
         elif self._bernouilli_decoder:
             return (
                 p_x_z.log_prob(x),
@@ -551,6 +553,7 @@ class V3AE(BaseVAE):
             p_x_z, x, q_λ_z, p_λ
         )
         kl_divergence_z = self.kl(q_z_x, p_z)
+        kl_divergence_z = torch.mean(kl_divergence_z, dim=0)
 
         loss = -self.elbo(expected_log_likelihood, kl_divergence_z, train=train).mean()
 
