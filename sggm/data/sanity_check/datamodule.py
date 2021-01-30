@@ -83,6 +83,8 @@ class SanityCheckDataModule(RegressionDataModule):
 
     @staticmethod
     def data_std(x: torch.Tensor) -> torch.Tensor:
+        # sig = 4.47213595499958
+        # lambda = 0.05
         return torch.sqrt(
             torch.Tensor([prior_β]) / (torch.Tensor([prior_α]) - 1)
         ) * torch.ones_like(x)
