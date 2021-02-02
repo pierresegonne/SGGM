@@ -1,15 +1,18 @@
-# eps effect - standard v3ae
-- name: eps_1e-3
+# eps effect - robust v3ae
+- name: robust_eps_1e-3
   experiment_name: mnist
   model_name: v3ae
   n_workers: 0
   # hparams
-  batch_size: 256
+  batch_size: 500
   learning_rate: 5e-5
   eps: 1e-3
   # From prior_gamma_per_pixel - for MNIST only
   prior_alpha: 0.3927581767454884
   prior_beta: 0.0010704155012337458
+  # ood
+  tau_ood: 0.5
+  ood_z_generation_method: kde
   # misc
   n_mc_samples: 5
   n_trials: 1
@@ -22,17 +25,20 @@
   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: eps_1e-4
+- name: robust_eps_1e-4
   experiment_name: mnist
   model_name: v3ae
   n_workers: 0
   # hparams
-  batch_size: 256
+  batch_size: 500
   learning_rate: 5e-5
   eps: 1e-4
   # From prior_gamma_per_pixel - for MNIST only
   prior_alpha: 0.3927581767454884
   prior_beta: 0.0010704155012337458
+  # ood
+  tau_ood: 0.5
+  ood_z_generation_method: kde
   # misc
   n_mc_samples: 5
   n_trials: 1
@@ -45,17 +51,20 @@
   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: eps_1e-5
+- name: robust_eps_1e-5
   experiment_name: mnist
   model_name: v3ae
   n_workers: 0
   # hparams
-  batch_size: 256
+  batch_size: 500
   learning_rate: 5e-5
   eps: 1e-5
   # From prior_gamma_per_pixel - for MNIST only
   prior_alpha: 0.3927581767454884
   prior_beta: 0.0010704155012337458
+  # ood
+  tau_ood: 0.5
+  ood_z_generation_method: kde
   # misc
   n_mc_samples: 5
   n_trials: 1
@@ -68,17 +77,20 @@
   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: eps_1e-6
+- name: robust_eps_1e-6
   experiment_name: mnist
   model_name: v3ae
   n_workers: 0
   # hparams
-  batch_size: 256
+  batch_size: 500
   learning_rate: 5e-5
   eps: 1e-6
   # From prior_gamma_per_pixel - for MNIST only
   prior_alpha: 0.3927581767454884
   prior_beta: 0.0010704155012337458
+  # ood
+  tau_ood: 0.5
+  ood_z_generation_method: kde
   # misc
   n_mc_samples: 5
   n_trials: 1
