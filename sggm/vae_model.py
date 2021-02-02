@@ -22,6 +22,7 @@ from sggm.definitions import (
     OOD_Z_GENERATION_METHOD,
     KDE,
     PRIOR,
+    KDE_BANDWIDTH_MULTIPLIER,
 )
 from sggm.definitions import (
     ACTIVATION_FUNCTIONS,
@@ -369,6 +370,9 @@ class V3AE(BaseVAE):
         eps: float = vae_parameters[EPS].default,
         n_mc_samples: int = vae_parameters[N_MC_SAMPLES].default,
         ood_z_generation_method: str = v3ae_parameters[OOD_Z_GENERATION_METHOD].default,
+        kde_bandwidth_multiplier: float = v3ae_parameters[
+            KDE_BANDWIDTH_MULTIPLIER
+        ].default,
         # encoder_type: str = vae_parameters[ENCODER_TYPE].default,
     ):
         super(V3AE, self).__init__(
@@ -385,7 +389,7 @@ class V3AE(BaseVAE):
         self.τ_ood = τ_ood
         self.ood_z_generation_method = ood_z_generation_method
 
-        self.kde_bandwidth_multiplier = 10
+        self.kde_bandwidth_multiplier = kde_bandwidth_multiplier
 
         self._switch_to_decoder_var = False
         self._student_t_decoder = True
@@ -552,24 +556,30 @@ class V3AE(BaseVAE):
                 torch.zeros((x.shape[0], 1)),
             )
 
+    def generate_z_out(self, q_z_x, averaged_std=True):
+        if averaged_std:
+            # Average var accross the BS
+            bs = q_z_x.variance.shape[0]
+            std = torch.sqrt(torch.mean(q_z_x.variance, dim=0).repeat(bs, 1))
+        else:
+            std = torch.sqrt(q_z_x.variance)
+        # batch_shape [BS] event_shape [event_shape]
+        q_out_z_x = tcd.Independent(
+            tcd.Normal(
+                q_z_x.mean,
+                self.kde_bandwidth_multiplier * std + self.eps,
+            ),
+            1,
+        )
+        # [n_mc_samples, BS, *self.latent_dims]
+        z_out = q_out_z_x.rsample(torch.Size([self.n_mc_samples]))
+        return z_out
+
     def ood_kl(self, p_λ, q_z_x):
 
         if self.ood_z_generation_method == KDE:
-            # Average var accross the BS
-            std = torch.sqrt(torch.mean(q_z_x.variance), dim=1)
-            print(std.shape)
-            exit()
-            # batch_shape [BS] event_shape [event_shape]
-            q_out_z_x = tcd.Independent(
-                tcd.Normal(
-                    q_z_x.mean,
-                    self.kde_bandwidth_multiplier * torch.sqrt(q_z_x.variance)
-                    + self.eps,
-                ),
-                1,
-            )
             # [n_mc_samples, BS, *self.latent_dims]
-            z_out = q_out_z_x.rsample(torch.Size([self.n_mc_samples]))
+            z_out = self.generate_z_out(q_z_x)
             # [self.n_mc_samples, BS, self.input_size]
             _, _, α_z_out, β_z_out = self.parametrise_z(z_out)
             # batch_shape [self.n_mc_samples, BS] event_shape [self.input_size]

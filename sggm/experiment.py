@@ -244,6 +244,7 @@ class Experiment:
                         ood_z_generation_method=check_ood_z_generation_method(
                             self.ood_z_generation_method
                         ),
+                        kde_bandwidth_multiplier=self.kde_bandwidth_multiplier,
                     )
                 else:
                     raise NotImplementedError(

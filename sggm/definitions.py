@@ -38,6 +38,7 @@ OOD_Z_GENERATION_METHOD = "ood_z_generation_method"
 # Options for OOD_Z_GENERATION_METHOD
 KDE = "kde"
 PRIOR = "prior"
+KDE_BANDWIDTH_MULTIPLIER = "kde_bandwidth_multiplier"
 
 OOD_Z_GENERATION_AVAILABLE_METHODS = [
     KDE,
@@ -194,6 +195,7 @@ v3ae_parameters = {
         none_or_str,
         choices=OOD_Z_GENERATION_AVAILABLE_METHODS,
     ),
+    KDE_BANDWIDTH_MULTIPLIER: Param(KDE_BANDWIDTH_MULTIPLIER, 10, float),
 }
 generative_models = [VANILLA_VAE, VV_VAE]
 

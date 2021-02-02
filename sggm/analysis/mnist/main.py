@@ -139,6 +139,27 @@ def show_2d_latent_space(model, x, y):
             # keep only a single z sample
             z = z[0]
 
+    # Show specific regions
+    ctr = torch.Tensor([[-0.012, -0.063]])
+    lft = torch.Tensor([[-1.258, 0.416]])
+    rgt = torch.Tensor([[1.17, -0.07]])
+    idx = torch.norm(z - rgt, dim=1) < 0.2
+    z_display = z[idx]
+    fig, [ax1, ax2, ax3, ax4] = plt.subplots(1, 4)
+    x_og = x[idx][0]
+    with torch.no_grad():
+        _, p_x = model(x_og)
+    x_hat = batch_reshape(p_x.sample(), model.input_dims)
+    x_mu = batch_reshape(p_x.mean, model.input_dims)
+    x_var = batch_reshape(p_x.variance, model.input_dims)
+
+    ax1.imshow(x_og[0], cmap="binary", vmin=0, vmax=1)
+    ax2.imshow(x_mu[0][0], cmap="binary", vmin=0, vmax=1)
+    ax3.imshow(x_var[0][0], cmap="binary")
+    ax4.imshow(x_hat[0][0], cmap="binary", vmin=0, vmax=1)
+    plt.show()
+    exit()
+
     fig, ax = plt.subplots()
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
     extent = 3.5
@@ -153,6 +174,12 @@ def show_2d_latent_space(model, x, y):
             var = model.decoder_std(z_latent_mesh)
         if isinstance(model, V3AE):
             var = model.decoder_β(z_latent_mesh) / (model.decoder_α(z_latent_mesh) - 1)
+            # var_epistemic = model.decoder_α(z_latent_mesh) / (
+            #     model.decoder_α(z_latent_mesh) - 1
+            # )
+            # var_aleatoric = model.decoder_β(z_latent_mesh) / model.decoder_α(
+            #     z_latent_mesh
+            # )
     # Accumulated gradient over all output cf nicki and martin
     var = torch.mean(var, dim=1)
     # reshape to x_shape
@@ -186,15 +213,12 @@ def show_2d_latent_space(model, x, y):
         and getattr(model, "ood_z_generation_method", None) is not None
         and show_pi
     ):
-        mult = getattr(model, "kde_bandwidth_multiplier", 10)
-        q_out_z_x = tcd.Independent(
-            tcd.Normal(q_z_x.mean, mult * torch.sqrt(q_z_x.variance) + model.eps), 1
-        )
+        # mult = getattr(model, "kde_bandwidth_multiplier", 10)
         # [n_mc_samples, BS, *self.latent_dims]
-        z_out = torch.reshape(q_out_z_x.rsample(), [-1, 2])
+        z_out = model.generate_z_out(q_z_x, averaged_std=False)
         ax.plot(
-            z_out[:, 0],
-            z_out[:, 1],
+            z_out[0, :, 0],
+            z_out[0, :, 1],
             "o",
             markersize=3.5,
             markerfacecolor=(*colours_rgb["purple"], 0.9),
@@ -303,12 +327,12 @@ def plot(experiment_log, **kwargs):
     # Figures
     n_display = 5
 
-    fig_test = plot_comparison(
-        n_display, "Test", x_test, p_x_test, best_model.input_dims
-    )
-    plt.savefig(f"{save_folder}/_main.png", dpi=300)
-    plt.savefig(f"{save_folder}/_main.svg")
-    plt.show()
+    # fig_test = plot_comparison(
+    #     n_display, "Test", x_test, p_x_test, best_model.input_dims
+    # )
+    # plt.savefig(f"{save_folder}/_main.png", dpi=300)
+    # plt.savefig(f"{save_folder}/_main.svg")
+    # plt.show()
 
     # Interpolation
     digits = [[] for _ in range(10)]
@@ -322,11 +346,11 @@ def plot(experiment_log, **kwargs):
         interpolation_digits = [digits[dm.digits[0]][0], digits[dm.digits[1]][0]]
     else:
         interpolation_digits = [digits[1][0], digits[3][0]]
-    fig_interpolation = plot_interpolation(best_model, *interpolation_digits)
+    # fig_interpolation = plot_interpolation(best_model, *interpolation_digits)
 
-    plt.savefig(f"{save_folder}/_interpolation.png", dpi=300)
-    plt.savefig(f"{save_folder}/_interpolation.svg")
-    plt.show()
+    # plt.savefig(f"{save_folder}/_interpolation.png", dpi=300)
+    # plt.savefig(f"{save_folder}/_interpolation.svg")
+    # plt.show()
 
     # NOTE: could be updated to if latent space is 2D
     if experiment_name == MNIST_2D:
