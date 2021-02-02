@@ -126,7 +126,7 @@ regressor_parameters = {
 }
 variational_regressor_parameters = {
     β_ELBO: Param(β_ELBO, 0.5, float),
-    τ_OOD: Param(τ_OOD, 0.5, float),
+    τ_OOD: Param(τ_OOD, 0.0, float),
     LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
     EPS: Param(EPS, 1e-10, float),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
@@ -158,6 +158,7 @@ vanilla_vae_parameters = {}
 v3ae_parameters = {
     PRIOR_α: Param(PRIOR_α, 1.05, float),
     PRIOR_β: Param(PRIOR_β, 1.0, float),
+    τ_OOD: Param(τ_OOD, 0.0, float),
 }
 generative_models = [VANILLA_VAE, VV_VAE]
 
