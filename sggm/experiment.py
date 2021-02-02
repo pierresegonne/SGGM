@@ -355,6 +355,8 @@ def get_model(experiment_config: dict) -> pl.LightningModule:
         model = VanillaVAE
     elif model_name == VV_VAE:
         model = V3AE
+    else:
+        raise NotImplementedError(f"Model {model_name} has no implementation")
     return model
 
 

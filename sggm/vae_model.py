@@ -130,8 +130,8 @@ class BaseVAE(pl.LightningModule):
         return tcd.kl_divergence(q, p)
 
     def elbo(self, ellk, kl, train: bool = False):
-        β = self.β_elbo if train else 1
-        return ellk - β * kl
+        β = self.β_elbo if train else 1 / 2
+        return (1 - β) * ellk - β * kl
 
     def sample_latent(
         self, mu: torch.Tensor, std: torch.Tensor
@@ -191,7 +191,7 @@ class VanillaVAE(BaseVAE):
             n_mc_samples=n_mc_samples,
         )
 
-        self.β_elbo = 1
+        self.β_elbo = 1 / 2
         self._switch_to_decoder_var = False
         self._gaussian_decoder = True
         self._bernouilli_decoder = False
@@ -234,6 +234,7 @@ class VanillaVAE(BaseVAE):
         z, _, _ = self.sample_latent(μ_x, std_x)
         μ_z, std_z = self.decoder_μ(z), self.decoder_std(z)
         x_hat, p_x = self.sample_generative(μ_z, std_z)
+        x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x
 
     def _run_step(self, x):
@@ -286,7 +287,7 @@ class VanillaVAE(BaseVAE):
         # Update decoder
         # Note: done with _gaussian_decoder | _bernouilli_decoder
         # Update β_elbo value through annealing
-        self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2))
+        self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2)) / 2
 
     def step(self, batch, batch_idx, train=False):
 
@@ -375,7 +376,7 @@ class V3AE(BaseVAE):
             n_mc_samples=n_mc_samples,
         )
 
-        self.β_elbo = 1
+        self.β_elbo = 1 / 2
         self.τ_ood = τ_ood
         self._switch_to_decoder_var = False
         self._student_t_decoder = True
@@ -416,6 +417,7 @@ class V3AE(BaseVAE):
             "n_mc_samples",
             "prior_α",
             "prior_β",
+            "τ_ood",
         )
 
     def forward(self, x):
@@ -542,7 +544,7 @@ class V3AE(BaseVAE):
         )
         self._student_t_decoder = self._switch_to_decoder_var
         self._bernouilli_decoder = not self._switch_to_decoder_var
-        self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2))
+        self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2)) / 2
 
     def step(self, batch, batch_idx, train=False):
 
@@ -562,8 +564,10 @@ class V3AE(BaseVAE):
 
         # TODO
         # suggestion for robust vv
-        if (train == True) & (self.robust):
-            loss = tau * loss + (1 - tau) * self.ood_kl(...)
+        # print(self.τ_ood)
+        # exit()
+        # if (train == True) & (self.robust):
+        #     loss = tau * loss + (1 - tau) * self.ood_kl(...)
 
         logs = {
             "llk": expected_log_likelihood.sum(),

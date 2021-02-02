@@ -7,8 +7,8 @@
   hidden_dim: 50
   beta_elbo: 0.5
   tau_ood: 0.5
-  prior_alpha: 1.005
-  prior_beta: 0.1
+  prior_alpha: 1.025
+  prior_beta: 0.5
   ood_x_generation_method: brute_force
   seed: 2
   # pl trainer
