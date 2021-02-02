@@ -8,7 +8,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0
+  tau_ood: 0
   prior_alpha: 1.5
   prior_beta: 0.5
   # shift
@@ -29,7 +29,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
@@ -53,7 +53,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
@@ -78,7 +78,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0
+  tau_ood: 0
   prior_alpha: 1.5
   prior_beta: 0.5
   # shift
@@ -99,7 +99,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
@@ -123,7 +123,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
@@ -148,7 +148,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0
+  tau_ood: 0
   prior_alpha: 1.5
   prior_beta: 0.5
   # shift
@@ -169,7 +169,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
@@ -193,7 +193,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
@@ -218,7 +218,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0
+  tau_ood: 0
   prior_alpha: 1.5
   prior_beta: 0.5
   # shift
@@ -239,7 +239,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
@@ -263,7 +263,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
@@ -288,7 +288,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0
+  tau_ood: 0
   prior_alpha: 1.5
   prior_beta: 0.5
   # shift
@@ -309,7 +309,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
@@ -333,7 +333,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
@@ -358,7 +358,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0
+  tau_ood: 0
   prior_alpha: 1.5
   prior_beta: 0.5
   # shift
@@ -379,7 +379,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
@@ -403,7 +403,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial
@@ -429,7 +429,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0
+  tau_ood: 0
   prior_alpha: 1.5
   prior_beta: 0.5
   # shift
@@ -450,7 +450,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: gaussian_noise
@@ -474,7 +474,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.5
   prior_beta: 0.5
   ood_x_generation_method: adversarial

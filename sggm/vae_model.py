@@ -16,6 +16,7 @@ from sggm.definitions import (
     LEARNING_RATE,
     PRIOR_α,
     PRIOR_β,
+    τ_OOD,
     EPS,
     N_MC_SAMPLES,
 )
@@ -360,6 +361,7 @@ class V3AE(BaseVAE):
         learning_rate: float = vae_parameters[LEARNING_RATE].default,
         prior_α: float = v3ae_parameters[PRIOR_α].default,
         prior_β: float = v3ae_parameters[PRIOR_β].default,
+        τ_ood: float = v3ae_parameters[τ_OOD].default,
         eps: float = vae_parameters[EPS].default,
         n_mc_samples: int = vae_parameters[N_MC_SAMPLES].default,
         # encoder_type: str = vae_parameters[ENCODER_TYPE].default,
@@ -374,6 +376,7 @@ class V3AE(BaseVAE):
         )
 
         self.β_elbo = 1
+        self.τ_ood = τ_ood
         self._switch_to_decoder_var = False
         self._student_t_decoder = True
         self._bernouilli_decoder = False
@@ -556,6 +559,11 @@ class V3AE(BaseVAE):
         kl_divergence_z = torch.mean(kl_divergence_z, dim=0)
 
         loss = -self.elbo(expected_log_likelihood, kl_divergence_z, train=train).mean()
+
+        # TODO
+        # suggestion for robust vv
+        if (train == True) & (self.robust):
+            loss = tau * loss + (1 - tau) * self.ood_kl(...)
 
         logs = {
             "llk": expected_log_likelihood.sum(),

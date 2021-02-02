@@ -189,7 +189,7 @@ class Experiment:
                         prior_α=self.prior_alpha,
                         prior_β=self.prior_beta,
                         β_elbo=self.beta_elbo,
-                        β_ood=self.beta_ood,
+                        τ_ood=self.tau_ood,
                         ood_x_generation_method=check_ood_x_generation_method(
                             self.ood_x_generation_method
                         ),

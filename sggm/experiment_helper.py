@@ -3,7 +3,7 @@ import numpy as np
 import pytorch_lightning as pl
 import torch
 
-from sggm.definitions import β_OOD, SPLIT_TRAINING_MSE_MEAN, SPLIT_TRAINING_STD_VV_MEAN
+from sggm.definitions import τ_OOD, SPLIT_TRAINING_MSE_MEAN, SPLIT_TRAINING_STD_VV_MEAN
 from torch import nn
 from typing import Any
 
@@ -18,8 +18,8 @@ def split_mean_uncertainty_training(
     # Set mode to standard ELBO
     # This effectively creates a new var not only a reference
     # Old
-    original_β_OOD = model.β_ood
-    model.β_ood = 0
+    original_τ_OOD = model.τ_ood
+    model.τ_ood = 0
     # New
     # Predict prior uncertainty
     original_α, original_β = model.α, model.β
@@ -63,7 +63,7 @@ def split_mean_uncertainty_training(
     # Reset ELBO params
     # Very hacky!
     # Old
-    model.β_ood = original_β_OOD
+    model.τ_ood = original_τ_OOD
     # New
     model.mse_mode = False
     if model.split_training_mode == SPLIT_TRAINING_MSE_MEAN:

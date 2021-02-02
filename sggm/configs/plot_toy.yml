@@ -6,7 +6,7 @@
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  beta_ood: 0.5
+  tau_ood: 0.5
   prior_alpha: 1.005
   prior_beta: 0.1
   ood_x_generation_method: brute_force
@@ -26,7 +26,7 @@
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0.5
-#   beta_ood: 0.5
+#   tau_ood: 0.5
 #   prior_alpha: 1.025
 #   prior_beta: 0.5
 #   ood_x_generation_method: brute_force
@@ -50,7 +50,7 @@
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0.5
-#   beta_ood: 0.2
+#   tau_ood: 0.2
 #   prior_alpha: 1.025
 #   prior_beta: 0.5
 #   ood_x_generation_method: brute_force
@@ -70,7 +70,7 @@
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0.5
-#   beta_ood: 0.8
+#   tau_ood: 0.8
 #   prior_alpha: 1.025
 #   prior_beta: 0.5
 #   ood_x_generation_method: brute_force
@@ -90,7 +90,7 @@
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0.5
-#   beta_ood: 0.99
+#   tau_ood: 0.99
 #   prior_alpha: 1.025
 #   prior_beta: 0.5
 #   ood_x_generation_method: brute_force
@@ -111,7 +111,7 @@
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0.5
-#   beta_ood: 0.5
+#   tau_ood: 0.5
 #   prior_alpha: 1.025
 #   prior_beta: 0.5
 #   ood_x_generation_method: gaussian_noise
@@ -131,7 +131,7 @@
 #   batch_size: 1024
 #   hidden_dim: 50
 #   beta_elbo: 0.5
-#   beta_ood: 0.5
+#   tau_ood: 0.5
 #   prior_alpha: 1.025
 #   prior_beta: 0.5
 #   ood_x_generation_method: adversarial

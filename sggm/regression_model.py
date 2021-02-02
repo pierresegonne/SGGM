@@ -16,7 +16,7 @@ from sggm.definitions import (
 )
 from sggm.definitions import (
     β_ELBO,
-    β_OOD,
+    τ_OOD,
     N_MC_SAMPLES,
     PRIOR_α,
     PRIOR_β,
@@ -138,7 +138,7 @@ class VariationalRegressor(pl.LightningModule):
         prior_α: float = variational_regressor_parameters[PRIOR_α].default,
         prior_β: float = variational_regressor_parameters[PRIOR_β].default,
         β_elbo: float = variational_regressor_parameters[β_ELBO].default,
-        β_ood: float = variational_regressor_parameters[β_OOD].default,
+        τ_ood: float = variational_regressor_parameters[τ_OOD].default,
         ood_x_generation_method: str = variational_regressor_parameters[
             OOD_X_GENERATION_METHOD
         ].default,
@@ -184,8 +184,8 @@ class VariationalRegressor(pl.LightningModule):
         # To do once β_elbo becomes a proper mixture proportion.
         assert (β_elbo >= 0) & (β_elbo <= 1), "Invalid β_elbo"
         self.β_elbo = β_elbo
-        assert (β_ood >= 0) & (β_ood <= 1), "Invalid β_ood"
-        self.β_ood = β_ood
+        assert (τ_ood >= 0) & (τ_ood <= 1), "Invalid τ_OOD"
+        self.τ_ood = τ_ood
 
         self.learning_rate = learning_rate
         self.lr_v = 1e-2
@@ -219,7 +219,7 @@ class VariationalRegressor(pl.LightningModule):
             "prior_α",
             "prior_β",
             "β_elbo",
-            "β_ood",
+            "τ_ood",
             "ood_x_generation_method",
             "eps",
             "n_mc_samples",
@@ -311,7 +311,7 @@ class VariationalRegressor(pl.LightningModule):
 
     def ood_x(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         # Skip generation if we're not going to see it used
-        if self.β_ood > 0:
+        if self.τ_ood > 0:
             if self.ood_x_generation_method == GAUSSIAN_NOISE:
                 noise_std = torch.std(x) * 3  # 3 is Arbitrary
                 return x + noise_std * torch.randn_like(x)
@@ -349,8 +349,8 @@ class VariationalRegressor(pl.LightningModule):
                 x_ood_proposal = torch.reshape(
                     torch.linspace(-25, 35, 4000), (4000, 1)
                 ).type_as(x)
-                _, alpha_ood, β_ood = self(x_ood_proposal)
-                kl = self.kl(alpha_ood, β_ood, self.prior_α, self.prior_β).detach()
+                _, alpha_ood, τ_ood = self(x_ood_proposal)
+                kl = self.kl(alpha_ood, τ_ood, self.prior_α, self.prior_β).detach()
 
                 # objective = kl - llk
                 objective = kl
@@ -480,9 +480,10 @@ class VariationalRegressor(pl.LightningModule):
                 expected_log_likelihood_out = torch.zeros((1,)).type_as(x)
                 kl_divergence_out = torch.zeros((1,)).type_as(x)
 
-            loss = -(1 - self.β_ood) * self.elbo(
+            # NOTE: careful, it's reverse definition for τ
+            loss = -(1 - self.τ_ood) * self.elbo(
                 expected_log_likelihood, kl_divergence
-            ) + self.β_ood * torch.mean(kl_divergence_out)
+            ) + self.τ_ood * torch.mean(kl_divergence_out)
 
             if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
                 self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)

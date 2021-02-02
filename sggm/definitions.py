@@ -13,7 +13,7 @@ MODEL_NAME = "model_name"
 SEED = "seed"
 BATCH_SIZE = "batch_size"
 β_ELBO = "beta_elbo"
-β_OOD = "beta_ood"
+τ_OOD = "tau_ood"
 PRIOR_α = "prior_alpha"
 PRIOR_β = "prior_beta"
 OOD_X_GENERATION_METHOD = "ood_x_generation_method"
@@ -125,8 +125,8 @@ regressor_parameters = {
     ),
 }
 variational_regressor_parameters = {
-    β_ELBO: Param(β_ELBO, 1, float),
-    β_OOD: Param(β_OOD, 0.5, float),
+    β_ELBO: Param(β_ELBO, 0.5, float),
+    τ_OOD: Param(τ_OOD, 0.5, float),
     LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
     EPS: Param(EPS, 1e-10, float),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
