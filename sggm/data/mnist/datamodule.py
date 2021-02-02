@@ -7,6 +7,8 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
 from torchvision.datasets import MNIST
 
+from sggm.types_ import List
+
 N_cpus = multiprocessing.cpu_count()
 
 
@@ -79,7 +81,7 @@ class MNISTDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
-            shuffle=True
+            shuffle=True,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -88,8 +90,64 @@ class MNISTDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
-            shuffle=True
+            shuffle=True,
         )
+
+
+class MNISTDataModule2D(MNISTDataModule):
+    def __init__(
+        self,
+        batch_size: int,
+        n_workers: int,
+        train_val_split: float = 0.9,
+        digits: List[int] = [0, 1],
+        **kwargs,
+    ):
+        super().__init__(batch_size, n_workers, train_val_split, **kwargs)
+        assert len(digits) == 2
+        for d in digits:
+            assert isinstance(d, int)
+            assert (0 <= d) & (d <= 9)
+        self.digits = digits
+
+    def setup(self, stage: str = None):
+        # Transforms
+        mnist_transforms = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize([self.x_mean], [self.x_std])]
+        )
+
+        # Train
+        train_val = MNIST(
+            os.path.dirname(__file__),
+            download=True,
+            train=True,
+            transform=mnist_transforms,
+        )
+
+        idx = (train_val.targets == self.digits[0]) | (
+            train_val.targets == self.digits[1]
+        )
+        train_val.targets = train_val.targets[idx]
+        train_val.data = train_val.data[idx]
+
+        train_length = int(len(train_val) * self.train_val_split)
+        val_length = len(train_val) - train_length
+        self.train_dataset, self.val_dataset = random_split(
+            train_val, [train_length, val_length]
+        )
+
+        # Test
+        self.test_dataset = MNIST(
+            os.path.dirname(__file__),
+            download=True,
+            train=False,
+            transform=mnist_transforms,
+        )
+        idx = (self.test_dataset.targets == self.digits[0]) | (
+            self.test_dataset.targets == self.digits[1]
+        )
+        self.test_dataset.targets = self.test_dataset.targets[idx]
+        self.test_dataset.data = self.test_dataset.data[idx]
 
 
 if __name__ == "__main__":

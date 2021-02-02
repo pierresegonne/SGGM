@@ -19,6 +19,9 @@ from sggm.definitions import (
     τ_OOD,
     EPS,
     N_MC_SAMPLES,
+    OOD_Z_GENERATION_METHOD,
+    KDE,
+    PRIOR,
 )
 from sggm.definitions import (
     ACTIVATION_FUNCTIONS,
@@ -365,6 +368,7 @@ class V3AE(BaseVAE):
         τ_ood: float = v3ae_parameters[τ_OOD].default,
         eps: float = vae_parameters[EPS].default,
         n_mc_samples: int = vae_parameters[N_MC_SAMPLES].default,
+        ood_z_generation_method: str = v3ae_parameters[OOD_Z_GENERATION_METHOD].default,
         # encoder_type: str = vae_parameters[ENCODER_TYPE].default,
     ):
         super(V3AE, self).__init__(
@@ -377,7 +381,10 @@ class V3AE(BaseVAE):
         )
 
         self.β_elbo = 1 / 2
+
         self.τ_ood = τ_ood
+        self.ood_z_generation_method = ood_z_generation_method
+
         self._switch_to_decoder_var = False
         self._student_t_decoder = True
         self._bernouilli_decoder = False
@@ -418,18 +425,30 @@ class V3AE(BaseVAE):
             "prior_α",
             "prior_β",
             "τ_ood",
+            "ood_z_generation_method",
         )
+
+    def parametrise_z(self, z):
+        bs = z.shape[1]
+        # [self.n_mc_samples, BS, *self.latent_dims] -> [self.n_mc_samples * BS, *self.latent_dims]
+        z = torch.reshape(z, [-1, *self.latent_dims])
+        μ_z = self.decoder_μ(z)
+        α_z = self.decoder_α(z)
+        β_z = self.decoder_β(z)
+        # [self.n_mc_samples * BS, self.input_size] -> [self.n_mc_samples, BS, self.input_size]
+        μ_z = torch.reshape(μ_z, [-1, bs, self.input_size])
+        α_z = torch.reshape(α_z, [-1, bs, self.input_size])
+        β_z = torch.reshape(β_z, [-1, bs, self.input_size])
+        # [self.n_mc_samples * BS, *self.latent_dims] -> [self.n_mc_samples, BS, *self.latent_dims]
+        z = torch.reshape(z, [-1, bs, *self.latent_dims])
+        return z, μ_z, α_z, β_z
 
     def forward(self, x):
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
         std_x = self.encoder_std(x)
         z, _, _ = self.sample_latent(μ_x, std_x)
-        z = torch.reshape(z, [-1, *self.latent_dims])
-        μ_z, α_z, β_z = self.decoder_μ(z), self.decoder_α(z), self.decoder_β(z)
-        μ_z = torch.reshape(μ_z, [-1, x.shape[0], self.input_size])
-        α_z = torch.reshape(α_z, [-1, x.shape[0], self.input_size])
-        β_z = torch.reshape(α_z, [-1, x.shape[0], self.input_size])
+        _, μ_z, α_z, β_z = self.parametrise_z(z)
         x_hat, p_x = self.sample_generative(μ_z, α_z, β_z)
         x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x
@@ -443,15 +462,8 @@ class V3AE(BaseVAE):
         z, q_z_x, p_z = self.sample_latent(
             μ_x, std_x, mc_samples=self._student_t_decoder
         )
-        # [self.n_mc_samples, BS, *self.latent_dims] -> [self.n_mc_samples * BS, *self.latent_dims]
-        z = torch.reshape(z, [-1, *self.latent_dims])
-        μ_z = self.decoder_μ(z)
-        α_z = self.decoder_α(z)
-        β_z = self.decoder_β(z)
-        # [self.n_mc_samples * BS, self.input_size] -> [self.n_mc_samples, BS, self.input_size]
-        μ_z = torch.reshape(μ_z, [-1, x.shape[0], self.input_size])
-        α_z = torch.reshape(α_z, [-1, x.shape[0], self.input_size])
-        β_z = torch.reshape(β_z, [-1, x.shape[0], self.input_size])
+        # [self.n_mc_samples, BS, *self.latent_dims/self.input_size]
+        z, μ_z, α_z, β_z = self.parametrise_z(z)
         # [self.n_mc_samples, BS, self.input_size]
         λ, q_λ_z, p_λ = self.sample_precision(α_z, β_z)
         # [BS, self.input_size], [n_mc_sample, BS, self.input_size]
@@ -493,7 +505,7 @@ class V3AE(BaseVAE):
             )
             x = p.rsample()
 
-        if self._bernouilli_decoder:
+        elif self._bernouilli_decoder:
             p = tcd.Independent(tcd.Bernoulli(mu), 1)
             x = p.sample()
 
@@ -538,6 +550,26 @@ class V3AE(BaseVAE):
                 torch.zeros((x.shape[0], 1)),
             )
 
+    def ood_kl(self, p_λ, q_z_x):
+
+        if self.ood_z_generation_method == KDE:
+            # batch_shape [BS] event_shape [event_shape]
+            q_out_z_x = tcd.Independent(
+                tcd.Normal(q_z_x.mean, 3 * torch.sqrt(q_z_x.variance) + self.eps), 1
+            )
+            # [n_mc_samples, BS, *self.latent_dims]
+            z_out = q_out_z_x.rsample(torch.Size([self.n_mc_samples]))
+            # [self.n_mc_samples, BS, self.input_size]
+            _, _, α_z_out, β_z_out = self.parametrise_z(z_out)
+            # batch_shape [self.n_mc_samples, BS] event_shape [self.input_size]
+            q_λ_z_out = tcd.Independent(tcd.Gamma(α_z_out, β_z_out), 1)
+            # [n_mc_sample, self.input_size]
+            kl_divergence_lbd_out = self.kl(q_λ_z_out, p_λ)
+            # [self.input_size]
+            kl_divergence_lbd_out = torch.mean(kl_divergence_lbd_out, dim=0)
+            return kl_divergence_lbd_out
+        return 0
+
     def update_hacks(self):
         self._switch_to_decoder_var = (
             True if self.current_epoch > self.trainer.max_epochs / 2 else False
@@ -547,7 +579,6 @@ class V3AE(BaseVAE):
         self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2)) / 2
 
     def step(self, batch, batch_idx, train=False):
-
         if self.training:
             self.update_hacks()
 
@@ -562,12 +593,14 @@ class V3AE(BaseVAE):
 
         loss = -self.elbo(expected_log_likelihood, kl_divergence_z, train=train).mean()
 
-        # TODO
-        # suggestion for robust vv
-        # print(self.τ_ood)
-        # exit()
-        # if (train == True) & (self.robust):
-        #     loss = tau * loss + (1 - tau) * self.ood_kl(...)
+        # Also verify that we are only training the decoder's variance
+        if (
+            (train)
+            & (self.ood_z_generation_method is not None)
+            & (self._student_t_decoder)
+        ):
+            # NOTE: beware, for understandability, tau is opposite.
+            loss = (1 - self.τ_ood) * loss + self.τ_ood * self.ood_kl(p_λ, q_z_x).mean()
 
         logs = {
             "llk": expected_log_likelihood.sum(),

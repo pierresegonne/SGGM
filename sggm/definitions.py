@@ -34,6 +34,16 @@ OOD_X_GENERATION_AVAILABLE_METHODS = [
     UNIFORM,
 ]
 
+OOD_Z_GENERATION_METHOD = "ood_z_generation_method"
+# Options for OOD_Z_GENERATION_METHOD
+KDE = "kde"
+PRIOR = "prior"
+
+OOD_Z_GENERATION_AVAILABLE_METHODS = [
+    KDE,
+    PRIOR,
+]
+
 EPS = "eps"
 EARLY_STOPPING_PATIENCE = "early_stopping_patience"
 HIDDEN_DIM = "hidden_dim"
@@ -159,6 +169,12 @@ v3ae_parameters = {
     PRIOR_α: Param(PRIOR_α, 1.05, float),
     PRIOR_β: Param(PRIOR_β, 1.0, float),
     τ_OOD: Param(τ_OOD, 0.0, float),
+    OOD_Z_GENERATION_METHOD: Param(
+        OOD_Z_GENERATION_METHOD,
+        None,
+        none_or_str,
+        choices=OOD_Z_GENERATION_AVAILABLE_METHODS,
+    ),
 }
 generative_models = [VANILLA_VAE, VV_VAE]
 
@@ -202,6 +218,7 @@ UCI_YACHT = "uci_yacht"
 UCI_YACHT_SHIFTED = UCI_YACHT + SHIFTED
 # Generative
 MNIST = "mnist"
+MNIST_2D = "mnist_2d"
 FASHION_MNIST = "fashion_mnist"
 NOT_MNIST = "not_mnist"
 
@@ -225,6 +242,7 @@ experiment_names = [
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
     MNIST,
+    MNIST_2D,
     FASHION_MNIST,
     NOT_MNIST,
 ]
@@ -247,7 +265,7 @@ regression_experiments = [
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
 ]
-generative_experiments = [MNIST, FASHION_MNIST, NOT_MNIST]
+generative_experiments = [MNIST, MNIST_2D, FASHION_MNIST, NOT_MNIST]
 
 
 # -------------

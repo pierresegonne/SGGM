@@ -30,6 +30,7 @@ from sggm.definitions import (
     UCI_YACHT_SHIFTED,
     #
     MNIST,
+    MNIST_2D,
     FASHION_MNIST,
     NOT_MNIST,
 )
@@ -51,6 +52,7 @@ UCI = [
 ]
 MNIST_L = [
     MNIST,
+    MNIST_2D,
     FASHION_MNIST,
     NOT_MNIST,
 ]

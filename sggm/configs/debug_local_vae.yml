@@ -1,5 +1,5 @@
-- name: test_van
-  experiment_name: mnist
+- name: test_mnist_2d_v3ae
+  experiment_name: mnist_2d
   model_name: v3ae
   n_workers: 0
   # hparams
@@ -7,11 +7,13 @@
   learning_rate: 1e-3
   eps: 1e-2
   # From prior_gamma_per_pixel - for MNIST only
-  prior_alpha: 0.3927581767454884
-  prior_beta: 0.0010704155012337458
+  # prior_alpha: 0.3927581767454884
+  # prior_beta: 0.0010704155012337458
+  # OOD
   # tau_ood: 0.5
+  # ood_z_generation_method: kde
   # misc
-  # n_mc_samples: 3
+  # n_mc_samples: 2
   n_trials: 1
   seed: 3
   max_epochs: 10

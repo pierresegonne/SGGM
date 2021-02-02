@@ -42,6 +42,7 @@ from sggm.definitions import (
     UCI_YACHT_SHIFTED,
     #
     MNIST,
+    MNIST_2D,
     FASHION_MNIST,
     NOT_MNIST,
 )
@@ -63,6 +64,7 @@ from sggm.definitions import (
     EXPERIMENTS_CONFIG,
     MODEL_NAME,
     OOD_X_GENERATION_AVAILABLE_METHODS,
+    OOD_Z_GENERATION_AVAILABLE_METHODS,
 )
 from sggm.definitions import (
     SEED,
@@ -108,6 +110,7 @@ def activation_function(experiment_name):
         return F_ELU
     elif experiment_name in [
         MNIST,
+        MNIST_2D,
         FASHION_MNIST,
         NOT_MNIST,
     ]:
@@ -118,6 +121,8 @@ def activation_function(experiment_name):
 def latent_dims(experiment_name):
     if experiment_name == MNIST:
         return (10,)
+    if experiment_name == MNIST_2D:
+        return (2,)
     elif experiment_name == FASHION_MNIST:
         return (10,)
     elif experiment_name == NOT_MNIST:
@@ -131,6 +136,16 @@ def check_ood_x_generation_method(method):
         method in OOD_X_GENERATION_AVAILABLE_METHODS
     ), f"""Method for x ood generation '{method}' is invalid.
     Must either be None or in {OOD_X_GENERATION_AVAILABLE_METHODS}"""
+    return method
+
+
+def check_ood_z_generation_method(method):
+    if method is None:
+        return method
+    assert (
+        method in OOD_Z_GENERATION_AVAILABLE_METHODS
+    ), f"""Method for z ood generation '{method}' is invalid.
+    Must either be None or in {OOD_Z_GENERATION_AVAILABLE_METHODS}"""
     return method
 
 
@@ -222,8 +237,12 @@ class Experiment:
                         learning_rate=self.learning_rate,
                         prior_α=self.prior_alpha,
                         prior_β=self.prior_beta,
+                        τ_ood=self.tau_ood,
                         eps=self.eps,
                         n_mc_samples=self.n_mc_samples,
+                        ood_z_generation_method=check_ood_z_generation_method(
+                            self.ood_z_generation_method
+                        ),
                     )
                 else:
                     raise NotImplementedError(

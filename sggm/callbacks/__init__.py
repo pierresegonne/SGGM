@@ -18,6 +18,7 @@ from sggm.definitions import (
     UCI_YACHT_SHIFTED,
     #
     MNIST,
+    MNIST_2D,
     FASHION_MNIST,
     NOT_MNIST,
 )
@@ -48,6 +49,7 @@ callbacks = {
     UCI_YACHT_SHIFTED: [LossPrinter],
     #
     MNIST: [IMGGeneratedSaver],
-    FASHION_MNIST: [],
-    NOT_MNIST: [],
+    MNIST_2D: [IMGGeneratedSaver],
+    FASHION_MNIST: [IMGGeneratedSaver],
+    NOT_MNIST: [IMGGeneratedSaver],
 }

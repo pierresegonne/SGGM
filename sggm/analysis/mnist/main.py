@@ -6,16 +6,18 @@ import torch
 from pytorch_lightning import Trainer
 from torch import no_grad
 
-from sggm.data.mnist import MNISTDataModule
+from sggm.data.mnist import MNISTDataModule, MNISTDataModule2D
 from sggm.data.fashion_mnist import FashionMNISTDataModule
 from sggm.data.not_mnist import NotMNISTDataModule
 from sggm.definitions import (
     MNIST,
+    MNIST_2D,
     FASHION_MNIST,
     NOT_MNIST,
 )
 from sggm.vae_model import V3AE, VanillaVAE
 from sggm.vae_model_helper import batch_flatten, batch_reshape
+from sggm.styles_ import colours, colours_rgb
 from sggm.types_ import List
 
 
@@ -119,6 +121,68 @@ def plot_interpolation(model, img1, img2):
     return fig
 
 
+def show_2d_latent_space(model, x, y):
+    digits = torch.unique(y)
+    colour_digits = [
+        colours_rgb["primaryRed"],
+        colours_rgb["green"],
+    ]
+    with torch.no_grad():
+        if isinstance(model, VanillaVAE):
+            _, p_x_z, z, _, _ = model._run_step(x)
+        elif isinstance(model, V3AE):
+            _, p_x_z, _, _, _, z, _, _ = model._run_step(x)
+
+    fig, ax = plt.subplots()
+    # Show imshow for variance -> inspiration from aleatoric_epistemic_split
+    extent = 3.5
+    x_mesh = torch.linspace(-extent, extent, 300)
+    y_mesh = torch.linspace(-extent, extent, 300)
+    x_mesh, y_mesh = torch.meshgrid(x_mesh, y_mesh)
+    z_latent_mesh = torch.cat(
+        (x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1
+    )
+    with torch.no_grad():
+        if isinstance(model, VanillaVAE):
+            var = model.decoder_std(z_latent_mesh)
+        if isinstance(model, V3AE):
+            var = model.decoder_β(z_latent_mesh) / (model.decoder_α(z_latent_mesh) - 1)
+    # Accumulated gradient over all output cf nicki and martin
+    var = torch.sum(var, dim=1)
+    # reshape to x_shape
+    var = var.reshape(*x_mesh.shape)
+    # vmin=-1.5, vmax=2.5
+    varimshw = ax.imshow(var, extent=(-extent, extent, -extent, extent), cmap="magma")
+
+    # Show two digits separately
+    for i, d in enumerate(digits):
+        ax.plot(
+            z[:, 0][y == d],
+            z[:, 1][y == d],
+            "o",
+            markersize=3.5,
+            markerfacecolor=(*colour_digits[i], 0.9),
+            markeredgewidth=1.2,
+            markeredgecolor=(*colours_rgb["white"], 0.5),
+            label=f"Digit {d}",
+        )
+
+    # Misc
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_xlim([-extent, extent])
+    ax.set_ylim([-extent, extent])
+    fig.colorbar(varimshw, ax=ax)
+    ax.legend(
+        fancybox=True,
+        shadow=False,
+        ncol=2,
+        bbox_to_anchor=(0.89, 1.15),
+    )
+
+    return fig
+
+
 def compute_all_mnist_metrics(model, others_mnist: List[str]):
     if others_mnist is None:
         return
@@ -144,7 +208,7 @@ def plot_others_mnist(model, others_mnist: List[str], save_folder):
         return
     for other in others_mnist:
         dm = None
-        bs = 16
+        bs = 512
         if other == FASHION_MNIST:
             dm = FashionMNISTDataModule(bs, 0)
         elif other == NOT_MNIST:
@@ -171,10 +235,12 @@ def plot(experiment_log, **kwargs):
     save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
 
     # Get correct datamodule
-    bs = 16
+    bs = 512
     experiment_name = experiment_log.experiment_name
     if experiment_name == MNIST:
         dm = MNISTDataModule(bs, 0)
+    if experiment_name == MNIST_2D:
+        dm = MNISTDataModule2D(bs, 0)
     elif experiment_name == FASHION_MNIST:
         dm = FashionMNISTDataModule(bs, 0)
     elif experiment_name == NOT_MNIST:
@@ -211,11 +277,22 @@ def plot(experiment_log, **kwargs):
         if sum(len(d) for d in digits) >= 100:
             break
 
-    fig_interpolation = plot_interpolation(best_model, digits[1][0], digits[3][0])
+    if experiment_name == MNIST_2D:
+        interpolation_digits = [digits[1][0], digits[0][0]]
+    else:
+        interpolation_digits = [digits[1][0], digits[3][0]]
+    fig_interpolation = plot_interpolation(best_model, *interpolation_digits)
 
     plt.savefig(f"{save_folder}/_interpolation.png", dpi=300)
     plt.savefig(f"{save_folder}/_interpolation.svg")
     plt.show()
+
+    # NOTE: could be updated to if latent space is 2D
+    if experiment_name == MNIST_2D:
+        fig_latent_space = show_2d_latent_space(best_model, x_test, y_test)
+        plt.savefig(f"{save_folder}/_latent_space.png", dpi=300)
+        plt.savefig(f"{save_folder}/_latent_space.svg")
+        plt.show()
 
     compute_all_mnist_metrics(best_model, kwargs["others"])
     plot_others_mnist(best_model, kwargs["others"], save_folder)
