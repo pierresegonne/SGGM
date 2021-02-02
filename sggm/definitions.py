@@ -44,6 +44,8 @@ OOD_Z_GENERATION_AVAILABLE_METHODS = [
     PRIOR,
 ]
 
+DIGITS = "digits"
+
 EPS = "eps"
 EARLY_STOPPING_PATIENCE = "early_stopping_patience"
 HIDDEN_DIM = "hidden_dim"
@@ -97,6 +99,21 @@ def none_or_str(value: Any) -> Union[str, None]:
     return str(value)
 
 
+def none_or_list(value: Any) -> Union[list, None]:
+    """Typing for argument being either a list or "None"
+
+    Args:
+        value (Any): value whose type will be checked
+
+    Returns:
+        Union[str, None]
+    """
+    if value == "None":
+        return None
+    assert isinstance(value, list)
+    return value
+
+
 class Param:
     def __init__(
         self,
@@ -123,6 +140,8 @@ parameters = {
     SHIFTING_PROPORTION_K: Param(SHIFTING_PROPORTION_K, 1e-2, float),
     #
     SPLIT_TRAINING: Param(SPLIT_TRAINING, False, bool),
+    #
+    DIGITS: Param(DIGITS, None, none_or_list),
 }
 
 # -------------

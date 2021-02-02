@@ -70,6 +70,7 @@ from sggm.definitions import (
     SEED,
     SHIFTING_PROPORTION_K,
     SHIFTING_PROPORTION_TOTAL,
+    DIGITS,
 )
 from sggm.data import datamodules
 from sggm.experiment_helper import split_mean_uncertainty_training
@@ -82,7 +83,7 @@ from sggm.types_ import List
 def clean_dict(dic: dict) -> dict:
     clean_dic = {}
     for k, v in dic.items():
-        if type(v) in [str, int, bool, float, object, None]:
+        if type(v) in [str, int, bool, float, object, None, list]:
             clean_dic[k] = v
     return clean_dic
 
@@ -479,6 +480,8 @@ def cli_main():
                 misc[SHIFTING_PROPORTION_K] = experiment.shifting_proportion_k
             if isinstance(experiment.shifting_proportion_total, float):
                 misc[SHIFTING_PROPORTION_TOTAL] = experiment.shifting_proportion_total
+            if isinstance(experiment.digits, list):
+                misc[DIGITS] = experiment.digits
             torch.save(misc, f"{trainer.logger.log_dir}/misc.pkl")
 
 

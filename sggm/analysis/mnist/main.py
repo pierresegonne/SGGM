@@ -2,6 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import torch.distributions as tcd
 
 from pytorch_lightning import Trainer
 from torch import no_grad
@@ -14,6 +15,9 @@ from sggm.definitions import (
     MNIST_2D,
     FASHION_MNIST,
     NOT_MNIST,
+)
+from sggm.definitions import (
+    DIGITS,
 )
 from sggm.vae_model import V3AE, VanillaVAE
 from sggm.vae_model_helper import batch_flatten, batch_reshape
@@ -129,9 +133,11 @@ def show_2d_latent_space(model, x, y):
     ]
     with torch.no_grad():
         if isinstance(model, VanillaVAE):
-            _, p_x_z, z, _, _ = model._run_step(x)
+            _, _, z, _, _ = model._run_step(x)
         elif isinstance(model, V3AE):
-            _, p_x_z, _, _, _, z, _, _ = model._run_step(x)
+            _, _, _, _, _, z, q_z_x, _ = model._run_step(x)
+            # keep only a single z sample
+            z = z[0]
 
     fig, ax = plt.subplots()
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
@@ -148,11 +154,16 @@ def show_2d_latent_space(model, x, y):
         if isinstance(model, V3AE):
             var = model.decoder_β(z_latent_mesh) / (model.decoder_α(z_latent_mesh) - 1)
     # Accumulated gradient over all output cf nicki and martin
-    var = torch.sum(var, dim=1)
+    var = torch.mean(var, dim=1)
     # reshape to x_shape
     var = var.reshape(*x_mesh.shape)
     # vmin=-1.5, vmax=2.5
-    varimshw = ax.imshow(var, extent=(-extent, extent, -extent, extent), cmap="magma")
+    varimshw = ax.imshow(
+        var,
+        extent=(-extent, extent, -extent, extent),
+        vmax=np.percentile(var.flatten(), 75),
+        cmap="magma",
+    )
 
     # Show two digits separately
     for i, d in enumerate(digits):
@@ -167,6 +178,32 @@ def show_2d_latent_space(model, x, y):
             label=f"Digit {d}",
         )
 
+    # Pseudo-inputs
+    legend_ncols = 2
+    show_pi = False
+    if (
+        isinstance(model, V3AE)
+        and getattr(model, "ood_z_generation_method", None) is not None
+        and show_pi
+    ):
+        mult = getattr(model, "kde_bandwidth_multiplier", 10)
+        q_out_z_x = tcd.Independent(
+            tcd.Normal(q_z_x.mean, mult * torch.sqrt(q_z_x.variance) + model.eps), 1
+        )
+        # [n_mc_samples, BS, *self.latent_dims]
+        z_out = torch.reshape(q_out_z_x.rsample(), [-1, 2])
+        ax.plot(
+            z_out[:, 0],
+            z_out[:, 1],
+            "o",
+            markersize=3.5,
+            markerfacecolor=(*colours_rgb["purple"], 0.9),
+            markeredgewidth=1.2,
+            markeredgecolor=(*colours_rgb["white"], 0.5),
+            label="PI",
+        )
+        legend_ncols = 3
+
     # Misc
     ax.set_xticks([])
     ax.set_yticks([])
@@ -176,7 +213,7 @@ def show_2d_latent_space(model, x, y):
     ax.legend(
         fancybox=True,
         shadow=False,
-        ncol=2,
+        ncol=legend_ncols,
         bbox_to_anchor=(0.89, 1.15),
     )
 
@@ -235,12 +272,16 @@ def plot(experiment_log, **kwargs):
     save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
 
     # Get correct datamodule
-    bs = 512
+    bs = 1024
     experiment_name = experiment_log.experiment_name
+    misc = experiment_log.best_version.misc
     if experiment_name == MNIST:
         dm = MNISTDataModule(bs, 0)
     if experiment_name == MNIST_2D:
-        dm = MNISTDataModule2D(bs, 0)
+        if DIGITS in misc:
+            dm = MNISTDataModule2D(bs, 0, digits=misc[DIGITS])
+        else:
+            dm = MNISTDataModule2D(bs, 0)
     elif experiment_name == FASHION_MNIST:
         dm = FashionMNISTDataModule(bs, 0)
     elif experiment_name == NOT_MNIST:
@@ -278,7 +319,7 @@ def plot(experiment_log, **kwargs):
             break
 
     if experiment_name == MNIST_2D:
-        interpolation_digits = [digits[1][0], digits[0][0]]
+        interpolation_digits = [digits[dm.digits[0]][0], digits[dm.digits[1]][0]]
     else:
         interpolation_digits = [digits[1][0], digits[3][0]]
     fig_interpolation = plot_interpolation(best_model, *interpolation_digits)

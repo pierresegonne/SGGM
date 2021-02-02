@@ -385,6 +385,8 @@ class V3AE(BaseVAE):
         self.τ_ood = τ_ood
         self.ood_z_generation_method = ood_z_generation_method
 
+        self.kde_bandwidth_multiplier = 10
+
         self._switch_to_decoder_var = False
         self._student_t_decoder = True
         self._bernouilli_decoder = False
@@ -553,9 +555,18 @@ class V3AE(BaseVAE):
     def ood_kl(self, p_λ, q_z_x):
 
         if self.ood_z_generation_method == KDE:
+            # Average var accross the BS
+            std = torch.sqrt(torch.mean(q_z_x.variance), dim=1)
+            print(std.shape)
+            exit()
             # batch_shape [BS] event_shape [event_shape]
             q_out_z_x = tcd.Independent(
-                tcd.Normal(q_z_x.mean, 3 * torch.sqrt(q_z_x.variance) + self.eps), 1
+                tcd.Normal(
+                    q_z_x.mean,
+                    self.kde_bandwidth_multiplier * torch.sqrt(q_z_x.variance)
+                    + self.eps,
+                ),
+                1,
             )
             # [n_mc_samples, BS, *self.latent_dims]
             z_out = q_out_z_x.rsample(torch.Size([self.n_mc_samples]))
