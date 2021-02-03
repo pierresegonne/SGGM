@@ -480,7 +480,8 @@ class V3AE(BaseVAE):
 
     def sample_latent(self, mu, std, mc_samples: bool = False):
         # batch_shape [batch_shape] event_shape [latent_size]
-        q = tcd.Independent(tcd.Normal(mu, std + self.eps), 1)
+        std = std + self.eps
+        q = tcd.Independent(tcd.Normal(mu, std), 1)
         z = (
             q.rsample(torch.Size([self.n_mc_samples]))
             if mc_samples
@@ -505,6 +506,7 @@ class V3AE(BaseVAE):
     def sample_generative(self, mu, alpha, beta):
         # batch_shape [n_mc_samples, BS] event_shape [input_size]
         beta = beta + self.eps
+        alpha = alpha + self.eps
         if self._student_t_decoder:
             p = tcd.Independent(
                 tcd.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1

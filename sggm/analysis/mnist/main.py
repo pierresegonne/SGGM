@@ -43,8 +43,10 @@ def plot_comparison(n_display, title, x_og, p_x, input_dims):
     x_hat = batch_reshape(p_x.sample(), input_dims)
     x_mu = batch_reshape(p_x.mean, input_dims)
     x_var = batch_reshape(p_x.variance, input_dims)
+    print(p_x.base_dist.df)
 
     for n in range(n_display):
+        print(x_var[n, :].min(), x_var[n, :].max())
         for k in range(4):
             ax = plt.subplot(gs[k, n])
             ax = disable_ticks(ax)
@@ -327,12 +329,12 @@ def plot(experiment_log, **kwargs):
     # Figures
     n_display = 5
 
-    # fig_test = plot_comparison(
-    #     n_display, "Test", x_test, p_x_test, best_model.input_dims
-    # )
-    # plt.savefig(f"{save_folder}/_main.png", dpi=300)
-    # plt.savefig(f"{save_folder}/_main.svg")
-    # plt.show()
+    fig_test = plot_comparison(
+        n_display, "Test", x_test, p_x_test, best_model.input_dims
+    )
+    plt.savefig(f"{save_folder}/_main.png", dpi=300)
+    plt.savefig(f"{save_folder}/_main.svg")
+    plt.show()
 
     # Interpolation
     digits = [[] for _ in range(10)]
@@ -346,11 +348,11 @@ def plot(experiment_log, **kwargs):
         interpolation_digits = [digits[dm.digits[0]][0], digits[dm.digits[1]][0]]
     else:
         interpolation_digits = [digits[1][0], digits[3][0]]
-    # fig_interpolation = plot_interpolation(best_model, *interpolation_digits)
+    fig_interpolation = plot_interpolation(best_model, *interpolation_digits)
 
-    # plt.savefig(f"{save_folder}/_interpolation.png", dpi=300)
-    # plt.savefig(f"{save_folder}/_interpolation.svg")
-    # plt.show()
+    plt.savefig(f"{save_folder}/_interpolation.png", dpi=300)
+    plt.savefig(f"{save_folder}/_interpolation.svg")
+    plt.show()
 
     # NOTE: could be updated to if latent space is 2D
     if experiment_name == MNIST_2D:
