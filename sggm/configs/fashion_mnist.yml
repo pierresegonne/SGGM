@@ -8,7 +8,7 @@
   eps: 1e-6
   # From prior_gamma_per_pixel - for MNIST only
   # misc
-  n_trials: 1
+  n_trials: 5
   seed: 3
   max_epochs: 200
   # pl trainer
@@ -31,7 +31,7 @@
   prior_beta: 0.005466103219719339
   # misc
   n_mc_samples: 5
-  n_trials: 1
+  n_trials: 5
   seed: 3
   max_epochs: 200
   # pl trainer
@@ -58,7 +58,7 @@
   kde_bandwidth_multiplier: 9
   # misc
   n_mc_samples: 5
-  n_trials: 1
+  n_trials: 5
   seed: 3
   max_epochs: 200
   # pl trainer
