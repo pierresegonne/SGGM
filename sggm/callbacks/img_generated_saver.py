@@ -86,16 +86,16 @@ class IMGGeneratedSaver(pl.callbacks.Callback):
                     ax = disable_ticks(ax)
                     # Original
                     if k == 0:
-                        ax.imshow(x[n, :][0], cmap="binary", vmin=0, vmax=1)
+                        ax.imshow(x[n, :][0].cpu(), cmap="binary", vmin=0, vmax=1)
                     # Mean
                     elif k == 1:
-                        ax.imshow(x_mean[n, :][0], cmap="binary", vmin=0, vmax=1)
+                        ax.imshow(x_mean[n, :][0].cpu(), cmap="binary", vmin=0, vmax=1)
                     # Variance
                     elif k == 2:
-                        ax.imshow(x_var[n, :][0], cmap="binary")
+                        ax.imshow(x_var[n, :][0].cpu(), cmap="binary")
                     # Sample
                     elif k == 3:
-                        ax.imshow(x_hat[n, :][0], cmap="binary", vmin=0, vmax=1)
+                        ax.imshow(x_hat[n, :][0].cpu(), cmap="binary", vmin=0, vmax=1)
 
             str_title = f"{pl_module.__class__.__name__}_images"
             trainer.logger.experiment.add_image(
