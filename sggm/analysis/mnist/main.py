@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import torch.distributions as tcd
 
-from pytorch_lightning import Trainer
+from pytorch_lightning import seed_everything, Trainer
 from torch import no_grad
 
 from sggm.data.mnist import MNISTDataModule, MNISTDataModule2D
@@ -43,7 +43,6 @@ def plot_comparison(n_display, title, x_og, p_x, input_dims):
     x_hat = batch_reshape(p_x.sample(), input_dims)
     x_mu = batch_reshape(p_x.mean, input_dims)
     x_var = batch_reshape(p_x.variance, input_dims)
-    print(p_x.base_dist.df)
 
     for n in range(n_display):
         print(x_var[n, :].min(), x_var[n, :].max())
@@ -160,7 +159,6 @@ def show_2d_latent_space(model, x, y):
     ax3.imshow(x_var[0][0], cmap="binary")
     ax4.imshow(x_hat[0][0], cmap="binary", vmin=0, vmax=1)
     plt.show()
-    exit()
 
     fig, ax = plt.subplots()
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
@@ -301,6 +299,8 @@ def plot(experiment_log, **kwargs):
     bs = 1024
     experiment_name = experiment_log.experiment_name
     misc = experiment_log.best_version.misc
+    # if "seed" in misc:
+    #     seed_everything(misc["seed"])
     if experiment_name == MNIST:
         dm = MNISTDataModule(bs, 0)
     if experiment_name == MNIST_2D:
@@ -317,7 +317,7 @@ def plot(experiment_log, **kwargs):
     # Dataset
     training_dataset = next(iter(dm.train_dataloader()))
     x_train, y_train = training_dataset
-    test_dataset = next(iter(dm.test_dataloader()))
+    test_dataset = next(iter(dm.val_dataloader()))
     x_test, y_test = test_dataset
 
     # Reconstruction
@@ -325,6 +325,20 @@ def plot(experiment_log, **kwargs):
     with no_grad():
         x_hat_train, p_x_train = best_model(x_train)
         x_hat_test, p_x_test = best_model(x_test)
+
+        mean_error = torch.nn.functional.mse_loss(
+            batch_reshape(p_x_test.mean[0], best_model.input_dims), x_test
+        )
+        print(mean_error)
+    #     x = batch_flatten(x_test)
+    #     best_model.encoder_μ.eval()
+    #     μ_x = best_model.encoder_μ(x)
+    #     std_x = best_model.encoder_std(x)
+    #     z, _, _ = best_model.sample_latent(μ_x, std_x)
+    #     _, μ_z, α_z, β_z = best_model.parametrise_z(z)
+    #     print(p_x_test.mean.shape)
+    #     print(z[0][0])
+    # exit()
 
     # Figures
     n_display = 5

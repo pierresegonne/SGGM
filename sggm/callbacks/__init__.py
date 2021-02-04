@@ -48,7 +48,7 @@ callbacks = {
     UCI_YACHT: [LossPrinter],
     UCI_YACHT_SHIFTED: [LossPrinter],
     #
-    MNIST: [IMGGeneratedSaver],
+    MNIST: [],
     MNIST_2D: [IMGGeneratedSaver],
     FASHION_MNIST: [IMGGeneratedSaver],
     NOT_MNIST: [IMGGeneratedSaver],

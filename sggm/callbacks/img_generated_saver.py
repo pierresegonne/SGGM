@@ -54,18 +54,27 @@ class IMGGeneratedSaver(pl.callbacks.Callback):
         ):
             x, y = next(iter(pl_module.val_dataloader()))
             x, y = x.to(pl_module.device), y.to(pl_module.device)
+            pl_module.eval()
             with torch.no_grad():
-                x_hat, p_x = pl_module(x)
+                # x_hat, p_x = pl_module(x)
+                x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = pl_module._run_step(x)
 
-                mean_error = torch.nn.functional.mse_loss(
-                    batch_reshape(p_x.mean[0], pl_module.input_dims), x
-                )
+                # print("\n")
+                # print("img gen")
+                # print(pl_module.val_dataloader)
+                # print(x.shape)
+                # print(x[0][0][14])
+                # print(q_z_x.mean[0])
 
-            print(mean_error)
+            #     mean_error = torch.nn.functional.mse_loss(
+            #         batch_reshape(p_x_z.mean[0], pl_module.input_dims), x
+            #     )
+
+            # print("Mean error on val batch", mean_error)
 
             x_hat = x_hat
-            x_mean = batch_reshape(p_x.mean, pl_module.input_dims)
-            x_var = batch_reshape(p_x.variance, pl_module.input_dims)
+            x_mean = batch_reshape(p_x_z.mean, pl_module.input_dims)
+            x_var = batch_reshape(p_x_z.variance, pl_module.input_dims)
 
             fig = plt.figure()
             n_display = 4

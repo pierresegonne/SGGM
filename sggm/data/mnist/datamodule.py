@@ -81,7 +81,7 @@ class MNISTDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
-            shuffle=True,
+            shuffle=False,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -90,7 +90,7 @@ class MNISTDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
-            shuffle=True,
+            shuffle=False,
         )
 
 

@@ -49,6 +49,12 @@ from sggm.model_helper import log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple
 from sggm.vae_model_helper import batch_flatten, batch_reshape, reduce_int_list
 
+# stages for steps
+TRAINING = "training"
+VALIDATION = "validation"
+TESTING = "testing"
+STAGES = [TRAINING, VALIDATION, TESTING]
+
 
 def activation_function(activation_function_name: str) -> nn.Module:
     assert (
@@ -155,7 +161,7 @@ class BaseVAE(pl.LightningModule):
         raise NotImplementedError("Method must be overriden by child VAE model")
 
     def validation_step(self, batch, batch_idx):
-        loss, logs = self.step(batch, batch_idx)
+        loss, logs = self.step(batch, batch_idx, stage=VALIDATION)
         # Needed for Early stopping?
         self.log(EVAL_LOSS, loss, on_epoch=True)
         self.log_dict(
@@ -164,6 +170,7 @@ class BaseVAE(pl.LightningModule):
         # Histogram of weights
         for name, weight in self.named_parameters():
             self.logger.experiment.add_histogram(name, weight, self.current_epoch)
+
         return loss
 
     @staticmethod
@@ -293,18 +300,16 @@ class VanillaVAE(BaseVAE):
         # Update β_elbo value through annealing
         self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2)) / 2
 
-    def step(self, batch, batch_idx, train=False):
-
-        if self.training:
-            self.update_hacks()
-
+    def step(self, batch, batch_idx, stage=None):
         x, y = batch
         x_hat, p_x_z, z, q_z_x, p_z = self._run_step(x)
 
         expected_log_likelihood = self.ellk(p_x_z, x)
         kl_divergence = self.kl(q_z_x, p_z)
 
-        loss = -self.elbo(expected_log_likelihood, kl_divergence, train=train).mean()
+        loss = -self.elbo(
+            expected_log_likelihood, kl_divergence, train=(stage == TRAINING)
+        ).mean()
 
         logs = {
             "llk": expected_log_likelihood.sum(),
@@ -315,13 +320,14 @@ class VanillaVAE(BaseVAE):
         return loss, logs
 
     def training_step(self, batch, batch_idx, optimizer_idx):
+        self.update_hacks()
         (model_opt, decoder_var_opt) = self.optimizers()
         if not self._switch_to_decoder_var:
             opt = model_opt
         else:
             opt = decoder_var_opt
         opt.zero_grad()
-        loss, logs = self.step(batch, batch_idx, train=True)
+        loss, logs = self.step(batch, batch_idx, stage=TRAINING)
 
         self.manual_backward(loss, opt)
         opt.step()
@@ -333,7 +339,7 @@ class VanillaVAE(BaseVAE):
         return loss
 
     def test_step(self, batch, batch_idx):
-        loss, logs = self.step(batch, batch_idx)
+        loss, logs = self.step(batch, batch_idx, stage=TESTING)
         self.log(TEST_LOSS, loss, on_epoch=True)
         self.log(TEST_ELBO, -loss, on_epoch=True)
         self.log(TEST_ELLK, logs["ellk"], on_epoch=True)
@@ -460,7 +466,7 @@ class V3AE(BaseVAE):
         return x_hat, p_x
 
     def _run_step(self, x):
-        # All relevant information for a training step
+        # All relevant information for a step
         # Both latent and generated samples and parameters are returned
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
@@ -594,19 +600,44 @@ class V3AE(BaseVAE):
         return 0
 
     def update_hacks(self):
+        previous_switch = self._switch_to_decoder_var
         self._switch_to_decoder_var = (
-            True if self.current_epoch > self.trainer.max_epochs / 2 else False
+            True if self.current_epoch >= self.trainer.max_epochs / 2 else False
         )
         self._student_t_decoder = self._switch_to_decoder_var
         self._bernouilli_decoder = not self._switch_to_decoder_var
         self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2)) / 2
+        # Explicitely freeze the gradients of everything but alpha and beta
+        if (
+            self._switch_to_decoder_var
+            and previous_switch != self._switch_to_decoder_var
+        ):
+            print("!!!Switching to decoder variance!!!")
+            for p in self.encoder_μ.parameters():
+                p.requires_grad = False
+            for p in self.encoder_std.parameters():
+                p.requires_grad = False
+            for p in self.decoder_μ.parameters():
+                p.requires_grad = False
 
-    def step(self, batch, batch_idx, train=False):
-        if self.training:
-            self.update_hacks()
+            print(next(self.decoder_μ.parameters()))
 
+    def step(self, batch, batch_idx, stage=None):
         x, y = batch
         x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
+
+        mean_error = nn.functional.mse_loss(
+            batch_reshape(p_x_z.mean[0], self.input_dims), x
+        )
+        if stage == VALIDATION:
+            #     print("\n")
+            #     print(batch_idx)
+            #     print(self.val_dataloader)
+            #     print(x.shape)
+            #     print(x[0][0][14])  # OK same
+            #     print(q_z_x.mean[0])
+            #     print(mean_error)
+            pass
 
         expected_log_likelihood, ellk_lbd, kl_divergence_lbd = self.ellk(
             p_x_z, x, q_λ_z, p_λ
@@ -614,11 +645,13 @@ class V3AE(BaseVAE):
         kl_divergence_z = self.kl(q_z_x, p_z)
         kl_divergence_z = torch.mean(kl_divergence_z, dim=0)
 
-        loss = -self.elbo(expected_log_likelihood, kl_divergence_z, train=train).mean()
+        loss = -self.elbo(
+            expected_log_likelihood, kl_divergence_z, train=(stage == TRAINING)
+        ).mean()
 
         # Also verify that we are only training the decoder's variance
         if (
-            (train)
+            (stage == TRAINING)
             & (self.ood_z_generation_method is not None)
             & (self._student_t_decoder)
         ):
@@ -632,17 +665,19 @@ class V3AE(BaseVAE):
             "ellk_lbd": ellk_lbd.mean(),
             "kl_lbd": kl_divergence_lbd.mean(),
             "loss": loss,
+            "mean_error": mean_error,
         }
         return loss, logs
 
     def training_step(self, batch, batch_idx, optimizer_idx):
+        self.update_hacks()
         (model_opt, decoder_var_opt) = self.optimizers()
         if not self._switch_to_decoder_var:
             opt = model_opt
         else:
             opt = decoder_var_opt
         opt.zero_grad()
-        loss, logs = self.step(batch, batch_idx, train=True)
+        loss, logs = self.step(batch, batch_idx, stage=TRAINING)
 
         self.manual_backward(loss, opt)
         opt.step()
@@ -654,7 +689,8 @@ class V3AE(BaseVAE):
         return loss
 
     def test_step(self, batch, batch_idx):
-        loss, logs = self.step(batch, batch_idx)
+        loss, logs = self.step(batch, batch_idx, stage=TESTING)
+        print(logs)
         self.log(TEST_LOSS, loss, on_epoch=True)
         self.log(TEST_ELBO, -loss, on_epoch=True)
         self.log(TEST_ELLK, logs["ellk"], on_epoch=True)

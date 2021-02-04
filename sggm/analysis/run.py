@@ -111,6 +111,9 @@ def parse_experiment_args(args):
 
 
 if __name__ == "__main__":
+    from pytorch_lightning import seed_everything
+
+    seed_everything(123)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
