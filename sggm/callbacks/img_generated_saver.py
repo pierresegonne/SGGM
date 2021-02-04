@@ -7,6 +7,7 @@ import torchvision
 from PIL import Image
 from pytorch_lightning import Callback, Trainer, LightningModule
 
+from sggm.vae_model import VanillaVAE, V3AE
 from sggm.vae_model_helper import batch_reshape
 
 """
@@ -56,21 +57,11 @@ class IMGGeneratedSaver(pl.callbacks.Callback):
             x, y = x.to(pl_module.device), y.to(pl_module.device)
             pl_module.eval()
             with torch.no_grad():
-                # x_hat, p_x = pl_module(x)
-                x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = pl_module._run_step(x)
+                if isinstance(pl_module, VanillaVAE):
+                    x_hat, p_x_z, z, q_z_x, p_z = pl_module._run_step(x)
+                elif isinstance(pl_module, V3AE):
+                    x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = pl_module._run_step(x)
 
-                print("\n")
-                print("img gen")
-                print(pl_module.val_dataloader)
-                print(x.shape)
-                print(x[0][0][14])
-                print(q_z_x.mean[0])
-                mean_error = torch.nn.functional.mse_loss(
-                    batch_reshape(p_x_z.mean[0], pl_module.input_dims), x
-                )
-                print("Mean error on val batch", mean_error)
-
-            x_hat = x_hat
             x_mean = batch_reshape(p_x_z.mean, pl_module.input_dims)
             x_var = batch_reshape(p_x_z.variance, pl_module.input_dims)
 

@@ -127,7 +127,7 @@ def latent_dims(experiment_name):
     if experiment_name == MNIST_2D:
         return (2,)
     elif experiment_name == FASHION_MNIST:
-        return (10,)
+        return (25,)
     elif experiment_name == FASHION_MNIST_2D:
         return (2,)
     elif experiment_name == NOT_MNIST:

@@ -627,14 +627,14 @@ class V3AE(BaseVAE):
             batch_reshape(p_x_z.mean[0], self.input_dims), x
         )
         if stage == VALIDATION:
-            if batch_idx == 0:
-                print("\n")
-                print(batch_idx)
-                print(self.val_dataloader)
-                print(x.shape)
-                print(x[0][0][14])  # OK same
-                print(q_z_x.mean[0])
-                print(mean_error)
+            # if batch_idx == 0:
+            #     print("\n")
+            #     print(batch_idx)
+            #     print(self.val_dataloader)
+            #     print(x.shape)
+            #     print(x[0][0][14])  # OK same
+            #     print(q_z_x.mean[0])
+            #     print(mean_error)
             pass
 
         expected_log_likelihood, ellk_lbd, kl_divergence_lbd = self.ellk(

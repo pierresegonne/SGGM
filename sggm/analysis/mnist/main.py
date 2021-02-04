@@ -200,8 +200,9 @@ def show_2d_latent_space(model, x, y):
     )
 
     # Show two digits separately
-    cla = ["T-shirt", "Sandal"]
+    cla = ["Pullover", "Sandal"]
     for i, d in enumerate(digits):
+        print(d)
         ax.plot(
             z[:, 0][y == d],
             z[:, 1][y == d],
@@ -215,7 +216,7 @@ def show_2d_latent_space(model, x, y):
 
     # Pseudo-inputs
     legend_ncols = 2
-    show_pi = True
+    show_pi = False
     if (
         isinstance(model, V3AE)
         and getattr(model, "ood_z_generation_method", None) is not None
@@ -223,7 +224,6 @@ def show_2d_latent_space(model, x, y):
     ):
         # mult = getattr(model, "kde_bandwidth_multiplier", 10)
         # [n_mc_samples, BS, *self.latent_dims]
-        model.kde_bandwidth_multiplier = 15
         z_out = model.generate_z_out(q_z_x, averaged_std=False)
         ax.plot(
             z_out[0, :, 0],
@@ -251,7 +251,7 @@ def show_2d_latent_space(model, x, y):
         ncol=legend_ncols,
         bbox_to_anchor=(0.89, -0.15),
     )
-    ax.set_title("Standard V3AE", fontsize=30)
+    ax.set_title("Robust V3AE", fontsize=30)
 
     return fig
 
@@ -342,20 +342,6 @@ def plot(experiment_log, **kwargs):
     with no_grad():
         x_hat_train, p_x_train = best_model(x_train)
         x_hat_test, p_x_test = best_model(x_test)
-
-        # mean_error = torch.nn.functional.mse_loss(
-        #     batch_reshape(p_x_test.mean[0], best_model.input_dims), x_test
-        # )
-        # print(mean_error)
-    #     x = batch_flatten(x_test)
-    #     best_model.encoder_μ.eval()
-    #     μ_x = best_model.encoder_μ(x)
-    #     std_x = best_model.encoder_std(x)
-    #     z, _, _ = best_model.sample_latent(μ_x, std_x)
-    #     _, μ_z, α_z, β_z = best_model.parametrise_z(z)
-    #     print(p_x_test.mean.shape)
-    #     print(z[0][0])
-    # exit()
 
     # Figures
     n_display = 5
