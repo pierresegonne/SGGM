@@ -59,18 +59,16 @@ class IMGGeneratedSaver(pl.callbacks.Callback):
                 # x_hat, p_x = pl_module(x)
                 x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = pl_module._run_step(x)
 
-                # print("\n")
-                # print("img gen")
-                # print(pl_module.val_dataloader)
-                # print(x.shape)
-                # print(x[0][0][14])
-                # print(q_z_x.mean[0])
-
-            #     mean_error = torch.nn.functional.mse_loss(
-            #         batch_reshape(p_x_z.mean[0], pl_module.input_dims), x
-            #     )
-
-            # print("Mean error on val batch", mean_error)
+                print("\n")
+                print("img gen")
+                print(pl_module.val_dataloader)
+                print(x.shape)
+                print(x[0][0][14])
+                print(q_z_x.mean[0])
+                mean_error = torch.nn.functional.mse_loss(
+                    batch_reshape(p_x_z.mean[0], pl_module.input_dims), x
+                )
+                print("Mean error on val batch", mean_error)
 
             x_hat = x_hat
             x_mean = batch_reshape(p_x_z.mean, pl_module.input_dims)

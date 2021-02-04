@@ -15,7 +15,7 @@ from sggm.data.uci_wine_white import (
 from sggm.data.uci_yacht import UCIYachtDataModule, UCIYachtDataModuleShifted
 
 from sggm.data.mnist import MNISTDataModule, MNISTDataModule2D
-from sggm.data.fashion_mnist import FashionMNISTDataModule
+from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModule2D
 from sggm.data.not_mnist import NotMNISTDataModule
 
 from sggm.definitions import (
@@ -40,6 +40,7 @@ from sggm.definitions import (
     MNIST,
     MNIST_2D,
     FASHION_MNIST,
+    FASHION_MNIST_2D,
     NOT_MNIST,
 )
 
@@ -65,5 +66,6 @@ datamodules = {
     MNIST: MNISTDataModule,
     MNIST_2D: MNISTDataModule2D,
     FASHION_MNIST: FashionMNISTDataModule,
+    FASHION_MNIST_2D: FashionMNISTDataModule2D,
     NOT_MNIST: NotMNISTDataModule,
 }

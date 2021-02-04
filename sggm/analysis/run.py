@@ -32,6 +32,7 @@ from sggm.definitions import (
     MNIST,
     MNIST_2D,
     FASHION_MNIST,
+    FASHION_MNIST_2D,
     NOT_MNIST,
 )
 from sggm.regression_model import check_available_methods, MARGINAL
@@ -54,6 +55,7 @@ MNIST_L = [
     MNIST,
     MNIST_2D,
     FASHION_MNIST,
+    FASHION_MNIST_2D,
     NOT_MNIST,
 ]
 

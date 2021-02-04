@@ -564,7 +564,7 @@ class V3AE(BaseVAE):
                 torch.zeros((x.shape[0], 1)),
             )
 
-    def generate_z_out(self, q_z_x, averaged_std=True):
+    def generate_z_out(self, q_z_x, averaged_std=False):
         if averaged_std:
             # Average var accross the BS
             bs = q_z_x.variance.shape[0]
@@ -612,15 +612,12 @@ class V3AE(BaseVAE):
             self._switch_to_decoder_var
             and previous_switch != self._switch_to_decoder_var
         ):
-            print("!!!Switching to decoder variance!!!")
             for p in self.encoder_μ.parameters():
                 p.requires_grad = False
             for p in self.encoder_std.parameters():
                 p.requires_grad = False
             for p in self.decoder_μ.parameters():
                 p.requires_grad = False
-
-            print(next(self.decoder_μ.parameters()))
 
     def step(self, batch, batch_idx, stage=None):
         x, y = batch
@@ -630,13 +627,14 @@ class V3AE(BaseVAE):
             batch_reshape(p_x_z.mean[0], self.input_dims), x
         )
         if stage == VALIDATION:
-            #     print("\n")
-            #     print(batch_idx)
-            #     print(self.val_dataloader)
-            #     print(x.shape)
-            #     print(x[0][0][14])  # OK same
-            #     print(q_z_x.mean[0])
-            #     print(mean_error)
+            if batch_idx == 0:
+                print("\n")
+                print(batch_idx)
+                print(self.val_dataloader)
+                print(x.shape)
+                print(x[0][0][14])  # OK same
+                print(q_z_x.mean[0])
+                print(mean_error)
             pass
 
         expected_log_likelihood, ellk_lbd, kl_divergence_lbd = self.ellk(
@@ -690,7 +688,6 @@ class V3AE(BaseVAE):
 
     def test_step(self, batch, batch_idx):
         loss, logs = self.step(batch, batch_idx, stage=TESTING)
-        print(logs)
         self.log(TEST_LOSS, loss, on_epoch=True)
         self.log(TEST_ELBO, -loss, on_epoch=True)
         self.log(TEST_ELLK, logs["ellk"], on_epoch=True)

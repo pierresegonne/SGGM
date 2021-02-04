@@ -3,17 +3,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.distributions as tcd
+import seaborn as sns
 
+from matplotlib.colors import ListedColormap
 from pytorch_lightning import seed_everything, Trainer
 from torch import no_grad
 
 from sggm.data.mnist import MNISTDataModule, MNISTDataModule2D
-from sggm.data.fashion_mnist import FashionMNISTDataModule
+from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModule2D
 from sggm.data.not_mnist import NotMNISTDataModule
 from sggm.definitions import (
     MNIST,
     MNIST_2D,
     FASHION_MNIST,
+    FASHION_MNIST_2D,
     NOT_MNIST,
 )
 from sggm.definitions import (
@@ -45,7 +48,7 @@ def plot_comparison(n_display, title, x_og, p_x, input_dims):
     x_var = batch_reshape(p_x.variance, input_dims)
 
     for n in range(n_display):
-        print(x_var[n, :].min(), x_var[n, :].max())
+        # print(x_var[n, :].min(), x_var[n, :].max())
         for k in range(4):
             ax = plt.subplot(gs[k, n])
             ax = disable_ticks(ax)
@@ -129,8 +132,8 @@ def plot_interpolation(model, img1, img2):
 def show_2d_latent_space(model, x, y):
     digits = torch.unique(y)
     colour_digits = [
-        colours_rgb["primaryRed"],
-        colours_rgb["green"],
+        (1 / 255, 133 / 255, 90 / 255),
+        (200 / 255, 154 / 255, 1 / 255),
     ]
     with torch.no_grad():
         if isinstance(model, VanillaVAE):
@@ -141,24 +144,26 @@ def show_2d_latent_space(model, x, y):
             z = z[0]
 
     # Show specific regions
-    ctr = torch.Tensor([[-0.012, -0.063]])
-    lft = torch.Tensor([[-1.258, 0.416]])
-    rgt = torch.Tensor([[1.17, -0.07]])
-    idx = torch.norm(z - rgt, dim=1) < 0.2
-    z_display = z[idx]
-    fig, [ax1, ax2, ax3, ax4] = plt.subplots(1, 4)
-    x_og = x[idx][0]
-    with torch.no_grad():
-        _, p_x = model(x_og)
-    x_hat = batch_reshape(p_x.sample(), model.input_dims)
-    x_mu = batch_reshape(p_x.mean, model.input_dims)
-    x_var = batch_reshape(p_x.variance, model.input_dims)
+    show_specific_input = False
+    if show_specific_input:
+        ctr = torch.Tensor([[-0.012, -0.063]])
+        lft = torch.Tensor([[-1.258, 0.416]])
+        rgt = torch.Tensor([[1.17, -0.07]])
+        idx = torch.norm(z - rgt, dim=1) < 0.5
+        z_display = z[idx]
+        fig, [ax1, ax2, ax3, ax4] = plt.subplots(1, 4)
+        x_og = x[idx][0]
+        with torch.no_grad():
+            _, p_x = model(x_og)
+        x_hat = batch_reshape(p_x.sample(), model.input_dims)
+        x_mu = batch_reshape(p_x.mean, model.input_dims)
+        x_var = batch_reshape(p_x.variance, model.input_dims)
 
-    ax1.imshow(x_og[0], cmap="binary", vmin=0, vmax=1)
-    ax2.imshow(x_mu[0][0], cmap="binary", vmin=0, vmax=1)
-    ax3.imshow(x_var[0][0], cmap="binary")
-    ax4.imshow(x_hat[0][0], cmap="binary", vmin=0, vmax=1)
-    plt.show()
+        ax1.imshow(x_og[0], cmap="binary", vmin=0, vmax=1)
+        ax2.imshow(x_mu[0][0], cmap="binary", vmin=0, vmax=1)
+        ax3.imshow(x_var[0][0], cmap="binary")
+        ax4.imshow(x_hat[0][0], cmap="binary", vmin=0, vmax=1)
+        plt.show()
 
     fig, ax = plt.subplots()
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
@@ -185,29 +190,32 @@ def show_2d_latent_space(model, x, y):
     # reshape to x_shape
     var = var.reshape(*x_mesh.shape)
     # vmin=-1.5, vmax=2.5
+    cmap = sns.color_palette("rocket", as_cmap=True)
     varimshw = ax.imshow(
         var,
         extent=(-extent, extent, -extent, extent),
         vmax=np.percentile(var.flatten(), 75),
-        cmap="magma",
+        # vmin=np.percentile(var.flatten(), 2),
+        cmap=cmap,
     )
 
     # Show two digits separately
+    cla = ["T-shirt", "Sandal"]
     for i, d in enumerate(digits):
         ax.plot(
             z[:, 0][y == d],
             z[:, 1][y == d],
             "o",
             markersize=3.5,
-            markerfacecolor=(*colour_digits[i], 0.9),
+            markerfacecolor=(*colour_digits[i], 0.95),
             markeredgewidth=1.2,
             markeredgecolor=(*colours_rgb["white"], 0.5),
-            label=f"Digit {d}",
+            label=cla[i],
         )
 
     # Pseudo-inputs
     legend_ncols = 2
-    show_pi = False
+    show_pi = True
     if (
         isinstance(model, V3AE)
         and getattr(model, "ood_z_generation_method", None) is not None
@@ -215,6 +223,7 @@ def show_2d_latent_space(model, x, y):
     ):
         # mult = getattr(model, "kde_bandwidth_multiplier", 10)
         # [n_mc_samples, BS, *self.latent_dims]
+        model.kde_bandwidth_multiplier = 15
         z_out = model.generate_z_out(q_z_x, averaged_std=False)
         ax.plot(
             z_out[0, :, 0],
@@ -233,13 +242,16 @@ def show_2d_latent_space(model, x, y):
     ax.set_yticks([])
     ax.set_xlim([-extent, extent])
     ax.set_ylim([-extent, extent])
-    fig.colorbar(varimshw, ax=ax)
+    cb = fig.colorbar(varimshw, ax=ax)
+    for t in cb.ax.get_yticklabels():
+        t.set_fontsize(20)
     ax.legend(
         fancybox=True,
         shadow=False,
         ncol=legend_ncols,
-        bbox_to_anchor=(0.89, 1.15),
+        bbox_to_anchor=(0.89, -0.15),
     )
+    ax.set_title("Standard V3AE", fontsize=30)
 
     return fig
 
@@ -303,13 +315,18 @@ def plot(experiment_log, **kwargs):
     #     seed_everything(misc["seed"])
     if experiment_name == MNIST:
         dm = MNISTDataModule(bs, 0)
-    if experiment_name == MNIST_2D:
+    elif experiment_name == MNIST_2D:
         if DIGITS in misc:
             dm = MNISTDataModule2D(bs, 0, digits=misc[DIGITS])
         else:
             dm = MNISTDataModule2D(bs, 0)
     elif experiment_name == FASHION_MNIST:
         dm = FashionMNISTDataModule(bs, 0)
+    elif experiment_name == FASHION_MNIST_2D:
+        if DIGITS in misc:
+            dm = FashionMNISTDataModule2D(bs, 0, digits=misc[DIGITS])
+        else:
+            dm = FashionMNISTDataModule2D(bs, 0)
     elif experiment_name == NOT_MNIST:
         dm = NotMNISTDataModule(bs, 0)
     dm.setup()
@@ -326,10 +343,10 @@ def plot(experiment_log, **kwargs):
         x_hat_train, p_x_train = best_model(x_train)
         x_hat_test, p_x_test = best_model(x_test)
 
-        mean_error = torch.nn.functional.mse_loss(
-            batch_reshape(p_x_test.mean[0], best_model.input_dims), x_test
-        )
-        print(mean_error)
+        # mean_error = torch.nn.functional.mse_loss(
+        #     batch_reshape(p_x_test.mean[0], best_model.input_dims), x_test
+        # )
+        # print(mean_error)
     #     x = batch_flatten(x_test)
     #     best_model.encoder_μ.eval()
     #     μ_x = best_model.encoder_μ(x)
@@ -358,7 +375,7 @@ def plot(experiment_log, **kwargs):
         if sum(len(d) for d in digits) >= 100:
             break
 
-    if experiment_name == MNIST_2D:
+    if experiment_name in [MNIST_2D, FASHION_MNIST_2D]:
         interpolation_digits = [digits[dm.digits[0]][0], digits[dm.digits[1]][0]]
     else:
         interpolation_digits = [digits[1][0], digits[3][0]]
@@ -369,7 +386,7 @@ def plot(experiment_log, **kwargs):
     plt.show()
 
     # NOTE: could be updated to if latent space is 2D
-    if experiment_name == MNIST_2D:
+    if experiment_name in [MNIST_2D, FASHION_MNIST_2D]:
         fig_latent_space = show_2d_latent_space(best_model, x_test, y_test)
         plt.savefig(f"{save_folder}/_latent_space.png", dpi=300)
         plt.savefig(f"{save_folder}/_latent_space.svg")

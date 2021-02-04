@@ -7,6 +7,8 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
 from torchvision.datasets import FashionMNIST
 
+from sggm.types_ import List
+
 N_cpus = multiprocessing.cpu_count()
 
 
@@ -32,6 +34,8 @@ class FashionMNISTDataModule(pl.LightningDataModule):
         self.x_mean = 0.2860
         self.x_std = 0.3530
         self.range = 255
+        self.x_mean = 0.0
+        self.x_std = 1
         self.dims = (1, 28, 28)
         self.labels = [
             "T-shirt/top",
@@ -49,7 +53,6 @@ class FashionMNISTDataModule(pl.LightningDataModule):
     def setup(self, stage: str = None):
 
         # Transforms
-        # transforms.Normalize([self.mu], [self.sigma])
         mnist_transforms = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize([self.x_mean], [self.x_std])]
         )
@@ -98,6 +101,63 @@ class FashionMNISTDataModule(pl.LightningDataModule):
             num_workers=self.n_workers,
             pin_memory=self.pin_memory,
         )
+
+
+class FashionMNISTDataModule2D(FashionMNISTDataModule):
+    def __init__(
+        self,
+        batch_size: int,
+        n_workers: int,
+        train_val_split: float = 0.9,
+        # To keep notation consistent, even though that represent the idx of classes
+        digits: List[int] = [0, 1],
+        **kwargs,
+    ):
+        super().__init__(batch_size, n_workers, train_val_split, **kwargs)
+        assert len(digits) == 2
+        for d in digits:
+            assert isinstance(d, int)
+            assert (0 <= d) & (d <= 9)
+        self.digits = digits
+
+    def setup(self, stage: str = None):
+        # Transforms
+        mnist_transforms = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize([self.x_mean], [self.x_std])]
+        )
+
+        # Train
+        train_val = FashionMNIST(
+            os.path.dirname(__file__),
+            download=True,
+            train=True,
+            transform=mnist_transforms,
+        )
+
+        idx = (train_val.targets == self.digits[0]) | (
+            train_val.targets == self.digits[1]
+        )
+        train_val.targets = train_val.targets[idx]
+        train_val.data = train_val.data[idx]
+
+        train_length = int(len(train_val) * self.train_val_split)
+        val_length = len(train_val) - train_length
+        self.train_dataset, self.val_dataset = random_split(
+            train_val, [train_length, val_length]
+        )
+
+        # Test
+        self.test_dataset = FashionMNIST(
+            os.path.dirname(__file__),
+            download=True,
+            train=False,
+            transform=mnist_transforms,
+        )
+        idx = (self.test_dataset.targets == self.digits[0]) | (
+            self.test_dataset.targets == self.digits[1]
+        )
+        self.test_dataset.targets = self.test_dataset.targets[idx]
+        self.test_dataset.data = self.test_dataset.data[idx]
 
 
 if __name__ == "__main__":

@@ -241,6 +241,7 @@ UCI_YACHT_SHIFTED = UCI_YACHT + SHIFTED
 MNIST = "mnist"
 MNIST_2D = "mnist_2d"
 FASHION_MNIST = "fashion_mnist"
+FASHION_MNIST_2D = "fashion_mnist_2d"
 NOT_MNIST = "not_mnist"
 
 
@@ -265,6 +266,7 @@ experiment_names = [
     MNIST,
     MNIST_2D,
     FASHION_MNIST,
+    FASHION_MNIST_2D,
     NOT_MNIST,
 ]
 regression_experiments = [
@@ -286,7 +288,7 @@ regression_experiments = [
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
 ]
-generative_experiments = [MNIST, MNIST_2D, FASHION_MNIST, NOT_MNIST]
+generative_experiments = [MNIST, MNIST_2D, FASHION_MNIST, FASHION_MNIST_2D, NOT_MNIST]
 
 
 # -------------

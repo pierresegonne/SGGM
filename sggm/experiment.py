@@ -44,6 +44,7 @@ from sggm.definitions import (
     MNIST,
     MNIST_2D,
     FASHION_MNIST,
+    FASHION_MNIST_2D,
     NOT_MNIST,
 )
 from sggm.definitions import (
@@ -113,6 +114,7 @@ def activation_function(experiment_name):
         MNIST,
         MNIST_2D,
         FASHION_MNIST,
+        FASHION_MNIST_2D,
         NOT_MNIST,
     ]:
         # Match Martin & Nicki
@@ -126,6 +128,8 @@ def latent_dims(experiment_name):
         return (2,)
     elif experiment_name == FASHION_MNIST:
         return (10,)
+    elif experiment_name == FASHION_MNIST_2D:
+        return (2,)
     elif experiment_name == NOT_MNIST:
         return (10,)
 
