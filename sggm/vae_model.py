@@ -448,7 +448,7 @@ class V3AE(BaseVAE):
         self.decoder_α = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
             nn.Softplus(),
-            ShiftLayer(1),
+            ShiftLayer(1.5),
         )
         self.decoder_β = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
@@ -530,6 +530,8 @@ class V3AE(BaseVAE):
 
     def sample_precision(self, alpha, beta):
         # batch_shape [n_mc_samples, BS] event_shape [input_size]
+        # beta = beta + self.eps
+        # alpha = alpha + self.eps
         q = tcd.Independent(tcd.Gamma(alpha, beta), 1)
         lbd = q.rsample()
         p = tcd.Independent(
@@ -543,8 +545,8 @@ class V3AE(BaseVAE):
 
     def sample_generative(self, mu, alpha, beta):
         # batch_shape [n_mc_samples, BS] event_shape [input_size]
-        beta = beta + self.eps
-        alpha = alpha + self.eps
+        # beta = beta + self.eps
+        # alpha = alpha + self.eps
         if self._student_t_decoder:
             p = tcd.Independent(
                 tcd.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
