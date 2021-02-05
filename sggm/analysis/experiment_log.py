@@ -32,6 +32,7 @@ class VersionLog:
         self.model = pl_module.load_from_checkpoint(
             checkpoint_name, activation=activation_function(experiment_name)
         )
+        self.model.freeze()
         # performance
         self.results = torch.load(f"{version_path}/results.pkl")
         # datasets

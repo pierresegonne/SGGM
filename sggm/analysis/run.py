@@ -105,7 +105,7 @@ def parse_experiment_args(args):
     if experiment_name in MNIST_L:
         args.others = (
             [item for item in args.others.split(",")]
-            if args.others is not None
+            if getattr(args, "others", None) is not None
             else None
         )
     args.names = [name for name in args.names.split(",")]
@@ -113,9 +113,6 @@ def parse_experiment_args(args):
 
 
 if __name__ == "__main__":
-    from pytorch_lightning import seed_everything
-
-    seed_everything(123)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(

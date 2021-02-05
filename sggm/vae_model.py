@@ -692,11 +692,12 @@ class V3AE(BaseVAE):
             # ELLK
             logs[TEST_ELLK] = expected_log_likelihood.mean()
             # MEAN
-            x_mean = batch_reshape(p_x_z.mean, self.input_dims)
+            # Only keep a single z sample
+            x_mean = batch_reshape(p_x_z.mean[0], self.input_dims)
             logs[TEST_MEAN_FIT_MAE] = F.l1_loss(x_mean, x)
             logs[TEST_MEAN_FIT_RMSE] = torch.sqrt(F.mse_loss(x_mean, x))
             # Variance
-            x_var = batch_reshape(p_x_z.variance, self.input_dims)
+            x_var = batch_reshape(p_x_z.variance[0], self.input_dims)
             empirical_var = (x_mean - x) ** 2
             logs[TEST_VARIANCE_FIT_MAE] = F.l1_loss(x_var, empirical_var)
             logs[TEST_VARIANCE_FIT_RMSE] = torch.sqrt(F.mse_loss(x_var, empirical_var))

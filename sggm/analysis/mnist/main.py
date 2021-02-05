@@ -110,11 +110,14 @@ def interpolation(tau, model, img1, img2):
 
 
 def plot_interpolation(model, img1, img2):
-    tau_range = np.flip(np.linspace(0, 1, 10))
+    n_img = 10
+    tau_range = np.flip(np.linspace(0, 1, n_img))
 
     fig = plt.figure()  # constrained_layout=True
     # fig.suptitle(title)
-    gs = fig.add_gridspec(2, 5, width_ratios=[1] * 5, height_ratios=[1, 1])
+    gs = fig.add_gridspec(
+        int(n_img / 5), 5, width_ratios=[1] * 5, height_ratios=[1] * int(n_img / 5)
+    )
     gs.update(hspace=0.5, wspace=0.001)
 
     for i, tau in enumerate(tau_range):
@@ -125,7 +128,7 @@ def plot_interpolation(model, img1, img2):
         interpolated_img = interpolation(float(tau), model, img1, img2)
 
         ax.imshow(interpolated_img[0][0], cmap="binary")
-        ax.set_title(r"$\tau$=" + str(round(tau, 1)))
+        ax.set_title(r"$\rho\,=\,$" + str(round(tau, 1)))
     return fig
 
 
@@ -146,12 +149,12 @@ def show_2d_latent_space(model, x, y):
     # Show specific regions
     show_specific_input = False
     if show_specific_input:
-        ctr = torch.Tensor([[-0.012, -0.063]])
-        lft = torch.Tensor([[-1.258, 0.416]])
+        ctr = torch.Tensor([[-0.264, -0.136]])
+        lft = torch.Tensor([[-1.045, 0.918]])
         rgt = torch.Tensor([[1.17, -0.07]])
-        idx = torch.norm(z - rgt, dim=1) < 0.5
+        idx = torch.norm(z - lft, dim=1) < 0.1
         z_display = z[idx]
-        fig, [ax1, ax2, ax3, ax4] = plt.subplots(1, 4)
+        fig, [ax1, ax2, ax3, ax4] = plt.subplots(1, 4, gridspec_kw={"wspace": 0})
         x_og = x[idx][0]
         with torch.no_grad():
             _, p_x = model(x_og)
@@ -163,7 +166,18 @@ def show_2d_latent_space(model, x, y):
         ax2.imshow(x_mu[0][0], cmap="binary", vmin=0, vmax=1)
         ax3.imshow(x_var[0][0], cmap="binary")
         ax4.imshow(x_hat[0][0], cmap="binary", vmin=0, vmax=1)
+
+        ax1 = disable_ticks(ax1)
+        ax2 = disable_ticks(ax2)
+        ax3 = disable_ticks(ax3)
+        ax4 = disable_ticks(ax4)
+
+        save_folder = "."
+        name = "left_2"
+        plt.savefig(f"{save_folder}/_{name}.png", dpi=300)
+        plt.savefig(f"{save_folder}/_{name}.svg")
         plt.show()
+        exit()
 
     fig, ax = plt.subplots()
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
@@ -179,12 +193,6 @@ def show_2d_latent_space(model, x, y):
             var = model.decoder_std(z_latent_mesh)
         if isinstance(model, V3AE):
             var = model.decoder_β(z_latent_mesh) / (model.decoder_α(z_latent_mesh) - 1)
-            # var_epistemic = model.decoder_α(z_latent_mesh) / (
-            #     model.decoder_α(z_latent_mesh) - 1
-            # )
-            # var_aleatoric = model.decoder_β(z_latent_mesh) / model.decoder_α(
-            #     z_latent_mesh
-            # )
     # Accumulated gradient over all output cf nicki and martin
     var = torch.mean(var, dim=1)
     # reshape to x_shape
@@ -200,9 +208,8 @@ def show_2d_latent_space(model, x, y):
     )
 
     # Show two digits separately
-    cla = ["Pullover", "Sandal"]
+    # cla = ["Pullover", "Sandal"]
     for i, d in enumerate(digits):
-        print(d)
         ax.plot(
             z[:, 0][y == d],
             z[:, 1][y == d],
@@ -211,7 +218,7 @@ def show_2d_latent_space(model, x, y):
             markerfacecolor=(*colour_digits[i], 0.95),
             markeredgewidth=1.2,
             markeredgecolor=(*colours_rgb["white"], 0.5),
-            label=cla[i],
+            label=f"Digit {d}",
         )
 
     # Pseudo-inputs
@@ -362,7 +369,10 @@ def plot(experiment_log, **kwargs):
             break
 
     if experiment_name in [MNIST_2D, FASHION_MNIST_2D]:
-        interpolation_digits = [digits[dm.digits[0]][0], digits[dm.digits[1]][0]]
+        # for in circle interpolation
+        interpolation_digits = [digits[dm.digits[0]][12], digits[dm.digits[1]][8]]
+        # for center interpolation
+        # interpolation_digits = [digits[dm.digits[0]][1], digits[dm.digits[1]][2]]
     else:
         interpolation_digits = [digits[1][0], digits[3][0]]
     fig_interpolation = plot_interpolation(best_model, *interpolation_digits)
