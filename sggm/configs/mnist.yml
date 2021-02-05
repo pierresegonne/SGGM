@@ -1,4 +1,4 @@
-- name: gaussian_vae_1e-3
+- name: gaussian_vae
   experiment_name: mnist
   model_name: vanilla_vae
   n_workers: 0

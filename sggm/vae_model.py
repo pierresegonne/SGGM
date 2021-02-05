@@ -44,6 +44,12 @@ from sggm.definitions import (
     TEST_ELLK,
     TEST_KL,
     TEST_LLK,
+    TEST_MEAN_FIT_MAE,
+    TEST_MEAN_FIT_RMSE,
+    TEST_VARIANCE_FIT_MAE,
+    TEST_VARIANCE_FIT_RMSE,
+    TEST_SAMPLE_FIT_MAE,
+    TEST_SAMPLE_FIT_RMSE,
 )
 from sggm.model_helper import log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple
@@ -171,6 +177,19 @@ class BaseVAE(pl.LightningModule):
         for name, weight in self.named_parameters():
             self.logger.experiment.add_histogram(name, weight, self.current_epoch)
 
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        loss, logs = self.step(batch, batch_idx, stage=TESTING)
+        self.log(TEST_LOSS, logs[TEST_LOSS], on_epoch=True)
+        self.log(TEST_ELBO, logs[TEST_ELBO], on_epoch=True)
+        self.log(TEST_ELLK, logs[TEST_ELLK], on_epoch=True)
+        self.log(TEST_MEAN_FIT_MAE, logs[TEST_MEAN_FIT_MAE], on_epoch=True)
+        self.log(TEST_MEAN_FIT_RMSE, logs[TEST_MEAN_FIT_RMSE], on_epoch=True)
+        self.log(TEST_VARIANCE_FIT_MAE, logs[TEST_VARIANCE_FIT_MAE], on_epoch=True)
+        self.log(TEST_VARIANCE_FIT_RMSE, logs[TEST_VARIANCE_FIT_RMSE], on_epoch=True)
+        self.log(TEST_SAMPLE_FIT_MAE, logs[TEST_SAMPLE_FIT_MAE], on_epoch=True)
+        self.log(TEST_SAMPLE_FIT_RMSE, logs[TEST_SAMPLE_FIT_RMSE], on_epoch=True)
         return loss
 
     @staticmethod
@@ -317,6 +336,28 @@ class VanillaVAE(BaseVAE):
             "kl": kl_divergence.mean(),
             "loss": loss,
         }
+
+        # Test logs
+        if stage == TESTING:
+            logs = {}
+            logs[TEST_LOSS] = loss
+            # ELBO
+            logs[TEST_ELBO] = -loss
+            # ELLK
+            logs[TEST_ELLK] = expected_log_likelihood.mean()
+            # MEAN
+            x_mean = batch_reshape(p_x_z.mean, self.input_dims)
+            logs[TEST_MEAN_FIT_MAE] = F.l1_loss(x_mean, x)
+            logs[TEST_MEAN_FIT_RMSE] = torch.sqrt(F.mse_loss(x_mean, x))
+            # Variance
+            x_var = batch_reshape(p_x_z.variance, self.input_dims)
+            empirical_var = (x_mean - x) ** 2
+            logs[TEST_VARIANCE_FIT_MAE] = F.l1_loss(x_var, empirical_var)
+            logs[TEST_VARIANCE_FIT_RMSE] = torch.sqrt(F.mse_loss(x_var, empirical_var))
+            # Samples
+            logs[TEST_SAMPLE_FIT_MAE] = F.l1_loss(x_hat, x)
+            logs[TEST_SAMPLE_FIT_RMSE] = torch.sqrt(F.mse_loss(x_hat, x))
+
         return loss, logs
 
     def training_step(self, batch, batch_idx, optimizer_idx):
@@ -336,15 +377,6 @@ class VanillaVAE(BaseVAE):
         self.log_dict(
             {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
         )
-        return loss
-
-    def test_step(self, batch, batch_idx):
-        loss, logs = self.step(batch, batch_idx, stage=TESTING)
-        self.log(TEST_LOSS, loss, on_epoch=True)
-        self.log(TEST_ELBO, -loss, on_epoch=True)
-        self.log(TEST_ELLK, logs["ellk"], on_epoch=True)
-        self.log(TEST_KL, logs["kl"], on_epoch=True)
-        self.log(TEST_LLK, logs["llk"], on_epoch=True)
         return loss
 
     def configure_optimizers(self):
@@ -620,22 +652,8 @@ class V3AE(BaseVAE):
                 p.requires_grad = False
 
     def step(self, batch, batch_idx, stage=None):
-        x, y = batch
+        x, _ = batch
         x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
-
-        mean_error = nn.functional.mse_loss(
-            batch_reshape(p_x_z.mean[0], self.input_dims), x
-        )
-        if stage == VALIDATION:
-            # if batch_idx == 0:
-            #     print("\n")
-            #     print(batch_idx)
-            #     print(self.val_dataloader)
-            #     print(x.shape)
-            #     print(x[0][0][14])  # OK same
-            #     print(q_z_x.mean[0])
-            #     print(mean_error)
-            pass
 
         expected_log_likelihood, ellk_lbd, kl_divergence_lbd = self.ellk(
             p_x_z, x, q_λ_z, p_λ
@@ -663,8 +681,29 @@ class V3AE(BaseVAE):
             "ellk_lbd": ellk_lbd.mean(),
             "kl_lbd": kl_divergence_lbd.mean(),
             "loss": loss,
-            "mean_error": mean_error,
         }
+
+        # Test logs
+        if stage == TESTING:
+            logs = {}
+            logs[TEST_LOSS] = loss
+            # ELBO
+            logs[TEST_ELBO] = -loss
+            # ELLK
+            logs[TEST_ELLK] = expected_log_likelihood.mean()
+            # MEAN
+            x_mean = batch_reshape(p_x_z.mean, self.input_dims)
+            logs[TEST_MEAN_FIT_MAE] = F.l1_loss(x_mean, x)
+            logs[TEST_MEAN_FIT_RMSE] = torch.sqrt(F.mse_loss(x_mean, x))
+            # Variance
+            x_var = batch_reshape(p_x_z.variance, self.input_dims)
+            empirical_var = (x_mean - x) ** 2
+            logs[TEST_VARIANCE_FIT_MAE] = F.l1_loss(x_var, empirical_var)
+            logs[TEST_VARIANCE_FIT_RMSE] = torch.sqrt(F.mse_loss(x_var, empirical_var))
+            # Samples
+            logs[TEST_SAMPLE_FIT_MAE] = F.l1_loss(x_hat, x)
+            logs[TEST_SAMPLE_FIT_RMSE] = torch.sqrt(F.mse_loss(x_hat, x))
+
         return loss, logs
 
     def training_step(self, batch, batch_idx, optimizer_idx):
@@ -684,15 +723,6 @@ class V3AE(BaseVAE):
         self.log_dict(
             {f"train_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
         )
-        return loss
-
-    def test_step(self, batch, batch_idx):
-        loss, logs = self.step(batch, batch_idx, stage=TESTING)
-        self.log(TEST_LOSS, loss, on_epoch=True)
-        self.log(TEST_ELBO, -loss, on_epoch=True)
-        self.log(TEST_ELLK, logs["ellk"], on_epoch=True)
-        self.log(TEST_KL, logs["kl_z"], on_epoch=True)
-        self.log(TEST_LLK, logs["llk"], on_epoch=True)
         return loss
 
     def configure_optimizers(self):

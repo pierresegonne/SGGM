@@ -1,4 +1,25 @@
-- name: inv_continues
+- name: test_metrics_vanilla_vae
+  experiment_name: mnist
+  model_name: vanilla_vae
+  n_workers: 0
+  # hparams
+  batch_size: 500
+  learning_rate: 1e-3
+  eps: 1e-3
+  # From prior_gamma_per_pixel - for MNIST only
+  # misc
+  n_trials: 1
+  seed: 3
+  max_epochs: 6
+  # pl trainer
+  early_stopping_patience: 50
+  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 10 # How often does the log writes to disc
+  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+
+- name: test_metrics_v3ae
   experiment_name: mnist
   model_name: v3ae
   n_workers: 0
@@ -12,15 +33,16 @@
   # ood
   tau_ood: 0.5
   ood_z_generation_method: kde
-  kde_bandwidth_multiplier: 27
+  kde_bandwidth_multiplier: 9
   # misc
   n_mc_samples: 1
   n_trials: 1
   seed: 3
-  max_epochs: 4
+  max_epochs: 6
   # pl trainer
-  early_stopping_patience: 50
-  log_every_n_steps: 5 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 5 # How often does the log writes to disc
+  early_stopping_patience: 3
+  log_every_n_steps: 3 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
+
