@@ -445,7 +445,7 @@ class VariationalRegressor(pl.LightningModule):
         self, ellk: torch.Tensor, kl: torch.Tensor, train: bool = True
     ) -> torch.Tensor:
         β = self.β_elbo if train else 0.5
-        return torch.mean((1 - β) * ellk - β * kl)
+        return 2 * torch.mean((1 - β) * ellk - β * kl)
 
     def training_step(self, batch, batch_idx):
 
