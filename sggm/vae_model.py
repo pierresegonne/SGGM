@@ -147,7 +147,7 @@ class BaseVAE(pl.LightningModule):
 
     def elbo(self, ellk, kl, train: bool = False):
         β = self.β_elbo if train else 1 / 2
-        return (1 - β) * ellk - β * kl
+        return 2 * ((1 - β) * ellk - β * kl)
 
     def sample_latent(
         self, mu: torch.Tensor, std: torch.Tensor
@@ -485,6 +485,10 @@ class V3AE(BaseVAE):
         β_z = torch.reshape(β_z, [-1, bs, self.input_size])
         # [self.n_mc_samples * BS, *self.latent_dims] -> [self.n_mc_samples, BS, *self.latent_dims]
         z = torch.reshape(z, [-1, bs, *self.latent_dims])
+
+        # Prevent beta from collapsing on 0
+        β_z = β_z + self.eps
+
         return z, μ_z, α_z, β_z
 
     def forward(self, x):
@@ -530,8 +534,8 @@ class V3AE(BaseVAE):
 
     def sample_precision(self, alpha, beta):
         # batch_shape [n_mc_samples, BS] event_shape [input_size]
-        # beta = beta + self.eps
         # alpha = alpha + self.eps
+        # beta = beta + self.eps
         q = tcd.Independent(tcd.Gamma(alpha, beta), 1)
         lbd = q.rsample()
         p = tcd.Independent(
@@ -674,7 +678,9 @@ class V3AE(BaseVAE):
             & (self._student_t_decoder)
         ):
             # NOTE: beware, for understandability, tau is opposite.
-            loss = (1 - self.τ_ood) * loss + self.τ_ood * self.ood_kl(p_λ, q_z_x).mean()
+            loss = 2 * (
+                (1 - self.τ_ood) * loss + self.τ_ood * self.ood_kl(p_λ, q_z_x).mean()
+            )
 
         logs = {
             "llk": expected_log_likelihood.sum(),
