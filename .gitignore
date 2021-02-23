@@ -130,6 +130,7 @@ lightning_logs/
 # custom
 sggm/_local/
 sggm/_tmp/
+sggm/_defence_plots
 sggm/_paper_plots
 sggm/hpc_lightning_logs/
 sggm/job_logs/
