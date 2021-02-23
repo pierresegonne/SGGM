@@ -19,8 +19,9 @@ Conference
 </div>
  
 ## Description   
-It's in the title
 
+
+WIP
 ## How to run   
 First, install dependencies   
 ```bash
@@ -44,15 +45,17 @@ python lit_classifier_main.py
 ## Imports
 This project is setup as a package which means you can now easily import any file into any other file like so:
 ```python
-from project.datasets.mnist import mnist
-from project.lit_classifier_main import LitClassifier
+from sggm.data.toy import ToyDataModule
+from sggm.regression_model import VariationalRegressor
 from pytorch_lightning import Trainer
 
 # model
-model = LitClassifier()
+model = VariationalRegressor(input_dim=1, hidden_dim=50, activation="sigmoid")
 
 # data
-train, val, test = mnist()
+dm = ToyDataModule(batch_size=32, num_workers=0)
+dm.setup()
+train, val, test = dm.train_dataloader(), dm.val_dataloader(), dm.test_dataloader()
 
 # train
 trainer = Trainer()
@@ -63,6 +66,10 @@ trainer.test(test_dataloaders=test)
 ```
 
 ### Citation   
+
+
+Paper WIP
+<!-- 
 ```
 @article{YourName,
   title={Your Title},
@@ -70,4 +77,4 @@ trainer.test(test_dataloaders=test)
   journal={Location},
   year={Year}
 }
-```   
+```    -->
