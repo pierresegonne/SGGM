@@ -55,7 +55,7 @@ def plot_comparison(n_display, x_og, p_x, input_dims):
 
 
 def get_interpolation_digits(
-    dm, experiment_name, target_digits: [1, 3], target_digits_idx: [0, 0]
+    dm, experiment_name, target_digits: [0, 1], target_digits_idx: [0, 0]
 ):
     """
     Organise class elements per class value and samples elements from it

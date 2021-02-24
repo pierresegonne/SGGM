@@ -27,7 +27,7 @@ from sggm.definitions import (
 def save_and_show(fig, name):
     fig.savefig(f"{name}.png", dpi=300)
     fig.savefig(f"{name}.svg")
-    fig.show()
+    plt.show()
 
 
 def plot(experiment_log, seed=False, **kwargs):
@@ -82,13 +82,12 @@ def plot(experiment_log, seed=False, **kwargs):
 
     # Interpolation
     interpolation_digits = get_interpolation_digits(
-        dm, experiment_name, target_digits=[0, 5], target_digits_idx=[3, 3]
+        dm, experiment_name, target_digits=[2, 5], target_digits_idx=[3, 3]
     )
     save_and_show(
         plot_interpolation(best_model, *interpolation_digits),
         f"{save_folder}/_interpolation",
     )
-    exit()
 
     # 2D Latent space
     if experiment_name in [MNIST_2D, FASHION_MNIST_2D]:

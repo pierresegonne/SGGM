@@ -106,7 +106,7 @@ def parse_experiment_args(args):
         args.others = (
             [item for item in args.others.split(",")]
             if getattr(args, "others", None) is not None
-            else None
+            else []
         )
     args.names = [name for name in args.names.split(",")]
     return args
