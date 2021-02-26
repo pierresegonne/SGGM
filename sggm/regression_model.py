@@ -32,10 +32,12 @@ from sggm.definitions import (
     GAUSSIAN_NOISE,
     UNIFORM,
     V_PARAM,
+    MEAN_SHIFT,
 )
 from sggm.definitions import (
     ACTIVATION_FUNCTIONS,
     F_ELU,
+    F_LEAKY_RELU,
     F_RELU,
     F_SIGMOID,
 )
@@ -57,7 +59,10 @@ from sggm.definitions import (
     NOISE_KL,
 )
 from sggm.model_helper import log_2_pi, ShiftLayer
-from sggm.regression_model_helper import generate_noise_for_model_test
+from sggm.regression_model_helper import (
+    generate_noise_for_model_test,
+    mean_shift_pig_dl,
+)
 
 # ----------
 # Model definitions
@@ -79,7 +84,9 @@ def BaseMLP(input_dim, hidden_dim, activation):
         activation in ACTIVATION_FUNCTIONS
     ), f"activation_function={activation} is not in {ACTIVATION_FUNCTIONS}"
     if activation == F_ELU:
-        f = nn.ELU()
+        f = nn.Tanh()
+    if activation == F_LEAKY_RELU:
+        f = nn.LeakyReLU()
     elif activation == F_RELU:
         f = nn.ReLU()
     elif activation == F_SIGMOID:
@@ -309,6 +316,18 @@ class VariationalRegressor(pl.LightningModule):
         gmm = tcd.MixtureSameFamily(mix, comp)
         return gmm
 
+    def setup_pig(self, dm):
+        if self.ood_x_generation_method == MEAN_SHIFT:
+            # Assigns a pig datamodule
+            self.pig_dl = mean_shift_pig_dl(
+                dm,
+                dm.batch_size,
+                N_hat=dm.batch_size * 4,
+                max_iters=35,
+                t_box=0.3,
+                sigma=0.1,
+            )
+
     def ood_x(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         # Skip generation if we're not going to see it used
         if self.τ_ood > 0:
@@ -341,8 +360,8 @@ class VariationalRegressor(pl.LightningModule):
 
             elif self.ood_x_generation_method == UNIFORM:
                 N = x.shape[0]
-                x_right = torch.FloatTensor(int(N / 2), 1).uniform_(100, 102)
-                x_left = torch.FloatTensor(int(N / 2), 1).uniform_(-102, -100)
+                x_right = torch.FloatTensor(int(N / 2), 1).uniform_(7, 16)
+                x_left = torch.FloatTensor(int(N / 2), 1).uniform_(-6, 3)
                 return torch.cat((x_right, x_left), dim=0)
 
             elif self.ood_x_generation_method == BRUTE_FORCE:
@@ -359,6 +378,13 @@ class VariationalRegressor(pl.LightningModule):
                 _, idx = torch.topk(objective, 1000, dim=0, sorted=False)
                 x_ood = x_ood_proposal[idx][::2]
                 return torch.reshape(x_ood, (500, 1))
+
+            elif self.ood_x_generation_method == MEAN_SHIFT:
+                # For now, hack to make it work without working for analysis
+                # Ok get the same number of pi as training points
+                if getattr(self, "pig_dl", None):
+                    x_ood = next(iter(self.pig_dl))[0]
+                    return x_ood
 
         return torch.empty(0, 0)
 
@@ -487,7 +513,6 @@ class VariationalRegressor(pl.LightningModule):
 
             if (torch.numel(x_out) > 0) and (x_out.shape[1] == 1):
                 self.logger.experiment.add_histogram("x_out", x_out, self.current_epoch)
-
         self.log(TRAIN_LOSS, loss, on_epoch=True)
 
         return loss

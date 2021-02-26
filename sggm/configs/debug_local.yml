@@ -1,7 +1,7 @@
 
 # Ours
-- name: test_tau_ood
-  experiment_name: toy
+- name: test_mean_shift
+  experiment_name: uci_wine_white
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -9,11 +9,11 @@
   tau_ood: 0.5
   prior_alpha: 1.025
   prior_beta: 0.5
-  ood_x_generation_method: brute_force
+  ood_x_generation_method: mean_shift
   seed: 2
   # pl trainer
   early_stopping_patience: 250
-  n_trials: 20
+  n_trials: 1
   max_epochs: -1
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc

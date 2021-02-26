@@ -10,6 +10,7 @@ from sggm.definitions import (
     TEST_LOSS,
     VANILLA_VAE,
     VV_VAE,
+    PIG_DL,
 )
 from sggm.experiment import activation_function
 from sggm.regression_model import VariationalRegressor
@@ -55,6 +56,8 @@ class VersionLog:
             if os.path.exists(f"{version_path}/misc.pkl")
             else None
         )
+        if PIG_DL in self.misc:
+            self.model.pig_dl = self.misc[PIG_DL]
 
 
 class ExperimentLog:

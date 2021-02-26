@@ -448,7 +448,7 @@ class V3AE(BaseVAE):
         self.decoder_α = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
             nn.Softplus(),
-            ShiftLayer(1.5),
+            ShiftLayer(1.0),
         )
         self.decoder_β = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
@@ -492,10 +492,12 @@ class V3AE(BaseVAE):
         return z, μ_z, α_z, β_z
 
     def forward(self, x):
+        # Encoding
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
         std_x = self.encoder_std(x)
         z, _, _ = self.sample_latent(μ_x, std_x)
+        # Decoding
         _, μ_z, α_z, β_z = self.parametrise_z(z)
         x_hat, p_x = self.sample_generative(μ_z, α_z, β_z)
         x_hat = batch_reshape(x_hat, self.input_dims)

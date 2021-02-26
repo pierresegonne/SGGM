@@ -66,6 +66,7 @@ from sggm.definitions import (
     MODEL_NAME,
     OOD_X_GENERATION_AVAILABLE_METHODS,
     OOD_Z_GENERATION_AVAILABLE_METHODS,
+    PIG_DL,
 )
 from sggm.definitions import (
     SEED,
@@ -454,6 +455,8 @@ def cli_main():
             # model
             # ------------
             model = experiment.model
+            if isinstance(model, VariationalRegressor):
+                model.setup_pig(datamodule)
 
             # ------------
             # training
@@ -487,6 +490,8 @@ def cli_main():
                 misc[SHIFTING_PROPORTION_TOTAL] = experiment.shifting_proportion_total
             if isinstance(experiment.digits, list):
                 misc[DIGITS] = experiment.digits
+            if getattr(model, PIG_DL, None):
+                misc[PIG_DL] = model.pig_dl
             torch.save(misc, f"{trainer.logger.log_dir}/misc.pkl")
 
 

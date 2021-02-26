@@ -24,6 +24,7 @@ ADVERSARIAL = "adversarial"
 ADVERSARIAL_KL_LK = "adversarial_kl-lk"
 BRUTE_FORCE = "brute_force"
 UNIFORM = "uniform"
+MEAN_SHIFT = "mean_shift"
 
 OOD_X_GENERATION_AVAILABLE_METHODS = [
     GAUSSIAN_NOISE,
@@ -32,6 +33,7 @@ OOD_X_GENERATION_AVAILABLE_METHODS = [
     ADVERSARIAL_KL_LK,
     BRUTE_FORCE,
     UNIFORM,
+    MEAN_SHIFT,
 ]
 
 OOD_Z_GENERATION_METHOD = "ood_z_generation_method"
@@ -44,6 +46,8 @@ OOD_Z_GENERATION_AVAILABLE_METHODS = [
     KDE,
     PRIOR,
 ]
+
+PIG_DL = "pig_dl"
 
 DIGITS = "digits"
 
