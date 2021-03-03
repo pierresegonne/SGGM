@@ -384,7 +384,7 @@ class VariationalRegressor(pl.LightningModule):
                 # Ok get the same number of pi as training points
                 if getattr(self, "pig_dl", None):
                     x_ood = next(iter(self.pig_dl))[0]
-                    return x_ood
+                    return x_ood.type_as(x)
 
         return torch.empty(0, 0)
 
