@@ -36,13 +36,13 @@ def sqr_dist(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
 
 
 def silverman_bandwidth(x: torch.Tensor) -> torch.Tensor:
-    x = x.numpy()
+    x = x.cpu().numpy()
     sigma = x.std(axis=0)
     iqr = np.subtract(*np.percentile(x, [75, 25], axis=0))
     n = x.shape[0]
     return torch.Tensor(
         [(0.9 * np.minimum(sigma, iqr / 1.34) * (n ** (-1 / 5))).mean()]
-    )
+    ).type_as(x)
 
 
 def mean_shift_pig_dl(
