@@ -323,9 +323,7 @@ class VariationalRegressor(pl.LightningModule):
                 dm,
                 dm.batch_size,
                 N_hat=dm.batch_size * 4,
-                max_iters=35,
-                t_box=0.3,
-                sigma=0.1,
+                max_iters=100,
             )
 
     def ood_x(self, x: torch.Tensor, **kwargs) -> torch.Tensor:

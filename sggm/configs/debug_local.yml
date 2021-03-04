@@ -1,7 +1,7 @@
 
 # Ours
 - name: test_mean_shift
-  experiment_name: uci_wine_white
+  experiment_name: toy
   # hparams
   batch_size: 1024
   hidden_dim: 50

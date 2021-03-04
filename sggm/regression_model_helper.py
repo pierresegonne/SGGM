@@ -35,11 +35,14 @@ def sqr_dist(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     return d2.clamp(min=0.0)  # NxM
 
 
-def sigmoid(x, mu=0, sigma=1):
-    if isinstance(x, np.ndarray):
-        x = torch.Tensor(x)
-    x = mu + (x * sigma)
-    return 1 / (1 + torch.exp(-x))
+def silverman_bandwidth(x: torch.Tensor) -> torch.Tensor:
+    x = x.numpy()
+    sigma = x.std(axis=0)
+    iqr = np.subtract(*np.percentile(x, [75, 25], axis=0))
+    n = x.shape[0]
+    return torch.Tensor(
+        [(0.9 * np.minimum(sigma, iqr / 1.34) * (n ** (-1 / 5))).mean()]
+    )
 
 
 def mean_shift_pig_dl(
@@ -47,16 +50,22 @@ def mean_shift_pig_dl(
     batch_size: int,
     N_hat: int = 100,
     max_iters: int = 20,
-    t_box: float = 0.75,
-    sigma=0.1,
+    h: float = None,
+    sigma: float = None,
+    kernel: str = "tophat",
+    τ: float = 1e-5,
 ) -> DataLoader:
-    t_box = torch.Tensor([t_box])
-
+    # Unpack x
     x = next(iter(dm.train_dataloader()))[0]
     for idx, batch in enumerate(iter(dm.train_dataloader())):
         if idx == 0:
             continue
         x = torch.cat((x, batch[0]))
+
+    if h is None:
+        h = silverman_bandwidth(x)
+    if sigma is None:
+        sigma = torch.std(x)
 
     # With replacement to allow for N_hat > N
     idx = torch.randint(x.shape[0], (N_hat,))
@@ -71,37 +80,40 @@ def mean_shift_pig_dl(
     for _ in range(max_iters):
         # [N, n_pig]
         dst = sqr_dist(x, x_hat)
-        dst = torch.where(
-            dst <= -2 * torch.log(t_box), torch.ones_like(dst), torch.zeros_like(dst)
-        )
+        if kernel == "tophat":
+            kde = torch.where(dst <= h, torch.ones_like(dst), torch.zeros_like(dst))
+        else:
+            raise NotImplementedError(f"Kernel {kernel} invalid")
         # Replace nan by 0
-        dst[dst != dst] = 0
+        kde[kde != kde] = 0
 
-        # [n_pig, D]
-        # Centroid for all estimates
-        sum_dst = torch.sum(dst, dim=0).reshape((-1, 1))
         # Threshold for stopping updates
-        out_dst = sum_dst < 1e-5
-        sum_dst = torch.where(out_dst, torch.ones_like(sum_dst), sum_dst)
+        out_kde = (torch.max(kde, dim=0)[0] < τ)[:, None]
 
-        mu = (torch.transpose(dst, 0, 1) @ x) / sum_dst
-        delta = (mu - x_hat) * sigmoid(sum_dst, mu=-5, sigma=1 / 25)
+        # [n_pig, 1]
+        sum_kde = torch.sum(kde, dim=0).reshape((-1, 1))
+        sum_kde = torch.where(out_kde, torch.ones_like(sum_kde), sum_kde)
 
-        x_hat = torch.where(out_dst, x_hat, x_hat - delta)
+        # Centroid for all estimates
+        mu = (torch.transpose(kde, 0, 1) @ x) / sum_kde
+        # Step size
+        delta = mu - x_hat
 
-    # import matplotlib.pyplot as plt
-    # from sklearn.neighbors import KernelDensity
+        x_hat = torch.where(out_kde, x_hat, x_hat - delta)
 
-    # kde = KernelDensity(kernel="gaussian", bandwidth=0.2).fit(x_hat)
-    # x_plot = np.linspace(-10, 20, 1000).reshape(-1, 1)
-    # density = np.exp(kde.score_samples(x_plot))
+    import matplotlib.pyplot as plt
+    from sklearn.neighbors import KernelDensity
 
-    # fig, ax = plt.subplots()
-    # ax.plot(x, torch.zeros_like(x), "o")
-    # ax.plot(x_hat, torch.zeros_like(x_hat), "o")
-    # ax.plot(x_plot, density, color="black")
+    kde = KernelDensity(kernel="gaussian", bandwidth=0.2).fit(x_hat)
+    x_plot = np.linspace(-10, 20, 1000).reshape(-1, 1)
+    density = np.exp(kde.score_samples(x_plot))
 
-    # plt.show()
+    fig, ax = plt.subplots()
+    ax.plot(x, torch.zeros_like(x), "o")
+    ax.plot(x_hat, torch.zeros_like(x_hat), "o")
+    ax.plot(x_plot, density, color="black")
+
+    plt.show()
 
     dl = DataLoader(TensorDataset(x_hat), batch_size=batch_size, shuffle=True)
 
