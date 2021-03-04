@@ -36,10 +36,10 @@ def sqr_dist(x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
 
 
 def silverman_bandwidth(x: torch.Tensor) -> torch.Tensor:
-    x = x.cpu().numpy()
-    sigma = x.std(axis=0)
-    iqr = np.subtract(*np.percentile(x, [75, 25], axis=0))
-    n = x.shape[0]
+    _x = x.cpu().numpy()
+    sigma = _x.std(axis=0)
+    iqr = np.subtract(*np.percentile(_x, [75, 25], axis=0))
+    n = _x.shape[0]
     return torch.Tensor(
         [(0.9 * np.minimum(sigma, iqr / 1.34) * (n ** (-1 / 5))).mean()]
     ).type_as(x)
@@ -101,19 +101,19 @@ def mean_shift_pig_dl(
 
         x_hat = torch.where(out_kde, x_hat, x_hat - delta)
 
-    import matplotlib.pyplot as plt
-    from sklearn.neighbors import KernelDensity
+    # import matplotlib.pyplot as plt
+    # from sklearn.neighbors import KernelDensity
 
-    kde = KernelDensity(kernel="gaussian", bandwidth=0.2).fit(x_hat)
-    x_plot = np.linspace(-10, 20, 1000).reshape(-1, 1)
-    density = np.exp(kde.score_samples(x_plot))
+    # kde = KernelDensity(kernel="gaussian", bandwidth=0.2).fit(x_hat)
+    # x_plot = np.linspace(-10, 20, 1000).reshape(-1, 1)
+    # density = np.exp(kde.score_samples(x_plot))
 
-    fig, ax = plt.subplots()
-    ax.plot(x, torch.zeros_like(x), "o")
-    ax.plot(x_hat, torch.zeros_like(x_hat), "o")
-    ax.plot(x_plot, density, color="black")
+    # fig, ax = plt.subplots()
+    # ax.plot(x, torch.zeros_like(x), "o")
+    # ax.plot(x_hat, torch.zeros_like(x_hat), "o")
+    # ax.plot(x_plot, density, color="black")
 
-    plt.show()
+    # plt.show()
 
     dl = DataLoader(TensorDataset(x_hat), batch_size=batch_size, shuffle=True)
 
