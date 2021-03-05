@@ -219,6 +219,8 @@ class Experiment:
                         y_mean=self.datamodule.y_mean,
                         y_std=self.datamodule.y_std,
                         split_training_mode=self.split_training_mode,
+                        ms_bw_factor=self.ms_bw_factor,
+                        ms_kde_bw_factor=self.ms_kde_bw_factor,
                     )
                 else:
                     raise NotImplementedError(

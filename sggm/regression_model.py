@@ -156,6 +156,8 @@ class VariationalRegressor(pl.LightningModule):
         split_training_mode: str = variational_regressor_parameters[
             SPLIT_TRAINING_MODE
         ].default,
+        ms_bw_factor: float = 1.0,
+        ms_kde_bw_factor: float = 1.0,
     ):
         super(VariationalRegressor, self).__init__()
 
@@ -181,6 +183,8 @@ class VariationalRegressor(pl.LightningModule):
             self.register_parameter("ood_generator_v", v_ini)
         else:
             self.ood_generator_v = None
+        self.ms_bw_factor = ms_bw_factor
+        self.ms_kde_bw_factor = ms_kde_bw_factor
 
         # ---------
         # HParameters
@@ -324,6 +328,9 @@ class VariationalRegressor(pl.LightningModule):
                 dm.batch_size,
                 N_hat=dm.batch_size * 4,
                 max_iters=100,
+                # ad hoc factors
+                h_factor=self.ms_bw_factor,
+                sigma_factor=self.ms_kde_bw_factor,
             )
 
     def ood_x(self, x: torch.Tensor, **kwargs) -> torch.Tensor:

@@ -51,7 +51,9 @@ def mean_shift_pig_dl(
     N_hat: int = 100,
     max_iters: int = 20,
     h: float = None,
+    h_factor: float = 1,
     sigma: float = None,
+    sigma_factor: float = 1,
     kernel: str = "tophat",
     τ: float = 1e-5,
 ) -> DataLoader:
@@ -63,9 +65,10 @@ def mean_shift_pig_dl(
         x = torch.cat((x, batch[0]))
 
     if h is None:
-        h = silverman_bandwidth(x)
+        h = silverman_bandwidth(x) * h_factor
     if sigma is None:
-        sigma = torch.std(x)
+        # Note multiplier is arbitrary
+        sigma = torch.std(x) * sigma_factor
 
     # With replacement to allow for N_hat > N
     idx = torch.randint(x.shape[0], (N_hat,))
@@ -114,6 +117,7 @@ def mean_shift_pig_dl(
     # ax.plot(x_plot, density, color="black")
 
     # plt.show()
+    # exit()
 
     dl = DataLoader(TensorDataset(x_hat), batch_size=batch_size, shuffle=True)
 

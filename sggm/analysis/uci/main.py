@@ -133,7 +133,7 @@ def plot(experiment_log, methods):
         # Test ood
         # Fallback on GN generation if no x ood
         best_model.τ_ood = 0.5
-        best_model.ood_x_generation_method = GAUSSIAN_NOISE
+        # best_model.ood_x_generation_method = GAUSSIAN_NOISE
         with torch.set_grad_enabled(True):
             x_test.requires_grad = True
             μ_x, α_x, β_x = best_model(x_test)

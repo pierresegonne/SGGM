@@ -35,6 +35,9 @@ OOD_X_GENERATION_AVAILABLE_METHODS = [
     UNIFORM,
     MEAN_SHIFT,
 ]
+# Options for OOD_X_GENERATION_AVAILABLE_METHODS
+MS_BW_FACTOR = "ms_bw_factor"
+MS_KDE_BW_FACTOR = "ms_kde_bw_factor"
 
 OOD_Z_GENERATION_METHOD = "ood_z_generation_method"
 # Options for OOD_Z_GENERATION_METHOD
@@ -175,6 +178,8 @@ variational_regressor_parameters = {
     PRIOR_β: Param(PRIOR_β, 1.0, float),
     #
     SPLIT_TRAINING_MODE: Param(SPLIT_TRAINING_MODE, None, str),
+    MS_BW_FACTOR: Param(MS_BW_FACTOR, 1.0, float),
+    MS_KDE_BW_FACTOR: Param(MS_KDE_BW_FACTOR, 1.0, float),
 }
 regression_models = [VARIATIONAL_REGRESSOR]
 
