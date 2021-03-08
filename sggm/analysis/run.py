@@ -9,6 +9,7 @@ from sggm.analysis.toy import toy_plot
 from sggm.analysis.toy_2d import toy_2d_plot
 from sggm.analysis.uci import uci_plot
 
+from sggm.analysis.utils import str2bool
 from sggm.definitions import (
     experiment_names,
     SANITY_CHECK,
@@ -126,6 +127,15 @@ if __name__ == "__main__":
     )
     parser.add_argument("--model_name", type=str, default=None)
     parser.add_argument("--save_dir", type=str, default="../lightning_logs")
+    parser.add_argument(
+        "--show_plot",
+        type=str2bool,
+        required=False,
+        const=True,
+        nargs="?",
+        default=True,
+        help="Whether to display the plots while running the analysis",
+    )
     args, unknown_args = parser.parse_known_args()
 
     # Reparse the arguments once the extra arguments have been obtained

@@ -44,7 +44,7 @@ from sggm.definitions import (
 from sggm.styles_ import colours, colours_rgb, random_rgb_colour
 
 
-def plot(experiment_log, methods):
+def plot(experiment_log, methods, show_plot=True):
     with no_grad():
         best_model = experiment_log.best_version.model
 
@@ -282,4 +282,6 @@ def plot(experiment_log, methods):
         plt.tight_layout()
         plt.savefig(f"{save_folder}/_.png")
 
-        plt.show()
+        if show_plot:
+            plt.show()
+        plt.close()
