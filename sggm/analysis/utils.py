@@ -1,5 +1,6 @@
 import argparse
 
+
 # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
 def str2bool(v):
     if isinstance(v, bool):
@@ -10,6 +11,3 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError("Boolean value expected.")
-
-
-none_to_str = lambda x: x if x is not None else ""
