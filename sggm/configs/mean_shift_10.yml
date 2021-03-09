@@ -1,4 +1,4 @@
-# - name: mean_shift_1
+# - name: mean_shift_10
 #   experiment_name: toy
 #   # hparams
 #   batch_size: 1024
@@ -20,7 +20,7 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: mean_shift_1
+- name: mean_shift_10
   experiment_name: uci_ccpp
   # hparams
   batch_size: 1024
@@ -43,7 +43,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: mean_shift_1
+- name: mean_shift_10
   experiment_name: uci_concrete
   # hparams
   batch_size: 1024
@@ -66,7 +66,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: mean_shift_1
+- name: mean_shift_10
   experiment_name: uci_superconduct
   # hparams
   batch_size: 1024
@@ -89,7 +89,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: mean_shift_1
+- name: mean_shift_10
   experiment_name: uci_wine_red
   # hparams
   batch_size: 1024
@@ -112,7 +112,7 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-- name: mean_shift_1
+- name: mean_shift_10
   experiment_name: uci_wine_white
   # hparams
   batch_size: 1024
@@ -136,7 +136,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 
-- name: mean_shift_1
+- name: mean_shift_10
   experiment_name: uci_yacht
   # hparams
   batch_size: 1024
