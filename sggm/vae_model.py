@@ -53,7 +53,7 @@ from sggm.definitions import (
 )
 from sggm.model_helper import log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple
-from sggm.vae_model_helper import batch_flatten, batch_reshape, reduce_int_list
+from sggm.vae_model_helper import batch_flatten, batch_reshape, check_ood_z_generation_method, reduce_int_list
 
 # stages for steps
 TRAINING = "training"
@@ -425,7 +425,7 @@ class V3AE(BaseVAE):
         self.β_elbo = 1 / 2
 
         self.τ_ood = τ_ood
-        self.ood_z_generation_method = ood_z_generation_method
+        self.ood_z_generation_method = check_ood_z_generation_method(ood_z_generation_method)
 
         self.kde_bandwidth_multiplier = kde_bandwidth_multiplier
 

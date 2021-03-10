@@ -4,6 +4,42 @@ import pytorch_lightning as pl
 
 from torch.utils.data import DataLoader, TensorDataset
 
+from sggm.definitions import OOD_X_GENERATION_AVAILABLE_METHODS
+
+
+def check_ood_x_generation_method(method: str) -> str:
+    if method is None:
+        return method
+    assert (
+        method in OOD_X_GENERATION_AVAILABLE_METHODS
+    ), f"""Method for x ood generation '{method}' is invalid.
+    Must either be None or in {OOD_X_GENERATION_AVAILABLE_METHODS}"""
+    return method
+
+
+def check_mixture_ratio(r: float) -> float:
+    assert (r >= 0) & (r <= 1), "Invalid ratio"
+    return r
+
+
+def normalise_grad(grad: torch.Tensor) -> torch.Tensor:
+    """Normalise and handle NaNs caused by norm division.
+
+    Args:
+        grad (torch.Tensor): Gradient to normalise
+
+    Returns:
+        torch.Tensor: Normalised gradient
+    """
+    normed_grad = grad / torch.linalg.norm(grad, dim=1)[:, None]
+    if torch.isnan(normed_grad).any():
+        normed_grad = torch.where(
+            torch.isnan(normed_grad),
+            torch.zeros_like(normed_grad),
+            normed_grad,
+        )
+    return normed_grad
+
 
 def generate_noise_for_model_test(x: torch.Tensor) -> torch.Tensor:
     """Generates noisy inputs to test the model out of distribution

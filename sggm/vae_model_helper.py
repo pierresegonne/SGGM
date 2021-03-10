@@ -6,6 +6,7 @@ from numbers import Number
 from torch.distributions import Distribution, constraints
 from torch.distributions.utils import broadcast_all
 
+from sggm.definitions import OOD_Z_GENERATION_AVAILABLE_METHODS
 from sggm.types_ import List
 
 
@@ -22,6 +23,14 @@ def batch_reshape(x: torch.Tensor, shape: List[int]) -> torch.Tensor:
 def reduce_int_list(list: List[int]) -> int:
     return reduce(lambda x, y: x * y, list)
 
+def check_ood_z_generation_method(method: str) -> str:
+    if method is None:
+        return method
+    assert (
+        method in OOD_Z_GENERATION_AVAILABLE_METHODS
+    ), f"""Method for z ood generation '{method}' is invalid.
+    Must either be None or in {OOD_Z_GENERATION_AVAILABLE_METHODS}"""
+    return method
 
 CONST_SQRT_2 = math.sqrt(2)
 CONST_INV_SQRT_2PI = 1 / math.sqrt(2 * math.pi)

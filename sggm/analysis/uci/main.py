@@ -133,18 +133,18 @@ def plot(experiment_log, methods, show_plot=True):
         # Test ood
         # Fallback on GN generation if no x ood
         best_model.τ_ood = 0.5
-        # best_model.ood_x_generation_method = GAUSSIAN_NOISE
+        best_model.ood_x_generation_method = GAUSSIAN_NOISE
         with torch.set_grad_enabled(True):
             x_test.requires_grad = True
             μ_x, α_x, β_x = best_model(x_test)
             kl_divergence = best_model.kl(
                 α_x, β_x, best_model.prior_α, best_model.prior_β
             )
-            density_lk = best_model.gmm_density(x_test).log_prob(x_test).exp()
+            # density_lk = best_model.gmm_density(x_test).log_prob(x_test).exp()
             x_out = best_model.ood_x(
                 x_test,
                 kl=kl_divergence,
-                density_lk=density_lk,
+                # density_lk=density_lk,
             )
         x_test = x_test.detach()
         x_out = x_out.detach()
@@ -263,6 +263,7 @@ def plot(experiment_log, methods, show_plot=True):
                 )
 
             print(f"Average test uncertainty= {std_test.mean():.3f}")
+            print(f"Average OOD uncertainty= {std_out.mean():.3f}")
 
         mean_ax.set_ylabel(r"$y$")
         y_max, _ = torch.max(y_train, dim=0)

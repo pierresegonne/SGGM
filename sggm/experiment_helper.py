@@ -8,6 +8,14 @@ from torch import nn
 from typing import Any
 
 
+def clean_dict(dic: dict) -> dict:
+    clean_dic = {}
+    for k, v in dic.items():
+        if type(v) in [str, int, bool, float, object, None, list]:
+            clean_dic[k] = v
+    return clean_dic
+
+
 def split_mean_uncertainty_training(
     experiment: Any,
     model: pl.LightningModule,

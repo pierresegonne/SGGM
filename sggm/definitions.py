@@ -19,18 +19,14 @@ PRIOR_β = "prior_beta"
 OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 # Options for OOD_X_GENERATION_METHOD
 GAUSSIAN_NOISE = "gaussian_noise"
-V_PARAM = "v_param"
 ADVERSARIAL = "adversarial"
-ADVERSARIAL_KL_LK = "adversarial_kl-lk"
 BRUTE_FORCE = "brute_force"
 UNIFORM = "uniform"
 MEAN_SHIFT = "mean_shift"
 
 OOD_X_GENERATION_AVAILABLE_METHODS = [
     GAUSSIAN_NOISE,
-    V_PARAM,
     ADVERSARIAL,
-    ADVERSARIAL_KL_LK,
     BRUTE_FORCE,
     UNIFORM,
     MEAN_SHIFT,
@@ -146,10 +142,6 @@ parameters = {
     #
     SHIFTING_PROPORTION_TOTAL: Param(SHIFTING_PROPORTION_TOTAL, 1e-1, float),
     SHIFTING_PROPORTION_K: Param(SHIFTING_PROPORTION_K, 1e-2, float),
-    #
-    SPLIT_TRAINING: Param(SPLIT_TRAINING, False, bool),
-    #
-    DIGITS: Param(DIGITS, None, none_or_list),
 }
 
 # -------------
@@ -160,6 +152,8 @@ regressor_parameters = {
     MODEL_NAME: Param(
         MODEL_NAME, VARIATIONAL_REGRESSOR, str, choices=[VARIATIONAL_REGRESSOR]
     ),
+    #
+    SPLIT_TRAINING: Param(SPLIT_TRAINING, False, bool),
 }
 variational_regressor_parameters = {
     β_ELBO: Param(β_ELBO, 0.5, float),
@@ -192,6 +186,8 @@ vae_parameters = {
     ENCODER_TYPE: Param(
         ENCODER_TYPE, ENCODER_FULLY_CONNECTED, str, choices=ENCODER_AVAILABLE_TYPES
     ),
+    #
+    DIGITS: Param(DIGITS, None, none_or_list),
 }
 vanilla_vae_parameters = {}
 v3ae_parameters = {
@@ -300,6 +296,19 @@ regression_experiments = [
 generative_experiments = [MNIST, MNIST_2D, FASHION_MNIST, FASHION_MNIST_2D, NOT_MNIST]
 
 
+def experiments_latent_dims(experiment_name: str) -> tuple:
+    if experiment_name == MNIST:
+        return (10,)
+    if experiment_name == MNIST_2D:
+        return (2,)
+    elif experiment_name == FASHION_MNIST:
+        return (25,)
+    elif experiment_name == FASHION_MNIST_2D:
+        return (2,)
+    elif experiment_name == NOT_MNIST:
+        return (10,)
+
+
 # -------------
 # Max batch iterations
 # -------------
@@ -326,6 +335,38 @@ ACTIVATION_FUNCTIONS = [
 ]
 
 
+def experiments_activation_function(experiment_name: str) -> str:
+    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, TOY_2D_SHIFTED]:
+        return F_SIGMOID
+    elif experiment_name in [
+        UCI_CCPP,
+        UCI_CCPP_SHIFTED,
+        UCI_CONCRETE,
+        UCI_CONCRETE_SHIFTED,
+        UCI_SUPERCONDUCT,
+        UCI_SUPERCONDUCT_SHIFTED,
+        UCI_WINE_RED,
+        UCI_WINE_RED_SHIFTED,
+        UCI_WINE_WHITE,
+        UCI_WINE_WHITE_SHIFTED,
+        UCI_YACHT,
+        UCI_YACHT_SHIFTED,
+    ]:
+        # Match VV
+        # return F_RELU
+        # Supposed to be best
+        return F_ELU
+    elif experiment_name in [
+        MNIST,
+        MNIST_2D,
+        FASHION_MNIST,
+        FASHION_MNIST_2D,
+        NOT_MNIST,
+    ]:
+        # Match Martin & Nicki
+        return F_LEAKY_RELU
+
+
 # -------------
 # Metric Names
 # -------------
@@ -348,7 +389,7 @@ TEST_SAMPLE_FIT_RMSE = f"test_sample_fit_rmse{DOWN_METRIC_INDICATOR}"
 TEST_ELLK = f"test_expected_log_likelihood{UP_METRIC_INDICATOR}"
 TEST_LLK = f"test_log_likelihood{UP_METRIC_INDICATOR}"
 TEST_KL = f"test_kl_divergence{DOWN_METRIC_INDICATOR}"
-NOISE_ELLK = f"noise_expected_log_likelihood{DOWN_METRIC_INDICATOR}"
+NOISE_UNCERTAINTY = f"noise_mean_uncertainty{UP_METRIC_INDICATOR}"
 NOISE_KL = f"noise_kl_divergence{DOWN_METRIC_INDICATOR}"
 
 COMPARISON_METRICS = [
@@ -362,6 +403,6 @@ COMPARISON_METRICS = [
     TEST_SAMPLE_FIT_RMSE,
     TEST_ELLK,
     TEST_KL,
-    NOISE_ELLK,
+    NOISE_UNCERTAINTY,
     NOISE_KL,
 ]

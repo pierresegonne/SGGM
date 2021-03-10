@@ -53,19 +53,10 @@ from sggm.definitions import (
     VV_VAE,
 )
 from sggm.definitions import (
-    ACTIVATION_FUNCTIONS,
-    F_ELU,
-    F_LEAKY_RELU,
-    F_RELU,
-    F_SIGMOID,
-)
-from sggm.definitions import (
     EVAL_LOSS,
     EXPERIMENT_NAME,
     EXPERIMENTS_CONFIG,
     MODEL_NAME,
-    OOD_X_GENERATION_AVAILABLE_METHODS,
-    OOD_Z_GENERATION_AVAILABLE_METHODS,
     PIG_DL,
 )
 from sggm.definitions import (
@@ -74,85 +65,16 @@ from sggm.definitions import (
     SHIFTING_PROPORTION_TOTAL,
     DIGITS,
 )
+from sggm.definitions import (
+    experiments_activation_function,
+    experiments_latent_dims,
+)
 from sggm.data import datamodules
-from sggm.experiment_helper import split_mean_uncertainty_training
+from sggm.experiment_helper import clean_dict, split_mean_uncertainty_training
 from sggm.regression_model import Regressor, VariationalRegressor
 from sggm.vae_model import BaseVAE, VanillaVAE, V3AE
 
 from sggm.types_ import List
-
-
-def clean_dict(dic: dict) -> dict:
-    clean_dic = {}
-    for k, v in dic.items():
-        if type(v) in [str, int, bool, float, object, None, list]:
-            clean_dic[k] = v
-    return clean_dic
-
-
-def activation_function(experiment_name):
-    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, TOY_2D_SHIFTED]:
-        return F_SIGMOID
-    elif experiment_name in [
-        UCI_CCPP,
-        UCI_CCPP_SHIFTED,
-        UCI_CONCRETE,
-        UCI_CONCRETE_SHIFTED,
-        UCI_SUPERCONDUCT,
-        UCI_SUPERCONDUCT_SHIFTED,
-        UCI_WINE_RED,
-        UCI_WINE_RED_SHIFTED,
-        UCI_WINE_WHITE,
-        UCI_WINE_WHITE_SHIFTED,
-        UCI_YACHT,
-        UCI_YACHT_SHIFTED,
-    ]:
-        # Match VV
-        # return F_RELU
-        # Supposed to be best
-        return F_ELU
-    elif experiment_name in [
-        MNIST,
-        MNIST_2D,
-        FASHION_MNIST,
-        FASHION_MNIST_2D,
-        NOT_MNIST,
-    ]:
-        # Match Martin & Nicki
-        return F_LEAKY_RELU
-
-
-def latent_dims(experiment_name):
-    if experiment_name == MNIST:
-        return (10,)
-    if experiment_name == MNIST_2D:
-        return (2,)
-    elif experiment_name == FASHION_MNIST:
-        return (25,)
-    elif experiment_name == FASHION_MNIST_2D:
-        return (2,)
-    elif experiment_name == NOT_MNIST:
-        return (10,)
-
-
-def check_ood_x_generation_method(method):
-    if method is None:
-        return method
-    assert (
-        method in OOD_X_GENERATION_AVAILABLE_METHODS
-    ), f"""Method for x ood generation '{method}' is invalid.
-    Must either be None or in {OOD_X_GENERATION_AVAILABLE_METHODS}"""
-    return method
-
-
-def check_ood_z_generation_method(method):
-    if method is None:
-        return method
-    assert (
-        method in OOD_Z_GENERATION_AVAILABLE_METHODS
-    ), f"""Method for z ood generation '{method}' is invalid.
-    Must either be None or in {OOD_Z_GENERATION_AVAILABLE_METHODS}"""
-    return method
 
 
 class Experiment:
@@ -205,15 +127,15 @@ class Experiment:
                     return VariationalRegressor(
                         input_dim=input_dim,
                         hidden_dim=self.hidden_dim,
-                        activation=activation_function(self.experiment_name),
+                        activation=experiments_activation_function(
+                            self.experiment_name
+                        ),
                         learning_rate=self.learning_rate,
                         prior_α=self.prior_alpha,
                         prior_β=self.prior_beta,
                         β_elbo=self.beta_elbo,
                         τ_ood=self.tau_ood,
-                        ood_x_generation_method=check_ood_x_generation_method(
-                            self.ood_x_generation_method
-                        ),
+                        ood_x_generation_method=self.ood_x_generation_method,
                         eps=self.eps,
                         n_mc_samples=self.n_mc_samples,
                         y_mean=self.datamodule.y_mean,
@@ -231,8 +153,10 @@ class Experiment:
                 if self.model_name == VANILLA_VAE:
                     return VanillaVAE(
                         input_dims=self.datamodule.dims,
-                        activation=activation_function(self.experiment_name),
-                        latent_dims=latent_dims(self.experiment_name),
+                        activation=experiments_activation_function(
+                            self.experiment_name
+                        ),
+                        latent_dims=experiments_latent_dims(self.experiment_name),
                         learning_rate=self.learning_rate,
                         eps=self.eps,
                         n_mc_samples=self.n_mc_samples,
@@ -240,17 +164,17 @@ class Experiment:
                 elif self.model_name == VV_VAE:
                     return V3AE(
                         input_dims=self.datamodule.dims,
-                        activation=activation_function(self.experiment_name),
-                        latent_dims=latent_dims(self.experiment_name),
+                        activation=experiments_activation_function(
+                            self.experiment_name
+                        ),
+                        latent_dims=experiments_latent_dims(self.experiment_name),
                         learning_rate=self.learning_rate,
                         prior_α=self.prior_alpha,
                         prior_β=self.prior_beta,
                         τ_ood=self.tau_ood,
                         eps=self.eps,
                         n_mc_samples=self.n_mc_samples,
-                        ood_z_generation_method=check_ood_z_generation_method(
-                            self.ood_z_generation_method
-                        ),
+                        ood_z_generation_method=self.ood_z_generation_method,
                         kde_bandwidth_multiplier=self.kde_bandwidth_multiplier,
                     )
                 else:
@@ -490,7 +414,7 @@ def cli_main():
                 misc[SHIFTING_PROPORTION_K] = experiment.shifting_proportion_k
             if isinstance(experiment.shifting_proportion_total, float):
                 misc[SHIFTING_PROPORTION_TOTAL] = experiment.shifting_proportion_total
-            if isinstance(experiment.digits, list):
+            if getattr(experiment, DIGITS, None):
                 misc[DIGITS] = experiment.digits
             if getattr(model, PIG_DL, None):
                 misc[PIG_DL] = model.pig_dl

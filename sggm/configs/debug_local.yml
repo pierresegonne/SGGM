@@ -16,7 +16,7 @@
   # pl trainer
   early_stopping_patience: 250
   n_trials: 1
-  max_epochs: 5
+  max_epochs: 1000
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).

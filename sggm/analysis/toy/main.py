@@ -11,7 +11,7 @@ from sggm.analysis.toy.helper import (
 )
 
 
-def plot(experiment_log, methods):
+def plot(experiment_log, methods, **kwargs):
     with no_grad():
         best_model = experiment_log.best_version.model
         best_training_dataset = experiment_log.best_version.train_dataset.tensors
