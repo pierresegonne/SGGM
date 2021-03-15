@@ -747,13 +747,11 @@ class V3AE(BaseVAE):
             z_out = next(iter(self.pig_dl))[0].type_as(z)
             z_out = z_out[: z.shape[1]]
             z_out = z_out.repeat(self.n_mc_samples, 1, 1)
-            print(z.shape)
             # [self.n_mc_samples, BS, self.input_size]
             _, _, α_z_out, β_z_out = self.parametrise_z(z_out)
             # batch_shape [self.n_mc_samples, BS] event_shape [self.input_size]
             q_λ_z_out = tcd.Independent(tcd.Gamma(α_z_out, β_z_out), 1)
             # [n_mc_sample, self.input_size]
-            print(q_λ_z_out.base_dist.mean.shape, p_λ.base_dist.mean.shape)
             kl_divergence_lbd_out = self.kl(q_λ_z_out, p_λ)
             # [self.input_size]
             kl_divergence_lbd_out = torch.mean(kl_divergence_lbd_out, dim=0)
