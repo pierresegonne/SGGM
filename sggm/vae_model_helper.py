@@ -1,5 +1,6 @@
 import math
 import torch
+import torch.distributions as tcd
 
 from functools import reduce
 from numbers import Number
@@ -7,6 +8,7 @@ from torch.distributions import Distribution, constraints
 from torch.distributions.utils import broadcast_all
 
 from sggm.definitions import OOD_Z_GENERATION_AVAILABLE_METHODS
+from sggm.regression_model_helper import normalise_grad
 from sggm.types_ import List
 
 
@@ -23,6 +25,7 @@ def batch_reshape(x: torch.Tensor, shape: List[int]) -> torch.Tensor:
 def reduce_int_list(list: List[int]) -> int:
     return reduce(lambda x, y: x * y, list)
 
+
 def check_ood_z_generation_method(method: str) -> str:
     if method is None:
         return method
@@ -31,6 +34,36 @@ def check_ood_z_generation_method(method: str) -> str:
     ), f"""Method for z ood generation '{method}' is invalid.
     Must either be None or in {OOD_Z_GENERATION_AVAILABLE_METHODS}"""
     return method
+
+
+def density_gradient_descent(
+    distribution: tcd.Distribution, x_0: torch.Tensor, params: dict
+) -> torch.Tensor:
+    N_steps, lr, threshold = params["N_steps"], params["lr"], params["threshold"]
+
+    x_hat = x_0.clone()
+    x_hat.requires_grad = True
+
+    print("   PIG gradient descent:", end=" ", flush=True)
+    for n in range(N_steps):
+        print(f"{n+1}", end=" ")
+        with torch.no_grad():
+            with torch.set_grad_enabled(True):
+                log_prob = distribution.log_prob(x_hat).mean()
+                density_grad = torch.autograd.grad(log_prob, x_hat, retain_graph=True)[
+                    0
+                ]
+                normed_density_grad = normalise_grad(density_grad)
+                normed_density_grad = torch.where(
+                    torch.linalg.norm(density_grad, dim=1)[:, None] < threshold,
+                    normed_density_grad,
+                    torch.zeros_like(normed_density_grad),
+                )
+                x_hat = x_hat - lr * normed_density_grad
+    print("-> OK")
+    x_hat = x_hat.detach()
+    return x_hat
+
 
 CONST_SQRT_2 = math.sqrt(2)
 CONST_INV_SQRT_2PI = 1 / math.sqrt(2 * math.pi)

@@ -64,6 +64,7 @@ from sggm.definitions import (
     SHIFTING_PROPORTION_K,
     SHIFTING_PROPORTION_TOTAL,
     DIGITS,
+    SPLIT_TRAINING,
 )
 from sggm.definitions import (
     experiments_activation_function,
@@ -383,11 +384,13 @@ def cli_main():
             model = experiment.model
             if isinstance(model, VariationalRegressor):
                 model.setup_pig(datamodule)
+            if isinstance(model, V3AE):
+                model.save_datamodule(datamodule)
 
             # ------------
             # training
             # ------------
-            if experiment.split_training:
+            if getattr(experiment, SPLIT_TRAINING, None):
                 (
                     experiment,
                     model,

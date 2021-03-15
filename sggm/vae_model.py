@@ -7,6 +7,8 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 from itertools import chain
+from torch.utils.data import DataLoader, TensorDataset
+
 
 from sggm.definitions import (
     model_specific_args,
@@ -19,9 +21,13 @@ from sggm.definitions import (
     τ_OOD,
     EPS,
     N_MC_SAMPLES,
+    # %
+    OOD_Z_GENERATION_AVAILABLE_METHODS,
     OOD_Z_GENERATION_METHOD,
     KDE,
     PRIOR,
+    GD_PRIOR,
+    GD_AGGREGATE_POSTERIOR,
     KDE_BANDWIDTH_MULTIPLIER,
 )
 from sggm.definitions import (
@@ -53,7 +59,13 @@ from sggm.definitions import (
 )
 from sggm.model_helper import log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple
-from sggm.vae_model_helper import batch_flatten, batch_reshape, check_ood_z_generation_method, reduce_int_list
+from sggm.vae_model_helper import (
+    batch_flatten,
+    batch_reshape,
+    check_ood_z_generation_method,
+    density_gradient_descent,
+    reduce_int_list,
+)
 
 # stages for steps
 TRAINING = "training"
@@ -425,7 +437,9 @@ class V3AE(BaseVAE):
         self.β_elbo = 1 / 2
 
         self.τ_ood = τ_ood
-        self.ood_z_generation_method = check_ood_z_generation_method(ood_z_generation_method)
+        self.ood_z_generation_method = check_ood_z_generation_method(
+            ood_z_generation_method
+        )
 
         self.kde_bandwidth_multiplier = kde_bandwidth_multiplier
 
@@ -471,6 +485,124 @@ class V3AE(BaseVAE):
             "τ_ood",
             "ood_z_generation_method",
         )
+
+    # %
+    def save_datamodule(self, datamodule: pl.LightningDataModule):
+        """ Keep reference of the datamodule on which the model is trained """
+        self.dm = datamodule
+
+    def _setup_pi_dl(self):
+        """ Generate a pseudo-input dataloader """
+        # Assume that the dataset holds on memory
+        print(
+            f"\n--- Generating Pseudo-Inputs | {self.ood_z_generation_method}",
+            flush=True,
+        )
+        print("   1. Aggregating DS ...", end=" ", flush=True)
+        with torch.no_grad():
+            for idx, batch in enumerate(iter(self.dm.train_dataloader())):
+                x, _ = batch
+                # Actually don't need that, only keep the encoded z, with generation batch by batch
+                x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
+                # Only keep one mc_sample
+                z = z[0]
+                if idx == 0:
+                    agg_z = z
+                    agg_q_z_x_mean, agg_q_z_x_stddev = (
+                        q_z_x.base_dist.mean,
+                        q_z_x.base_dist.stddev,
+                    )
+                    # Prior is not aggregated as cst
+                    p_z_mean, p_z_stddev = p_z.base_dist.mean, p_z.base_dist.stddev
+                else:
+                    agg_z = torch.cat((agg_z, z), dim=0)
+                    agg_q_z_x_mean = torch.cat(
+                        (agg_q_z_x_mean, q_z_x.base_dist.mean), dim=0
+                    )
+                    agg_q_z_x_stddev = torch.cat(
+                        (agg_q_z_x_stddev, q_z_x.base_dist.stddev), dim=0
+                    )
+        print(f"OK | [{agg_z.shape}]", flush=True)
+
+        # two options: pass all in forward pass, or generate pseudo-inputs batch per batch
+        q_z_x = tcd.Independent(tcd.Normal(agg_q_z_x_mean, agg_q_z_x_stddev), 1)
+        p_z_mean, p_z_stddev = (
+            p_z_mean[0].repeat(agg_z.shape[0], 1),
+            p_z_stddev[0].repeat(agg_z.shape[0], 1),
+        )
+        p_z = tcd.Independent(tcd.Normal(p_z_mean, p_z_stddev), 1)
+        z_hat = self.generate_z_out(agg_z, q_z_x, p_z)
+        # # Create DL
+        self.pig_dl = DataLoader(
+            TensorDataset(z_hat), batch_size=self.dm.batch_size, shuffle=True
+        )
+        print("--- OK\n")
+
+    def generate_z_out(
+        self,
+        z: torch.Tensor,
+        q_z_x: tcd.Distribution,
+        p_z: tcd.Distribution,
+        averaged_std: bool = False,
+        **kwargs,
+    ) -> torch.Tensor:
+        # %
+        gd_n_steps, gd_lr, gd_threshold = 20, 5e-1, 3
+        # Only preserve one set of mc samples for efficiency
+        assert len(z.shape) == 2, "Incorrect dimensions for z"
+        if self.ood_z_generation_method == KDE:
+            if averaged_std:
+                # Average var accross the BS
+                bs = q_z_x.variance.shape[0]
+                std = torch.sqrt(torch.mean(q_z_x.variance, dim=0).repeat(bs, 1))
+            else:
+                std = torch.sqrt(q_z_x.variance)
+            # batch_shape [BS] event_shape [event_shape]
+            q_out_z_x = tcd.Independent(
+                tcd.Normal(
+                    q_z_x.mean,
+                    self.kde_bandwidth_multiplier * std + self.eps,
+                ),
+                1,
+            )
+            # [BS, *self.latent_dims]
+            z_out = q_out_z_x.rsample((1,)).reshape(*z.shape)
+        elif self.ood_z_generation_method == GD_PRIOR:
+            # batch_shape [] event_shape [event_shape]
+            agg_p_z = tcd.Independent(
+                tcd.Normal(p_z.base_dist.mean[0], p_z.base_dist.stddev[0]),
+                1,
+            )
+            # [BS, *self.latent_dims]
+            z_out_start = agg_p_z.sample((z.shape[0],))
+            # [BS, *self.latent_dims]
+            z_out = density_gradient_descent(
+                agg_p_z,
+                z_out_start,
+                {"N_steps": gd_n_steps, "lr": gd_lr, "threshold": gd_threshold},
+            )
+
+        elif self.ood_z_generation_method == GD_AGGREGATE_POSTERIOR:
+            means, stddevs = (
+                q_z_x.base_dist.mean,
+                q_z_x.base_dist.stddev,
+            )
+            agg_q_z_x = tcd.Independent(tcd.Normal(means, stddevs), 1)
+            mix = tcd.Categorical(
+                torch.ones(
+                    means.shape[0],
+                )
+            )
+            agg_q_z_x = tcd.MixtureSameFamily(mix, agg_q_z_x)
+            z_out = density_gradient_descent(
+                agg_q_z_x,
+                z,
+                {"N_steps": gd_n_steps, "lr": gd_lr, "threshold": gd_threshold},
+            )
+
+        return z_out
+
+    # %
 
     def parametrise_z(self, z):
         bs = z.shape[1]
@@ -531,7 +663,7 @@ class V3AE(BaseVAE):
             if mc_samples
             else q.rsample(torch.Size([1]))
         )  # rsample implies reparametrisation
-        p = tcd.Independent(tcd.Normal(torch.zeros_like(z), torch.ones_like(z)), 1)
+        p = tcd.Independent(tcd.Normal(torch.zeros_like(mu), torch.ones_like(std)), 1)
         return z, q, p
 
     def sample_precision(self, alpha, beta):
@@ -604,30 +736,15 @@ class V3AE(BaseVAE):
                 torch.zeros((x.shape[0], 1)),
             )
 
-    def generate_z_out(self, q_z_x, averaged_std=False):
-        if averaged_std:
-            # Average var accross the BS
-            bs = q_z_x.variance.shape[0]
-            std = torch.sqrt(torch.mean(q_z_x.variance, dim=0).repeat(bs, 1))
-        else:
-            std = torch.sqrt(q_z_x.variance)
-        # batch_shape [BS] event_shape [event_shape]
-        q_out_z_x = tcd.Independent(
-            tcd.Normal(
-                q_z_x.mean,
-                self.kde_bandwidth_multiplier * std + self.eps,
-            ),
-            1,
-        )
-        # [n_mc_samples, BS, *self.latent_dims]
-        z_out = q_out_z_x.rsample(torch.Size([self.n_mc_samples]))
-        return z_out
+    def ood_kl(
+        self,
+        p_λ: tcd.Distribution,
+        z: torch.Tensor,
+    ) -> torch.Tensor:
 
-    def ood_kl(self, p_λ, q_z_x):
-
-        if self.ood_z_generation_method == KDE:
+        if self.ood_z_generation_method in OOD_Z_GENERATION_AVAILABLE_METHODS:
             # [n_mc_samples, BS, *self.latent_dims]
-            z_out = self.generate_z_out(q_z_x)
+            z_out = next(iter(self.pig_dl))[0].type_as(z)
             # [self.n_mc_samples, BS, self.input_size]
             _, _, α_z_out, β_z_out = self.parametrise_z(z_out)
             # batch_shape [self.n_mc_samples, BS] event_shape [self.input_size]
@@ -637,7 +754,7 @@ class V3AE(BaseVAE):
             # [self.input_size]
             kl_divergence_lbd_out = torch.mean(kl_divergence_lbd_out, dim=0)
             return kl_divergence_lbd_out
-        return 0
+        return torch.zeros((1,))
 
     def update_hacks(self):
         previous_switch = self._switch_to_decoder_var
@@ -658,6 +775,8 @@ class V3AE(BaseVAE):
                 p.requires_grad = False
             for p in self.decoder_μ.parameters():
                 p.requires_grad = False
+
+            self._setup_pi_dl()
 
     def step(self, batch, batch_idx, stage=None):
         x, _ = batch
@@ -681,7 +800,7 @@ class V3AE(BaseVAE):
         ):
             # NOTE: beware, for understandability, tau is opposite.
             loss = 2 * (
-                (1 - self.τ_ood) * loss + self.τ_ood * self.ood_kl(p_λ, q_z_x).mean()
+                (1 - self.τ_ood) * loss + self.τ_ood * self.ood_kl(p_λ, z).mean()
             )
 
         logs = {

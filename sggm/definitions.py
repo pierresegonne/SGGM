@@ -40,10 +40,14 @@ OOD_Z_GENERATION_METHOD = "ood_z_generation_method"
 KDE = "kde"
 PRIOR = "prior"
 KDE_BANDWIDTH_MULTIPLIER = "kde_bandwidth_multiplier"
+GD_PRIOR = "gd_prior"
+GD_AGGREGATE_POSTERIOR = "gd_aggregate_posterior"
 
 OOD_Z_GENERATION_AVAILABLE_METHODS = [
     KDE,
     PRIOR,
+    GD_PRIOR,
+    GD_AGGREGATE_POSTERIOR,
 ]
 
 PIG_DL = "pig_dl"
