@@ -746,6 +746,7 @@ class V3AE(BaseVAE):
             # [n_mc_samples, BS, *self.latent_dims]
             z_out = next(iter(self.pig_dl))[0].type_as(z)
             z_out = z_out.repeat(self.n_mc_samples, 1, 1)
+            z_out = z_out[: z.shape[1]]
             # [self.n_mc_samples, BS, self.input_size]
             _, _, α_z_out, β_z_out = self.parametrise_z(z_out)
             # batch_shape [self.n_mc_samples, BS] event_shape [self.input_size]
