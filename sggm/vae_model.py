@@ -546,8 +546,6 @@ class V3AE(BaseVAE):
         averaged_std: bool = False,
         **kwargs,
     ) -> torch.Tensor:
-        # %
-        gd_n_steps, gd_lr, gd_threshold = 20, 5e-1, 3
         # Only preserve one set of mc samples for efficiency
         assert len(z.shape) == 2, "Incorrect dimensions for z"
         if self.ood_z_generation_method == KDE:
@@ -568,6 +566,8 @@ class V3AE(BaseVAE):
             # [BS, *self.latent_dims]
             z_out = q_out_z_x.rsample((1,)).reshape(*z.shape)
         elif self.ood_z_generation_method == GD_PRIOR:
+            # %
+            gd_n_steps, gd_lr, gd_threshold = 5, 5e-1, 1
             # batch_shape [] event_shape [event_shape]
             agg_p_z = tcd.Independent(
                 tcd.Normal(p_z.base_dist.mean[0], p_z.base_dist.stddev[0]),
@@ -583,6 +583,9 @@ class V3AE(BaseVAE):
             )
 
         elif self.ood_z_generation_method == GD_AGGREGATE_POSTERIOR:
+            # %
+            gd_n_steps, gd_lr, gd_threshold = 10, 5e-1, 3
+            # %
             means, stddevs = (
                 q_z_x.base_dist.mean,
                 q_z_x.base_dist.stddev,
@@ -594,9 +597,17 @@ class V3AE(BaseVAE):
                 )
             )
             agg_q_z_x = tcd.MixtureSameFamily(mix, agg_q_z_x)
+            q_start = tcd.Independent(
+                tcd.Normal(
+                    q_z_x.mean,
+                    2 * torch.ones_like(q_z_x.mean),
+                ),
+                1,
+            )
+            z_start = q_start.sample((1,)).reshape(*z.shape)
             z_out = density_gradient_descent(
                 agg_q_z_x,
-                z,
+                z_start,
                 {"N_steps": gd_n_steps, "lr": gd_lr, "threshold": gd_threshold},
             )
 
