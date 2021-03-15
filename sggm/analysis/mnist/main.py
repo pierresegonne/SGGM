@@ -82,7 +82,7 @@ def plot(experiment_log, seed=False, **kwargs):
 
     # Interpolation
     interpolation_digits = get_interpolation_digits(
-        dm, experiment_name, target_digits=[2, 5], target_digits_idx=[3, 3]
+        dm, experiment_name, target_digits=[0, 1], target_digits_idx=[3, 3]
     )
     save_and_show(
         plot_interpolation(best_model, *interpolation_digits),

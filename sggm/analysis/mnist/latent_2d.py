@@ -14,17 +14,18 @@ colour_digits = [
 ]
 
 
-def show_pseudo_inputs(ax, model, q_z_x):
+def show_pseudo_inputs(ax, model):
     if (
         isinstance(model, V3AE)
         and getattr(model, "ood_z_generation_method", None) is not None
     ):
         # mult = getattr(model, "kde_bandwidth_multiplier", 10)
         # [n_mc_samples, BS, *self.latent_dims]
-        z_out = model.generate_z_out(q_z_x, averaged_std=False)
+        z_out = next(iter(model.pig_dl))[0]
+        print(z_out)
         ax.plot(
-            z_out[0, :, 0],
-            z_out[0, :, 1],
+            z_out[:, 0],
+            z_out[:, 1],
             "o",
             markersize=3.5,
             markerfacecolor=(*colours_rgb["purple"], 0.9),
@@ -35,7 +36,7 @@ def show_pseudo_inputs(ax, model, q_z_x):
     return ax
 
 
-def show_2d_latent_space(model, x, y, title="TITLE", show_pi=False):
+def show_2d_latent_space(model, x, y, title="TITLE", show_pi=True):
     digits = torch.unique(y)
     with torch.no_grad():
         if isinstance(model, VanillaVAE):
@@ -90,7 +91,7 @@ def show_2d_latent_space(model, x, y, title="TITLE", show_pi=False):
     # Pseudo-inputs
     legend_ncols = 2
     if show_pi:
-        show_pseudo_inputs(ax.model, q_z_x)
+        show_pseudo_inputs(ax, model)
         legend_ncols = 3
 
     # Misc
