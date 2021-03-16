@@ -1,4 +1,5 @@
 - name: implement_new_pig_gd_prior_25
+  experiment_name: mnist_2d
   model_name: v3ae
   n_workers: 0
   # hparams
