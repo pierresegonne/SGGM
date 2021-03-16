@@ -187,7 +187,11 @@ class BaseVAE(pl.LightningModule):
         )
         # Histogram of weights
         for name, weight in self.named_parameters():
-            self.logger.experiment.add_histogram(name, weight, self.current_epoch)
+            try:
+                self.logger.experiment.add_histogram(name, weight, self.current_epoch)
+            except:
+                print(name, weight)
+                exit()
 
         return loss
 
