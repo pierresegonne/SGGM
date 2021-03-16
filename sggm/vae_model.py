@@ -462,7 +462,7 @@ class V3AE(BaseVAE):
         self.decoder_α = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
             nn.Softplus(),
-            ShiftLayer(1.0),
+            ShiftLayer(0.0),
         )
         self.decoder_β = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
