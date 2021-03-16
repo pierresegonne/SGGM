@@ -72,7 +72,7 @@ def show_2d_latent_space(model, x, y, title="TITLE", show_pi=True, z_star=None):
 
     fig, ax = plt.subplots()
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
-    extent = 10
+    extent = 3.5
     x_mesh = torch.linspace(-extent, extent, 300)
     y_mesh = torch.linspace(-extent, extent, 300)
     x_mesh, y_mesh = torch.meshgrid(x_mesh, y_mesh)

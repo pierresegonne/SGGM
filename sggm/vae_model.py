@@ -584,7 +584,7 @@ class V3AE(BaseVAE):
 
         elif self.ood_z_generation_method == GD_AGGREGATE_POSTERIOR:
             # %
-            gd_n_steps, gd_lr, gd_threshold = 10, 5e-1, 0.2
+            gd_n_steps, gd_lr, gd_threshold = 10, 4e-1, 0.05
             # %
             means, stddevs = (
                 q_z_x.base_dist.mean,
