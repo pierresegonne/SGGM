@@ -15,7 +15,7 @@
   prior_beta: 0.0010704155012337458
   # ood
   tau_ood: 0.5
-  ood_z_generation_method: aggregate_posterior
+  ood_z_generation_method: gd_aggregate_posterior
   # kde_bandwidth_multiplier: 9
   # misc
   n_trials: 1
