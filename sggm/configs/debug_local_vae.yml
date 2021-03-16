@@ -1,5 +1,4 @@
-- name: implement_new_pig_gd_aggregate_posterior_25
-  experiment_name: mnist_2d
+- name: implement_new_pig_gd_prior_25
   model_name: v3ae
   n_workers: 0
   # hparams
@@ -15,7 +14,7 @@
   prior_beta: 0.0010704155012337458
   # ood
   tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
+  ood_z_generation_method: gd_prior
   # kde_bandwidth_multiplier: 9
   # misc
   n_trials: 1
