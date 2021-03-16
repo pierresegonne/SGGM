@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import torch
+
 from pytorch_lightning import seed_everything
 from torch import no_grad
 
@@ -7,7 +9,10 @@ from sggm.analysis.mnist.helper import (
     plot_comparison,
     plot_interpolation,
 )
-from sggm.analysis.mnist.latent_2d import show_2d_latent_space
+from sggm.analysis.mnist.latent_2d import (
+    show_2d_latent_space,
+    show_reconstruction_arbitrary_latent,
+)
 from sggm.analysis.mnist.others_mnist import analyse_others_mnist
 from sggm.data.mnist import MNISTDataModule, MNISTDataModule2D
 from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModule2D
@@ -73,27 +78,33 @@ def plot(experiment_log, seed=False, **kwargs):
         x_hat_train, p_x_train = best_model(x_train)
         x_hat_test, p_x_test = best_model(x_test)
 
-    # Reconstruction plots
-    n_display = 5
-    save_and_show(
-        plot_comparison(n_display, x_test, p_x_test, best_model.input_dims),
-        f"{save_folder}/_main",
-    )
+    # # Reconstruction plots
+    # n_display = 5
+    # save_and_show(
+    #     plot_comparison(n_display, x_test, p_x_test, best_model.input_dims),
+    #     f"{save_folder}/_main",
+    # )
 
-    # Interpolation
-    interpolation_digits = get_interpolation_digits(
-        dm, experiment_name, target_digits=[0, 1], target_digits_idx=[3, 3]
-    )
-    save_and_show(
-        plot_interpolation(best_model, *interpolation_digits),
-        f"{save_folder}/_interpolation",
-    )
+    # # Interpolation
+    # interpolation_digits = get_interpolation_digits(
+    #     dm, experiment_name, target_digits=[2, 5], target_digits_idx=[3, 3]
+    # )
+    # save_and_show(
+    #     plot_interpolation(best_model, *interpolation_digits),
+    #     f"{save_folder}/_interpolation",
+    # )
 
     # 2D Latent space
     if experiment_name in [MNIST_2D, FASHION_MNIST_2D]:
+        # Arbitrary latent code
+        z_star = torch.Tensor([[[3, 0]]])
         save_and_show(
-            show_2d_latent_space(best_model, x_test, y_test),
+            show_2d_latent_space(best_model, x_test, y_test, z_star=z_star),
             f"{save_folder}/_latent_space",
+        )
+        save_and_show(
+            show_reconstruction_arbitrary_latent(best_model, z_star),
+            f"{save_folder}/_arbitrary_z_reconstruction",
         )
 
     for other_mnist in kwargs["others"]:

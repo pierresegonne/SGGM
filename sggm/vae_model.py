@@ -187,11 +187,7 @@ class BaseVAE(pl.LightningModule):
         )
         # Histogram of weights
         for name, weight in self.named_parameters():
-            try:
-                self.logger.experiment.add_histogram(name, weight, self.current_epoch)
-            except:
-                print(name, weight)
-                exit()
+            self.logger.experiment.add_histogram(name, weight, self.current_epoch)
 
         return loss
 
@@ -466,7 +462,7 @@ class V3AE(BaseVAE):
         self.decoder_α = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
             nn.Softplus(),
-            ShiftLayer(0.0),
+            ShiftLayer(1.0),
         )
         self.decoder_β = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
