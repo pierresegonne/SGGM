@@ -22,7 +22,6 @@ def show_pseudo_inputs(ax, model):
         # mult = getattr(model, "kde_bandwidth_multiplier", 10)
         # [n_mc_samples, BS, *self.latent_dims]
         z_out = next(iter(model.pig_dl))[0]
-        print(z_out)
         ax.plot(
             z_out[:, 0],
             z_out[:, 1],
