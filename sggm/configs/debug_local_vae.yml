@@ -1,4 +1,4 @@
-- name: implement_new_pig_gd_aggregate_posterior_25_bp
+- name: implement_new_pig_gd_aggregate_posterior_29
   experiment_name: mnist_2d
   model_name: v3ae
   n_workers: 0
@@ -9,9 +9,9 @@
   n_mc_samples: 2
   digits:
     - 2
-    - 5
+    - 9
   # From prior_gamma_per_pixel - for MNIST only
-  prior_alpha: 1.625
+  prior_alpha: 0.3927581767454884
   prior_beta: 0.0010704155012337458
   # ood
   tau_ood: 0.5
