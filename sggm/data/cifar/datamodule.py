@@ -5,14 +5,12 @@ import torch
 
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
-from torchvision.datasets import MNIST
-
-from sggm.types_ import List
+from torchvision.datasets import CIFAR10
 
 N_cpus = multiprocessing.cpu_count()
 
 
-class MNISTDataModule(pl.LightningDataModule):
+class CIFARDataModule(pl.LightningDataModule):
     def __init__(
         self,
         batch_size: int,
@@ -32,12 +30,23 @@ class MNISTDataModule(pl.LightningDataModule):
         self.train_val_split = train_val_split
 
         # Manual
-        self.x_mean = 0.1307
-        self.x_std = 0.3081
-        self.x_mean = 0.0
+        self.x_mean = torch.Tensor([0.4914, 0.4822, 0.4465])
+        self.x_std = torch.Tensor([0.2470, 0.2435, 0.2616])
+        self.x_mean = 0
         self.x_std = 1
-        self.range = 255
-        self.dims = (1, 28, 28)
+        self.dims = (3, 32, 32)
+        self.class_names = [
+            "airplane",
+            "automobile",
+            "bird",
+            "cat",
+            "deer",
+            "dog",
+            "frog",
+            "horse",
+            "ship",
+            "truck",
+        ]
 
     def setup(self, stage: str = None):
 
@@ -47,7 +56,7 @@ class MNISTDataModule(pl.LightningDataModule):
         )
 
         # Train
-        train_val = MNIST(
+        train_val = CIFAR10(
             os.path.dirname(__file__),
             download=True,
             train=True,
@@ -60,7 +69,7 @@ class MNISTDataModule(pl.LightningDataModule):
         )
 
         # Test
-        self.test_dataset = MNIST(
+        self.test_dataset = CIFAR10(
             os.path.dirname(__file__),
             download=True,
             train=False,
@@ -95,76 +104,41 @@ class MNISTDataModule(pl.LightningDataModule):
         )
 
 
-class MNISTDataModule2D(MNISTDataModule):
-    def __init__(
-        self,
-        batch_size: int,
-        n_workers: int,
-        train_val_split: float = 0.9,
-        digits: List[int] = [0, 1],
-        **kwargs,
-    ):
-        super().__init__(batch_size, n_workers, train_val_split, **kwargs)
-        assert len(digits) == 2
-        for d in digits:
-            assert isinstance(d, int)
-            assert (0 <= d) & (d <= 9)
-        self.digits = digits
-
-    def setup(self, stage: str = None):
-        # Transforms
-        mnist_transforms = transforms.Compose(
-            [transforms.ToTensor(), transforms.Normalize([self.x_mean], [self.x_std])]
-        )
-
-        # Train
-        train_val = MNIST(
-            os.path.dirname(__file__),
-            download=True,
-            train=True,
-            transform=mnist_transforms,
-        )
-
-        idx = (train_val.targets == self.digits[0]) | (
-            train_val.targets == self.digits[1]
-        )
-        train_val.targets = train_val.targets[idx]
-        train_val.data = train_val.data[idx]
-
-        train_length = int(len(train_val) * self.train_val_split)
-        val_length = len(train_val) - train_length
-        self.train_dataset, self.val_dataset = random_split(
-            train_val, [train_length, val_length]
-        )
-
-        # Test
-        self.test_dataset = MNIST(
-            os.path.dirname(__file__),
-            download=True,
-            train=False,
-            transform=mnist_transforms,
-        )
-        idx = (self.test_dataset.targets == self.digits[0]) | (
-            self.test_dataset.targets == self.digits[1]
-        )
-        self.test_dataset.targets = self.test_dataset.targets[idx]
-        self.test_dataset.data = self.test_dataset.data[idx]
-
-
 if __name__ == "__main__":
 
-    dm = MNISTDataModule(256, 0)
+    dm = CIFARDataModule(16, 0)
     dm.setup()
 
     # Observe sample
     x, y = next(iter(dm.train_dataloader()))
 
-    import matplotlib.pyplot as plt
+    show_samples = True
+    if show_samples:
+        import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots()
-    ax.imshow((x[0, 0, :, :] * dm.x_std + dm.x_mean) * dm.range, cmap="binary")
-    print(f"Displayed {y[0]}")
+        fig, ax = plt.subplots()
+        print(x[0].permute(1, 2, 0).shape)
+        ax.imshow(x[0].permute(1, 2, 0), cmap="binary")
+        print(f"Displayed: `{dm.class_names[y[0]]}`")
 
-    plt.show()
+        plt.show()
 
     # Info about the data
+    compute_info = False
+    if compute_info:
+        dm = CIFARDataModule(512, 0)
+        dm.setup()
+        x_train = []
+        for idx, batch in enumerate(dm.train_dataloader()):
+            x, _ = batch
+            x_train.append(x)
+        for idx, batch in enumerate(dm.val_dataloader()):
+            x, _ = batch
+            x_train.append(x)
+
+        x_train = torch.cat(x_train, dim=0)
+        print(f"Dataset shape: {x_train.shape}")
+        print(f"Dataset range: {(x_train.min(), x_train.max())}")
+        print(
+            f"Dataset per channel mean and std: {(x_train.mean(dim=(0,2,3)), x_train.std(dim=(0,2,3)))}"
+        )

@@ -14,9 +14,11 @@ from sggm.data.uci_wine_white import (
 )
 from sggm.data.uci_yacht import UCIYachtDataModule, UCIYachtDataModuleShifted
 
+from sggm.data.cifar import CIFARDataModule
 from sggm.data.mnist import MNISTDataModule, MNISTDataModule2D
 from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModule2D
 from sggm.data.not_mnist import NotMNISTDataModule
+from sggm.data.svhn import SVHNDataModule
 
 from sggm.definitions import (
     SANITY_CHECK,
@@ -37,11 +39,13 @@ from sggm.definitions import (
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
     #
+    CIFAR,
     MNIST,
     MNIST_2D,
     FASHION_MNIST,
     FASHION_MNIST_2D,
     NOT_MNIST,
+    SVHN,
 )
 
 datamodules = {
@@ -63,9 +67,11 @@ datamodules = {
     UCI_YACHT: UCIYachtDataModule,
     UCI_YACHT_SHIFTED: UCIYachtDataModuleShifted,
     #
+    CIFAR: CIFARDataModule,
     MNIST: MNISTDataModule,
     MNIST_2D: MNISTDataModule2D,
     FASHION_MNIST: FashionMNISTDataModule,
     FASHION_MNIST_2D: FashionMNISTDataModule2D,
     NOT_MNIST: NotMNISTDataModule,
+    SVHN: SVHNDataModule,
 }

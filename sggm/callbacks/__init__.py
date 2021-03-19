@@ -17,11 +17,13 @@ from sggm.definitions import (
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
     #
+    CIFAR,
     MNIST,
     MNIST_2D,
     FASHION_MNIST,
     FASHION_MNIST_2D,
     NOT_MNIST,
+    SVHN,
 )
 from sggm.callbacks.data_saver import DataSaver
 from sggm.callbacks.fit_saver import FitSaver
@@ -49,9 +51,11 @@ callbacks = {
     UCI_YACHT: [LossPrinter],
     UCI_YACHT_SHIFTED: [LossPrinter],
     #
+    CIFAR: [],
     MNIST: [IMGGeneratedSaver],
     MNIST_2D: [],
     FASHION_MNIST: [IMGGeneratedSaver],
     FASHION_MNIST_2D: [],
     NOT_MNIST: [IMGGeneratedSaver],
+    SVHN: [],
 }
