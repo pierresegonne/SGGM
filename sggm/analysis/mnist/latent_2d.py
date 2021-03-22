@@ -6,7 +6,7 @@ import torch
 
 from torch import no_grad
 
-from sggm.vae_model import V3AE, VanillaVAE
+from sggm.vae_model import VanillaVAE, V3AE, V3AEm
 from sggm.vae_model_helper import batch_reshape
 from sggm.styles_ import colours, colours_rgb
 
@@ -60,7 +60,9 @@ def show_pseudo_inputs(ax, model):
     return ax
 
 
-def show_2d_latent_space(model, x, y, title="TITLE", show_pi=True, z_star=None):
+def show_2d_latent_space(
+    model, x, y, title="TITLE", show_pi=True, show_geodesic=True, z_star=None
+):
     digits = torch.unique(y)
     with torch.no_grad():
         if isinstance(model, VanillaVAE):
@@ -83,8 +85,8 @@ def show_2d_latent_space(model, x, y, title="TITLE", show_pi=True, z_star=None):
         if isinstance(model, VanillaVAE):
             var = model.decoder_std(z_latent_mesh)
         if isinstance(model, V3AE):
-            # var = model.decoder_β(z_latent_mesh) / (model.decoder_α(z_latent_mesh) - 1)
-            var = model.decoder_α(z_latent_mesh)
+            var = model.decoder_β(z_latent_mesh) / (model.decoder_α(z_latent_mesh) - 1)
+            # var = model.decoder_α(z_latent_mesh)
     # Accumulated gradient over all output cf nicki and martin
     var = torch.mean(var, dim=1)
     # reshape to x_shape
@@ -122,6 +124,13 @@ def show_2d_latent_space(model, x, y, title="TITLE", show_pi=True, z_star=None):
     if show_pi:
         show_pseudo_inputs(ax, model)
         legend_ncols = 3
+
+    # Geodesic
+    if show_geodesic and isinstance(model, V3AEm):
+        z1 = torch.Tensor([-0.58, -1.13])
+        z2 = torch.Tensor([0.4, 1.1])
+        C, success = model.connecting_geodesic(z1, z2)
+        C.plot()
 
     # Misc
     ax.set_xticks([])

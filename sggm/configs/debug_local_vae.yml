@@ -1,6 +1,6 @@
 - name: test_v3ae_for_v3aem
   experiment_name: mnist_2d
-  model_name: v3ae
+  model_name: v3aem
   n_workers: 0
   # hparams
   batch_size: 500

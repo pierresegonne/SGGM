@@ -1,3 +1,4 @@
+import geoml.nnj as nnj
 import numpy as np
 import pytorch_lightning as pl
 import torch
@@ -10,7 +11,6 @@ from itertools import chain
 from torch.utils.data import DataLoader, TensorDataset
 
 from geoml import EmbeddedManifold
-
 
 from sggm.definitions import (
     model_specific_args,
@@ -890,15 +890,73 @@ class V3AEm(V3AE, EmbeddedManifold):
     def __init__(self, *args, **kwargs):
         super(V3AEm, self).__init__(*args, **kwargs)
 
-    def embed(self, z: torch.Tensor) -> torch.Tensor:
+        # Update the decoder networks to allow for Jacobian computation
+        # self.decoder_μ = self.nn_to_nnj(self.decoder_μ)
+        # self.decoder_α = self.nn_to_nnj(self.decoder_α)
+        # self.decoder_β = self.nn_to_nnj(self.decoder_β)
+
+    @staticmethod
+    def extract_module_children(mod: nn.Module) -> List[nn.Module]:
+        # Extracts all children of a nn module and flattens them
+        _children = []
+        for child in mod.children():
+            _children += V3AEm.extract_module_children(child)
+        if len(_children) == 0:
+            _children.append(mod)
+        return _children
+
+    @staticmethod
+    def nn_to_nnj(mod: nn.Module) -> nn.Module:
+        # Transform a module with nn layers and activations to nnj module from the geoml package.
+        _children = V3AEm.extract_module_children(mod)
+        _children_nnj = []
+        for child in _children:
+            # Layers
+            if isinstance(child, nn.Linear):
+                bias = True if child.bias is not None else False
+                _children_nnj.append(
+                    nnj.Linear(child.in_features, child.out_features, bias=bias)
+                )
+            elif isinstance(child, nn.BatchNorm1d):
+                _children_nnj.append(
+                    nnj.BatchNorm1d(
+                        child.num_features,
+                        eps=child.eps,
+                        momentum=child.momentum,
+                        affine=child.affine,
+                        track_running_stats=child.track_running_stats,
+                    )
+                )
+            # Activations
+            elif isinstance(child, nn.LeakyReLU):
+                _children_nnj.append(nnj.LeakyReLU())
+            elif isinstance(child, nn.Sigmoid):
+                _children_nnj.append(nnj.Sigmoid())
+            elif isinstance(child, nn.Softplus):
+                _children_nnj.append(nnj.Softplus())
+            else:
+                raise NotImplementedError(f"{child} casting to nnj not supported")
+
+    def decoder_jacobian(self, z: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        _, J_μ = self.decoder_μ(z, jacobian=True)
+        _, J_α = self.decoder_α(z, jacobian=True)
+        _, J_β = self.decoder_β(z, jacobian=True)
+
+        # TODO - WIP but not necessary
+        J_σ = 1
+        return J_μ, J_σ
+
+    def embed(self, z: torch.Tensor, jacobian=False) -> torch.Tensor:
+        is_batched = z.dim() > 2
+        if not is_batched:
+            z = z.unsqueeze(0)
+
         # , *self.latent_dims
         assert (
-            z.dim() == 2
-        ), "Latent codes to embed must be provided as a batch [batch_size, *latent_dims]"
+            z.dim() == 3
+        ), "Latent codes to embed must be provided as a batch [batch_size, N, *latent_dims]"
 
-        # with n_mc_samples = 1
-        # [n_mc_samples, BS, *self.latent_dims/self.input_size]
-        z = z[None, :]
+        # with n_mc_samples = batch_size
         # [n_mc_samples, BS, *self.latent_dims/self.input_size]
         z, μ_z, α_z, β_z = self.parametrise_z(z)
         # [n_mc_samples, BS, *self.latent_dims/self.input_size]
@@ -906,5 +964,16 @@ class V3AEm(V3AE, EmbeddedManifold):
 
         # [n_mc_samples, BS, 2 *self.latent_dims/self.input_size]
         embedded = torch.cat((μ_z, σ_z), dim=2)  # BxNx(2D)
+        if jacobian:
+            J_μ_z, J_σ_z = self.decoder_jacobian(z)
+            J = torch.cat((J_μ_z, J_σ_z), dim=2)
 
-        return embedded
+        if not is_batched:
+            embedded = embedded.squeeze(0)
+            if jacobian:
+                J = J.squeeze(0)
+
+        if jacobian:
+            return embedded, J
+        else:
+            return embedded
