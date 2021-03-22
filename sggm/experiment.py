@@ -51,6 +51,7 @@ from sggm.definitions import (
     VARIATIONAL_REGRESSOR,
     VANILLA_VAE,
     VV_VAE,
+    VV_VAE_MANIFOLD,
 )
 from sggm.definitions import (
     EVAL_LOSS,
@@ -73,7 +74,7 @@ from sggm.definitions import (
 from sggm.data import datamodules
 from sggm.experiment_helper import clean_dict, split_mean_uncertainty_training
 from sggm.regression_model import Regressor, VariationalRegressor
-from sggm.vae_model import BaseVAE, VanillaVAE, V3AE
+from sggm.vae_model import BaseVAE, VanillaVAE, V3AE, V3AEm
 
 from sggm.types_ import List
 
@@ -164,6 +165,22 @@ class Experiment:
                     )
                 elif self.model_name == VV_VAE:
                     return V3AE(
+                        input_dims=self.datamodule.dims,
+                        activation=experiments_activation_function(
+                            self.experiment_name
+                        ),
+                        latent_dims=experiments_latent_dims(self.experiment_name),
+                        learning_rate=self.learning_rate,
+                        prior_α=self.prior_alpha,
+                        prior_β=self.prior_beta,
+                        τ_ood=self.tau_ood,
+                        eps=self.eps,
+                        n_mc_samples=self.n_mc_samples,
+                        ood_z_generation_method=self.ood_z_generation_method,
+                        kde_bandwidth_multiplier=self.kde_bandwidth_multiplier,
+                    )
+                elif self.model_name == VV_VAE_MANIFOLD:
+                    return V3AEm(
                         input_dims=self.datamodule.dims,
                         activation=experiments_activation_function(
                             self.experiment_name
@@ -308,6 +325,8 @@ def get_model(experiment_config: dict) -> pl.LightningModule:
         model = VanillaVAE
     elif model_name == VV_VAE:
         model = V3AE
+    elif model_name == VV_VAE_MANIFOLD:
+        model = V3AEm
     else:
         raise NotImplementedError(f"Model {model_name} has no implementation")
     return model

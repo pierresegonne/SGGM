@@ -9,6 +9,8 @@ from argparse import ArgumentParser
 from itertools import chain
 from torch.utils.data import DataLoader, TensorDataset
 
+from geoml import EmbeddedManifold
+
 
 from sggm.definitions import (
     model_specific_args,
@@ -703,7 +705,9 @@ class V3AE(BaseVAE):
             x = p.rsample()
 
         elif self._bernouilli_decoder:
-            p = tcd.Independent(tcd.Bernoulli(mu), 1)
+            # Note the Bernouilli's support is {0, 1} -> not validating args allow to evaluate it on [0, 1]
+            # See https://pytorch.org/docs/stable/distributions.html#continuousbernoulli for improvement.
+            p = tcd.Independent(tcd.Bernoulli(mu, validate_args=False), 1)
             x = p.sample()
 
         # first dim is num of latent z samples, only keep the reconstructed from the first draw
@@ -879,3 +883,28 @@ class V3AE(BaseVAE):
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):
         return model_specific_args(v3ae_parameters, parent_parser)
+
+
+class V3AEm(V3AE, EmbeddedManifold):
+    # This will probably fail
+    def __init__(self, *args, **kwargs):
+        super(V3AEm, self).__init__(*args, **kwargs)
+
+    def embed(self, z: torch.Tensor) -> torch.Tensor:
+        # , *self.latent_dims
+        assert (
+            z.dim() == 2
+        ), "Latent codes to embed must be provided as a batch [batch_size, *latent_dims]"
+
+        # with n_mc_samples = 1
+        # [n_mc_samples, BS, *self.latent_dims/self.input_size]
+        z = z[None, :]
+        # [n_mc_samples, BS, *self.latent_dims/self.input_size]
+        z, μ_z, α_z, β_z = self.parametrise_z(z)
+        # [n_mc_samples, BS, *self.latent_dims/self.input_size]
+        σ_z = torch.sqrt(β_z / (α_z - 1))
+
+        # [n_mc_samples, BS, 2 *self.latent_dims/self.input_size]
+        embedded = torch.cat((μ_z, σ_z), dim=2)  # BxNx(2D)
+
+        return embedded

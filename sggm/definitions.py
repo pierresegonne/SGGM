@@ -183,6 +183,7 @@ regression_models = [VARIATIONAL_REGRESSOR]
 
 VANILLA_VAE = "vanilla_vae"
 VV_VAE = "v3ae"
+VV_VAE_MANIFOLD = "v3aem"
 vae_parameters = {
     LEARNING_RATE: Param(LEARNING_RATE, 1e-3, float),
     EPS: Param(EPS, 1e-4, float),
@@ -206,7 +207,7 @@ v3ae_parameters = {
     ),
     KDE_BANDWIDTH_MULTIPLIER: Param(KDE_BANDWIDTH_MULTIPLIER, 10, float),
 }
-generative_models = [VANILLA_VAE, VV_VAE]
+generative_models = [VANILLA_VAE, VV_VAE, VV_VAE_MANIFOLD]
 
 
 model_names = regression_models + generative_models

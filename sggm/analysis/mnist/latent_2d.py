@@ -83,7 +83,8 @@ def show_2d_latent_space(model, x, y, title="TITLE", show_pi=True, z_star=None):
         if isinstance(model, VanillaVAE):
             var = model.decoder_std(z_latent_mesh)
         if isinstance(model, V3AE):
-            var = model.decoder_β(z_latent_mesh) / (model.decoder_α(z_latent_mesh) - 1)
+            # var = model.decoder_β(z_latent_mesh) / (model.decoder_α(z_latent_mesh) - 1)
+            var = model.decoder_α(z_latent_mesh)
     # Accumulated gradient over all output cf nicki and martin
     var = torch.mean(var, dim=1)
     # reshape to x_shape
