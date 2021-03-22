@@ -11,10 +11,11 @@ from sggm.definitions import (
     TEST_LOSS,
     VANILLA_VAE,
     VV_VAE,
+    VV_VAE_MANIFOLD,
     PIG_DL,
 )
 from sggm.regression_model import VariationalRegressor
-from sggm.vae_model import VanillaVAE, V3AE
+from sggm.vae_model import VanillaVAE, V3AE, V3AEm
 
 
 def version_dir(path):
@@ -82,6 +83,8 @@ class ExperimentLog:
                 pl_module = VanillaVAE
             elif self.model_name == VV_VAE:
                 pl_module = V3AE
+            elif self.model_name == VV_VAE_MANIFOLD:
+                pl_module = V3AEm
             else:
                 raise NotImplementedError(f"Model {self.model_name} not implemented")
         else:
