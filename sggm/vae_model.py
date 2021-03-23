@@ -2,7 +2,7 @@ import geoml.nnj as nnj
 import numpy as np
 import pytorch_lightning as pl
 import torch
-import torch.distributions as tcd
+import torch.distributions as D
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -157,7 +157,7 @@ class BaseVAE(pl.LightningModule):
         if mc_integration:
             z = q.rsample(torch.Size([self.n_mc_samples]))
             return torch.mean(q.log_prob(z) - p.log_prob(z), dim=0)
-        return tcd.kl_divergence(q, p)
+        return D.kl_divergence(q, p)
 
     def elbo(self, ellk, kl, train: bool = False):
         β = self.β_elbo if train else 1 / 2
@@ -165,17 +165,17 @@ class BaseVAE(pl.LightningModule):
 
     def sample_latent(
         self, mu: torch.Tensor, std: torch.Tensor
-    ) -> Tuple[torch.Tensor, tcd.Distribution, tcd.Distribution]:
+    ) -> Tuple[torch.Tensor, D.Distribution, D.Distribution]:
         # Returns latent_samples, posterior, prior
         raise NotImplementedError("Method must be overriden by child VAE model")
 
     def sample_generative(
         self, mu: torch.Tensor, std: torch.Tensor
-    ) -> Tuple[torch.Tensor, tcd.Distribution]:
+    ) -> Tuple[torch.Tensor, D.Distribution]:
         # Returns generated_samples, decoder
         raise NotImplementedError("Method must be overriden by child VAE model")
 
-    def forward(self, x: Tensor) -> Tuple[torch.Tensor, tcd.Distribution]:
+    def forward(self, x: Tensor) -> Tuple[torch.Tensor, D.Distribution]:
         # Reconstruction
         # Returns generated_samples, decoder
         raise NotImplementedError("Method must be overriden by child VAE model")
@@ -295,19 +295,19 @@ class VanillaVAE(BaseVAE):
 
     def sample_latent(self, mu, std):
         # batch_shape [batch_shape] event_shape [latent_size]
-        q = tcd.Independent(tcd.Normal(mu, std + self.eps), 1)
+        q = D.Independent(D.Normal(mu, std + self.eps), 1)
         z = q.rsample()  # rsample implies reparametrisation
-        p = tcd.Independent(tcd.Normal(torch.zeros_like(z), torch.ones_like(z)), 1)
+        p = D.Independent(D.Normal(torch.zeros_like(z), torch.ones_like(z)), 1)
         return z, q, p
 
     def sample_generative(self, mu, std):
         # batch_shape [batch_shape] event_shape [input_size]
         if self._gaussian_decoder:
-            p = tcd.Independent(tcd.Normal(mu, std + self.eps), 1)
+            p = D.Independent(D.Normal(mu, std + self.eps), 1)
             x = p.rsample()
 
         if self._bernouilli_decoder:
-            p = tcd.Independent(tcd.Bernoulli(mu), 1)
+            p = D.Independent(D.Bernoulli(mu), 1)
             x = p.sample()
 
         return x, p
@@ -553,12 +553,12 @@ class V3AE(BaseVAE):
         print(f"OK | [{agg_z.shape}]", flush=True)
 
         # two options: pass all in forward pass, or generate pseudo-inputs batch per batch
-        q_z_x = tcd.Independent(tcd.Normal(agg_q_z_x_mean, agg_q_z_x_stddev), 1)
+        q_z_x = D.Independent(D.Normal(agg_q_z_x_mean, agg_q_z_x_stddev), 1)
         p_z_mean, p_z_stddev = (
             p_z_mean[0].repeat(agg_z.shape[0], 1),
             p_z_stddev[0].repeat(agg_z.shape[0], 1),
         )
-        p_z = tcd.Independent(tcd.Normal(p_z_mean, p_z_stddev), 1)
+        p_z = D.Independent(D.Normal(p_z_mean, p_z_stddev), 1)
         z_hat = self.generate_z_out(agg_z, q_z_x, p_z)
         # # Create DL
         self.pig_dl = DataLoader(
@@ -569,8 +569,8 @@ class V3AE(BaseVAE):
     def generate_z_out(
         self,
         z: torch.Tensor,
-        q_z_x: tcd.Distribution,
-        p_z: tcd.Distribution,
+        q_z_x: D.Distribution,
+        p_z: D.Distribution,
         averaged_std: bool = False,
         **kwargs,
     ) -> torch.Tensor:
@@ -584,8 +584,8 @@ class V3AE(BaseVAE):
             else:
                 std = torch.sqrt(q_z_x.variance)
             # batch_shape [BS] event_shape [event_shape]
-            q_out_z_x = tcd.Independent(
-                tcd.Normal(
+            q_out_z_x = D.Independent(
+                D.Normal(
                     q_z_x.mean,
                     self.kde_bandwidth_multiplier * std + self.eps,
                 ),
@@ -597,8 +597,8 @@ class V3AE(BaseVAE):
             # %
             gd_n_steps, gd_lr, gd_threshold = 5, 5e-1, 1
             # batch_shape [] event_shape [event_shape]
-            agg_p_z = tcd.Independent(
-                tcd.Normal(p_z.base_dist.mean[0], p_z.base_dist.stddev[0]),
+            agg_p_z = D.Independent(
+                D.Normal(p_z.base_dist.mean[0], p_z.base_dist.stddev[0]),
                 1,
             )
             # [BS, *self.latent_dims]
@@ -618,15 +618,15 @@ class V3AE(BaseVAE):
                 q_z_x.base_dist.mean,
                 q_z_x.base_dist.stddev,
             )
-            agg_q_z_x = tcd.Independent(tcd.Normal(means, stddevs), 1)
-            mix = tcd.Categorical(
+            agg_q_z_x = D.Independent(D.Normal(means, stddevs), 1)
+            mix = D.Categorical(
                 torch.ones(
                     means.shape[0],
                 )
             )
-            agg_q_z_x = tcd.MixtureSameFamily(mix, agg_q_z_x)
-            q_start = tcd.Independent(
-                tcd.Normal(
+            agg_q_z_x = D.MixtureSameFamily(mix, agg_q_z_x)
+            q_start = D.Independent(
+                D.Normal(
                     q_z_x.mean,
                     2 * torch.ones_like(q_z_x.mean),
                 ),
@@ -696,26 +696,26 @@ class V3AE(BaseVAE):
     def sample_latent(self, mu, std, mc_samples: bool = False):
         # batch_shape [batch_shape] event_shape [latent_size]
         std = std + self.eps
-        q = tcd.Independent(tcd.Normal(mu, std), 1)
+        q = D.Independent(D.Normal(mu, std), 1)
         z = (
             q.rsample(torch.Size([self.n_mc_samples]))
             if mc_samples
             else q.rsample(torch.Size([1]))
         )  # rsample implies reparametrisation
-        p = tcd.Independent(tcd.Normal(torch.zeros_like(mu), torch.ones_like(std)), 1)
+        p = D.Independent(D.Normal(torch.zeros_like(mu), torch.ones_like(std)), 1)
         return z, q, p
 
     def sample_precision(self, alpha, beta):
         # batch_shape [n_mc_samples, BS] event_shape [input_size]
         # alpha = alpha + self.eps
         # beta = beta + self.eps
-        q = tcd.Independent(tcd.Gamma(alpha, beta), 1)
+        q = D.Independent(D.Gamma(alpha, beta), 1)
         lbd = q.rsample()
         # Reshape prior to match [n_mc_samples, BS, input_size]
         prior_α = self.prior_α.flatten().repeat(alpha.shape[0], alpha.shape[1], 1)
         prior_β = self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1)
-        p = tcd.Independent(
-            tcd.Gamma(
+        p = D.Independent(
+            D.Gamma(
                 prior_α,
                 prior_β,
             ),
@@ -728,15 +728,15 @@ class V3AE(BaseVAE):
         # beta = beta + self.eps
         # alpha = alpha + self.eps
         if self._student_t_decoder:
-            p = tcd.Independent(
-                tcd.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
+            p = D.Independent(
+                D.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
             )
             x = p.rsample()
 
         elif self._bernouilli_decoder:
             # Note the Bernouilli's support is {0, 1} -> not validating args allow to evaluate it on [0, 1]
             # See https://pytorch.org/docs/stable/distributions.html#continuousbernoulli for improvement.
-            p = tcd.Independent(tcd.Bernoulli(mu, validate_args=False), 1)
+            p = D.Independent(D.Bernoulli(mu, validate_args=False), 1)
             x = p.sample()
 
         # first dim is num of latent z samples, only keep the reconstructed from the first draw
@@ -782,7 +782,7 @@ class V3AE(BaseVAE):
 
     def ood_kl(
         self,
-        p_λ: tcd.Distribution,
+        p_λ: D.Distribution,
         z: torch.Tensor,
     ) -> torch.Tensor:
 
@@ -794,7 +794,7 @@ class V3AE(BaseVAE):
             # [self.n_mc_samples, BS, self.input_size]
             _, _, α_z_out, β_z_out = self.parametrise_z(z_out)
             # batch_shape [self.n_mc_samples, BS] event_shape [self.input_size]
-            q_λ_z_out = tcd.Independent(tcd.Gamma(α_z_out, β_z_out), 1)
+            q_λ_z_out = D.Independent(D.Gamma(α_z_out, β_z_out), 1)
             # [n_mc_sample, self.input_size]
             kl_divergence_lbd_out = self.kl(q_λ_z_out, p_λ)
             # [self.input_size]

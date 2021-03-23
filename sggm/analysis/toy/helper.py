@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
-import torch.distributions as tcd
+import torch.distributions as D
 
 from matplotlib.axes import Axes
 from sggm.types_ import Tuple, List
@@ -262,7 +262,7 @@ def kl_grad_shift_plot(
         μ_x, α_x, β_x = model(torch.Tensor(x_plot))
         kl = model.kl(α_x, β_x, model.prior_α, model.prior_β)
         ellk = model.ellk(μ_x, α_x, β_x, torch.Tensor(y_plot))
-        mllk = tcd.StudentT(2 * α_x, μ_x, torch.sqrt(β_x / α_x)).log_prob(y_plot)
+        mllk = D.StudentT(2 * α_x, μ_x, torch.sqrt(β_x / α_x)).log_prob(y_plot)
 
         # TODO likelihood remove once study over
         gm = GaussianMixture(n_components=5).fit(x_train.reshape(-1, 1))

@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
-import torch.distributions as tcd
+import torch.distributions as D
 
 from typing import Tuple
 from mpl_toolkits.mplot3d import Axes3D

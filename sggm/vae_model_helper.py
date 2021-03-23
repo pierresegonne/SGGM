@@ -1,6 +1,6 @@
 import math
 import torch
-import torch.distributions as tcd
+import torch.distributions as D
 
 from functools import reduce
 from numbers import Number
@@ -37,7 +37,7 @@ def check_ood_z_generation_method(method: str) -> str:
 
 
 def density_gradient_descent(
-    distribution: tcd.Distribution, x_0: torch.Tensor, params: dict
+    distribution: D.Distribution, x_0: torch.Tensor, params: dict
 ) -> torch.Tensor:
     N_steps, lr, threshold = params["N_steps"], params["lr"], params["threshold"]
 

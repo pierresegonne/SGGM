@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
-import torch.distributions as tcd
+import torch.distributions as D
 
 from matplotlib.axes import Axes
 from sggm.types_ import Tuple, List

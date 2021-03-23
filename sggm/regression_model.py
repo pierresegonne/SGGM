@@ -1,7 +1,7 @@
 import numpy as np
 import pytorch_lightning as pl
 import torch
-import torch.distributions as tcd
+import torch.distributions as D
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -225,7 +225,7 @@ class VariationalRegressor(pl.LightningModule):
             mean_precision = self.α(x) / self.β(x)
             σ = 1 / torch.sqrt(mean_precision + self.eps)
         else:
-            qp = tcd.Gamma(self.α(x), self.β(x))
+            qp = D.Gamma(self.α(x), self.β(x))
             samples_precision = qp.rsample(torch.Size([self.n_mc_samples]))
             precision = torch.mean(samples_precision, 0, True)
             σ = 1 / torch.sqrt(precision)
@@ -377,9 +377,9 @@ class VariationalRegressor(pl.LightningModule):
         ε: float = 1e-10,
     ) -> torch.Tensor:
         β = β + ε
-        qp = tcd.Gamma(α, β)
-        pp = tcd.Gamma(a, b)
-        return tcd.kl_divergence(qp, pp)
+        qp = D.Gamma(α, β)
+        pp = D.Gamma(a, b)
+        return D.kl_divergence(qp, pp)
 
     def elbo(
         self, ellk: torch.Tensor, kl: torch.Tensor, train: bool = True
@@ -463,7 +463,7 @@ class VariationalRegressor(pl.LightningModule):
 
         y_pred = self.predictive_mean(x)
 
-        m_p = tcd.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
+        m_p = D.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
 
         # ---------
         # Metrics
@@ -492,9 +492,9 @@ class VariationalRegressor(pl.LightningModule):
         # Sample fit
         ancestral = False
         if ancestral:
-            lbds = tcd.Gamma(α_x, β_x).sample((1,))
+            lbds = D.Gamma(α_x, β_x).sample((1,))
             samples_y = (
-                tcd.Normal(μ_x, 1 / torch.sqrt(lbds)).sample((1,)).reshape(y.shape)
+                D.Normal(μ_x, 1 / torch.sqrt(lbds)).sample((1,)).reshape(y.shape)
             )
         else:
             samples_y = m_p.sample((1,)).reshape(y.shape)
