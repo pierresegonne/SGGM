@@ -66,6 +66,8 @@ from sggm.definitions import (
     SHIFTING_PROPORTION_TOTAL,
     DIGITS,
     SPLIT_TRAINING,
+    PRIOR_α,
+    PRIOR_β,
 )
 from sggm.definitions import (
     experiments_activation_function,
