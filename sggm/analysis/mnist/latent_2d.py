@@ -88,6 +88,7 @@ def show_2d_latent_space(
                 z_latent_mesh
             )
             var = decoder_β / (decoder_α - 1)
+            var = decoder_β
             # %
             display_kl = True
             if display_kl:
@@ -111,13 +112,15 @@ def show_2d_latent_space(
                     _kl = model.kl(q, p)
                     kl[idx_low:idx_high] = _kl
 
-                kl = kl.reshape(*x_mesh.shape)
-                print(kl)
+                kl = kl.reshape(*x_mesh.shape) / prior_α.shape[1]
                 fig, ax = plt.subplots()
-                ax.imshow(
+                cax = ax.imshow(
                     kl,
                     extent=(-extent, extent, -extent, extent),
+                    vmin=0,
+                    vmax=15,
                 )
+                fig.colorbar(cax)
                 plt.show()
                 exit()
             # var = model.decoder_α(z_latent_mesh)

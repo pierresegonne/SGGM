@@ -469,7 +469,7 @@ class V3AE(BaseVAE):
             nn.Softplus(),
         )
 
-        self.prior_α = 1.625 * torch.ones((28, 28))
+        self.prior_α = 0.39 * torch.ones((28, 28))
         self.prior_β = 0.0010704155012337458 * torch.ones((28, 28))
 
         # Save hparams

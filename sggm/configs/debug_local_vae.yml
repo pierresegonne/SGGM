@@ -1,4 +1,4 @@
-- name: test_v3aem_kl
+- name: test_v3aem_kl_2
   experiment_name: mnist_2d
   model_name: v3ae
   n_workers: 0
