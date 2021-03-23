@@ -13,6 +13,8 @@ from sggm.definitions import (
     VV_VAE,
     VV_VAE_MANIFOLD,
     PIG_DL,
+    PRIOR_α,
+    PRIOR_β,
 )
 from sggm.regression_model import VariationalRegressor
 from sggm.vae_model import VanillaVAE, V3AE, V3AEm
@@ -59,6 +61,10 @@ class VersionLog:
         )
         if PIG_DL in self.misc:
             self.model.pig_dl = self.misc[PIG_DL]
+        if PRIOR_α in self.misc:
+            self.model.prior_α = self.misc[PRIOR_α]
+        if PRIOR_β in self.misc:
+            self.model.prior_β = self.misc[PRIOR_β]
 
 
 class ExperimentLog:

@@ -437,6 +437,10 @@ def cli_main():
                 misc[DIGITS] = experiment.digits
             if getattr(model, PIG_DL, None):
                 misc[PIG_DL] = model.pig_dl
+            if getattr(model, PRIOR_α, None):
+                misc[PRIOR_α] = model.prior_α
+            if getattr(model, PRIOR_β, None):
+                misc[PRIOR_β] = model.prior_β
             torch.save(misc, f"{trainer.logger.log_dir}/misc.pkl")
 
 
