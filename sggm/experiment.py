@@ -439,9 +439,9 @@ def cli_main():
                 misc[DIGITS] = experiment.digits
             if getattr(model, PIG_DL, None):
                 misc[PIG_DL] = model.pig_dl
-            if getattr(model, PRIOR_α, None):
+            if getattr(model, PRIOR_α, None) is not None:
                 misc[PRIOR_α] = model.prior_α
-            if getattr(model, PRIOR_β, None):
+            if getattr(model, PRIOR_β, None) is not None:
                 misc[PRIOR_β] = model.prior_β
             torch.save(misc, f"{trainer.logger.log_dir}/misc.pkl")
 
