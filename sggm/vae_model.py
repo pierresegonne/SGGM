@@ -489,7 +489,12 @@ class V3AE(BaseVAE):
         """ Keep reference of the datamodule on which the model is trained """
         self.dm = datamodule
 
-    def set_prior_parameters(self, datamodule: pl.LightningDataModule):
+    def set_prior_parameters(
+        self,
+        datamodule: pl.LightningDataModule,
+        min_mode: float = 1e-3,
+        max_mode: float = 1e3,
+    ):
         """
         Computes adequate prior parameters for the model for the given datamodule.
         Assumes that we can hold the dataset in memory.
@@ -505,6 +510,12 @@ class V3AE(BaseVAE):
 
         x_train_var = x_train.var(dim=0)
         prior_modes = 1 / x_train_var
+        prior_modes = torch.maximum(
+            prior_modes, min_mode * torch.ones_like(prior_modes)
+        )
+        prior_modes = torch.minimum(
+            prior_modes, max_mode * torch.ones_like(prior_modes)
+        )
         self.prior_β = 0.5 * torch.ones_like(prior_modes)
         self.prior_α = 1 + self.prior_β * prior_modes
 
