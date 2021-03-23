@@ -171,8 +171,6 @@ class Experiment:
                         ),
                         latent_dims=experiments_latent_dims(self.experiment_name),
                         learning_rate=self.learning_rate,
-                        prior_α=self.prior_alpha,
-                        prior_β=self.prior_beta,
                         τ_ood=self.tau_ood,
                         eps=self.eps,
                         n_mc_samples=self.n_mc_samples,
@@ -187,8 +185,6 @@ class Experiment:
                         ),
                         latent_dims=experiments_latent_dims(self.experiment_name),
                         learning_rate=self.learning_rate,
-                        prior_α=self.prior_alpha,
-                        prior_β=self.prior_beta,
                         τ_ood=self.tau_ood,
                         eps=self.eps,
                         n_mc_samples=self.n_mc_samples,
@@ -405,6 +401,7 @@ def cli_main():
                 model.setup_pig(datamodule)
             if isinstance(model, V3AE):
                 model.save_datamodule(datamodule)
+                model.set_prior_parameters(datamodule)
 
             # ------------
             # training

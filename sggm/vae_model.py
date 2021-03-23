@@ -416,8 +416,6 @@ class V3AE(BaseVAE):
         activation: str,
         latent_dims: Tuple[int],
         learning_rate: float = vae_parameters[LEARNING_RATE].default,
-        prior_α: float = v3ae_parameters[PRIOR_α].default,
-        prior_β: float = v3ae_parameters[PRIOR_β].default,
         τ_ood: float = v3ae_parameters[τ_OOD].default,
         eps: float = vae_parameters[EPS].default,
         n_mc_samples: int = vae_parameters[N_MC_SAMPLES].default,
@@ -471,8 +469,8 @@ class V3AE(BaseVAE):
             nn.Softplus(),
         )
 
-        self.prior_α = prior_α
-        self.prior_β = prior_β
+        self.prior_α = None
+        self.prior_β = None
 
         # Save hparams
         self.save_hyperparameters(
@@ -482,8 +480,6 @@ class V3AE(BaseVAE):
             "learning_rate",
             "eps",
             "n_mc_samples",
-            "prior_α",
-            "prior_β",
             "τ_ood",
             "ood_z_generation_method",
         )
@@ -492,6 +488,25 @@ class V3AE(BaseVAE):
     def save_datamodule(self, datamodule: pl.LightningDataModule):
         """ Keep reference of the datamodule on which the model is trained """
         self.dm = datamodule
+
+    def set_prior_parameters(self, datamodule: pl.LightningDataModule):
+        """
+        Computes adequate prior parameters for the model for the given datamodule.
+        Assumes that we can hold the dataset in memory.
+        """
+        x_train = []
+        for idx, batch in enumerate(datamodule.train_dataloader()):
+            x, _ = batch
+            x_train.append(x)
+
+        # Aggregate the whole dataset
+        x_train = torch.cat(x_train, dim=0)
+        x_train = torch.reshape(x_train, (-1, *datamodule.dims[1:]))
+
+        x_train_var = x_train.var(dim=0)
+        prior_modes = 1 / x_train_var
+        self.prior_β = 0.5 * torch.ones_like(prior_modes)
+        self.prior_α = 1 + self.prior_β * prior_modes
 
     def _setup_pi_dl(self):
         """ Generate a pseudo-input dataloader """
@@ -685,10 +700,13 @@ class V3AE(BaseVAE):
         # beta = beta + self.eps
         q = tcd.Independent(tcd.Gamma(alpha, beta), 1)
         lbd = q.rsample()
+        # Reshape prior to match [n_mc_samples, BS, input_size]
+        prior_α = self.prior_α.flatten().repeat(alpha.shape[0], alpha.shape[1], 1)
+        prior_β = self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1)
         p = tcd.Independent(
             tcd.Gamma(
-                self.prior_α * torch.ones_like(alpha),
-                self.prior_β * torch.ones_like(beta),
+                prior_α,
+                prior_β,
             ),
             1,
         )

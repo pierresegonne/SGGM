@@ -1,4 +1,4 @@
-- name: test_v3ae_for_v3aem
+- name: test_v3aem
   experiment_name: mnist_2d
   model_name: v3aem
   n_workers: 0
@@ -10,9 +10,6 @@
   digits:
     - 2
     - 5
-  # From prior_gamma_per_pixel - for MNIST only
-  prior_alpha: 0.3927581767454884
-  prior_beta: 0.0010704155012337458
   # ood
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior

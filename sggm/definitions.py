@@ -196,8 +196,6 @@ vae_parameters = {
 }
 vanilla_vae_parameters = {}
 v3ae_parameters = {
-    PRIOR_α: Param(PRIOR_α, 1.05, float),
-    PRIOR_β: Param(PRIOR_β, 1.0, float),
     τ_OOD: Param(τ_OOD, 0.0, float),
     OOD_Z_GENERATION_METHOD: Param(
         OOD_Z_GENERATION_METHOD,
