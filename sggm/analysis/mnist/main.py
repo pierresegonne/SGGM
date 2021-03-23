@@ -97,15 +97,15 @@ def plot(experiment_log, seed=False, **kwargs):
     # 2D Latent space
     if experiment_name in [MNIST_2D, FASHION_MNIST_2D]:
         # Arbitrary latent code
-        z_star = torch.Tensor([[[0, 1.5]]])
+        z_star = torch.Tensor([[[-4, -4]]])
         save_and_show(
-            show_2d_latent_space(best_model, x_test, y_test, z_star=None),
+            show_2d_latent_space(best_model, x_test, y_test, z_star=z_star),
             f"{save_folder}/_latent_space",
         )
-        # save_and_show(
-        #     show_reconstruction_arbitrary_latent(best_model, z_star),
-        #     f"{save_folder}/_arbitrary_z_reconstruction",
-        # )
+        save_and_show(
+            show_reconstruction_arbitrary_latent(best_model, z_star),
+            f"{save_folder}/_arbitrary_z_reconstruction",
+        )
 
     for other_mnist in kwargs["others"]:
         save_and_show(

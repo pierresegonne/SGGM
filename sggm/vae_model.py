@@ -469,8 +469,8 @@ class V3AE(BaseVAE):
             nn.Softplus(),
         )
 
-        self.prior_α = None
-        self.prior_β = None
+        self.prior_α = 1.625 * torch.ones((28, 28))
+        self.prior_β = 0.0010704155012337458 * torch.ones((28, 28))
 
         # Save hparams
         self.save_hyperparameters(
@@ -499,6 +499,7 @@ class V3AE(BaseVAE):
         Computes adequate prior parameters for the model for the given datamodule.
         Assumes that we can hold the dataset in memory.
         """
+        return
         x_train = []
         for idx, batch in enumerate(datamodule.train_dataloader()):
             x, _ = batch

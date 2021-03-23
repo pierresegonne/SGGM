@@ -3,6 +3,7 @@ import numpy as np
 import pytorch_lightning as pl
 import seaborn as sns
 import torch
+import torch.distributions as D
 
 from torch import no_grad
 
@@ -25,8 +26,6 @@ def show_reconstruction_arbitrary_latent(
     x_hat = batch_reshape(x_hat, model.input_dims)
     x_mu = batch_reshape(p_x.mean, model.input_dims)
     x_var = batch_reshape(p_x.variance, model.input_dims)
-    print(x_var.min(), x_var.max(), x_var.mean(), x_var.std())
-    print(x_var.shape)
 
     fig, (ax_reconstruct, ax_mean, ax_std) = plt.subplots(3, 1)
     # Reconstruction
@@ -61,7 +60,7 @@ def show_pseudo_inputs(ax, model):
 
 
 def show_2d_latent_space(
-    model, x, y, title="TITLE", show_pi=True, show_geodesic=True, z_star=None
+    model, x, y, title="TITLE", show_pi=False, show_geodesic=False, z_star=None
 ):
     digits = torch.unique(y)
     with torch.no_grad():
@@ -85,7 +84,42 @@ def show_2d_latent_space(
         if isinstance(model, VanillaVAE):
             var = model.decoder_std(z_latent_mesh)
         if isinstance(model, V3AE):
-            var = model.decoder_β(z_latent_mesh) / (model.decoder_α(z_latent_mesh) - 1)
+            decoder_α, decoder_β = model.decoder_α(z_latent_mesh), model.decoder_β(
+                z_latent_mesh
+            )
+            var = decoder_β / (decoder_α - 1)
+            # %
+            display_kl = True
+            if display_kl:
+                _bs = 1028
+                N = var.shape[0]
+                kl = torch.empty((N))
+                prior_α = model.prior_α.flatten().repeat(_bs, 1)
+                prior_β = model.prior_β.flatten().repeat(_bs, 1)
+                p = D.Independent(
+                    D.Gamma(
+                        prior_α,
+                        prior_β,
+                    ),
+                    1,
+                )
+                for i in range(N // _bs):
+                    idx_low, idx_high = i * _bs, (i + 1) * _bs
+                    _decoder_α = decoder_α[idx_low:idx_high]
+                    _decoder_β = decoder_β[idx_low:idx_high]
+                    q = D.Independent(D.Gamma(_decoder_α, _decoder_β), 1)
+                    _kl = model.kl(q, p)
+                    kl[idx_low:idx_high] = _kl
+
+                kl = kl.reshape(*x_mesh.shape)
+                print(kl)
+                fig, ax = plt.subplots()
+                ax.imshow(
+                    kl,
+                    extent=(-extent, extent, -extent, extent),
+                )
+                plt.show()
+                exit()
             # var = model.decoder_α(z_latent_mesh)
     # Accumulated gradient over all output cf nicki and martin
     var = torch.mean(var, dim=1)
