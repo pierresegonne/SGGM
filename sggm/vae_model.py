@@ -557,9 +557,9 @@ class V3AE(BaseVAE):
         with torch.no_grad():
             for idx, batch in enumerate(iter(self.dm.train_dataloader())):
                 x, _ = batch
+                # dm not registered on device
+                x = x.to(self.device)
                 # Actually don't need that, only keep the encoded z, with generation batch by batch
-                print(f"x device in setup pi dl: {x.device}")
-                print(self.device)
                 x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
                 # Only keep one mc_sample
                 z = z[0]
@@ -741,8 +741,14 @@ class V3AE(BaseVAE):
         q = D.Independent(D.Gamma(alpha, beta), 1)
         lbd = q.rsample()
         # Reshape prior to match [n_mc_samples, BS, input_size]
-        prior_α = self.prior_α.flatten().repeat(alpha.shape[0], alpha.shape[1], 1).type_as(alpha)
-        prior_β = self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
+        prior_α = (
+            self.prior_α.flatten()
+            .repeat(alpha.shape[0], alpha.shape[1], 1)
+            .type_as(alpha)
+        )
+        prior_β = (
+            self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
+        )
         p = D.Independent(
             D.Gamma(
                 prior_α,
