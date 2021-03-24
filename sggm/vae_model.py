@@ -657,7 +657,7 @@ class V3AE(BaseVAE):
             mix = D.Categorical(
                 torch.ones(
                     means.shape[0],
-                )
+                ).to(self.device)
             )
             agg_q_z_x = D.MixtureSameFamily(mix, agg_q_z_x)
             q_start = D.Independent(
