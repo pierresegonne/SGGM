@@ -55,7 +55,7 @@ class VersionLog:
             self.hparams = yaml.load(hparams_file, Loader=yaml.FullLoader)
         # misc
         self.misc = (
-            torch.load(f"{version_path}/misc.pkl")
+            torch.load(f"{version_path}/misc.pkl", map_location=torch.device("cpu"))
             if os.path.exists(f"{version_path}/misc.pkl")
             else None
         )
