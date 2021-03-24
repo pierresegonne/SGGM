@@ -672,6 +672,8 @@ class V3AE(BaseVAE):
                 z_start,
                 {"N_steps": gd_n_steps, "lr": gd_lr, "threshold": gd_threshold},
             )
+        else:
+            z_out = torch.zeros_like(z)
 
         return z_out
 
