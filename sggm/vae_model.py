@@ -662,6 +662,7 @@ class V3AE(BaseVAE):
                 1,
             )
             z_start = q_start.sample((1,)).reshape(*z.shape)
+            print(agg_q_z_x.base_dist.mean.device)
             print(z_start.device)
             exit()
             z_out = density_gradient_descent(
