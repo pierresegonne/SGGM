@@ -580,6 +580,7 @@ class V3AE(BaseVAE):
                         (agg_q_z_x_stddev, q_z_x.base_dist.stddev), dim=0
                     )
         print(f"OK | [{agg_z.shape}]", flush=True)
+        agg_z = agg_z.to(self.device)
 
         # two options: pass all in forward pass, or generate pseudo-inputs batch per batch
         agg_q_z_x_mean = agg_q_z_x_mean.to(self.device)
@@ -590,6 +591,8 @@ class V3AE(BaseVAE):
             p_z_mean[0].repeat(agg_z.shape[0], 1),
             p_z_stddev[0].repeat(agg_z.shape[0], 1),
         )
+        p_z_mean = p_z_mean.to(self.device)
+        p_z_stddev = p_z_stddev.to(self.device)
         p_z = D.Independent(D.Normal(p_z_mean, p_z_stddev), 1)
         z_hat = self.generate_z_out(agg_z, q_z_x, p_z)
         # # Create DL
