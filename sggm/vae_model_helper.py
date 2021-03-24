@@ -43,8 +43,6 @@ def density_gradient_descent(
 
     x_hat = x_0.clone()
     x_hat.requires_grad = True
-    print(x_hat.device)
-    exit()
 
     print("   PIG gradient descent:", end=" ", flush=True)
     for n in range(N_steps):
