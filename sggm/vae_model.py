@@ -528,15 +528,12 @@ class V3AE(BaseVAE):
             self.prior_β = 0.5 * torch.ones_like(prior_modes).type_as(x_train)
             self.prior_α = 1 + self.prior_β * prior_modes
         elif (prior_α is not None) & (prior_β is not None):
-            _x, _ = next(iter(datamodule.train_dataloader()))
-            print(_x.device)
-            exit()
             assert type(prior_α) == type(
                 prior_β
             ), "prior_α and prior_β are not of the same type"
             if isinstance(prior_α, float) | isinstance(prior_α, int):
-                self.prior_α = prior_α * torch.ones(datamodule.dims).type_as(_x)
-                self.prior_β = prior_β * torch.ones(datamodule.dims).type_as(_x)
+                self.prior_α = prior_α * torch.ones(datamodule.dims)
+                self.prior_β = prior_β * torch.ones(datamodule.dims)
             elif isinstance(prior_α, torch.Tensor):
                 assert (
                     prior_α.shape == datamodule.dims
@@ -544,8 +541,8 @@ class V3AE(BaseVAE):
                 assert (
                     prior_β.shape == datamodule.dims
                 ), "Incorrect dimensions for tensor prior_β"
-                self.prior_α = prior_α.type_as(_x)
-                self.prior_β = prior_β.type_as(_x)
+                self.prior_α = prior_α
+                self.prior_β = prior_β
         else:
             raise ValueError("Incorrect prior values provided, prior_α and prior_β")
 
@@ -742,8 +739,8 @@ class V3AE(BaseVAE):
         q = D.Independent(D.Gamma(alpha, beta), 1)
         lbd = q.rsample()
         # Reshape prior to match [n_mc_samples, BS, input_size]
-        prior_α = self.prior_α.flatten().repeat(alpha.shape[0], alpha.shape[1], 1)
-        prior_β = self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1)
+        prior_α = self.prior_α.flatten().repeat(alpha.shape[0], alpha.shape[1], 1).type_as(alpha)
+        prior_β = self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
         p = D.Independent(
             D.Gamma(
                 prior_α,
