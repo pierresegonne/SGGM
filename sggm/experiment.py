@@ -403,7 +403,11 @@ def cli_main():
                 model.setup_pig(datamodule)
             if isinstance(model, V3AE):
                 model.save_datamodule(datamodule)
-                model.set_prior_parameters(datamodule)
+                print(experiment.prior_α, experiment.prior_β)
+                exit()
+                model.set_prior_parameters(
+                    datamodule, prior_α=experiment.prior_α, prior_β=experiment.prior_β
+                )
 
             # ------------
             # training

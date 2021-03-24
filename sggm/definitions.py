@@ -203,6 +203,8 @@ v3ae_parameters = {
         none_or_str,
         choices=OOD_Z_GENERATION_AVAILABLE_METHODS,
     ),
+    PRIOR_α: Param(PRIOR_α, None, float),
+    PRIOR_β: Param(PRIOR_β, None, float),
     KDE_BANDWIDTH_MULTIPLIER: Param(KDE_BANDWIDTH_MULTIPLIER, 10, float),
 }
 generative_models = [VANILLA_VAE, VV_VAE, VV_VAE_MANIFOLD]

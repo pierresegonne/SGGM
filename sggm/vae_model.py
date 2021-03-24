@@ -1,3 +1,4 @@
+from typing import Union
 import geoml.nnj as nnj
 import numpy as np
 import pytorch_lightning as pl
@@ -469,8 +470,9 @@ class V3AE(BaseVAE):
             nn.Softplus(),
         )
 
-        self.prior_α = 0.39 * torch.ones((28, 28))
-        self.prior_β = 0.0010704155012337458 * torch.ones((28, 28))
+        # set with `set_prior_parameters`
+        self.prior_α = None
+        self.prior_β = None
 
         # Save hparams
         self.save_hyperparameters(
@@ -492,33 +494,50 @@ class V3AE(BaseVAE):
     def set_prior_parameters(
         self,
         datamodule: pl.LightningDataModule,
+        prior_α: Union[float, torch.Tensor] = None,
+        prior_β: Union[float, torch.Tensor] = None,
         min_mode: float = 1e-3,
         max_mode: float = 1e3,
     ):
         """
         Computes adequate prior parameters for the model for the given datamodule.
         Assumes that we can hold the dataset in memory.
+
+        OR
+        applies the provided prior parameters
         """
-        return
-        x_train = []
-        for idx, batch in enumerate(datamodule.train_dataloader()):
-            x, _ = batch
-            x_train.append(x)
+        if (prior_α is None) & (prior_β is None):
+            x_train = []
+            for idx, batch in enumerate(datamodule.train_dataloader()):
+                x, _ = batch
+                x_train.append(x)
 
-        # Aggregate the whole dataset
-        x_train = torch.cat(x_train, dim=0)
-        x_train = torch.reshape(x_train, (-1, *datamodule.dims[1:]))
+            # Aggregate the whole dataset
+            x_train = torch.cat(x_train, dim=0)
+            x_train = torch.reshape(x_train, (-1, *datamodule.dims[1:]))
 
-        x_train_var = x_train.var(dim=0)
-        prior_modes = 1 / x_train_var
-        prior_modes = torch.maximum(
-            prior_modes, min_mode * torch.ones_like(prior_modes)
-        )
-        prior_modes = torch.minimum(
-            prior_modes, max_mode * torch.ones_like(prior_modes)
-        )
-        self.prior_β = 0.5 * torch.ones_like(prior_modes)
-        self.prior_α = 1 + self.prior_β * prior_modes
+            x_train_var = x_train.var(dim=0)
+            prior_modes = 1 / x_train_var
+            prior_modes = torch.maximum(
+                prior_modes, min_mode * torch.ones_like(prior_modes)
+            )
+            prior_modes = torch.minimum(
+                prior_modes, max_mode * torch.ones_like(prior_modes)
+            )
+            self.prior_β = 0.5 * torch.ones_like(prior_modes)
+            self.prior_α = 1 + self.prior_β * prior_modes
+        elif (prior_α is not None) & (prior_β is not None):
+            assert type(prior_α) == type(prior_β), "prior_α and prior_β are not of the same type"
+            if isinstance(prior_α, float):
+                self.prior_α = prior_α * torch.ones(datamodule.dims)
+                self.prior_β = prior_β * torch.ones(datamodule.dims)
+            elif isinstance(prior_α, torch.Tensor):
+                assert prior_α.shape == datamodule.dims, "Incorrect dimensions for tensor prior_α"
+                assert prior_β.shape == datamodule.dims, "Incorrect dimensions for tensor prior_β"
+                self.prior_α = prior_α
+                self.prior_β = prior_β
+        else:
+            raise ValueError("Incorrect prior values provided, prior_α and prior_β")
 
     def _setup_pi_dl(self):
         """ Generate a pseudo-input dataloader """
