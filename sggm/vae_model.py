@@ -529,6 +529,8 @@ class V3AE(BaseVAE):
             self.prior_α = 1 + self.prior_β * prior_modes
         elif (prior_α is not None) & (prior_β is not None):
             _x, _ = next(iter(datamodule.train_dataloader()))
+            print(_x.device)
+            exit()
             assert type(prior_α) == type(
                 prior_β
             ), "prior_α and prior_β are not of the same type"
