@@ -559,6 +559,7 @@ class V3AE(BaseVAE):
                 x, _ = batch
                 # Actually don't need that, only keep the encoded z, with generation batch by batch
                 print(f"x device in setup pi dl: {x.device}")
+                print(self.device)
                 x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
                 # Only keep one mc_sample
                 z = z[0]
