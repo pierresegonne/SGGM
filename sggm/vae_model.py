@@ -644,8 +644,8 @@ class V3AE(BaseVAE):
             gd_n_steps, gd_lr, gd_threshold = 10, 4e-1, 0.007
             # %
             means, stddevs = (
-                q_z_x.base_dist.mean,
-                q_z_x.base_dist.stddev,
+                q_z_x.base_dist.mean.to(self.device),
+                q_z_x.base_dist.stddev.to(self.device),
             )
             agg_q_z_x = D.Independent(D.Normal(means, stddevs), 1)
             mix = D.Categorical(
