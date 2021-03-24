@@ -494,8 +494,8 @@ class V3AE(BaseVAE):
     def set_prior_parameters(
         self,
         datamodule: pl.LightningDataModule,
-        prior_α: Union[float, torch.Tensor] = None,
-        prior_β: Union[float, torch.Tensor] = None,
+        prior_α: Union[int, float, torch.Tensor] = None,
+        prior_β: Union[int, float, torch.Tensor] = None,
         min_mode: float = 1e-3,
         max_mode: float = 1e3,
     ):
@@ -527,13 +527,19 @@ class V3AE(BaseVAE):
             self.prior_β = 0.5 * torch.ones_like(prior_modes)
             self.prior_α = 1 + self.prior_β * prior_modes
         elif (prior_α is not None) & (prior_β is not None):
-            assert type(prior_α) == type(prior_β), "prior_α and prior_β are not of the same type"
-            if isinstance(prior_α, float):
+            assert type(prior_α) == type(
+                prior_β
+            ), "prior_α and prior_β are not of the same type"
+            if isinstance(prior_α, float) | isinstance(prior_α, int):
                 self.prior_α = prior_α * torch.ones(datamodule.dims)
                 self.prior_β = prior_β * torch.ones(datamodule.dims)
             elif isinstance(prior_α, torch.Tensor):
-                assert prior_α.shape == datamodule.dims, "Incorrect dimensions for tensor prior_α"
-                assert prior_β.shape == datamodule.dims, "Incorrect dimensions for tensor prior_β"
+                assert (
+                    prior_α.shape == datamodule.dims
+                ), "Incorrect dimensions for tensor prior_α"
+                assert (
+                    prior_β.shape == datamodule.dims
+                ), "Incorrect dimensions for tensor prior_β"
                 self.prior_α = prior_α
                 self.prior_β = prior_β
         else:
