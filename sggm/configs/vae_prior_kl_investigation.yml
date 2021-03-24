@@ -19,14 +19,14 @@
     - 5
   # ood
   tau_ood: 0.5
-  ood_z_generation_method: kde
+  ood_z_generation_method: gd_aggregate_posterior
   kde_bandwidth_multiplier: 9
   prior_α: 1.625
   prior_β: 0.0010704155012337458
   # misc
   n_trials: 1
   seed: 3
-  max_epochs: 100
+  max_epochs: 10
   # pl trainer
   early_stopping_patience: 100
   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)

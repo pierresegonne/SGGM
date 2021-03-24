@@ -630,6 +630,8 @@ class V3AE(BaseVAE):
                 D.Normal(p_z.base_dist.mean[0], p_z.base_dist.stddev[0]),
                 1,
             )
+            print(p_z.base_dist.mean[0].device)
+            exit()
             # [BS, *self.latent_dims]
             z_out_start = agg_p_z.sample((z.shape[0],))
             # [BS, *self.latent_dims]
