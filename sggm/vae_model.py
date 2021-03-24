@@ -9,6 +9,7 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 from itertools import chain
+from torch.utils import data
 from torch.utils.data import DataLoader, TensorDataset
 
 from geoml import EmbeddedManifold
@@ -524,15 +525,16 @@ class V3AE(BaseVAE):
             prior_modes = torch.minimum(
                 prior_modes, max_mode * torch.ones_like(prior_modes)
             )
-            self.prior_β = 0.5 * torch.ones_like(prior_modes)
+            self.prior_β = 0.5 * torch.ones_like(prior_modes).type_as(x_train)
             self.prior_α = 1 + self.prior_β * prior_modes
         elif (prior_α is not None) & (prior_β is not None):
+            _x, _ = next(iter(datamodule.train_dataloader()))
             assert type(prior_α) == type(
                 prior_β
             ), "prior_α and prior_β are not of the same type"
             if isinstance(prior_α, float) | isinstance(prior_α, int):
-                self.prior_α = prior_α * torch.ones(datamodule.dims)
-                self.prior_β = prior_β * torch.ones(datamodule.dims)
+                self.prior_α = prior_α * torch.ones(datamodule.dims).type_as(_x)
+                self.prior_β = prior_β * torch.ones(datamodule.dims).type_as(_x)
             elif isinstance(prior_α, torch.Tensor):
                 assert (
                     prior_α.shape == datamodule.dims
@@ -540,8 +542,8 @@ class V3AE(BaseVAE):
                 assert (
                     prior_β.shape == datamodule.dims
                 ), "Incorrect dimensions for tensor prior_β"
-                self.prior_α = prior_α
-                self.prior_β = prior_β
+                self.prior_α = prior_α.type_as(_x)
+                self.prior_β = prior_β.type_as(_x)
         else:
             raise ValueError("Incorrect prior values provided, prior_α and prior_β")
 
