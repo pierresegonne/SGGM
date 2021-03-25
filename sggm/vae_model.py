@@ -881,7 +881,7 @@ class V3AE(BaseVAE):
         ).mean()
 
         # Also verify that we are only training the decoder's variance
-        kl_divergence_lbd_ood = None
+        kl_divergence_lbd_ood = -1 * torch.ones((1,))
         if (
             (stage == TRAINING)
             & (self.ood_z_generation_method is not None)
