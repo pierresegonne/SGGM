@@ -880,8 +880,6 @@ class V3AE(BaseVAE):
         )
         # [BS]
         kl_divergence_z = self.kl(q_z_x, p_z)
-        # []
-        # kl_divergence_z = torch.mean(kl_divergence_z, dim=0)
 
         # Expected value of the ELBO
         # Equivalently minimised with its sum.
