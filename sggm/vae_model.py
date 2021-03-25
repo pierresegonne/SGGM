@@ -881,14 +881,16 @@ class V3AE(BaseVAE):
         ).mean()
 
         # Also verify that we are only training the decoder's variance
+        kl_divergence_lbd_ood = None
         if (
             (stage == TRAINING)
             & (self.ood_z_generation_method is not None)
             & (self._student_t_decoder)
         ):
             # NOTE: beware, for understandability, tau is opposite.
+            kl_divergence_lbd_ood = self.ood_kl(p_λ, z).mean()
             loss = 2 * (
-                (1 - self.τ_ood) * loss + self.τ_ood * self.ood_kl(p_λ, z).mean()
+                (1 - self.τ_ood) * loss + self.τ_ood * kl_divergence_lbd_ood
             )
 
         logs = {
@@ -897,6 +899,7 @@ class V3AE(BaseVAE):
             "kl_z": kl_divergence_z.mean(),
             "ellk_lbd": ellk_lbd.mean(),
             "kl_lbd": kl_divergence_lbd.mean(),
+            "kl_lbd_ood": kl_divergence_lbd_ood,
             "loss": loss,
         }
 
