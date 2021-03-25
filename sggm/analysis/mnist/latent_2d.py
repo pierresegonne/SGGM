@@ -68,14 +68,27 @@ def show_2d_latent_space(
             _, _, z, _, _ = model._run_step(x)
         elif isinstance(model, V3AE):
             _, _, _, q_λ_z, p_λ, z, q_z_x, _ = model._run_step(x)
+            # %
+            # [BS]
+            kl_lbd = model.kl(q_λ_z, p_λ).mean(dim=0)
+            print(kl_lbd.min(), kl_lbd.max())
+            # [BS]
+            kl_divergence_lbd_ood = model.ood_kl(p_λ, z)
+            kls = torch.cat((kl_lbd[None, :], kl_divergence_lbd_ood[None, :]), dim=0)
+            fig, ax = plt.subplots()
+            ax.violinplot(kls, showmeans=True)
+            plt.show()
+            # exit()
+
+            # %
             # keep only a single z sample
             z = z[0]
 
     fig, ax = plt.subplots()
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
     extent = 5
-    x_mesh = torch.linspace(-extent, extent, 300)
-    y_mesh = torch.linspace(-extent, extent, 300)
+    x_mesh = torch.linspace(-extent, extent, 100)
+    y_mesh = torch.linspace(-extent, extent, 100)
     x_mesh, y_mesh = torch.meshgrid(x_mesh, y_mesh)
     z_latent_mesh = torch.cat(
         (x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1
@@ -84,13 +97,14 @@ def show_2d_latent_space(
         if isinstance(model, VanillaVAE):
             var = model.decoder_std(z_latent_mesh)
         if isinstance(model, V3AE):
-            decoder_α, decoder_β = model.decoder_α(z_latent_mesh), model.decoder_β(
-                z_latent_mesh
-            )
-            var = decoder_β / (decoder_α - 1)
+            # [1, BS(meshgrid # positions), input_size]
+            _, _, decoder_α_z, decoder_β_z = model.parametrise_z(z_latent_mesh[None, :])
+            var = decoder_β_z[0] / (decoder_α_z[0] - 1)
             # %
             display_kl = True
             if display_kl:
+                # %
+                # Show variance for a reconstruction and pixel wise kl
                 # z_star = torch.Tensor([[-3.5, -3.5]])
                 # z_star = next(iter(model.pig_dl))[0][0][None, :]
                 # print(z_star)
@@ -124,29 +138,22 @@ def show_2d_latent_space(
                 # fig.colorbar(cax2)
                 # plt.show()
                 # exit()
-                _bs = 1028
-                N = var.shape[0]
+
+                # %
+                # Show latent space kl
+                _bs = 500
+                N = decoder_α_z.shape[1]
                 kl = torch.empty((N))
-                # Prior is the same for all batches
-                prior_α = model.prior_α.flatten().repeat(_bs, 1)
-                prior_β = model.prior_β.flatten().repeat(_bs, 1)
-                # batch_shape [] event_shape []
-                p = D.Independent(
-                    D.Gamma(
-                        prior_α,
-                        prior_β,
-                    ),
-                    1,
-                )
                 for i in range(N // _bs):
                     idx_low, idx_high = i * _bs, (i + 1) * _bs
-                    _decoder_α = decoder_α[idx_low:idx_high]
-                    _decoder_β = decoder_β[idx_low:idx_high]
-                    q = D.Independent(D.Gamma(_decoder_α, _decoder_β), 1)
-                    _kl = model.kl(q, p)
+                    _decoder_α_z = decoder_α_z[0][idx_low:idx_high][None, :]
+                    _decoder_β_z = decoder_β_z[0][idx_low:idx_high][None, :]
+                    _, _q_λ_z, _p_λ = model.sample_precision(_decoder_α_z, _decoder_β_z)
+                    # [BS]
+                    _kl = model.kl(_q_λ_z, _p_λ).mean(dim=0)
                     kl[idx_low:idx_high] = _kl
 
-                kl = kl.reshape(*x_mesh.shape) / prior_α.shape[1]
+                kl = kl.reshape(*x_mesh.shape)
                 fig, ax = plt.subplots()
                 cax = ax.imshow(
                     kl,
@@ -160,6 +167,13 @@ def show_2d_latent_space(
                     z_out[:, 1],
                     ".",
                 )
+                ax.plot(
+                    z[:, 0],
+                    z[:, 1],
+                    ".",
+                )
+                ax.set_xlim([-extent, extent])
+                ax.set_ylim([-extent, extent])
                 fig.colorbar(cax)
                 plt.show()
                 exit()

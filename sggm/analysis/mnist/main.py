@@ -40,7 +40,7 @@ def plot(experiment_log, seed=False, **kwargs):
     save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
 
     # Get correct datamodule
-    bs = 1024
+    bs = 500
     experiment_name = experiment_log.experiment_name
     misc = experiment_log.best_version.misc
     if ("seed" in misc) & seed:
