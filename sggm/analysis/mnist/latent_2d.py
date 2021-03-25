@@ -89,45 +89,48 @@ def show_2d_latent_space(
             )
             var = decoder_β / (decoder_α - 1)
             # %
-            display_kl = False
+            display_kl = True
             if display_kl:
-                z_star = torch.Tensor([[-3.5, -3.5]])
-                alpha = model.decoder_α(z_star)
-                beta = model.decoder_β(z_star)
-                # alpha = q_λ_z.base_dist.concentration[0, 0]
-                # beta = q_λ_z.base_dist.rate[0, 0]
-                a = p_λ.base_dist.concentration[0, 0]
-                b = p_λ.base_dist.rate[0, 0]
-                q = D.Independent(D.Gamma(alpha, beta), 0)
-                p = D.Independent(D.Gamma(a, b), 0)
-                kl = D.kl_divergence(q, p)
-                var = beta / (alpha - 1)
-                fig, (ax1, ax2) = plt.subplots(1, 2)
-                extent = 4
-                ax1.imshow(
-                    var.reshape((28, 28)),
-                    extent=(-extent, extent, -extent, extent),
-                    vmax=np.percentile(var.flatten(), 75),
-                    # vmin=np.percentile(var.flatten(), 2),
-                    # cmap=cmap,
-                )
-                cax2 = ax2.imshow(
-                    kl.reshape((28, 28)),
-                    extent=(-extent, extent, -extent, extent),
-                    # vmax=np.percentile(kl.flatten(), 75),
-                    # vmin=np.percentile(var.flatten(), 2),
-                    # cmap=cmap,
-                )
-                ax2.title.set_text(f"Avg kl: {kl.mean()}")
-                fig.colorbar(cax2)
-                plt.show()
-                exit()
+                # z_star = torch.Tensor([[-3.5, -3.5]])
+                # z_star = next(iter(model.pig_dl))[0][0][None, :]
+                # print(z_star)
+                # alpha = model.decoder_α(z_star)
+                # beta = model.decoder_β(z_star)
+                # # alpha = q_λ_z.base_dist.concentration[0, 0]
+                # # beta = q_λ_z.base_dist.rate[0, 0]
+                # a = p_λ.base_dist.concentration[0, 0]
+                # b = p_λ.base_dist.rate[0, 0]
+                # q = D.Independent(D.Gamma(alpha, beta), 0)
+                # p = D.Independent(D.Gamma(a, b), 0)
+                # kl = D.kl_divergence(q, p)
+                # var = beta / (alpha - 1)
+                # fig, (ax1, ax2) = plt.subplots(1, 2)
+                # extent = 4
+                # ax1.imshow(
+                #     var.reshape((28, 28)),
+                #     extent=(-extent, extent, -extent, extent),
+                #     vmax=np.percentile(var.flatten(), 75),
+                #     # vmin=np.percentile(var.flatten(), 2),
+                #     # cmap=cmap,
+                # )
+                # cax2 = ax2.imshow(
+                #     kl.reshape((28, 28)),
+                #     extent=(-extent, extent, -extent, extent),
+                #     # vmax=np.percentile(kl.flatten(), 75),
+                #     # vmin=np.percentile(var.flatten(), 2),
+                #     # cmap=cmap,
+                # )
+                # ax2.title.set_text(f"Avg kl: {kl.mean()}")
+                # fig.colorbar(cax2)
+                # plt.show()
+                # exit()
                 _bs = 1028
                 N = var.shape[0]
                 kl = torch.empty((N))
                 # Prior is the same for all batches
                 prior_α = model.prior_α.flatten().repeat(_bs, 1)
                 prior_β = model.prior_β.flatten().repeat(_bs, 1)
+                # batch_shape [] event_shape []
                 p = D.Independent(
                     D.Gamma(
                         prior_α,
@@ -150,6 +153,12 @@ def show_2d_latent_space(
                     extent=(-extent, extent, -extent, extent),
                     vmin=0,
                     vmax=15,
+                )
+                z_out = next(iter(model.pig_dl))[0]
+                ax.plot(
+                    z_out[:, 0],
+                    z_out[:, 1],
+                    ".",
                 )
                 fig.colorbar(cax)
                 plt.show()

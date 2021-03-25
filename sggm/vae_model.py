@@ -789,25 +789,29 @@ class V3AE(BaseVAE):
     def ellk(self, p_x_z, x, q_λ_z, p_λ):
         x = batch_flatten(x)
         if self._student_t_decoder:
-            # [n_mc_sample, BS, self.input_size]
+            # [n_mc_sample, BS, input_size]
             μ_z = p_x_z.mean
             α_z = p_x_z.base_dist.df / 2
             β_z = (p_x_z.base_dist.scale ** 2) * α_z
 
             expected_log_lambda = torch.digamma(α_z) - torch.log(β_z)
             expected_lambda = α_z / β_z
-            # [n_mc_sample, self.input_size]
+            # [n_mc_sample, BS]
+            # sum over the independent input dims
             ellk_lbd = torch.sum(
                 (1 / 2)
                 * (expected_log_lambda - log_2_pi - expected_lambda * ((x - μ_z) ** 2)),
                 dim=2,
             )
-            # [self.input_size]
+
+            # [BS]
+            # MC integration over z samples
             ellk_lbd = torch.mean(ellk_lbd, dim=0)
 
-            # [n_mc_sample, self.input_size]
+            # [n_mc_sample, BS]
             kl_divergence_lbd = self.kl(q_λ_z, p_λ)
-            # [self.input_size]
+            # [BS]
+            # MC integration over z samples
             kl_divergence_lbd = torch.mean(kl_divergence_lbd, dim=0)
             return (
                 ellk_lbd - kl_divergence_lbd,
@@ -837,9 +841,9 @@ class V3AE(BaseVAE):
             _, _, α_z_out, β_z_out = self.parametrise_z(z_out)
             # batch_shape [self.n_mc_samples, BS] event_shape [self.input_size]
             q_λ_z_out = D.Independent(D.Gamma(α_z_out, β_z_out), 1)
-            # [n_mc_sample, self.input_size]
+            # [self.n_mc_sample, BS]
             kl_divergence_lbd_out = self.kl(q_λ_z_out, p_λ)
-            # [self.input_size]
+            # [BS]
             kl_divergence_lbd_out = torch.mean(kl_divergence_lbd_out, dim=0)
             return kl_divergence_lbd_out
         return torch.zeros((1,))
@@ -870,12 +874,17 @@ class V3AE(BaseVAE):
         x, _ = batch
         x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
 
+        # [BS]
         expected_log_likelihood, ellk_lbd, kl_divergence_lbd = self.ellk(
             p_x_z, x, q_λ_z, p_λ
         )
+        # [BS]
         kl_divergence_z = self.kl(q_z_x, p_z)
-        kl_divergence_z = torch.mean(kl_divergence_z, dim=0)
+        # []
+        # kl_divergence_z = torch.mean(kl_divergence_z, dim=0)
 
+        # Expected value of the ELBO
+        # Equivalently minimised with its sum.
         loss = -self.elbo(
             expected_log_likelihood, kl_divergence_z, train=(stage == TRAINING)
         ).mean()
@@ -888,10 +897,9 @@ class V3AE(BaseVAE):
             & (self._student_t_decoder)
         ):
             # NOTE: beware, for understandability, tau is opposite.
-            kl_divergence_lbd_ood = self.ood_kl(p_λ, z).mean()
-            loss = 2 * (
-                (1 - self.τ_ood) * loss + self.τ_ood * kl_divergence_lbd_ood
-            )
+            kl_divergence_lbd_ood = self.ood_kl(p_λ, z)
+            expected_kl_divergence_lbd_ood = kl_divergence_lbd_ood.mean()
+            loss = 2 * ((1 - self.τ_ood) * loss + self.τ_ood * expected_kl_divergence_lbd_ood)
 
         logs = {
             "llk": expected_log_likelihood.sum(),
@@ -899,7 +907,7 @@ class V3AE(BaseVAE):
             "kl_z": kl_divergence_z.mean(),
             "ellk_lbd": ellk_lbd.mean(),
             "kl_lbd": kl_divergence_lbd.mean(),
-            "kl_lbd_ood": kl_divergence_lbd_ood,
+            "kl_lbd_ood": kl_divergence_lbd_ood.mean(),
             "loss": loss,
         }
 
