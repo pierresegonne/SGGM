@@ -388,13 +388,6 @@ def cli_main():
             datamodule = experiment.datamodule
             datamodule.setup()
 
-            shift_investigation = False
-            if shift_investigation:
-                print(
-                    f"{len(datamodule.train_dataset)};{len(datamodule.val_dataset)};{len(datamodule.test_dataset)}"
-                )
-                continue
-
             # ------------
             # model
             # ------------
