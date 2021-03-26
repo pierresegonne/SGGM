@@ -202,14 +202,8 @@ def show_2d_latent_space(
         elif isinstance(model, V3AE):
             _, _, _, q_λ_z, p_λ, z, q_z_x, _ = model._run_step(x)
             # %
-            x_val, _ = next(iter(model.dm.train_dataloader()))
-            _, _, _, _, _, z_val, _, _ = model._run_step(x_val)
-            print(z_val.shape)
-            # %
             # keep only a single z sample
             z = z[0]
-            z_val = z_val[0]
-            print(z_val.shape)
 
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
     extent = 5
@@ -256,9 +250,6 @@ def show_2d_latent_space(
             markeredgecolor=(*colours_rgb["white"], 0.5),
             label=f"Digit {d}",
         )
-
-    # %
-    ax.plot(z_val[:, 0], z_val[:, 1], "o", markersize=6, color=colours["pink"])
 
     if isinstance(z_star, torch.Tensor):
         z_star = z_star.flatten()
