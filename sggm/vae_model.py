@@ -907,6 +907,9 @@ class V3AE(BaseVAE):
             "kl_lbd": kl_divergence_lbd.mean(),
             "kl_lbd_ood": kl_divergence_lbd_ood.mean(),
             "loss": loss,
+            # %
+            "mean_mse": F.mse_loss(batch_reshape(p_x_z.mean[0], self.input_dims), x),
+            "samples_mse": F.mse_loss(x_hat, x)
         }
 
         # Test logs
