@@ -65,7 +65,7 @@
 
 # %
 # Higher OOD ratio
-- name: investigate_prior_kl_normal_ratio
+- name: investigate_kl
   experiment_name: mnist_2d
   model_name: v3ae
   n_workers: 0
@@ -78,9 +78,9 @@
     - 2
     - 5
   # ood
-  tau_ood: 0.5
+  tau_ood: 0.
   # TODO change
-  ood_z_generation_method: gd_aggregate_posterior
+  # ood_z_generation_method: gd_aggregate_posterior
   # kde_bandwidth_multiplier: 9
   prior_α: 1.625
   prior_β: 0.001

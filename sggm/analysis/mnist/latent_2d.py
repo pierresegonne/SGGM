@@ -5,11 +5,10 @@ import seaborn as sns
 import torch
 import torch.distributions as D
 
-from torch import no_grad
-
 from sggm.vae_model import VanillaVAE, V3AE, V3AEm
 from sggm.vae_model_helper import batch_reshape
 from sggm.styles_ import colours, colours_rgb
+from sggm.types_ import Tuple, Union
 
 colour_digits = [
     (1 / 255, 133 / 255, 90 / 255),
@@ -59,8 +58,135 @@ def show_pseudo_inputs(ax, model):
     return ax
 
 
+def show_violin_plot_kl(model: V3AE, q_λ_z: D.Gamma, p_λ: D.Gamma, z: torch.Tensor):
+    kl_lbd = model.kl(q_λ_z, p_λ).mean(dim=0)
+    # [BS]
+    kl_divergence_lbd_ood = model.ood_kl(p_λ, z)
+    kls = torch.cat((kl_lbd[None, :], kl_divergence_lbd_ood[None, :]), dim=0)
+    fig, ax = plt.subplots()
+    ax.violinplot(kls, showmeans=True)
+    plt.show()
+
+
+def show_per_pixel_uncertainty_kl(
+    model: V3AE, z_star: Union[None, torch.Tensor], extent: Union[int, float]
+):
+    z_star = torch.Tensor([[-3.5, -3.5]]) if z_star is None else z_star
+    z_star = z_star[None, :]
+    _, _, α_z, β_z = model.parametrise_z(z_star)
+    _, q_λ_z, p_λ = model.sample_precision(α_z, β_z)
+    q_α, q_β = q_λ_z.base_dist.concentration.flatten(), q_λ_z.base_dist.rate.flatten()
+    p_α, p_β = p_λ.base_dist.concentration.flatten(), p_λ.base_dist.rate.flatten()
+    q_λ_z = D.Gamma(q_α, q_β)
+    p_λ = D.Gamma(p_α, p_β)
+    kl = model.kl(q_λ_z, p_λ)
+    var = β_z / (α_z - 1)
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    extent = 4
+    ax1.imshow(
+        var.reshape((28, 28)),
+        extent=(-extent, extent, -extent, extent),
+        vmax=np.percentile(var.flatten(), 75),
+        # vmin=np.percentile(var.flatten(), 2),
+        # cmap=cmap,
+    )
+    cax2 = ax2.imshow(
+        kl.reshape((28, 28)),
+        extent=(-extent, extent, -extent, extent),
+        # vmax=np.percentile(kl.flatten(), 75),
+        # vmin=np.percentile(var.flatten(), 2),
+        # cmap=cmap,
+    )
+    ax2.title.set_text(f"Avg kl: {kl.mean():.2f}\nSum kl: {kl.sum():.2f}")
+    fig.colorbar(cax2)
+    plt.show()
+
+
+def show_kl_imshow(
+    model: V3AE,
+    z: torch.Tensor,
+    decoder_α_z: torch.Tensor,
+    decoder_β_z: torch.Tensor,
+    x_mesh_shape: Tuple[int, int],
+    extent: Union[int, float],
+    z_star: Union[None, torch.Tensor],
+):
+    _bs = 500
+    N = decoder_α_z.shape[1]
+    kl = torch.empty((N))
+    for i in range(N // _bs):
+        idx_low, idx_high = i * _bs, (i + 1) * _bs
+        _decoder_α_z = decoder_α_z[0][idx_low:idx_high][None, :]
+        _decoder_β_z = decoder_β_z[0][idx_low:idx_high][None, :]
+        _, _q_λ_z, _p_λ = model.sample_precision(_decoder_α_z, _decoder_β_z)
+        # [BS]
+        _kl = model.kl(_q_λ_z, _p_λ).mean(dim=0)
+        kl[idx_low:idx_high] = _kl
+
+    kl = kl.reshape(x_mesh_shape)
+    fig, ax = plt.subplots()
+    cax = ax.imshow(
+        kl,
+        extent=(-extent, extent, -extent, extent),
+        vmin=0,
+        # vmax=15,
+    )
+    z_out = next(iter(model.pig_dl))[0]
+    ax.plot(
+        z_out[:, 0],
+        z_out[:, 1],
+        ".",
+    )
+    ax.plot(
+        z[:, 0],
+        z[:, 1],
+        ".",
+    )
+    if isinstance(z_star, torch.Tensor):
+        z_star = z_star.flatten()
+        ax.plot(z_star[0], z_star[1], "o", markersize=6, color=colours["red"])
+    ax.set_xlim([-extent, extent])
+    ax.set_ylim([-extent, extent])
+    fig.colorbar(cax)
+    plt.show()
+
+
+def plot_kl(
+    model: V3AE,
+    z: torch.Tensor,
+    z_mesh: torch.Tensor,
+    z_star: torch.Tensor,
+    x_mesh_shape: Tuple[int, int],
+    extent: Union[int, float],
+    # %
+    # Change here for display
+    show_imshow: bool = False,
+    show_per_pixel: bool = True,
+    show_violin: bool = True,
+):
+    # %
+    if show_imshow:
+        _, _, α_z, β_z = model.parametrise_z(z_mesh[None, :])
+        show_kl_imshow(model, z, α_z, β_z, x_mesh_shape, extent, z_star)
+    # %
+    if show_per_pixel:
+        show_per_pixel_uncertainty_kl(model, z_star, extent)
+    # %
+    if show_violin:
+        _, _, α_z, β_z = model.parametrise_z(z[None, :])
+        _, q_λ_z, p_λ = model.sample_precision(α_z, β_z)
+        show_violin_plot_kl(model, q_λ_z, p_λ, z[None, :])
+
+
 def show_2d_latent_space(
-    model, x, y, title="TITLE", show_pi=True, show_geodesic=False, z_star=None
+    model,
+    x,
+    y,
+    title="TITLE",
+    show_geodesic=False,
+    show_kl=True,
+    show_pi=True,
+    z_star: Union[None, torch.Tensor] = None,
 ):
     digits = torch.unique(y)
     with torch.no_grad():
@@ -69,120 +195,32 @@ def show_2d_latent_space(
         elif isinstance(model, V3AE):
             _, _, _, q_λ_z, p_λ, z, q_z_x, _ = model._run_step(x)
             # %
-            # [BS]
-            kl_lbd = model.kl(q_λ_z, p_λ).mean(dim=0)
-            print(kl_lbd.min(), kl_lbd.max())
-            # [BS]
-            kl_divergence_lbd_ood = model.ood_kl(p_λ, z)
-            kls = torch.cat((kl_lbd[None, :], kl_divergence_lbd_ood[None, :]), dim=0)
-            fig, ax = plt.subplots()
-            ax.violinplot(kls, showmeans=True)
-            plt.show()
-            # exit()
-
-            # %
             # keep only a single z sample
             z = z[0]
 
-    fig, ax = plt.subplots()
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
     extent = 5
     x_mesh = torch.linspace(-extent, extent, 100)
     y_mesh = torch.linspace(-extent, extent, 100)
     x_mesh, y_mesh = torch.meshgrid(x_mesh, y_mesh)
-    z_latent_mesh = torch.cat(
-        (x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1
-    )
+    z_mesh = torch.cat((x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1)
     with torch.no_grad():
         if isinstance(model, VanillaVAE):
-            var = model.decoder_std(z_latent_mesh)
+            var = model.decoder_std(z_mesh)
         if isinstance(model, V3AE):
             # [1, BS(meshgrid # positions), input_size]
-            _, _, decoder_α_z, decoder_β_z = model.parametrise_z(z_latent_mesh[None, :])
+            _, _, decoder_α_z, decoder_β_z = model.parametrise_z(z_mesh[None, :])
             var = decoder_β_z[0] / (decoder_α_z[0] - 1)
             # %
-            display_kl = True
-            if display_kl:
-                # %
-                # Show variance for a reconstruction and pixel wise kl
-                # z_star = torch.Tensor([[-3.5, -3.5]])
-                # z_star = next(iter(model.pig_dl))[0][0][None, :]
-                # print(z_star)
-                # alpha = model.decoder_α(z_star)
-                # beta = model.decoder_β(z_star)
-                # # alpha = q_λ_z.base_dist.concentration[0, 0]
-                # # beta = q_λ_z.base_dist.rate[0, 0]
-                # a = p_λ.base_dist.concentration[0, 0]
-                # b = p_λ.base_dist.rate[0, 0]
-                # q = D.Independent(D.Gamma(alpha, beta), 0)
-                # p = D.Independent(D.Gamma(a, b), 0)
-                # kl = D.kl_divergence(q, p)
-                # var = beta / (alpha - 1)
-                # fig, (ax1, ax2) = plt.subplots(1, 2)
-                # extent = 4
-                # ax1.imshow(
-                #     var.reshape((28, 28)),
-                #     extent=(-extent, extent, -extent, extent),
-                #     vmax=np.percentile(var.flatten(), 75),
-                #     # vmin=np.percentile(var.flatten(), 2),
-                #     # cmap=cmap,
-                # )
-                # cax2 = ax2.imshow(
-                #     kl.reshape((28, 28)),
-                #     extent=(-extent, extent, -extent, extent),
-                #     # vmax=np.percentile(kl.flatten(), 75),
-                #     # vmin=np.percentile(var.flatten(), 2),
-                #     # cmap=cmap,
-                # )
-                # ax2.title.set_text(f"Avg kl: {kl.mean()}")
-                # fig.colorbar(cax2)
-                # plt.show()
-                # exit()
+            if show_kl:
+                plot_kl(model, z, z_mesh, z_star, x_mesh.shape, extent)
 
-                # %
-                # Show latent space kl
-                _bs = 500
-                N = decoder_α_z.shape[1]
-                kl = torch.empty((N))
-                for i in range(N // _bs):
-                    idx_low, idx_high = i * _bs, (i + 1) * _bs
-                    _decoder_α_z = decoder_α_z[0][idx_low:idx_high][None, :]
-                    _decoder_β_z = decoder_β_z[0][idx_low:idx_high][None, :]
-                    _, _q_λ_z, _p_λ = model.sample_precision(_decoder_α_z, _decoder_β_z)
-                    # [BS]
-                    _kl = model.kl(_q_λ_z, _p_λ).mean(dim=0)
-                    kl[idx_low:idx_high] = _kl
-
-                kl = kl.reshape(*x_mesh.shape)
-                fig, ax = plt.subplots()
-                cax = ax.imshow(
-                    kl,
-                    extent=(-extent, extent, -extent, extent),
-                    vmin=0,
-                    vmax=15,
-                )
-                z_out = next(iter(model.pig_dl))[0]
-                ax.plot(
-                    z_out[:, 0],
-                    z_out[:, 1],
-                    ".",
-                )
-                ax.plot(
-                    z[:, 0],
-                    z[:, 1],
-                    ".",
-                )
-                ax.set_xlim([-extent, extent])
-                ax.set_ylim([-extent, extent])
-                fig.colorbar(cax)
-                plt.show()
-                exit()
-            # var = model.decoder_α(z_latent_mesh)
     # Accumulated gradient over all output cf nicki and martin
     var = torch.mean(var, dim=1)
     # reshape to x_shape
     var = var.reshape(*x_mesh.shape)
 
+    fig, ax = plt.subplots()
     cmap = sns.color_palette("rocket", as_cmap=True)
     varimshw = ax.imshow(
         var,
