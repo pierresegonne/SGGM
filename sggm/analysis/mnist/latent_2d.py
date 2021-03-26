@@ -62,7 +62,11 @@ def show_violin_plot_kl(model: V3AE, q_λ_z: D.Gamma, p_λ: D.Gamma, z: torch.Te
     kl_lbd = model.kl(q_λ_z, p_λ).mean(dim=0)
     # [BS]
     kl_divergence_lbd_ood = model.ood_kl(p_λ, z)
-    kls = torch.cat((kl_lbd[None, :], kl_divergence_lbd_ood[None, :]), dim=0)
+    # If no ood
+    if kl_divergence_lbd_ood.shape != kl_lbd.shape:
+        kls = kl_lbd[None, :]
+    else:
+        kls = torch.cat((kl_lbd[None, :], kl_divergence_lbd_ood[None, :]), dim=0)
     fig, ax = plt.subplots()
     ax.violinplot(kls, showmeans=True)
     plt.show()
@@ -161,7 +165,7 @@ def plot_kl(
     # %
     # Change here for display
     show_imshow: bool = False,
-    show_per_pixel: bool = True,
+    show_per_pixel: bool = False,
     show_violin: bool = True,
 ):
     # %
@@ -178,13 +182,16 @@ def plot_kl(
         show_violin_plot_kl(model, q_λ_z, p_λ, z[None, :])
 
 
+# ==================================================================================
+
+
 def show_2d_latent_space(
     model,
     x,
     y,
     title="TITLE",
     show_geodesic=False,
-    show_kl=True,
+    show_kl=False,
     show_pi=True,
     z_star: Union[None, torch.Tensor] = None,
 ):
@@ -195,8 +202,14 @@ def show_2d_latent_space(
         elif isinstance(model, V3AE):
             _, _, _, q_λ_z, p_λ, z, q_z_x, _ = model._run_step(x)
             # %
+            x_val, _ = next(iter(model.dm.train_dataloader()))
+            _, _, _, _, _, z_val, _, _ = model._run_step(x_val)
+            print(z_val.shape)
+            # %
             # keep only a single z sample
             z = z[0]
+            z_val = z_val[0]
+            print(z_val.shape)
 
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
     extent = 5
@@ -243,6 +256,9 @@ def show_2d_latent_space(
             markeredgecolor=(*colours_rgb["white"], 0.5),
             label=f"Digit {d}",
         )
+
+    # %
+    ax.plot(z_val[:, 0], z_val[:, 1], "o", markersize=6, color=colours["pink"])
 
     if isinstance(z_star, torch.Tensor):
         z_star = z_star.flatten()

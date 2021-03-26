@@ -153,11 +153,11 @@ class MNISTDataModule2D(MNISTDataModule):
 
 if __name__ == "__main__":
 
-    dm = MNISTDataModule(256, 0)
+    dm = MNISTDataModule2D(256, 0, digits=[2, 5])
     dm.setup()
 
     # Observe sample
-    x, y = next(iter(dm.train_dataloader()))
+    x, y = next(iter(dm.val_dataloader()))
 
     import matplotlib.pyplot as plt
 

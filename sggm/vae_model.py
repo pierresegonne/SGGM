@@ -187,7 +187,7 @@ class BaseVAE(pl.LightningModule):
         # Needed for Early stopping?
         self.log(EVAL_LOSS, loss, on_epoch=True)
         self.log_dict(
-            {f"val_{k}": v for k, v in logs.items()}, on_step=True, on_epoch=False
+            {f"val_{k}": v for k, v in logs.items()}, on_step=False, on_epoch=True
         )
         # Histogram of weights
         for name, weight in self.named_parameters():

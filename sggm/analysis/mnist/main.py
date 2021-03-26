@@ -74,6 +74,8 @@ def plot(experiment_log, seed=False, **kwargs):
 
     # Reconstruction
     best_model.eval()
+    # %
+    best_model.dm = dm
     with no_grad():
         x_hat_train, p_x_train = best_model(x_train)
         x_hat_test, p_x_test = best_model(x_test)
