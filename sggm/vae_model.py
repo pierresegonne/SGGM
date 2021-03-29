@@ -71,6 +71,9 @@ from sggm.vae_model_helper import (
     reduce_int_list,
 )
 
+# %
+from sggm.test_input import test_input
+
 # stages for steps
 TRAINING = "training"
 VALIDATION = "validation"
@@ -772,14 +775,12 @@ class V3AE(BaseVAE):
             p = D.Independent(
                 D.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
             )
-            print("\nStudent", p.base_dist.mean[0, :2, :2])
             x = p.rsample()
 
         elif self._bernouilli_decoder:
             # Note the Bernouilli's support is {0, 1} -> not validating args allow to evaluate it on [0, 1]
             # See https://pytorch.org/docs/stable/distributions.html#continuousbernoulli for improvement.
             p = D.Independent(D.Bernoulli(mu, validate_args=False), 1)
-            print("\nBernoulli", p.base_dist.mean[0, :2, :2])
             x = p.sample()
 
         # first dim is num of latent z samples, only keep the reconstructed from the first draw
@@ -924,6 +925,12 @@ class V3AE(BaseVAE):
             )
             digamma_alpha = torch.digamma(alpha).sum(dim=2).mean()
             log_beta = torch.log(beta).sum(dim=2).mean()
+
+        # %
+        _, p_test, _, _, _, _, _, _ = self._run_step(test_input)
+        test_diff = (p_test.mean - batch_flatten(test_input).repeat(self.n_mc_samples, 1, 1)) ** 2
+        print('\n')
+        print(test_diff.mean(), test_diff.var())
 
         logs = {
             "llk": expected_log_likelihood.sum(),
