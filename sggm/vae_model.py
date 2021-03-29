@@ -927,6 +927,7 @@ class V3AE(BaseVAE):
             log_beta = torch.log(beta).sum(dim=2).mean()
 
         # %
+        test_input = test_input.type_as(x)
         _, p_test, _, _, _, _, _, _ = self._run_step(test_input)
         test_diff = (p_test.mean - batch_flatten(test_input).repeat(self.n_mc_samples, 1, 1)) ** 2
         print('\n')
