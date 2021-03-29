@@ -500,7 +500,7 @@ class V3AE(BaseVAE):
         """
         if (prior_α is None) & (prior_β is None):
             # %
-            b = 1
+            b = 0.001
             # %
             x_train = []
             for idx, batch in enumerate(datamodule.train_dataloader()):
@@ -521,6 +521,7 @@ class V3AE(BaseVAE):
             )
             self.prior_β = b * torch.ones_like(prior_modes).type_as(x_train)
             self.prior_α = 1 + self.prior_β * prior_modes
+
         elif (prior_α is not None) & (prior_β is not None):
             assert type(prior_α) == type(
                 prior_β
