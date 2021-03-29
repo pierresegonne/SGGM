@@ -799,7 +799,7 @@ class V3AE(BaseVAE):
             expected_lambda = α_z / β_z
             print("digamma - log beta", expected_log_lambda.sum(dim=2).mean())
             print("alpha_over_beta", expected_lambda.sum(dim=2).mean())
-            print("mse", ((x - μ_z) ** 2).sum(dim=2).mean())
+            print("alpha_over_beta X mse", (expected_lambda * ((x - μ_z) ** 2)).sum(dim=2).mean())
             # [n_mc_sample, BS]
             # sum over the independent input dims
             ellk_lbd = torch.sum(
