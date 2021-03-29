@@ -597,7 +597,7 @@ class V3AE(BaseVAE):
             TensorDataset(z_hat), batch_size=self.dm.batch_size, shuffle=True
         )
         # Safety, zero_grad on the optimisers
-        for opt in self.optimizers:
+        for opt in self.optimizers():
             opt.zero_grad()
         print("--- OK\n")
 
