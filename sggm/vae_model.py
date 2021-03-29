@@ -72,7 +72,7 @@ from sggm.vae_model_helper import (
 )
 
 # %
-from sggm.test_input import test_input
+from sggm.test_input import test_z
 
 # stages for steps
 TRAINING = "training"
@@ -927,11 +927,10 @@ class V3AE(BaseVAE):
             log_beta = torch.log(beta).sum(dim=2).mean()
 
         # %
-        _test_input = test_input.clone().type_as(x)
-        _, p_test, _, _, _, _, _, _ = self._run_step(_test_input)
-        test_diff = (p_test.mean - batch_flatten(_test_input).repeat(self.n_mc_samples, 1, 1)) ** 2
-        print('\n')
-        print(test_diff.mean(), test_diff.var())
+        _test_z = test_z.clone().type_as(x)
+        _, _mu, _, _ = self.parametrise_z(_test_z)
+        print("\n")
+        print(_mu.mean(), _mu.var())
 
         logs = {
             "llk": expected_log_likelihood.sum(),
