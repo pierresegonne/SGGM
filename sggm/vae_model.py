@@ -187,9 +187,7 @@ class BaseVAE(pl.LightningModule):
         # Needed for Early stopping?
         self.log(EVAL_LOSS, loss, on_epoch=True)
         del logs["loss"]
-        self.log_dict(
-            {f"val_{k}": v for k, v in logs.items()}, on_epoch=True
-        )
+        self.log_dict({f"val_{k}": v for k, v in logs.items()}, on_epoch=True)
         # Histogram of weights
         for name, weight in self.named_parameters():
             self.logger.experiment.add_histogram(name, weight, self.current_epoch)
@@ -594,10 +592,13 @@ class V3AE(BaseVAE):
         p_z_stddev = p_z_stddev.to(self.device)
         p_z = D.Independent(D.Normal(p_z_mean, p_z_stddev), 1)
         z_hat = self.generate_z_out(agg_z, q_z_x, p_z)
-        # # Create DL
+        # Create DL
         self.pig_dl = DataLoader(
             TensorDataset(z_hat), batch_size=self.dm.batch_size, shuffle=True
         )
+        # Safety, zero_grad on the optimisers
+        for opt in self.optimizers:
+            opt.zero_grad()
         print("--- OK\n")
 
     def generate_z_out(
@@ -773,12 +774,14 @@ class V3AE(BaseVAE):
             p = D.Independent(
                 D.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
             )
+            print("Student", p.base_dist.mean[0, :2, :2])
             x = p.rsample()
 
         elif self._bernouilli_decoder:
             # Note the Bernouilli's support is {0, 1} -> not validating args allow to evaluate it on [0, 1]
             # See https://pytorch.org/docs/stable/distributions.html#continuousbernoulli for improvement.
             p = D.Independent(D.Bernoulli(mu, validate_args=False), 1)
+            print("Bernoulli", p.base_dist.mean[0, :2, :2])
             x = p.sample()
 
         # first dim is num of latent z samples, only keep the reconstructed from the first draw
@@ -889,7 +892,11 @@ class V3AE(BaseVAE):
 
         # Also verify that we are only training the decoder's variance
         kl_divergence_lbd_ood = -1 * torch.ones((1,))
-        beta_over_alpha, digamma_alpha, log_beta = -1 * torch.ones((1,)), -1 * torch.ones((1,)), -1 * torch.ones((1,))
+        beta_over_alpha, digamma_alpha, log_beta = (
+            -1 * torch.ones((1,)),
+            -1 * torch.ones((1,)),
+            -1 * torch.ones((1,)),
+        )
         if (
             (stage == TRAINING)
             & (self.ood_z_generation_method is not None)
@@ -898,9 +905,11 @@ class V3AE(BaseVAE):
             # NOTE: beware, for understandability, tau is opposite.
             kl_divergence_lbd_ood = self.ood_kl(p_λ, z)
             expected_kl_divergence_lbd_ood = kl_divergence_lbd_ood.mean()
-            loss = 2 * ((1 - self.τ_ood) * loss + self.τ_ood * expected_kl_divergence_lbd_ood)
+            loss = 2 * (
+                (1 - self.τ_ood) * loss + self.τ_ood * expected_kl_divergence_lbd_ood
+            )
             # %
-            alpha, beta = q_λ_z.base_dist.concentration, q_λ_z.base_dist.rate 
+            alpha, beta = q_λ_z.base_dist.concentration, q_λ_z.base_dist.rate
             beta_over_alpha = (beta / alpha).mean()
             digamma_alpha = torch.digamma(alpha).mean()
             log_beta = torch.log(beta).mean()
