@@ -908,12 +908,10 @@ class V3AE(BaseVAE):
             loss = 2 * (
                 (1 - self.τ_ood) * loss + self.τ_ood * expected_kl_divergence_lbd_ood
             )
+
+        if self._student_t_decoder:
             # %
             alpha, beta = q_λ_z.base_dist.concentration, q_λ_z.base_dist.rate
-            
-        if (
-            self._student_t_decoder
-        ):
             beta_over_alpha = (beta / alpha).mean()
             digamma_alpha = torch.digamma(alpha).mean()
             log_beta = torch.log(beta).mean()
