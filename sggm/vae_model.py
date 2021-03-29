@@ -9,7 +9,6 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 from itertools import chain
-from torch.utils import data
 from torch.utils.data import DataLoader, TensorDataset
 
 from geoml import EmbeddedManifold
@@ -42,11 +41,6 @@ from sggm.definitions import (
     F_SIGMOID,
 )
 from sggm.definitions import (
-    ENCODER_TYPE,
-    ENCODER_CONVOLUTIONAL,
-    ENCODER_FULLY_CONNECTED,
-)
-from sggm.definitions import (
     TRAIN_LOSS,
     EVAL_LOSS,
     TEST_LOSS,
@@ -70,9 +64,6 @@ from sggm.vae_model_helper import (
     density_gradient_descent,
     reduce_int_list,
 )
-
-# %
-from sggm.test_input import test_z
 
 # stages for steps
 TRAINING = "training"
@@ -123,10 +114,10 @@ def decoder_dense_base(
 
     return nn.Sequential(
         nn.Linear(latent_size, 256),
-        # nn.BatchNorm1d(256),
+        nn.BatchNorm1d(256),
         nn.LeakyReLU(),
         nn.Linear(256, 512),
-        # nn.BatchNorm1d(512),
+        nn.BatchNorm1d(512),
         nn.LeakyReLU(),
         nn.Linear(512, output_size),
     )
@@ -426,7 +417,6 @@ class V3AE(BaseVAE):
         kde_bandwidth_multiplier: float = v3ae_parameters[
             KDE_BANDWIDTH_MULTIPLIER
         ].default,
-        # encoder_type: str = vae_parameters[ENCODER_TYPE].default,
     ):
         super(V3AE, self).__init__(
             input_dims,
@@ -891,11 +881,6 @@ class V3AE(BaseVAE):
 
         # Also verify that we are only training the decoder's variance
         kl_divergence_lbd_ood = -1 * torch.ones((1,))
-        alpha_over_beta_X_mse, digamma_alpha, log_beta = (
-            -1 * torch.ones((1,)),
-            -1 * torch.ones((1,)),
-            -1 * torch.ones((1,)),
-        )
         if (
             (stage == TRAINING)
             & (self.ood_z_generation_method is not None)
@@ -908,30 +893,6 @@ class V3AE(BaseVAE):
                 (1 - self.τ_ood) * loss + self.τ_ood * expected_kl_divergence_lbd_ood
             )
 
-        if self._student_t_decoder:
-            # %
-            # [n_mc_samples, bs, input_size]
-            alpha, beta = q_λ_z.base_dist.concentration, q_λ_z.base_dist.rate
-            alpha_over_beta_X_mse = (
-                (
-                    (alpha / beta)
-                    * (
-                        (p_x_z.mean - batch_flatten(x).repeat(self.n_mc_samples, 1, 1))
-                        ** 2
-                    )
-                )
-                .sum(dim=2)
-                .mean()
-            )
-            digamma_alpha = torch.digamma(alpha).sum(dim=2).mean()
-            log_beta = torch.log(beta).sum(dim=2).mean()
-
-        # %
-        _test_z = test_z.clone().type_as(x)
-        _, _mu, _, _ = self.parametrise_z(_test_z)
-        print("\n")
-        print(_mu.mean(), _mu.var())
-
         logs = {
             "llk": expected_log_likelihood.sum(),
             "ellk": expected_log_likelihood.mean(),
@@ -940,13 +901,6 @@ class V3AE(BaseVAE):
             "kl_lbd": kl_divergence_lbd.mean(),
             "kl_lbd_ood": kl_divergence_lbd_ood.mean(),
             "loss": loss,
-            # %
-            # "mean_mse": mean_mse,
-            # "samples_mse": F.mse_loss(x_hat, x),
-            # % Pure investigation
-            "alpha_over_beta_X_mse": alpha_over_beta_X_mse,
-            "digamma_alpha": digamma_alpha,
-            "log_beta": log_beta,
         }
 
         # Test logs
