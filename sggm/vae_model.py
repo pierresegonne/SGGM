@@ -768,8 +768,6 @@ class V3AE(BaseVAE):
 
     def sample_generative(self, mu, alpha, beta):
         # batch_shape [n_mc_samples, BS] event_shape [input_size]
-        # beta = beta + self.eps
-        # alpha = alpha + self.eps
         if self._student_t_decoder:
             p = D.Independent(
                 D.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
@@ -799,6 +797,9 @@ class V3AE(BaseVAE):
 
             expected_log_lambda = torch.digamma(α_z) - torch.log(β_z)
             expected_lambda = α_z / β_z
+            print("digamma - log beta", expected_log_lambda.sum(dim=2).mean())
+            print("alpha_over_beta", expected_lambda.sum(dim=2).mean())
+            print("mse", ((x - μ_z) ** 2).sum(dim=2).mean())
             # [n_mc_sample, BS]
             # sum over the independent input dims
             ellk_lbd = torch.sum(
