@@ -186,12 +186,12 @@ class BaseVAE(pl.LightningModule):
         loss, logs = self.step(batch, batch_idx, stage=VALIDATION)
         # Needed for Early stopping?
         self.log(EVAL_LOSS, loss, on_epoch=True)
-        # self.log_dict(
-        #     {f"val_{k}": v for k, v in logs.items()}, on_step=False, on_epoch=True
-        # )
-        # # Histogram of weights
-        # for name, weight in self.named_parameters():
-        #     self.logger.experiment.add_histogram(name, weight, self.current_epoch)
+        self.log_dict(
+            {f"val_{k}": v for k, v in logs.items()}, on_step=False, on_epoch=True
+        )
+        # Histogram of weights
+        for name, weight in self.named_parameters():
+            self.logger.experiment.add_histogram(name, weight, self.current_epoch)
 
         return loss
 
@@ -226,7 +226,6 @@ class VanillaVAE(BaseVAE):
         learning_rate: float = vae_parameters[LEARNING_RATE].default,
         eps: float = vae_parameters[EPS].default,
         n_mc_samples: int = vae_parameters[N_MC_SAMPLES].default,
-        # encoder_type: str = vae_parameters[ENCODER_TYPE].default,
     ):
         super(VanillaVAE, self).__init__(
             input_dims,
