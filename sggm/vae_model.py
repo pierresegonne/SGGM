@@ -186,12 +186,12 @@ class BaseVAE(pl.LightningModule):
         loss, logs = self.step(batch, batch_idx, stage=VALIDATION)
         # Needed for Early stopping?
         self.log(EVAL_LOSS, loss, on_epoch=True)
-        self.log_dict(
-            {f"val_{k}": v for k, v in logs.items()}, on_step=False, on_epoch=True
-        )
-        # Histogram of weights
-        for name, weight in self.named_parameters():
-            self.logger.experiment.add_histogram(name, weight, self.current_epoch)
+        # self.log_dict(
+        #     {f"val_{k}": v for k, v in logs.items()}, on_step=False, on_epoch=True
+        # )
+        # # Histogram of weights
+        # for name, weight in self.named_parameters():
+        #     self.logger.experiment.add_histogram(name, weight, self.current_epoch)
 
         return loss
 
