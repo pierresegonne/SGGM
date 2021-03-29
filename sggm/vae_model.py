@@ -910,6 +910,10 @@ class V3AE(BaseVAE):
             )
             # %
             alpha, beta = q_λ_z.base_dist.concentration, q_λ_z.base_dist.rate
+            
+        if (
+            self._student_t_decoder
+        ):
             beta_over_alpha = (beta / alpha).mean()
             digamma_alpha = torch.digamma(alpha).mean()
             log_beta = torch.log(beta).mean()
