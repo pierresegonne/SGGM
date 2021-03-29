@@ -83,7 +83,7 @@
   ood_z_generation_method: gd_aggregate_posterior
   # kde_bandwidth_multiplier: 9
   prior_α: 1.625
-  prior_β: 1
+  prior_β: 1.
   # misc
   n_trials: 1
   seed: 3
