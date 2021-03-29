@@ -797,9 +797,6 @@ class V3AE(BaseVAE):
 
             expected_log_lambda = torch.digamma(α_z) - torch.log(β_z)
             expected_lambda = α_z / β_z
-            print("digamma - log beta", expected_log_lambda.sum(dim=2).mean())
-            print("alpha_over_beta", expected_lambda.sum(dim=2).mean())
-            print("alpha_over_beta X mse", (expected_lambda * ((x - μ_z) ** 2)).sum(dim=2).mean())
             # [n_mc_sample, BS]
             # sum over the independent input dims
             ellk_lbd = torch.sum(
@@ -893,7 +890,7 @@ class V3AE(BaseVAE):
 
         # Also verify that we are only training the decoder's variance
         kl_divergence_lbd_ood = -1 * torch.ones((1,))
-        alpha_over_beta, digamma_alpha, log_beta = (
+        alpha_over_beta_X_mse, digamma_alpha, log_beta = (
             -1 * torch.ones((1,)),
             -1 * torch.ones((1,)),
             -1 * torch.ones((1,)),
@@ -914,12 +911,11 @@ class V3AE(BaseVAE):
             # %
             # [n_mc_samples, bs, input_size]
             alpha, beta = q_λ_z.base_dist.concentration, q_λ_z.base_dist.rate
-            alpha_over_beta = (alpha / beta).sum(dim=2).mean()
+            alpha_over_beta_X_mse = (alpha / beta) * (
+                (p_x_z.mean - batch_flatten(x).repeat(self.n_mc_samples, 1, 1)) ** 2
+            ).sum(dim=2).mean()
             digamma_alpha = torch.digamma(alpha).sum(dim=2).mean()
             log_beta = torch.log(beta).sum(dim=2).mean()
-
-        # % For just one z sample
-        mean_mse = ((p_x_z.mean[0] - batch_flatten(x)) ** 2).sum(dim=1).mean()
 
         logs = {
             "llk": expected_log_likelihood.sum(),
@@ -930,10 +926,10 @@ class V3AE(BaseVAE):
             "kl_lbd_ood": kl_divergence_lbd_ood.mean(),
             "loss": loss,
             # %
-            "mean_mse": mean_mse,
+            # "mean_mse": mean_mse,
             # "samples_mse": F.mse_loss(x_hat, x),
             # % Pure investigation
-            "alpha_over_beta": alpha_over_beta,
+            "alpha_over_beta_X_mse": alpha_over_beta_X_mse,
             "digamma_alpha": digamma_alpha,
             "log_beta": log_beta,
         }
