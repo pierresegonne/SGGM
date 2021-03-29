@@ -889,6 +889,7 @@ class V3AE(BaseVAE):
 
         # Also verify that we are only training the decoder's variance
         kl_divergence_lbd_ood = -1 * torch.ones((1,))
+        beta_over_alpha, digamma_alpha, log_beta = -1 * torch.ones((1,)), -1 * torch.ones((1,)), -1 * torch.ones((1,))
         if (
             (stage == TRAINING)
             & (self.ood_z_generation_method is not None)
@@ -898,6 +899,11 @@ class V3AE(BaseVAE):
             kl_divergence_lbd_ood = self.ood_kl(p_λ, z)
             expected_kl_divergence_lbd_ood = kl_divergence_lbd_ood.mean()
             loss = 2 * ((1 - self.τ_ood) * loss + self.τ_ood * expected_kl_divergence_lbd_ood)
+            # %
+            alpha, beta = q_λ_z.base_dist.concentration, q_λ_z.base_dist.rate 
+            beta_over_alpha = (beta / alpha).mean()
+            digamma_alpha = torch.digamma(alpha).mean()
+            log_beta = torch.log(beta).mean()
 
         logs = {
             "llk": expected_log_likelihood.sum(),
@@ -909,7 +915,11 @@ class V3AE(BaseVAE):
             "loss": loss,
             # %
             "mean_mse": F.mse_loss(batch_reshape(p_x_z.mean[0], self.input_dims), x),
-            "samples_mse": F.mse_loss(x_hat, x)
+            "samples_mse": F.mse_loss(x_hat, x),
+            # % Pure investigation
+            "beta_over_alpha": beta_over_alpha,
+            "digamma_alpha": digamma_alpha,
+            "log_beta": log_beta,
         }
 
         # Test logs
