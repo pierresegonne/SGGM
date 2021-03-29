@@ -911,10 +911,14 @@ class V3AE(BaseVAE):
 
         if self._student_t_decoder:
             # %
+            # [n_mc_samples, bs, input_size]
             alpha, beta = q_λ_z.base_dist.concentration, q_λ_z.base_dist.rate
-            alpha_over_beta = (alpha / beta).mean()
-            digamma_alpha = torch.digamma(alpha).mean()
-            log_beta = torch.log(beta).mean()
+            alpha_over_beta = (alpha / beta).sum(dim=2).mean()
+            digamma_alpha = torch.digamma(alpha).sum(dim=2).mean()
+            log_beta = torch.log(beta).sum(dim=2).mean()
+
+        # % For just one z sample
+        mean_mse = ((p_x_z.mean[0] - batch_flatten(x)) ** 2).sum(dim=1).mean()
 
         logs = {
             "llk": expected_log_likelihood.sum(),
@@ -925,8 +929,8 @@ class V3AE(BaseVAE):
             "kl_lbd_ood": kl_divergence_lbd_ood.mean(),
             "loss": loss,
             # %
-            "mean_mse": F.mse_loss(batch_reshape(p_x_z.mean[0], self.input_dims), x),
-            "samples_mse": F.mse_loss(x_hat, x),
+            "mean_mse": mean_mse,
+            # "samples_mse": F.mse_loss(x_hat, x),
             # % Pure investigation
             "alpha_over_beta": alpha_over_beta,
             "digamma_alpha": digamma_alpha,
