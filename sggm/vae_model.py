@@ -500,7 +500,7 @@ class V3AE(BaseVAE):
         """
         if (prior_α is None) & (prior_β is None):
             # %
-            b = 0.001
+            b = 0.01
             # %
             x_train = []
             for idx, batch in enumerate(datamodule.train_dataloader()):
