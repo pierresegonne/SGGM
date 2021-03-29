@@ -911,9 +911,17 @@ class V3AE(BaseVAE):
             # %
             # [n_mc_samples, bs, input_size]
             alpha, beta = q_λ_z.base_dist.concentration, q_λ_z.base_dist.rate
-            alpha_over_beta_X_mse = (alpha / beta) * (
-                (p_x_z.mean - batch_flatten(x).repeat(self.n_mc_samples, 1, 1)) ** 2
-            ).sum(dim=2).mean()
+            alpha_over_beta_X_mse = (
+                (
+                    (alpha / beta)
+                    * (
+                        (p_x_z.mean - batch_flatten(x).repeat(self.n_mc_samples, 1, 1))
+                        ** 2
+                    )
+                )
+                .sum(dim=2)
+                .mean()
+            )
             digamma_alpha = torch.digamma(alpha).sum(dim=2).mean()
             log_beta = torch.log(beta).sum(dim=2).mean()
 
