@@ -772,14 +772,14 @@ class V3AE(BaseVAE):
             p = D.Independent(
                 D.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
             )
-            print("Student", p.base_dist.mean[0, :2, :2])
+            print("\nStudent", p.base_dist.mean[0, :2, :2])
             x = p.rsample()
 
         elif self._bernouilli_decoder:
             # Note the Bernouilli's support is {0, 1} -> not validating args allow to evaluate it on [0, 1]
             # See https://pytorch.org/docs/stable/distributions.html#continuousbernoulli for improvement.
             p = D.Independent(D.Bernoulli(mu, validate_args=False), 1)
-            print("Bernoulli", p.base_dist.mean[0, :2, :2])
+            print("\nBernoulli", p.base_dist.mean[0, :2, :2])
             x = p.sample()
 
         # first dim is num of latent z samples, only keep the reconstructed from the first draw
