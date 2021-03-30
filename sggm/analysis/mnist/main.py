@@ -5,9 +5,7 @@ from pytorch_lightning import seed_everything
 from torch import no_grad
 
 from sggm.analysis.mnist.helper import (
-    get_interpolation_digits,
     plot_comparison,
-    plot_interpolation,
 )
 from sggm.analysis.mnist.latent_2d import (
     show_2d_latent_space,

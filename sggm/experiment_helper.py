@@ -1,9 +1,20 @@
 import copy
 import numpy as np
 import pytorch_lightning as pl
+from sggm.data import mnist
 import torch
 
-from sggm.definitions import τ_OOD, SPLIT_TRAINING_MSE_MEAN, SPLIT_TRAINING_STD_VV_MEAN
+from sggm.definitions import (
+    SEED,
+    SHIFTING_PROPORTION_K,
+    SHIFTING_PROPORTION_TOTAL,
+    DIGITS,
+    PIG_DL,
+    PRIOR_α,
+    PRIOR_β,
+    SPLIT_TRAINING_MSE_MEAN,
+    SPLIT_TRAINING_STD_VV_MEAN
+)
 from torch import nn
 from typing import Any
 
@@ -14,6 +25,25 @@ def clean_dict(dic: dict) -> dict:
         if type(v) in [str, int, bool, float, object, None, list]:
             clean_dic[k] = v
     return clean_dic
+
+
+def get_misc_save_dict(experiment, model: pl.LightningModule) -> dict:
+    misc = {}
+    if isinstance(experiment.seed, int):
+        misc[SEED] = experiment.seed
+    if isinstance(experiment.shifting_proportion_k, float):
+        misc[SHIFTING_PROPORTION_K] = experiment.shifting_proportion_k
+    if isinstance(experiment.shifting_proportion_total, float):
+        misc[SHIFTING_PROPORTION_TOTAL] = experiment.shifting_proportion_total
+    if getattr(experiment, DIGITS, None):
+        misc[DIGITS] = experiment.digits
+    if getattr(model, PIG_DL, None):
+        misc[PIG_DL] = model.pig_dl
+    if getattr(model, PRIOR_α, None) is not None:
+        misc[PRIOR_α] = model.prior_α
+    if getattr(model, PRIOR_β, None) is not None:
+        misc[PRIOR_β] = model.prior_β
+    return misc
 
 
 def split_mean_uncertainty_training(

@@ -103,7 +103,7 @@ class ExperimentLog:
                 experiment_name, version_dir(version_path), version_path, pl_module
             )
             for version_path in sorted(
-                glob.glob(f"{save_dir}/{experiment_name}/{name}/*/"),
+                glob.glob(f"{save_dir}/{experiment_name}/{name}/version_*/"),
                 key=lambda v: int(v.split("/")[-2].split("_")[-1]),
             )
         ]
@@ -111,3 +111,7 @@ class ExperimentLog:
             [v.results[0][TEST_LOSS] for v in self.versions]
         )
         self.best_version = self.versions[self.idx_best_version]
+
+    @property
+    def experiment_path(self):
+        return f"{self.save_dir}/{self.experiment_name}/"

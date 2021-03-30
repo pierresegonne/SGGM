@@ -199,6 +199,9 @@ class BaseVAE(pl.LightningModule):
         self.log(TEST_SAMPLE_FIT_RMSE, logs[TEST_SAMPLE_FIT_RMSE], on_epoch=True)
         return loss
 
+    def freeze_but_encoder(self):
+        raise NotImplementedError("Method must be overidden by child VAE model")
+
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):
         return model_specific_args(vae_parameters, parent_parser)
@@ -248,6 +251,9 @@ class VanillaVAE(BaseVAE):
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
             nn.Softplus(),
         )
+
+        # %
+        self._refit_encoder_mode = False
 
         # Save hparams
         self.save_hyperparameters(
@@ -312,18 +318,19 @@ class VanillaVAE(BaseVAE):
         return p_x_z.log_prob(x)
 
     def update_hacks(self):
-        # Switches
-        self._switch_to_decoder_var = (
-            True if self.current_epoch > self.trainer.max_epochs / 2 else False
-        )
-        self._gaussian_decoder = self._switch_to_decoder_var
-        self._bernouilli_decoder = not self._switch_to_decoder_var
-        # Update optimiser to learn decoder's variance
-        # Note: done in training_step
-        # Update decoder
-        # Note: done with _gaussian_decoder | _bernouilli_decoder
-        # Update β_elbo value through annealing
-        self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2)) / 2
+        if not self._refit_encoder_mode:
+            # Switches
+            self._switch_to_decoder_var = (
+                True if self.current_epoch > self.trainer.max_epochs / 2 else False
+            )
+            self._gaussian_decoder = self._switch_to_decoder_var
+            self._bernouilli_decoder = not self._switch_to_decoder_var
+            # Update optimiser to learn decoder's variance
+            # Note: done in training_step
+            # Update decoder
+            # Note: done with _gaussian_decoder | _bernouilli_decoder
+            # Update β_elbo value through annealing
+            self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2)) / 2
 
     def step(self, batch, batch_idx, stage=None):
         x, y = batch
@@ -391,6 +398,19 @@ class VanillaVAE(BaseVAE):
             self.decoder_std.parameters(), lr=self.learning_rate
         )
         return [model_opt, decoder_var_opt], []
+
+    def freeze_but_encoder(self):
+        self._refit_encoder_mode = True
+        # Restore gradients of the encoder
+        for p in self.encoder_μ.parameters():
+            p.requires_grad = True
+        for p in self.encoder_std.parameters():
+            p.requires_grad = True
+        # Freeze gradients of the decoder
+        for p in self.decoder_μ.parameters():
+            p.requires_grad = False
+        for p in self.decoder_std.parameters():
+            p.requires_grad = False
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):
@@ -845,26 +865,27 @@ class V3AE(BaseVAE):
         return torch.zeros((1,))
 
     def update_hacks(self):
-        previous_switch = self._switch_to_decoder_var
-        self._switch_to_decoder_var = (
-            True if self.current_epoch >= self.trainer.max_epochs / 2 else False
-        )
-        self._student_t_decoder = self._switch_to_decoder_var
-        self._bernouilli_decoder = not self._switch_to_decoder_var
-        self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2)) / 2
-        # Explicitely freeze the gradients of everything but alpha and beta
-        if (
-            self._switch_to_decoder_var
-            and previous_switch != self._switch_to_decoder_var
-        ):
-            for p in self.encoder_μ.parameters():
-                p.requires_grad = False
-            for p in self.encoder_std.parameters():
-                p.requires_grad = False
-            for p in self.decoder_μ.parameters():
-                p.requires_grad = False
+        if not self._refit_encoder_mode:
+            previous_switch = self._switch_to_decoder_var
+            self._switch_to_decoder_var = (
+                True if self.current_epoch >= self.trainer.max_epochs / 2 else False
+            )
+            self._student_t_decoder = self._switch_to_decoder_var
+            self._bernouilli_decoder = not self._switch_to_decoder_var
+            self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2)) / 2
+            # Explicitely freeze the gradients of everything but alpha and beta
+            if (
+                self._switch_to_decoder_var
+                and previous_switch != self._switch_to_decoder_var
+            ):
+                for p in self.encoder_μ.parameters():
+                    p.requires_grad = False
+                for p in self.encoder_std.parameters():
+                    p.requires_grad = False
+                for p in self.decoder_μ.parameters():
+                    p.requires_grad = False
 
-            self._setup_pi_dl()
+                self._setup_pi_dl()
 
     def step(self, batch, batch_idx, stage=None):
         x, _ = batch
@@ -957,6 +978,21 @@ class V3AE(BaseVAE):
             lr=self.learning_rate,
         )
         return [model_opt, decoder_var_opt], []
+
+    def freeze_but_encoder(self):
+        self._refit_encoder_mode = True
+        # Restore gradients of the encoder
+        for p in self.encoder_μ.parameters():
+            p.requires_grad = True
+        for p in self.encoder_std.parameters():
+            p.requires_grad = True
+        # Freeze gradients of the decoder
+        for p in self.decoder_μ.parameters():
+            p.requires_grad = False
+        for p in self.decoder_α.parameters():
+            p.requires_grad = False
+        for p in self.decoder_β.parameters():
+            p.requires_grad = False
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):

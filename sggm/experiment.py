@@ -47,7 +47,11 @@ from sggm.definitions import (
     experiments_latent_dims,
 )
 from sggm.data import datamodules
-from sggm.experiment_helper import clean_dict, split_mean_uncertainty_training
+from sggm.experiment_helper import (
+    clean_dict,
+    get_misc_save_dict,
+    split_mean_uncertainty_training,
+)
 from sggm.regression_model import Regressor, VariationalRegressor
 from sggm.vae_model import BaseVAE, VanillaVAE, V3AE, V3AEm
 
@@ -398,22 +402,10 @@ def cli_main():
             # saving
             # ------------
             torch.save(results, f"{trainer.logger.log_dir}/results.pkl")
-            misc = {}
-            if isinstance(experiment.seed, int):
-                misc[SEED] = experiment.seed
-            if isinstance(experiment.shifting_proportion_k, float):
-                misc[SHIFTING_PROPORTION_K] = experiment.shifting_proportion_k
-            if isinstance(experiment.shifting_proportion_total, float):
-                misc[SHIFTING_PROPORTION_TOTAL] = experiment.shifting_proportion_total
-            if getattr(experiment, DIGITS, None):
-                misc[DIGITS] = experiment.digits
-            if getattr(model, PIG_DL, None):
-                misc[PIG_DL] = model.pig_dl
-            if getattr(model, PRIOR_α, None) is not None:
-                misc[PRIOR_α] = model.prior_α
-            if getattr(model, PRIOR_β, None) is not None:
-                misc[PRIOR_β] = model.prior_β
-            torch.save(misc, f"{trainer.logger.log_dir}/misc.pkl")
+            torch.save(
+                get_misc_save_dict(experiment, model),
+                f"{trainer.logger.log_dir}/misc.pkl",
+            )
 
 
 if __name__ == "__main__":
