@@ -305,7 +305,7 @@ generative_experiments = [MNIST, MNIST_2D, FASHION_MNIST, FASHION_MNIST_2D, NOT_
 
 def experiments_latent_dims(experiment_name: str) -> tuple:
     if experiment_name == MNIST:
-        return (10,)
+        return (2,)  # Match Nicki and Martin
     if experiment_name == MNIST_2D:
         return (2,)
     elif experiment_name == FASHION_MNIST:

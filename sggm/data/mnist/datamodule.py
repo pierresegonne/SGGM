@@ -152,9 +152,11 @@ class MNISTDataModule2D(MNISTDataModule):
 
 
 if __name__ == "__main__":
-
-    dm = MNISTDataModule2D(256, 0, digits=[2, 5])
+    dm = MNISTDataModule(256, 0)
+    # dm = MNISTDataModule2D(256, 0, digits=[2, 5])
     dm.setup()
+    print(len(dm.train_dataset))
+    exit()
 
     # Observe sample
     x, y = next(iter(dm.val_dataloader()))
