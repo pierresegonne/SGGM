@@ -500,8 +500,6 @@ class V3AE(BaseVAE):
         OR
         applies the provided prior parameters
         """
-        print(self.prior_b)
-        exit()
         if (prior_α is None) & (prior_β is None):
             # %
             x_train = []
