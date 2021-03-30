@@ -1,6 +1,6 @@
 # %
 # Match Nicki and Martin MNIST likelihood
-- name: gaussian_vae
+- name: gaussian_vae_match
   experiment_name: mnist
   model_name: vanilla_vae
   n_workers: 0
