@@ -16,6 +16,7 @@ BATCH_SIZE = "batch_size"
 τ_OOD = "tau_ood"
 PRIOR_α = "prior_α"
 PRIOR_β = "prior_β"
+PRIOR_B = "prior_b"
 OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 # Options for OOD_X_GENERATION_METHOD
 GAUSSIAN_NOISE = "gaussian_noise"
@@ -38,14 +39,12 @@ MS_KDE_BW_FACTOR = "ms_kde_bw_factor"
 OOD_Z_GENERATION_METHOD = "ood_z_generation_method"
 # Options for OOD_Z_GENERATION_METHOD
 KDE = "kde"
-PRIOR = "prior"
 KDE_BANDWIDTH_MULTIPLIER = "kde_bandwidth_multiplier"
 GD_PRIOR = "gd_prior"
 GD_AGGREGATE_POSTERIOR = "gd_aggregate_posterior"
 
 OOD_Z_GENERATION_AVAILABLE_METHODS = [
     KDE,
-    PRIOR,
     GD_PRIOR,
     GD_AGGREGATE_POSTERIOR,
 ]
@@ -205,6 +204,7 @@ v3ae_parameters = {
     ),
     PRIOR_α: Param(PRIOR_α, None, float),
     PRIOR_β: Param(PRIOR_β, None, float),
+    PRIOR_B: Param(PRIOR_B, 0.5, float),
     KDE_BANDWIDTH_MULTIPLIER: Param(KDE_BANDWIDTH_MULTIPLIER, 10, float),
 }
 generative_models = [VANILLA_VAE, VV_VAE, VV_VAE_MANIFOLD]

@@ -19,16 +19,14 @@ from sggm.definitions import (
     vanilla_vae_parameters,
     v3ae_parameters,
     LEARNING_RATE,
-    PRIOR_α,
-    PRIOR_β,
     τ_OOD,
     EPS,
     N_MC_SAMPLES,
+    PRIOR_B,
     # %
     OOD_Z_GENERATION_AVAILABLE_METHODS,
     OOD_Z_GENERATION_METHOD,
     KDE,
-    PRIOR,
     GD_PRIOR,
     GD_AGGREGATE_POSTERIOR,
     KDE_BANDWIDTH_MULTIPLIER,
@@ -183,8 +181,8 @@ class BaseVAE(pl.LightningModule):
         del logs["loss"]
         self.log_dict({f"val_{k}": v for k, v in logs.items()}, on_epoch=True)
         # Histogram of weights
-        for name, weight in self.named_parameters():
-            self.logger.experiment.add_histogram(name, weight, self.current_epoch)
+        # for name, weight in self.named_parameters():
+        #     self.logger.experiment.add_histogram(name, weight, self.current_epoch)
 
         return loss
 
@@ -417,6 +415,7 @@ class V3AE(BaseVAE):
         kde_bandwidth_multiplier: float = v3ae_parameters[
             KDE_BANDWIDTH_MULTIPLIER
         ].default,
+        prior_b: float = v3ae_parameters[PRIOR_B].default,
     ):
         super(V3AE, self).__init__(
             input_dims,
@@ -466,6 +465,8 @@ class V3AE(BaseVAE):
         self.prior_α = None
         self.prior_β = None
 
+        self.prior_b = prior_b
+
         # Save hparams
         self.save_hyperparameters(
             "activation",
@@ -476,6 +477,7 @@ class V3AE(BaseVAE):
             "n_mc_samples",
             "τ_ood",
             "ood_z_generation_method",
+            "prior_b",
         )
 
     # %
@@ -498,9 +500,9 @@ class V3AE(BaseVAE):
         OR
         applies the provided prior parameters
         """
+        print(self.prior_b)
+        exit()
         if (prior_α is None) & (prior_β is None):
-            # %
-            b = 0.01
             # %
             x_train = []
             for idx, batch in enumerate(datamodule.train_dataloader()):
@@ -519,7 +521,7 @@ class V3AE(BaseVAE):
             prior_modes = torch.minimum(
                 prior_modes, max_mode * torch.ones_like(prior_modes)
             )
-            self.prior_β = b * torch.ones_like(prior_modes).type_as(x_train)
+            self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(x_train)
             self.prior_α = 0.5 + self.prior_β * prior_modes
 
         elif (prior_α is not None) & (prior_β is not None):

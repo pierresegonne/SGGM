@@ -15,37 +15,10 @@ from sggm.callbacks import callbacks
 from sggm.definitions import (
     experiment_names,
     generative_experiments,
-    generative_models,
     model_names,
     parameters,
     regression_experiments,
-    regression_models,
     regressor_parameters,
-)
-from sggm.definitions import (
-    SANITY_CHECK,
-    TOY,
-    TOY_SHIFTED,
-    TOY_2D,
-    TOY_2D_SHIFTED,
-    UCI_CCPP,
-    UCI_CCPP_SHIFTED,
-    UCI_CONCRETE,
-    UCI_CONCRETE_SHIFTED,
-    UCI_SUPERCONDUCT,
-    UCI_SUPERCONDUCT_SHIFTED,
-    UCI_WINE_RED,
-    UCI_WINE_RED_SHIFTED,
-    UCI_WINE_WHITE,
-    UCI_WINE_WHITE_SHIFTED,
-    UCI_YACHT,
-    UCI_YACHT_SHIFTED,
-    #
-    MNIST,
-    MNIST_2D,
-    FASHION_MNIST,
-    FASHION_MNIST_2D,
-    NOT_MNIST,
 )
 from sggm.definitions import (
     VARIATIONAL_REGRESSOR,
@@ -178,6 +151,7 @@ class Experiment:
                         n_mc_samples=self.n_mc_samples,
                         ood_z_generation_method=self.ood_z_generation_method,
                         kde_bandwidth_multiplier=self.kde_bandwidth_multiplier,
+                        prior_b=self.prior_b,
                     )
                 elif self.model_name == VV_VAE_MANIFOLD:
                     return V3AEm(
@@ -192,6 +166,7 @@ class Experiment:
                         n_mc_samples=self.n_mc_samples,
                         ood_z_generation_method=self.ood_z_generation_method,
                         kde_bandwidth_multiplier=self.kde_bandwidth_multiplier,
+                        prior_b=self.prior_b,
                     )
                 else:
                     raise NotImplementedError(

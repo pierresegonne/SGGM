@@ -164,9 +164,9 @@ def plot_kl(
     extent: Union[int, float],
     # %
     # Change here for display
-    show_imshow: bool = False,
+    show_imshow: bool = True,
     show_per_pixel: bool = False,
-    show_violin: bool = True,
+    show_violin: bool = False,
 ):
     # %
     if show_imshow:
@@ -191,7 +191,7 @@ def show_2d_latent_space(
     y,
     title="TITLE",
     show_geodesic=False,
-    show_kl=False,
+    show_kl=True,
     show_pi=True,
     z_star: Union[None, torch.Tensor] = None,
 ):
