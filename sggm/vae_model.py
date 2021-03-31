@@ -30,6 +30,7 @@ from sggm.definitions import (
     GD_PRIOR,
     GD_AGGREGATE_POSTERIOR,
     KDE_BANDWIDTH_MULTIPLIER,
+    DECODER_α_OFFSET,
 )
 from sggm.definitions import (
     ACTIVATION_FUNCTIONS,
@@ -436,6 +437,7 @@ class V3AE(BaseVAE):
             KDE_BANDWIDTH_MULTIPLIER
         ].default,
         prior_b: float = v3ae_parameters[PRIOR_B].default,
+        decoder_α_offset: float = v3ae_parameters[DECODER_α_OFFSET].default,
     ):
         super(V3AE, self).__init__(
             input_dims,
@@ -471,11 +473,11 @@ class V3AE(BaseVAE):
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
             nn.Sigmoid(),
         )
+        self.decoder_α_offset = decoder_α_offset
         self.decoder_α = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),
             nn.Softplus(),
-            # TODO changes here
-            ShiftLayer(1.5),
+            ShiftLayer(1.0 + self.decoder_α_offset),
         )
         self.decoder_β = nn.Sequential(
             decoder_dense_base(self.latent_size, self.input_size, self.activation),

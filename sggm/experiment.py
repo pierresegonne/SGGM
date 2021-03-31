@@ -156,6 +156,7 @@ class Experiment:
                         ood_z_generation_method=self.ood_z_generation_method,
                         kde_bandwidth_multiplier=self.kde_bandwidth_multiplier,
                         prior_b=self.prior_b,
+                        decoder_α_offset=self.decoder_α_offset,
                     )
                 elif self.model_name == VV_VAE_MANIFOLD:
                     return V3AEm(
@@ -171,6 +172,7 @@ class Experiment:
                         ood_z_generation_method=self.ood_z_generation_method,
                         kde_bandwidth_multiplier=self.kde_bandwidth_multiplier,
                         prior_b=self.prior_b,
+                        decoder_α_offset=self.decoder_α_offset,
                     )
                 else:
                     raise NotImplementedError(

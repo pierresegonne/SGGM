@@ -22,6 +22,7 @@
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   prior_b: 0.00001
+  # decoder_α_offset: 
   # misc
   n_trials: 1
   seed: 3

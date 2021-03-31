@@ -71,11 +71,7 @@ SPLIT_TRAINING_MODE = "split_training_mode"
 SPLIT_TRAINING_MSE_MEAN = "split_training_mse_mean"
 SPLIT_TRAINING_STD_VV_MEAN = "split_training_std_vv_mean"
 
-ENCODER_TYPE = "encoder_type"
-# Options for ENCODER_TYPE
-ENCODER_FULLY_CONNECTED = "encoder_fully_connected"
-ENCODER_CONVOLUTIONAL = "encoder_convolutional"
-ENCODER_AVAILABLE_TYPES = [ENCODER_FULLY_CONNECTED, ENCODER_CONVOLUTIONAL]
+DECODER_α_OFFSET = "decoder_α_offset"
 
 
 def none_or_int(value: Any) -> Union[int, None]:
@@ -187,9 +183,6 @@ vae_parameters = {
     LEARNING_RATE: Param(LEARNING_RATE, 1e-3, float),
     EPS: Param(EPS, 1e-4, float),
     N_MC_SAMPLES: Param(N_MC_SAMPLES, 20, int),
-    ENCODER_TYPE: Param(
-        ENCODER_TYPE, ENCODER_FULLY_CONNECTED, str, choices=ENCODER_AVAILABLE_TYPES
-    ),
     #
     DIGITS: Param(DIGITS, None, none_or_list),
 }
@@ -206,6 +199,7 @@ v3ae_parameters = {
     PRIOR_β: Param(PRIOR_β, None, float),
     PRIOR_B: Param(PRIOR_B, 0.5, float),
     KDE_BANDWIDTH_MULTIPLIER: Param(KDE_BANDWIDTH_MULTIPLIER, 10, float),
+    DECODER_α_OFFSET: Param(DECODER_α_OFFSET, 0., float),
 }
 generative_models = [VANILLA_VAE, VV_VAE, VV_VAE_MANIFOLD]
 
