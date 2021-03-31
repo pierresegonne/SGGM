@@ -5,6 +5,8 @@ import seaborn as sns
 import torch
 import torch.distributions as D
 
+from torchvision.utils import save_image, make_grid
+
 from sggm.vae_model import VanillaVAE, V3AE, V3AEm
 from sggm.vae_model_helper import batch_reshape
 from sggm.styles_ import colours, colours_rgb
@@ -183,6 +185,38 @@ def plot_kl(
 
 
 # ==================================================================================
+def show_reconstruction_grid(
+    model: Union[VanillaVAE, V3AE],
+    size: int = 50,
+):
+    extent = 4
+    x_mesh = torch.linspace(-extent, extent, size)
+    y_mesh = torch.linspace(-extent, extent, size)
+    x_mesh, y_mesh = torch.meshgrid(x_mesh, y_mesh)
+    z_mesh = torch.cat((x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1)[
+        None, :
+    ]
+
+    with torch.no_grad():
+        _, μ_z, α_z, β_z = model.parametrise_z(z_mesh)
+        x_hat, p_x = model.sample_generative(μ_z, α_z, β_z)
+        x_mean = p_x.mean
+
+    # reshape
+    x_hat, x_mean = x_hat.reshape(-1, 1, 28, 28), x_mean.reshape(-1, 1, 28, 28)
+
+    # grid
+    x_hat, x_mean = (
+        make_grid(x_hat, nrow=size).permute(1, 2, 0),
+        make_grid(x_mean, nrow=size).permute(1, 2, 0),
+    )
+    fig_hat, ax_hat = plt.subplots()
+    ax_hat.imshow(x_hat)
+
+    fig_mean, ax_mean = plt.subplots()
+    ax_mean.imshow(x_mean)
+
+    return fig_hat, fig_mean
 
 
 def show_2d_latent_space(

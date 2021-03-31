@@ -10,6 +10,7 @@ from sggm.analysis.mnist.helper import (
 from sggm.analysis.mnist.latent_2d import (
     show_2d_latent_space,
     show_reconstruction_arbitrary_latent,
+    show_reconstruction_grid,
 )
 from sggm.analysis.mnist.others_mnist import analyse_others_mnist
 from sggm.data.mnist import MNISTDataModule, MNISTDataModule2D
@@ -80,10 +81,10 @@ def plot(experiment_log, seed=False, **kwargs):
 
     # # Reconstruction plots
     n_display = 5
-    save_and_show(
-        plot_comparison(n_display, x_test, p_x_test, best_model.input_dims),
-        f"{save_folder}/_main",
-    )
+    # save_and_show(
+    #     plot_comparison(n_display, x_test, p_x_test, best_model.input_dims),
+    #     f"{save_folder}/_main",
+    # )
 
     # # Interpolation
     # interpolation_digits = get_interpolation_digits(
@@ -97,7 +98,19 @@ def plot(experiment_log, seed=False, **kwargs):
     # 2D Latent space
     if experiment_name in [MNIST_2D, FASHION_MNIST_2D]:
         # Arbitrary latent code
-        z_star = torch.Tensor([[[-4, -4]]])
+        z_star = torch.Tensor([[[2.43, -4.19]]])
+        (
+            grid_samples,
+            grid_mean,
+        ) = show_reconstruction_grid(best_model)
+        save_and_show(
+            grid_samples,
+            f"{save_folder}/_grid_samples",
+        )
+        save_and_show(
+            grid_mean,
+            f"{save_folder}/_grid_mean",
+        )
         save_and_show(
             show_2d_latent_space(best_model, x_test, y_test, z_star=z_star),
             f"{save_folder}/_latent_space",
