@@ -487,6 +487,9 @@ class V3AE(BaseVAE):
 
         self.prior_b = prior_b
 
+        # %
+        self._refit_encoder_mode = False
+
         # Save hparams
         self.save_hyperparameters(
             "activation",
