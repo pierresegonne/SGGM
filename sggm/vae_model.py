@@ -100,6 +100,15 @@ def encoder_dense_base(
         nn.Linear(512, 256),
         nn.BatchNorm1d(256),
         f,
+        nn.Linear(256, latent_size),
+    )
+    return nn.Sequential(
+        nn.Linear(input_size, 512),
+        nn.BatchNorm1d(512),
+        f,
+        nn.Linear(512, 256),
+        nn.BatchNorm1d(256),
+        f,
         nn.Linear(256, 128),
         nn.BatchNorm1d(128),
         f,
@@ -114,6 +123,15 @@ def decoder_dense_base(
 ) -> nn.Module:
     f = activation_function(activation)
 
+    return nn.Sequential(
+        nn.Linear(latent_size, 256),
+        nn.BatchNorm1d(256),
+        f,
+        nn.Linear(256, 512),
+        nn.BatchNorm1d(512),
+        f,
+        nn.Linear(512, output_size),
+    )
     return nn.Sequential(
         nn.Linear(latent_size, 128),
         nn.BatchNorm1d(128),
@@ -554,7 +572,7 @@ class V3AE(BaseVAE):
                 prior_modes, max_mode * torch.ones_like(prior_modes)
             )
             self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(x_train)
-            self.prior_α = 0.5 + self.prior_β * prior_modes
+            self.prior_α = 1 + self.prior_β * prior_modes
 
         elif (prior_α is not None) & (prior_β is not None):
             assert type(prior_α) == type(
