@@ -7,64 +7,7 @@
 # %
 # Posterior
 # 1e-5
-# - name: b_search_aggregate_posterior_000001_alpha15
-#   experiment_name: mnist_2d
-#   model_name: v3ae
-#   n_workers: 0
-#   # hparams
-#   batch_size: 500
-#   learning_rate: 5e-4
-#   eps: 1e-3
-#   n_mc_samples: 3
-#   digits:
-#     - 2
-#     - 5
-#   # ood
-#   tau_ood: 0.5
-#   ood_z_generation_method: gd_aggregate_posterior
-#   prior_b: 0.00001
-#   decoder_α_offset: 0.5
-#   # misc
-#   n_trials: 1
-#   seed: 3
-#   max_epochs: 200
-#   # pl trainer
-#   early_stopping_patience: 200
-#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# - name: b_search_aggregate_posterior_000001_alpha_eps
-#   experiment_name: mnist_2d
-#   model_name: v3ae
-#   n_workers: 0
-#   # hparams
-#   batch_size: 500
-#   learning_rate: 5e-4
-#   eps: 1e-3
-#   n_mc_samples: 3
-#   digits:
-#     - 2
-#     - 5
-#   # ood
-#   tau_ood: 0.5
-#   ood_z_generation_method: gd_aggregate_posterior
-#   prior_b: 0.00001
-#   decoder_α_offset: 1e-3
-#   # misc
-#   n_trials: 1
-#   seed: 3
-#   max_epochs: 200
-#   # pl trainer
-#   early_stopping_patience: 200
-#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# 1e-4
-- name: b_search_aggregate_posterior_00001_alpha15
+- name: b_search_aggregate_posterior_000001_alpha15
   experiment_name: mnist_2d
   model_name: v3ae
   n_workers: 0
@@ -79,7 +22,7 @@
   # ood
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
-  prior_b: 0.0001
+  prior_b: 0.00001
   decoder_α_offset: 0.5
   # misc
   n_trials: 1
@@ -92,7 +35,36 @@
   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: b_search_aggregate_posterior_00001_alpha_eps
+- name: b_search_aggregate_posterior_000001_alpha_eps
+  experiment_name: mnist_2d
+  model_name: v3ae
+  n_workers: 0
+  # hparams
+  batch_size: 500
+  learning_rate: 5e-4
+  eps: 1e-3
+  n_mc_samples: 3
+  digits:
+    - 2
+    - 5
+  # ood
+  tau_ood: 0.5
+  ood_z_generation_method: gd_aggregate_posterior
+  prior_b: 0.00001
+  decoder_α_offset: 1e-3
+  # misc
+  n_trials: 1
+  seed: 3
+  max_epochs: 200
+  # pl trainer
+  early_stopping_patience: 200
+  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 10 # How often does the log writes to disc
+  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+# # 1e-4
+# - name: b_search_aggregate_posterior_00001_alpha15
 #   experiment_name: mnist_2d
 #   model_name: v3ae
 #   n_workers: 0
@@ -108,35 +80,6 @@
 #   tau_ood: 0.5
 #   ood_z_generation_method: gd_aggregate_posterior
 #   prior_b: 0.0001
-#   decoder_α_offset: 1e-3
-#   # misc
-#   n_trials: 1
-#   seed: 3
-#   max_epochs: 200
-#   # pl trainer
-#   early_stopping_patience: 200
-#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
-
-# # 1e-3
-# - name: b_search_aggregate_posterior_0001_alpha15
-#   experiment_name: mnist_2d
-#   model_name: v3ae
-#   n_workers: 0
-#   # hparams
-#   batch_size: 500
-#   learning_rate: 5e-4
-#   eps: 1e-3
-#   n_mc_samples: 3
-#   digits:
-#     - 2
-#     - 5
-#   # ood
-#   tau_ood: 0.5
-#   ood_z_generation_method: gd_aggregate_posterior
-#   prior_b: 0.001
 #   decoder_α_offset: 0.5
 #   # misc
 #   n_trials: 1
@@ -149,30 +92,87 @@
 #   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
-# - name: b_search_aggregate_posterior_0001_alpha_eps
-#   experiment_name: mnist_2d
-#   model_name: v3ae
-#   n_workers: 0
-#   # hparams
-#   batch_size: 500
-#   learning_rate: 5e-4
-#   eps: 1e-3
-#   n_mc_samples: 3
-#   digits:
-#     - 2
-#     - 5
-#   # ood
-#   tau_ood: 0.5
-#   ood_z_generation_method: gd_aggregate_posterior
-#   prior_b: 0.001
-#   decoder_α_offset: 1e-3
-#   # misc
-#   n_trials: 1
-#   seed: 3
-#   max_epochs: 200
-#   # pl trainer
-#   early_stopping_patience: 200
-#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 1 # Check val every n train epochs
+- name: b_search_aggregate_posterior_00001_alpha_eps
+  experiment_name: mnist_2d
+  model_name: v3ae
+  n_workers: 0
+  # hparams
+  batch_size: 500
+  learning_rate: 5e-4
+  eps: 1e-3
+  n_mc_samples: 3
+  digits:
+    - 2
+    - 5
+  # ood
+  tau_ood: 0.5
+  ood_z_generation_method: gd_aggregate_posterior
+  prior_b: 0.0001
+  decoder_α_offset: 1e-3
+  # misc
+  n_trials: 1
+  seed: 3
+  max_epochs: 200
+  # pl trainer
+  early_stopping_patience: 200
+  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 10 # How often does the log writes to disc
+  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+# 1e-3
+- name: b_search_aggregate_posterior_0001_alpha15
+  experiment_name: mnist_2d
+  model_name: v3ae
+  n_workers: 0
+  # hparams
+  batch_size: 500
+  learning_rate: 5e-4
+  eps: 1e-3
+  n_mc_samples: 3
+  digits:
+    - 2
+    - 5
+  # ood
+  tau_ood: 0.5
+  ood_z_generation_method: gd_aggregate_posterior
+  prior_b: 0.001
+  decoder_α_offset: 0.5
+  # misc
+  n_trials: 1
+  seed: 3
+  max_epochs: 200
+  # pl trainer
+  early_stopping_patience: 200
+  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 10 # How often does the log writes to disc
+  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
+
+- name: b_search_aggregate_posterior_0001_alpha_eps
+  experiment_name: mnist_2d
+  model_name: v3ae
+  n_workers: 0
+  # hparams
+  batch_size: 500
+  learning_rate: 5e-4
+  eps: 1e-3
+  n_mc_samples: 3
+  digits:
+    - 2
+    - 5
+  # ood
+  tau_ood: 0.5
+  ood_z_generation_method: gd_aggregate_posterior
+  prior_b: 0.001
+  decoder_α_offset: 1e-3
+  # misc
+  n_trials: 1
+  seed: 3
+  max_epochs: 200
+  # pl trainer
+  early_stopping_patience: 200
+  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 10 # How often does the log writes to disc
+  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs

@@ -504,7 +504,7 @@ class V3AE(BaseVAE):
             "τ_ood",
             "ood_z_generation_method",
             "prior_b",
-            "decoder_α_offset"
+            "decoder_α_offset",
         )
 
     # %
