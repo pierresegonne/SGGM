@@ -54,6 +54,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         pip install --requirement requirements.txt --upgrade --quiet --find-links https://download.pytorch.org/whl/cpu/torch_stable.html --use-feature=2020-resolver
         pip install --requirement tests/requirements.txt --quiet --use-feature=2020-resolver
         pip install --requirement dependencies/geoml-0.0.1.tar.gz
