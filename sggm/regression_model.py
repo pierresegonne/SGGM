@@ -172,7 +172,7 @@ class VariationalRegressor(pl.LightningModule):
         self.prior_α = prior_α
         self.prior_β = prior_β
 
-        self.β_elbo = check_mixture_ratio(β_elbo)
+        self.β_elbo = β_elbo
         self.τ_ood = check_mixture_ratio(τ_ood)
 
         self.learning_rate = learning_rate
@@ -384,8 +384,8 @@ class VariationalRegressor(pl.LightningModule):
     def elbo(
         self, ellk: torch.Tensor, kl: torch.Tensor, train: bool = True
     ) -> torch.Tensor:
-        β = self.β_elbo if train else 0.5
-        return 2 * torch.mean((1 - β) * ellk - β * kl)
+        β = self.β_elbo if train else 1
+        return torch.mean(ellk - β * kl)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
