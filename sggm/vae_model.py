@@ -100,7 +100,10 @@ def encoder_dense_base(
         nn.Linear(512, 256),
         nn.BatchNorm1d(256),
         f,
-        nn.Linear(256, latent_size),
+        nn.Linear(256, 128),
+        nn.BatchNorm1d(128),
+        f,
+        nn.Linear(128, latent_size),
     )
 
 
@@ -112,12 +115,15 @@ def decoder_dense_base(
     f = activation_function(activation)
 
     return nn.Sequential(
-        nn.Linear(latent_size, 256),
+        nn.Linear(latent_size, 128),
+        nn.BatchNorm1d(128),
+        f,
+        nn.Linear(128, 256),
         nn.BatchNorm1d(256),
-        nn.LeakyReLU(),
+        f,
         nn.Linear(256, 512),
         nn.BatchNorm1d(512),
-        nn.LeakyReLU(),
+        f,
         nn.Linear(512, output_size),
     )
 
@@ -236,9 +242,10 @@ class VanillaVAE(BaseVAE):
         self._gaussian_decoder = True
         self._bernouilli_decoder = False
 
-        self.encoder_μ = encoder_dense_base(
-            self.input_size, self.latent_size, self.activation
+        self.encoder_μ = nn.Sequential(
+            encoder_dense_base(self.input_size, self.latent_size, self.activation),
         )
+
         self.encoder_std = nn.Sequential(
             encoder_dense_base(self.input_size, self.latent_size, self.activation),
             nn.Softplus(),
