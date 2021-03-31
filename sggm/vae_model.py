@@ -572,7 +572,7 @@ class V3AE(BaseVAE):
                 prior_modes, max_mode * torch.ones_like(prior_modes)
             )
             self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(x_train)
-            self.prior_α = 1 + self.prior_β * prior_modes
+            self.prior_α = (1 + self.decoder_α_offset) + self.prior_β * prior_modes
 
         elif (prior_α is not None) & (prior_β is not None):
             assert type(prior_α) == type(
