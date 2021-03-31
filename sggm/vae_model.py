@@ -313,7 +313,7 @@ class VanillaVAE(BaseVAE):
             x = p.rsample()
 
         if self._bernouilli_decoder:
-            p = D.Independent(D.Bernoulli(mu), 1)
+            p = D.Independent(D.Bernoulli(mu, validate_args=False), 1)
             x = p.sample()
 
         return x, p
