@@ -574,7 +574,7 @@ class V3AE(BaseVAE):
             )
             inv_prior_modes = 1 / prior_modes
             #%
-            _C = 10
+            _C = 100
             C = _C * torch.ones_like(prior_modes)
             self.prior_α = C / (C - 1)
             self.prior_β = self.prior_α * inv_prior_modes / _C
