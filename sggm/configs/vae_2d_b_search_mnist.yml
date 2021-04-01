@@ -7,7 +7,7 @@
 # %
 # Posterior
 # 1e-5
-- name: simple_2
+- name: simple_2_2
   experiment_name: mnist_2d
   model_name: v3ae
   n_workers: 0
@@ -20,7 +20,7 @@
     - 2
     - 5
   # ood
-  tau_ood: 0.95
+  tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   # prior_b: 0.00001
   prior_α: 1.6
