@@ -8,7 +8,7 @@
 # Posterior
 
 # 2
-- name: jsaispas
+- name: make_it_simple
   experiment_name: mnist_2d
   model_name: v3ae
   n_workers: 0
