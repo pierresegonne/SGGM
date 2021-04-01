@@ -81,10 +81,10 @@ def plot(experiment_log, seed=False, **kwargs):
 
     # # Reconstruction plots
     n_display = 5
-    # save_and_show(
-    #     plot_comparison(n_display, x_test, p_x_test, best_model.input_dims),
-    #     f"{save_folder}/_main",
-    # )
+    save_and_show(
+        plot_comparison(n_display, x_test, p_x_test, best_model.input_dims),
+        f"{save_folder}/_main",
+    )
 
     # # Interpolation
     # interpolation_digits = get_interpolation_digits(
@@ -98,7 +98,7 @@ def plot(experiment_log, seed=False, **kwargs):
     # 2D Latent space
     if experiment_name in [MNIST_2D, FASHION_MNIST_2D]:
         # Arbitrary latent code
-        z_star = torch.Tensor([[[2.43, -4.19]]])
+        z_star = torch.Tensor([[[3.5, 3.5]]])
         (
             grid_samples,
             grid_mean,

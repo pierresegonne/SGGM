@@ -3,6 +3,7 @@ import geoml.nnj as nnj
 import numpy as np
 from numpy.core.fromnumeric import var
 import pytorch_lightning as pl
+from sggm._local.translated_sigmoid import translated_sigmoid
 import torch
 import torch.distributions as D
 import torch.nn as nn
@@ -791,7 +792,7 @@ class V3AE(BaseVAE):
         # [self.n_mc_samples, BS, *self.latent_dims/self.input_size]
         z, μ_z, α_z, β_z = self.parametrise_z(z)
         # [self.n_mc_samples, BS, self.input_size]
-        λ, q_λ_z, p_λ = self.sample_precision(α_z, β_z)
+        λ, q_λ_z, p_λ = self.sample_precision(α_z, β_z, z)
         # [BS, self.input_size], [n_mc_sample, BS, self.input_size]
         x_hat, p_x_z = self.sample_generative(μ_z, α_z, β_z)
         # [BS, *self.input_dims]
@@ -810,7 +811,7 @@ class V3AE(BaseVAE):
         p = D.Independent(D.Normal(torch.zeros_like(mu), torch.ones_like(std)), 1)
         return z, q, p
 
-    def sample_precision(self, alpha, beta):
+    def sample_precision(self, alpha, beta, z):
         # batch_shape [n_mc_samples, BS] event_shape [input_size]
         # alpha = alpha + self.eps
         # beta = beta + self.eps
@@ -825,6 +826,12 @@ class V3AE(BaseVAE):
         prior_β = (
             self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
         )
+        #%
+        prior_β_extrapolation = prior_β * 100
+        s = translated_sigmoid(torch.norm(z, dim=2), 6.907 * 0.3, 0.3)[:, :, None]
+        s = s.repeat(1, 1, beta.shape[2])
+        prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
+        #%
         p = D.Independent(
             D.Gamma(
                 prior_α,
@@ -840,34 +847,6 @@ class V3AE(BaseVAE):
             p = D.Independent(
                 D.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
             )
-
-            # if mu.shape[1] == 1:
-            #     import matplotlib.pyplot as plt
-            #     from scipy.stats import nct
-
-            #     # x_samples = p.rsample((1000,))
-            #     print(alpha[0].flatten().numpy().shape)
-            #     var_samples = np.zeros((784,))
-            #     var_rv = np.zeros((784,))
-            #     for i in range(784):
-            #         a = alpha[0].flatten().numpy()[i]
-            #         b = beta[0].flatten().numpy()[i]
-            #         m = mu[0].flatten().numpy()[i]
-            #         rv = nct(df=(2 * a), nc=0, loc=m, scale=np.sqrt(b / a))
-            #         var_rv[i] = rv.var()
-            #         var_samples[i] = rv.rvs(size=100000).var()
-            #     var_samples = var_samples.reshape(28, 28)
-            #     var_rv = var_rv.reshape(28, 28)
-            #     fig, (ax_og, ax_ds, ax_rv, ax_sp) = plt.subplots(1, 4)
-            #     ax_og.imshow((beta / (alpha - 1))[0].reshape(28, 28), cmap="binary")
-            #     ax_ds.imshow(p.variance[0].reshape(28, 28), cmap="binary")
-            #     ax_rv.imshow(var_rv, cmap="binary")
-            #     ax_sp.imshow(var_samples, cmap="binary")
-            #     plt.show()
-            #     exit()
-            # else:
-            #     x = p.sample()
-            # print(x.shape)
 
             x = p.rsample()
 
@@ -936,7 +915,8 @@ class V3AE(BaseVAE):
             # [self.n_mc_samples, BS, self.input_size]
             _, _, α_z_out, β_z_out = self.parametrise_z(z_out)
             # batch_shape [self.n_mc_samples, BS] event_shape [self.input_size]
-            q_λ_z_out = D.Independent(D.Gamma(α_z_out, β_z_out), 1)
+            # q_λ_z_out = D.Independent(D.Gamma(α_z_out, β_z_out), 1)
+            _, q_λ_z_out, p_λ = self.sample_precision(α_z_out, β_z_out, z_out)
             # [self.n_mc_sample, BS]
             kl_divergence_lbd_out = self.kl(q_λ_z_out, p_λ)
             # [BS]

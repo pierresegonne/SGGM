@@ -6,6 +6,7 @@ import torch
 import torch.distributions as D
 
 from torchvision.utils import save_image, make_grid
+from torchvision import transforms
 
 from sggm.vae_model import VanillaVAE, V3AE, V3AEm
 from sggm.vae_model_helper import batch_reshape
@@ -191,7 +192,8 @@ def show_reconstruction_grid(
 ):
     extent = 4
     x_mesh = torch.linspace(-extent, extent, size)
-    y_mesh = torch.linspace(-extent, extent, size)
+    # Imshow starts by default from upper left
+    y_mesh = torch.linspace(extent, -extent, size)
     x_mesh, y_mesh = torch.meshgrid(x_mesh, y_mesh)
     z_mesh = torch.cat((x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1)[
         None, :
@@ -204,17 +206,26 @@ def show_reconstruction_grid(
 
     # reshape
     x_hat, x_mean = x_hat.reshape(-1, 1, 28, 28), x_mean.reshape(-1, 1, 28, 28)
+    x_hat, x_mean = x_hat.clamp(0, 1), x_mean.clamp(0, 1)
 
     # grid
     x_hat, x_mean = (
-        make_grid(x_hat, nrow=size).permute(1, 2, 0),
-        make_grid(x_mean, nrow=size).permute(1, 2, 0),
+        make_grid(x_hat, nrow=size),
+        make_grid(x_mean, nrow=size),
     )
+
+    # to grayscale
+    tf_to_gs = transforms.Compose(
+        [transforms.ToPILImage(), transforms.Grayscale(), transforms.ToTensor()]
+    )
+    x_hat, x_mean = tf_to_gs(x_hat)[0], tf_to_gs(x_mean)[0]
+
+    # plot
     fig_hat, ax_hat = plt.subplots()
-    ax_hat.imshow(x_hat)
+    ax_hat.imshow(x_hat, cmap="binary", vmin=0, vmax=1)
 
     fig_mean, ax_mean = plt.subplots()
-    ax_mean.imshow(x_mean)
+    ax_mean.imshow(x_mean, cmap="binary", vmin=0, vmax=1)
 
     return fig_hat, fig_mean
 

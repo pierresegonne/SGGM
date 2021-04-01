@@ -1,4 +1,5 @@
 import math
+from typing import Union
 import torch
 import torch.distributions as D
 
@@ -34,6 +35,15 @@ def check_ood_z_generation_method(method: str) -> str:
     ), f"""Method for z ood generation '{method}' is invalid.
     Must either be None or in {OOD_Z_GENERATION_AVAILABLE_METHODS}"""
     return method
+
+
+def locscale_sigmoid(
+    x: torch.Tensor,
+    loc: Union[int, float, torch.Tensor],
+    scale: Union[int, float, torch.Tensor],
+) -> torch.Tensor:
+    x = (x - loc) / scale
+    return torch.sigmoid(x)
 
 
 def density_gradient_descent(
