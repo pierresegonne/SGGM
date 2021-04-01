@@ -573,8 +573,7 @@ class V3AE(BaseVAE):
                 prior_modes, max_mode * torch.ones_like(prior_modes)
             )
             #%
-            prior_a = 1 + 1e-1
-            self.prior_α = prior_a * torch.ones_like(prior_modes).type_as(x_train)
+            self.prior_α = self.prior_b * torch.ones_like(prior_modes).type_as(x_train)
             self.prior_β = (1 / prior_modes) * self.prior_α
             #%
             # self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(x_train)
