@@ -602,14 +602,14 @@ class V3AE(BaseVAE):
             raise ValueError("Incorrect prior values provided, prior_α and prior_β")
 
         #%
-        import matplotlib.pyplot as plt
+        # import matplotlib.pyplot as plt
 
-        fig, (ax_alpha, ax_beta, ax_uncertainty) = plt.subplots(1, 3)
-        ax_alpha.imshow(self.prior_α, cmap="binary")
-        ax_beta.imshow(self.prior_β, cmap="binary")
-        ax_uncertainty.imshow(self.prior_β / (self.prior_α - 1))
-        plt.show()
-        exit()
+        # fig, (ax_alpha, ax_beta, ax_uncertainty) = plt.subplots(1, 3)
+        # ax_alpha.imshow(self.prior_α, cmap="binary")
+        # ax_beta.imshow(self.prior_β, cmap="binary")
+        # ax_uncertainty.imshow(self.prior_β / (self.prior_α - 1))
+        # plt.show()
+        # exit()
 
     def _setup_pi_dl(self):
         """ Generate a pseudo-input dataloader """
