@@ -1,6 +1,7 @@
 from typing import Union
 import geoml.nnj as nnj
 import numpy as np
+from numpy.core.fromnumeric import var
 import pytorch_lightning as pl
 import torch
 import torch.distributions as D
@@ -571,8 +572,13 @@ class V3AE(BaseVAE):
             prior_modes = torch.minimum(
                 prior_modes, max_mode * torch.ones_like(prior_modes)
             )
-            self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(x_train)
-            self.prior_α = 1 + self.prior_β * prior_modes
+            #%
+            prior_a = 1 + 1e-1
+            self.prior_α = prior_a * torch.ones_like(prior_modes).type_as(x_train)
+            self.prior_β = (1 / prior_modes) * self.prior_α
+            #%
+            # self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(x_train)
+            # self.prior_α = 1 + self.prior_β * prior_modes
 
         elif (prior_α is not None) & (prior_β is not None):
             assert type(prior_α) == type(
@@ -831,6 +837,35 @@ class V3AE(BaseVAE):
             p = D.Independent(
                 D.StudentT(2 * alpha, loc=mu, scale=torch.sqrt(beta / alpha)), 1
             )
+
+            # if mu.shape[1] == 1:
+            #     import matplotlib.pyplot as plt
+            #     from scipy.stats import nct
+
+            #     # x_samples = p.rsample((1000,))
+            #     print(alpha[0].flatten().numpy().shape)
+            #     var_samples = np.zeros((784,))
+            #     var_rv = np.zeros((784,))
+            #     for i in range(784):
+            #         a = alpha[0].flatten().numpy()[i]
+            #         b = beta[0].flatten().numpy()[i]
+            #         m = mu[0].flatten().numpy()[i]
+            #         rv = nct(df=(2 * a), nc=0, loc=m, scale=np.sqrt(b / a))
+            #         var_rv[i] = rv.var()
+            #         var_samples[i] = rv.rvs(size=100000).var()
+            #     var_samples = var_samples.reshape(28, 28)
+            #     var_rv = var_rv.reshape(28, 28)
+            #     fig, (ax_og, ax_ds, ax_rv, ax_sp) = plt.subplots(1, 4)
+            #     ax_og.imshow((beta / (alpha - 1))[0].reshape(28, 28), cmap="binary")
+            #     ax_ds.imshow(p.variance[0].reshape(28, 28), cmap="binary")
+            #     ax_rv.imshow(var_rv, cmap="binary")
+            #     ax_sp.imshow(var_samples, cmap="binary")
+            #     plt.show()
+            #     exit()
+            # else:
+            #     x = p.sample()
+            # print(x.shape)
+
             x = p.rsample()
 
         elif self._bernouilli_decoder:
