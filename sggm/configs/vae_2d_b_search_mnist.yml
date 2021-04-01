@@ -8,7 +8,7 @@
 # Posterior
 
 # 2
-- name: make_it_simple_2
+- name: make_it_not_so_simple
   experiment_name: mnist_2d
   model_name: v3ae
   n_workers: 0
