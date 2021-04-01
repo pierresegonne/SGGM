@@ -69,7 +69,7 @@
   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 # 1.3
-- name: grid_search_alpha_11
+- name: grid_search_alpha_13
   experiment_name: mnist_2d
   model_name: v3ae
   n_workers: 0
