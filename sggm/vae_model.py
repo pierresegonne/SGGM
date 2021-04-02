@@ -62,7 +62,7 @@ from sggm.vae_model_helper import (
     check_ood_z_generation_method,
     density_gradient_descent,
     reduce_int_list,
-    translated_sigmoid
+    locscale_sigmoid,
 )
 
 # stages for steps
@@ -827,7 +827,7 @@ class V3AE(BaseVAE):
         )
         #%
         prior_β_extrapolation = prior_β * 100
-        s = translated_sigmoid(torch.norm(z, dim=2), 6.907 * 0.3, 0.3)[:, :, None]
+        s = locscale_sigmoid(torch.norm(z, dim=2), 6.907 * 0.3, 0.3)[:, :, None]
         s = s.repeat(1, 1, beta.shape[2])
         prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
         #%
