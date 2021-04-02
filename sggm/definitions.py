@@ -50,7 +50,7 @@ OOD_Z_GENERATION_AVAILABLE_METHODS = [
 ]
 
 PIG_DL = "pig_dl"
-
+INDUCING_CENTROIDS = "inducing_centroids"
 DIGITS = "digits"
 
 EPS = "eps"

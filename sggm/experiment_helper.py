@@ -12,8 +12,9 @@ from sggm.definitions import (
     PIG_DL,
     PRIOR_α,
     PRIOR_β,
+    INDUCING_CENTROIDS,
     SPLIT_TRAINING_MSE_MEAN,
-    SPLIT_TRAINING_STD_VV_MEAN
+    SPLIT_TRAINING_STD_VV_MEAN,
 )
 from torch import nn
 from typing import Any
@@ -43,6 +44,8 @@ def get_misc_save_dict(experiment, model: pl.LightningModule) -> dict:
         misc[PRIOR_α] = model.prior_α
     if getattr(model, PRIOR_β, None) is not None:
         misc[PRIOR_β] = model.prior_β
+    if getattr(model, INDUCING_CENTROIDS, None) is not None:
+        misc[INDUCING_CENTROIDS] = model.inducing_centroids
     return misc
 
 
