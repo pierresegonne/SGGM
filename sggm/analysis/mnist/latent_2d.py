@@ -112,20 +112,22 @@ def show_per_pixel_uncertainty_kl(
 def show_kl_imshow(
     model: V3AE,
     z: torch.Tensor,
-    decoder_α_z: torch.Tensor,
-    decoder_β_z: torch.Tensor,
+    z_mesh: torch.Tensor,
+    decoder_α_z_mesh: torch.Tensor,
+    decoder_β_z_mesh: torch.Tensor,
     x_mesh_shape: Tuple[int, int],
     extent: Union[int, float],
     z_star: Union[None, torch.Tensor],
 ):
     _bs = 500
-    N = decoder_α_z.shape[1]
+    N = decoder_α_z_mesh.shape[1]
     kl = torch.empty((N))
     for i in range(N // _bs):
         idx_low, idx_high = i * _bs, (i + 1) * _bs
-        _decoder_α_z = decoder_α_z[0][idx_low:idx_high][None, :]
-        _decoder_β_z = decoder_β_z[0][idx_low:idx_high][None, :]
-        _, _q_λ_z, _p_λ = model.sample_precision(_decoder_α_z, _decoder_β_z)
+        _decoder_α_z = decoder_α_z_mesh[0][idx_low:idx_high][None, :]
+        _decoder_β_z = decoder_β_z_mesh[0][idx_low:idx_high][None, :]
+        _z = z_mesh[idx_low:idx_high][None, :]
+        _, _q_λ_z, _p_λ = model.sample_precision(_decoder_α_z, _decoder_β_z, _z)
         # [BS]
         _kl = model.kl(_q_λ_z, _p_λ).mean(dim=0)
         kl[idx_low:idx_high] = _kl
@@ -173,8 +175,10 @@ def plot_kl(
 ):
     # %
     if show_imshow:
-        _, _, α_z, β_z = model.parametrise_z(z_mesh[None, :])
-        show_kl_imshow(model, z, α_z, β_z, x_mesh_shape, extent, z_star)
+        _, _, α_z_mesh, β_z_mesh = model.parametrise_z(z_mesh[None, :])
+        show_kl_imshow(
+            model, z, z_mesh, α_z_mesh, β_z_mesh, x_mesh_shape, extent, z_star
+        )
     # %
     if show_per_pixel:
         show_per_pixel_uncertainty_kl(model, z_star, extent)

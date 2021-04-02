@@ -562,7 +562,7 @@ class V3AE(BaseVAE):
             )
             inv_prior_modes = 1 / prior_modes
             #%
-            _epistemic = True
+            _epistemic = False
             if _epistemic:
                 _C = 100
                 C = _C * torch.ones_like(prior_modes)
@@ -817,7 +817,7 @@ class V3AE(BaseVAE):
             self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
         )
         #%
-        _extrapolation = True
+        _extrapolation = False
         if _extrapolation:
             _X = 10
             prior_β_extrapolation = prior_β * _X
