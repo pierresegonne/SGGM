@@ -192,7 +192,7 @@ def plot_kl(
 # ==================================================================================
 def show_reconstruction_grid(
     model: Union[VanillaVAE, V3AE],
-    size: int = 50,
+    size: int = 20,
 ):
     extent = 4
     x_mesh = torch.linspace(-extent, extent, size)
@@ -229,7 +229,7 @@ def show_reconstruction_grid(
     ax_hat.imshow(x_hat, cmap="binary", vmin=0, vmax=1)
 
     fig_mean, ax_mean = plt.subplots()
-    ax_mean.imshow(x_mean, cmap="binary", vmin=0, vmax=1)
+    ax_mean.imshow(x_mean, cmap="binary", vmin=0)
 
     return fig_hat, fig_mean
 
@@ -256,8 +256,8 @@ def show_2d_latent_space(
 
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
     extent = 5
-    x_mesh = torch.linspace(-extent, extent, 100)
-    y_mesh = torch.linspace(-extent, extent, 100)
+    x_mesh = torch.linspace(-extent, extent, 300)
+    y_mesh = torch.linspace(-extent, extent, 300)
     x_mesh, y_mesh = torch.meshgrid(x_mesh, y_mesh)
     z_mesh = torch.cat((x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1)
     with torch.no_grad():

@@ -15,6 +15,7 @@ from sggm.definitions import (
     PIG_DL,
     PRIOR_α,
     PRIOR_β,
+    INDUCING_CENTROIDS,
 )
 from sggm.regression_model import VariationalRegressor
 from sggm.vae_model import VanillaVAE, V3AE, V3AEm
@@ -65,6 +66,8 @@ class VersionLog:
             self.model.prior_α = self.misc[PRIOR_α]
         if PRIOR_β in self.misc:
             self.model.prior_β = self.misc[PRIOR_β]
+        if INDUCING_CENTROIDS in self.misc:
+            self.model.inducing_centroids = self.misc[INDUCING_CENTROIDS]
 
 
 class ExperimentLog:

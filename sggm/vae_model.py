@@ -24,6 +24,8 @@ from sggm.definitions import (
     EPS,
     N_MC_SAMPLES,
     PRIOR_B,
+    PRIOR_EPISTEMIC_C,
+    PRIOR_EXTRAPOLATION_X,
     # %
     OOD_Z_GENERATION_AVAILABLE_METHODS,
     OOD_Z_GENERATION_METHOD,
@@ -56,6 +58,7 @@ from sggm.definitions import (
     TEST_SAMPLE_FIT_RMSE,
     TEST_OOD_SAMPLE_FIT_MAE,
     TEST_OOD_SAMPLE_FIT_RMSE,
+    TEST_OOD_SAMPLE_MEAN_MSE,
 )
 from sggm.model_helper import log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple
@@ -206,6 +209,9 @@ class BaseVAE(pl.LightningModule):
         self.log(TEST_OOD_SAMPLE_FIT_MAE, logs[TEST_OOD_SAMPLE_FIT_MAE], on_epoch=True)
         self.log(
             TEST_OOD_SAMPLE_FIT_RMSE, logs[TEST_OOD_SAMPLE_FIT_RMSE], on_epoch=True
+        )
+        self.log(
+            TEST_OOD_SAMPLE_MEAN_MSE, logs[TEST_OOD_SAMPLE_MEAN_MSE], on_epoch=True
         )
         return loss
 
@@ -381,6 +387,10 @@ class VanillaVAE(BaseVAE):
             # Samples
             logs[TEST_SAMPLE_FIT_MAE] = F.l1_loss(x_hat, x)
             logs[TEST_SAMPLE_FIT_RMSE] = torch.sqrt(F.mse_loss(x_hat, x))
+            # MISC
+            logs[TEST_OOD_SAMPLE_FIT_MAE] = 0
+            logs[TEST_OOD_SAMPLE_FIT_RMSE] = 0
+            logs[TEST_OOD_SAMPLE_MEAN_MSE] = 0
 
         return loss, logs
 
@@ -446,7 +456,13 @@ class V3AE(BaseVAE):
         kde_bandwidth_multiplier: float = v3ae_parameters[
             KDE_BANDWIDTH_MULTIPLIER
         ].default,
-        prior_b: float = v3ae_parameters[PRIOR_B].default,
+        prior_b: Union[float, None] = v3ae_parameters[PRIOR_B].default,
+        prior_epistemic_c: Union[float, None] = v3ae_parameters[
+            PRIOR_EPISTEMIC_C
+        ].default,
+        prior_extrapolation_x: Union[float, None] = v3ae_parameters[
+            PRIOR_EXTRAPOLATION_X
+        ].default,
         decoder_α_offset: float = v3ae_parameters[DECODER_α_OFFSET].default,
     ):
         super(V3AE, self).__init__(
@@ -499,6 +515,8 @@ class V3AE(BaseVAE):
         self.prior_β = None
 
         self.prior_b = prior_b
+        self.prior_epistemic_c = prior_epistemic_c
+        self.prior_extrapolation_x = prior_extrapolation_x
 
         self._mean_x_train = None
 
@@ -570,20 +588,23 @@ class V3AE(BaseVAE):
                 prior_modes, max_mode * torch.ones_like(prior_modes)
             )
             inv_prior_modes = 1 / prior_modes
-            #%
-            _epistemic = True
-            if _epistemic:
-                _C = 100
-                C = _C * torch.ones_like(prior_modes)
-                self.prior_α = C / (C - 1)
-                self.prior_β = self.prior_α * inv_prior_modes / _C
+
+            if self.prior_epistemic_c is not None:
+                prior_epistemic_c = self.prior_epistemic_c * torch.ones_like(
+                    prior_modes
+                )
+                self.prior_α = prior_epistemic_c / (prior_epistemic_c - 1)
+                self.prior_β = self.prior_α * inv_prior_modes / prior_epistemic_c
                 self.prior_β = self.prior_β
-            #%
-            else:
+            elif self.prior_b is not None:
                 self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(
                     x_train
                 )
                 self.prior_α = 1 + self.prior_β * prior_modes
+            else:
+                raise ValueError(
+                    "No prior_α and prior_β provided, and no procedure for prior parameter selection provided."
+                )
 
         elif (prior_α is not None) & (prior_β is not None):
             assert type(prior_α) == type(
@@ -602,17 +623,7 @@ class V3AE(BaseVAE):
                 self.prior_α = prior_α
                 self.prior_β = prior_β
         else:
-            raise ValueError("Incorrect prior values provided, prior_α and prior_β")
-
-        #%
-        # import matplotlib.pyplot as plt
-
-        # fig, (ax_alpha, ax_beta, ax_uncertainty) = plt.subplots(1, 3)
-        # ax_alpha.imshow(self.prior_α, cmap="binary")
-        # ax_beta.imshow(self.prior_β, cmap="binary")
-        # ax_uncertainty.imshow(self.prior_β / (self.prior_α - 1))
-        # plt.show()
-        # exit()
+            raise ValueError("Incorrect prior values provided for prior_α and prior_β")
 
     def _setup_pi_dl(self):
         """ Generate a pseudo-input dataloader """
@@ -850,17 +861,15 @@ class V3AE(BaseVAE):
         prior_β = (
             self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
         )
-        #%
-        _extrapolation = True
-        if _extrapolation:
-            _X = 100
-            prior_β_extrapolation = prior_β * _X
+
+        if self.prior_extrapolation_x is not None:
+            prior_β_extrapolation = prior_β * self.prior_extrapolation_x
             s = self.get_latent_extrapolation_ratios(z)
             s = s.repeat(1, 1, beta.shape[2])
             # How to make sure that this works properly?
             # In analysis script, one could probably plot on the grid
             prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
-        #%
+
         p = D.Independent(
             D.Gamma(
                 prior_α,
@@ -931,7 +940,9 @@ class V3AE(BaseVAE):
             )
 
     def sample_z_out_like(self, z: torch.Tensor) -> torch.Tensor:
-        return next(iter(self.pig_dl))[0].type_as(z)
+        # z might not fill the batch_size
+        # [n_mc_samples, batch_size, latent_size]
+        return next(iter(self.pig_dl))[0].type_as(z)[None, : z.shape[1], :]
 
     def ood_kl(
         self,
@@ -947,7 +958,6 @@ class V3AE(BaseVAE):
             # [self.n_mc_samples, BS, self.input_size]
             _, _, α_z_out, β_z_out = self.parametrise_z(z_out)
             # batch_shape [self.n_mc_samples, BS] event_shape [self.input_size]
-            # q_λ_z_out = D.Independent(D.Gamma(α_z_out, β_z_out), 1)
             _, q_λ_z_out, p_λ = self.sample_precision(α_z_out, β_z_out, z_out)
             # [self.n_mc_sample, BS]
             kl_divergence_lbd_out = self.kl(q_λ_z_out, p_λ)
@@ -1051,7 +1061,12 @@ class V3AE(BaseVAE):
                 x_hat_ood.shape[0], 1, 1, 1
             ).type_as(x_hat_ood)
             logs[TEST_OOD_SAMPLE_FIT_MAE] = F.l1_loss(x_hat_ood, mean_x_train)
-            logs[TEST_OOD_SAMPLE_FIT_RMSE] = F.l1_loss(x_hat_ood, mean_x_train)
+            logs[TEST_OOD_SAMPLE_FIT_RMSE] = torch.sqrt(
+                F.mse_loss(x_hat_ood, mean_x_train)
+            )
+            # MSE Samples and their own mean OOD
+            x_mean_ood = batch_reshape(μ_z_ood[0], self.input_dims)
+            logs[TEST_OOD_SAMPLE_MEAN_MSE] = F.mse_loss(x_hat_ood, x_mean_ood)
 
         return loss, logs
 

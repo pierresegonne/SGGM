@@ -3,7 +3,7 @@
 ### specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J vae_2d_b_search_fashion_mnist
+#BSUB -J fashion_mnist_for_encoder_refit
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 4
 #BSUB -R "span[hosts=1]"
@@ -37,4 +37,4 @@ python3 -m venv env
 source env/bin/activate
 python3 -m pip install -r requirements.txt
 export PYTHONIOENCODING=utf8
-cd sggm/ && python experiment.py --experiments_config configs/vae_2d_b_search_fashion_mnist.yml --gpus -1
+cd sggm/ && python experiment.py --experiments_config configs/fashion_mnist_for_encoder_refit.yml --gpus -1

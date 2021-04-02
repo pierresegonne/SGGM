@@ -17,6 +17,8 @@ BATCH_SIZE = "batch_size"
 PRIOR_α = "prior_α"
 PRIOR_β = "prior_β"
 PRIOR_B = "prior_b"
+PRIOR_EPISTEMIC_C = "prior_epistemic_c"
+PRIOR_EXTRAPOLATION_X = "prior_extrapolation_x"
 OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 # Options for OOD_X_GENERATION_METHOD
 GAUSSIAN_NOISE = "gaussian_noise"
@@ -197,9 +199,11 @@ v3ae_parameters = {
     ),
     PRIOR_α: Param(PRIOR_α, None, float),
     PRIOR_β: Param(PRIOR_β, None, float),
-    PRIOR_B: Param(PRIOR_B, 0.5, float),
+    PRIOR_B: Param(PRIOR_B, None, float),
+    PRIOR_EPISTEMIC_C: Param(PRIOR_EPISTEMIC_C, None, float),
+    PRIOR_EXTRAPOLATION_X: Param(PRIOR_EXTRAPOLATION_X, None, float),
     KDE_BANDWIDTH_MULTIPLIER: Param(KDE_BANDWIDTH_MULTIPLIER, 10, float),
-    DECODER_α_OFFSET: Param(DECODER_α_OFFSET, 0., float),
+    DECODER_α_OFFSET: Param(DECODER_α_OFFSET, 0.0, float),
 }
 generative_models = [VANILLA_VAE, VV_VAE, VV_VAE_MANIFOLD]
 
@@ -299,7 +303,7 @@ generative_experiments = [MNIST, MNIST_2D, FASHION_MNIST, FASHION_MNIST_2D, NOT_
 
 def experiments_latent_dims(experiment_name: str) -> tuple:
     if experiment_name == MNIST:
-        return (2,)  # Match Nicki and Martin
+        return (10,)  # Match Nicki and Martin
     if experiment_name == MNIST_2D:
         return (2,)
     elif experiment_name == FASHION_MNIST:
@@ -389,6 +393,7 @@ TEST_SAMPLE_FIT_MAE = f"test_sample_fit_mae{DOWN_METRIC_INDICATOR}"
 TEST_SAMPLE_FIT_RMSE = f"test_sample_fit_rmse{DOWN_METRIC_INDICATOR}"
 TEST_OOD_SAMPLE_FIT_MAE = f"test_ood_sample_fit_mae{DOWN_METRIC_INDICATOR}"
 TEST_OOD_SAMPLE_FIT_RMSE = f"test_ood_sample_fit_rmse{DOWN_METRIC_INDICATOR}"
+TEST_OOD_SAMPLE_MEAN_MSE = f"test_ood_sample_mean_mse{UP_METRIC_INDICATOR}"
 TEST_ELLK = f"test_expected_log_likelihood{UP_METRIC_INDICATOR}"
 TEST_LLK = f"test_log_likelihood{UP_METRIC_INDICATOR}"
 TEST_KL = f"test_kl_divergence{DOWN_METRIC_INDICATOR}"

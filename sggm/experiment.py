@@ -130,14 +130,18 @@ class Experiment:
                         f"Model {self.model_name} not implemented"
                     )
             elif self.experiment_name in generative_experiments:
-
+                latent_dims = (
+                    experiments_latent_dims(self.experiment_name)
+                    if getattr(self, "latent_dims", None) is None
+                    else self.latent_dims
+                )
                 if self.model_name == VANILLA_VAE:
                     return VanillaVAE(
                         input_dims=self.datamodule.dims,
                         activation=experiments_activation_function(
                             self.experiment_name
                         ),
-                        latent_dims=experiments_latent_dims(self.experiment_name),
+                        latent_dims=latent_dims,
                         learning_rate=self.learning_rate,
                         eps=self.eps,
                         n_mc_samples=self.n_mc_samples,
@@ -148,7 +152,7 @@ class Experiment:
                         activation=experiments_activation_function(
                             self.experiment_name
                         ),
-                        latent_dims=experiments_latent_dims(self.experiment_name),
+                        latent_dims=latent_dims,
                         learning_rate=self.learning_rate,
                         τ_ood=self.tau_ood,
                         eps=self.eps,
@@ -156,6 +160,8 @@ class Experiment:
                         ood_z_generation_method=self.ood_z_generation_method,
                         kde_bandwidth_multiplier=self.kde_bandwidth_multiplier,
                         prior_b=self.prior_b,
+                        prior_epistemic_c=self.prior_epistemic_c,
+                        prior_extrapolation_x=self.prior_extrapolation_x,
                         decoder_α_offset=self.decoder_α_offset,
                     )
                 elif self.model_name == VV_VAE_MANIFOLD:
@@ -164,7 +170,7 @@ class Experiment:
                         activation=experiments_activation_function(
                             self.experiment_name
                         ),
-                        latent_dims=experiments_latent_dims(self.experiment_name),
+                        latent_dims=latent_dims,
                         learning_rate=self.learning_rate,
                         τ_ood=self.tau_ood,
                         eps=self.eps,
@@ -172,6 +178,8 @@ class Experiment:
                         ood_z_generation_method=self.ood_z_generation_method,
                         kde_bandwidth_multiplier=self.kde_bandwidth_multiplier,
                         prior_b=self.prior_b,
+                        prior_epistemic_c=self.prior_epistemic_c,
+                        prior_extrapolation_x=self.prior_extrapolation_x,
                         decoder_α_offset=self.decoder_α_offset,
                     )
                 else:
