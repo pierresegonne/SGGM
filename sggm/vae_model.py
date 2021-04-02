@@ -53,6 +53,8 @@ from sggm.definitions import (
     TEST_VARIANCE_FIT_RMSE,
     TEST_SAMPLE_FIT_MAE,
     TEST_SAMPLE_FIT_RMSE,
+    TEST_OOD_SAMPLE_FIT_MAE,
+    TEST_OOD_SAMPLE_FIT_RMSE,
 )
 from sggm.model_helper import log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple
@@ -103,18 +105,6 @@ def encoder_dense_base(
         f,
         nn.Linear(256, latent_size),
     )
-    return nn.Sequential(
-        nn.Linear(input_size, 512),
-        nn.BatchNorm1d(512),
-        f,
-        nn.Linear(512, 256),
-        nn.BatchNorm1d(256),
-        f,
-        nn.Linear(256, 128),
-        nn.BatchNorm1d(128),
-        f,
-        nn.Linear(128, latent_size),
-    )
 
 
 def decoder_dense_base(
@@ -126,18 +116,6 @@ def decoder_dense_base(
 
     return nn.Sequential(
         nn.Linear(latent_size, 256),
-        nn.BatchNorm1d(256),
-        f,
-        nn.Linear(256, 512),
-        nn.BatchNorm1d(512),
-        f,
-        nn.Linear(512, output_size),
-    )
-    return nn.Sequential(
-        nn.Linear(latent_size, 128),
-        nn.BatchNorm1d(128),
-        f,
-        nn.Linear(128, 256),
         nn.BatchNorm1d(256),
         f,
         nn.Linear(256, 512),
@@ -223,6 +201,8 @@ class BaseVAE(pl.LightningModule):
         self.log(TEST_VARIANCE_FIT_RMSE, logs[TEST_VARIANCE_FIT_RMSE], on_epoch=True)
         self.log(TEST_SAMPLE_FIT_MAE, logs[TEST_SAMPLE_FIT_MAE], on_epoch=True)
         self.log(TEST_SAMPLE_FIT_RMSE, logs[TEST_SAMPLE_FIT_RMSE], on_epoch=True)
+        self.log(TEST_OOD_SAMPLE_FIT_MAE, logs[TEST_OOD_SAMPLE_FIT_MAE], on_epoch=True)
+        self.log(TEST_OOD_SAMPLE_FIT_RMSE, logs[TEST_OOD_SAMPLE_FIT_RMSE], on_epoch=True)
         return loss
 
     def freeze_but_encoder(self):
@@ -516,6 +496,11 @@ class V3AE(BaseVAE):
 
         self.prior_b = prior_b
 
+        self._mean_x_train = None
+
+        # PIG DL
+        self.pig_dl = None
+
         # %
         self._refit_encoder_mode = False
 
@@ -562,9 +547,12 @@ class V3AE(BaseVAE):
 
             # Aggregate the whole dataset
             x_train = torch.cat(x_train, dim=0)
-            x_train = torch.reshape(x_train, (-1, *datamodule.dims[1:]))
+            x_train = torch.reshape(x_train, (-1, *datamodule.dims))
 
+            # Save mean of dataset
+            self._mean_x_train = x_train.mean(dim=0)[None, :]
             x_train_var = x_train.var(dim=0)
+
             prior_modes = 1 / x_train_var
             prior_modes = torch.maximum(
                 prior_modes, min_mode * torch.ones_like(prior_modes)
@@ -574,14 +562,17 @@ class V3AE(BaseVAE):
             )
             inv_prior_modes = 1 / prior_modes
             #%
-            _C = 100
-            C = _C * torch.ones_like(prior_modes)
-            self.prior_α = C / (C - 1)
-            self.prior_β = self.prior_α * inv_prior_modes / _C
-
+            _epistemic = False
+            if _epistemic:
+                _C = 100
+                C = _C * torch.ones_like(prior_modes)
+                self.prior_α = C / (C - 1)
+                self.prior_β = self.prior_α * inv_prior_modes / _C
+                self.prior_β = self.prior_β
             #%
-            # self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(x_train)
-            # self.prior_α = 1 + self.prior_β * prior_modes
+            else:
+                self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(x_train)
+                self.prior_α = 1 + self.prior_β * prior_modes
 
         elif (prior_α is not None) & (prior_β is not None):
             assert type(prior_α) == type(
@@ -826,10 +817,13 @@ class V3AE(BaseVAE):
             self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
         )
         #%
-        prior_β_extrapolation = prior_β * 100
-        s = locscale_sigmoid(torch.norm(z, dim=2), 6.907 * 0.3, 0.3)[:, :, None]
-        s = s.repeat(1, 1, beta.shape[2])
-        prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
+        _extrapolation = False
+        if _extrapolation:
+            _X = 10
+            prior_β_extrapolation = prior_β * _X
+            s = locscale_sigmoid(torch.norm(z, dim=2), 6.907 * 0.3, 0.3)[:, :, None]
+            s = s.repeat(1, 1, beta.shape[2])
+            prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
         #%
         p = D.Independent(
             D.Gamma(
@@ -900,6 +894,9 @@ class V3AE(BaseVAE):
                 torch.zeros((x.shape[0], 1)),
             )
 
+    def sample_z_out_like(self, z: torch.Tensor) -> torch.Tensor:
+        return next(iter(self.pig_dl))[0].type_as(z)
+
     def ood_kl(
         self,
         p_λ: D.Distribution,
@@ -908,7 +905,7 @@ class V3AE(BaseVAE):
 
         if self.ood_z_generation_method in OOD_Z_GENERATION_AVAILABLE_METHODS:
             # [n_mc_samples, BS, *self.latent_dims]
-            z_out = next(iter(self.pig_dl))[0].type_as(z)
+            z_out = self.sample_z_out_like(z)
             z_out = z_out[: z.shape[1]]
             z_out = z_out.repeat(self.n_mc_samples, 1, 1)
             # [self.n_mc_samples, BS, self.input_size]
@@ -1008,6 +1005,14 @@ class V3AE(BaseVAE):
             # Samples
             logs[TEST_SAMPLE_FIT_MAE] = F.l1_loss(x_hat, x)
             logs[TEST_SAMPLE_FIT_RMSE] = torch.sqrt(F.mse_loss(x_hat, x))
+            # Samples OOD
+            z_ood = self.sample_z_out_like(z)
+            _, μ_z_ood, α_z_ood, β_z_ood = self.parametrise_z(z_ood)
+            x_hat_ood, _ = self.sample_generative(μ_z_ood, α_z_ood, β_z_ood)
+            x_hat_ood = batch_reshape(x_hat, self.input_dims)
+            mean_x_train = self._mean_x_train.repeat(x_hat_ood.shape[0], 1, 1, 1)
+            logs[TEST_OOD_SAMPLE_FIT_MAE] = F.l1_loss(x_hat_ood, mean_x_train)
+            logs[TEST_OOD_SAMPLE_FIT_RMSE] = F.l1_loss(x_hat_ood, mean_x_train)
 
         return loss, logs
 
