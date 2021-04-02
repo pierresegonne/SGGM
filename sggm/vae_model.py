@@ -817,7 +817,7 @@ class V3AE(BaseVAE):
             self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
         )
         #%
-        _extrapolation = False
+        _extrapolation = True
         if _extrapolation:
             _X = 10
             prior_β_extrapolation = prior_β * _X
