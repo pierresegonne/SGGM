@@ -1,9 +1,7 @@
 from typing import Union
 import geoml.nnj as nnj
 import numpy as np
-from numpy.core.fromnumeric import var
 import pytorch_lightning as pl
-from sggm._local.translated_sigmoid import translated_sigmoid
 import torch
 import torch.distributions as D
 import torch.nn as nn
@@ -64,6 +62,7 @@ from sggm.vae_model_helper import (
     check_ood_z_generation_method,
     density_gradient_descent,
     reduce_int_list,
+    translated_sigmoid
 )
 
 # stages for steps
