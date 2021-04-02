@@ -562,7 +562,7 @@ class V3AE(BaseVAE):
             )
             inv_prior_modes = 1 / prior_modes
             #%
-            _epistemic = False
+            _epistemic = True
             if _epistemic:
                 _C = 100
                 C = _C * torch.ones_like(prior_modes)
