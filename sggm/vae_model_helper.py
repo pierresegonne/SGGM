@@ -46,6 +46,20 @@ def locscale_sigmoid(
     return torch.sigmoid(x)
 
 
+def get_latent_extrapolation_ratios(
+    z: torch.Tensor, N_inducing: int = 50
+) -> torch.Tensor:
+    # [n_mc_samples, batch_size, latent_size]
+    # pick inducing points
+    perm = torch.randperm(z.size(1))
+    idx = perm[:N_inducing]
+    z_i = z[:, idx, :]
+    dist, _ = torch.cdist(z, z_i).min(dim=2)
+    s = locscale_sigmoid(dist[:, :, None], 6.907 * 0.3, 0.3)
+    # [n_mc_samples, batch_size, 1]
+    return s
+
+
 def density_gradient_descent(
     distribution: D.Distribution, x_0: torch.Tensor, params: dict
 ) -> torch.Tensor:
@@ -246,6 +260,11 @@ class TruncatedNormal(TruncatedStandardNormal):
 
 
 if __name__ == "__main__":
+
+    z = torch.rand((3, 100, 2))
+    get_latent_extrapolation_ratios(z)
+
+    #%
     list_test = [1, 2, 3]
     print(f"reduce_int_list: {list_test} -> {reduce_int_list(list_test)}")
 

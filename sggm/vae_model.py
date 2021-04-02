@@ -63,6 +63,7 @@ from sggm.vae_model_helper import (
     batch_reshape,
     check_ood_z_generation_method,
     density_gradient_descent,
+    get_latent_extrapolation_ratios,
     reduce_int_list,
     locscale_sigmoid,
 )
@@ -202,7 +203,9 @@ class BaseVAE(pl.LightningModule):
         self.log(TEST_SAMPLE_FIT_MAE, logs[TEST_SAMPLE_FIT_MAE], on_epoch=True)
         self.log(TEST_SAMPLE_FIT_RMSE, logs[TEST_SAMPLE_FIT_RMSE], on_epoch=True)
         self.log(TEST_OOD_SAMPLE_FIT_MAE, logs[TEST_OOD_SAMPLE_FIT_MAE], on_epoch=True)
-        self.log(TEST_OOD_SAMPLE_FIT_RMSE, logs[TEST_OOD_SAMPLE_FIT_RMSE], on_epoch=True)
+        self.log(
+            TEST_OOD_SAMPLE_FIT_RMSE, logs[TEST_OOD_SAMPLE_FIT_RMSE], on_epoch=True
+        )
         return loss
 
     def freeze_but_encoder(self):
@@ -538,19 +541,20 @@ class V3AE(BaseVAE):
         OR
         applies the provided prior parameters
         """
+        x_train = []
+        for idx, batch in enumerate(datamodule.train_dataloader()):
+            x, _ = batch
+            x_train.append(x)
+
+        # Aggregate the whole dataset
+        x_train = torch.cat(x_train, dim=0)
+        x_train = torch.reshape(x_train, (-1, *datamodule.dims))
+
+        # Save mean of dataset
+        self._mean_x_train = x_train.mean(dim=0)[None, :]
+
         if (prior_α is None) & (prior_β is None):
             # %
-            x_train = []
-            for idx, batch in enumerate(datamodule.train_dataloader()):
-                x, _ = batch
-                x_train.append(x)
-
-            # Aggregate the whole dataset
-            x_train = torch.cat(x_train, dim=0)
-            x_train = torch.reshape(x_train, (-1, *datamodule.dims))
-
-            # Save mean of dataset
-            self._mean_x_train = x_train.mean(dim=0)[None, :]
             x_train_var = x_train.var(dim=0)
 
             prior_modes = 1 / x_train_var
@@ -571,7 +575,9 @@ class V3AE(BaseVAE):
                 self.prior_β = self.prior_β
             #%
             else:
-                self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(x_train)
+                self.prior_β = self.prior_b * torch.ones_like(prior_modes).type_as(
+                    x_train
+                )
                 self.prior_α = 1 + self.prior_β * prior_modes
 
         elif (prior_α is not None) & (prior_β is not None):
@@ -821,7 +827,7 @@ class V3AE(BaseVAE):
         if _extrapolation:
             _X = 10
             prior_β_extrapolation = prior_β * _X
-            s = locscale_sigmoid(torch.norm(z, dim=2), 6.907 * 0.3, 0.3)[:, :, None]
+            s = get_latent_extrapolation_ratios(z)
             s = s.repeat(1, 1, beta.shape[2])
             prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
         #%
@@ -1010,7 +1016,9 @@ class V3AE(BaseVAE):
             _, μ_z_ood, α_z_ood, β_z_ood = self.parametrise_z(z_ood)
             x_hat_ood, _ = self.sample_generative(μ_z_ood, α_z_ood, β_z_ood)
             x_hat_ood = batch_reshape(x_hat, self.input_dims)
-            mean_x_train = self._mean_x_train.repeat(x_hat_ood.shape[0], 1, 1, 1).type_as(x_hat_ood)
+            mean_x_train = self._mean_x_train.repeat(
+                x_hat_ood.shape[0], 1, 1, 1
+            ).type_as(x_hat_ood)
             logs[TEST_OOD_SAMPLE_FIT_MAE] = F.l1_loss(x_hat_ood, mean_x_train)
             logs[TEST_OOD_SAMPLE_FIT_RMSE] = F.l1_loss(x_hat_ood, mean_x_train)
 
