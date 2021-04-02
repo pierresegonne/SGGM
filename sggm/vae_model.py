@@ -60,6 +60,7 @@ from sggm.definitions import (
 from sggm.model_helper import log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple
 from sggm.vae_model_helper import (
+    TruncatedNormal,
     batch_flatten,
     batch_reshape,
     check_ood_z_generation_method,
@@ -570,7 +571,7 @@ class V3AE(BaseVAE):
             )
             inv_prior_modes = 1 / prior_modes
             #%
-            _epistemic = False
+            _epistemic = True
             if _epistemic:
                 _C = 100
                 C = _C * torch.ones_like(prior_modes)
@@ -852,7 +853,7 @@ class V3AE(BaseVAE):
         #%
         _extrapolation = True
         if _extrapolation:
-            _X = 1000
+            _X = 100
             prior_β_extrapolation = prior_β * _X
             s = self.get_latent_extrapolation_ratios(z)
             s = s.repeat(1, 1, beta.shape[2])
