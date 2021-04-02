@@ -562,7 +562,7 @@ class V3AE(BaseVAE):
             )
             inv_prior_modes = 1 / prior_modes
             #%
-            _epistemic = True
+            _epistemic = False
             if _epistemic:
                 _C = 100
                 C = _C * torch.ones_like(prior_modes)
@@ -1010,7 +1010,7 @@ class V3AE(BaseVAE):
             _, μ_z_ood, α_z_ood, β_z_ood = self.parametrise_z(z_ood)
             x_hat_ood, _ = self.sample_generative(μ_z_ood, α_z_ood, β_z_ood)
             x_hat_ood = batch_reshape(x_hat, self.input_dims)
-            mean_x_train = self._mean_x_train.repeat(x_hat_ood.shape[0], 1, 1, 1)
+            mean_x_train = self._mean_x_train.repeat(x_hat_ood.shape[0], 1, 1, 1).type_as(x_hat_ood)
             logs[TEST_OOD_SAMPLE_FIT_MAE] = F.l1_loss(x_hat_ood, mean_x_train)
             logs[TEST_OOD_SAMPLE_FIT_RMSE] = F.l1_loss(x_hat_ood, mean_x_train)
 
