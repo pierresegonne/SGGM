@@ -9,6 +9,7 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 from itertools import chain
+from sklearn.cluster import KMeans
 from torch.utils.data import DataLoader, TensorDataset
 
 from geoml import EmbeddedManifold
@@ -63,7 +64,6 @@ from sggm.vae_model_helper import (
     batch_reshape,
     check_ood_z_generation_method,
     density_gradient_descent,
-    get_latent_extrapolation_ratios,
     reduce_int_list,
     locscale_sigmoid,
 )
@@ -504,6 +504,12 @@ class V3AE(BaseVAE):
         # PIG DL
         self.pig_dl = None
 
+        # Inducing centroids for latent prior extrapolation
+        self.N_inducing = 50
+        self.inducing_centroids = torch.zeros((self.N_inducing, self.latent_size)).to(
+            self.device
+        )
+
         # %
         self._refit_encoder_mode = False
 
@@ -743,6 +749,31 @@ class V3AE(BaseVAE):
 
         return z_out
 
+    def _setup_inducing_centroids(self, N_inducing: int = 50):
+        print(f"\n--- Generating Inducing Centroids", flush=True)
+        # Gather all z
+        with torch.no_grad():
+            for idx, batch in enumerate(iter(self.dm.train_dataloader())):
+                x, _ = batch
+                # dm not registered on device
+                x = x.to(self.device)
+                # Actually don't need that, only keep the encoded z, with generation batch by batch
+                _, _, _, _, _, z, _, _ = self._run_step(x)
+                # Only keep one mc_sample
+                z = z[0]
+                if idx == 0:
+                    agg_z = z
+                else:
+                    agg_z = torch.cat((agg_z, z), dim=0)
+                agg_z = agg_z.to(self.device)
+        print(agg_z.shape)
+        # Kmean to get centroids
+        kmeans = KMeans(n_clusters=N_inducing)
+        kmeans.fit(agg_z.detach().cpu().numpy())
+        self.inducing_centroids = torch.tensor(kmeans.cluster_centers_).type_as(agg_z)
+        print(self.inducing_centroids.shape)
+        print("--- OK\n")
+
     # %
 
     def parametrise_z(self, z):
@@ -825,10 +856,12 @@ class V3AE(BaseVAE):
         #%
         _extrapolation = False
         if _extrapolation:
-            _X = 10
+            _X = 1000
             prior_β_extrapolation = prior_β * _X
-            s = get_latent_extrapolation_ratios(z)
+            s = self.get_latent_extrapolation_ratios(z)
             s = s.repeat(1, 1, beta.shape[2])
+            # How to make sure that this works properly?
+            # In analysis script, one could probably plot on the grid
             prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
         #%
         p = D.Independent(
@@ -948,6 +981,7 @@ class V3AE(BaseVAE):
                     p.requires_grad = False
 
                 self._setup_pi_dl()
+                self._setup_inducing_centroids()
 
     def step(self, batch, batch_idx, stage=None):
         x, _ = batch
@@ -1050,6 +1084,16 @@ class V3AE(BaseVAE):
             lr=self.learning_rate,
         )
         return [model_opt, decoder_var_opt], []
+
+    def get_latent_extrapolation_ratios(
+        self, z: torch.Tensor, N_inducing: int = 50
+    ) -> torch.Tensor:
+        # [n_mc_samples, batch_size, latent_size]
+        dist, _ = torch.cdist(z, self.inducing_centroids).min(dim=2)
+        s = locscale_sigmoid(dist[:, :, None], 6.907 * 0.3, 0.3)
+        s = locscale_sigmoid(dist[:, :, None], 2 * 0.3, 0.3)
+        # [n_mc_samples, batch_size, 1]
+        return s
 
     def freeze_but_encoder(self):
         self._refit_encoder_mode = True
