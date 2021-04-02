@@ -769,7 +769,7 @@ class V3AE(BaseVAE):
         # Kmean to get centroids
         kmeans = KMeans(n_clusters=N_inducing)
         kmeans.fit(agg_z.detach().cpu().numpy())
-        self.inducing_centroids = torch.tensor(kmeans.cluster_centers_).type_as(agg_z)
+        self.inducing_centroids = torch.tensor(kmeans.cluster_centers_).type_as(agg_z).to(self.device)
         print("--- OK\n")
 
     # %
@@ -1085,6 +1085,7 @@ class V3AE(BaseVAE):
 
     def get_latent_extrapolation_ratios(self, z: torch.Tensor) -> torch.Tensor:
         # [n_mc_samples, batch_size, latent_size]
+        print(z.device, self.inducing_centroids.device)
         dist, _ = torch.cdist(z, self.inducing_centroids).min(dim=2)
         s = locscale_sigmoid(dist[:, :, None], 6.907 * 0.3, 0.3)
         # [n_mc_samples, batch_size, 1]
