@@ -660,10 +660,15 @@ class V3AE(BaseVAE):
                     )
         print(f"OK | [{agg_z.shape}]", flush=True)
         agg_z = agg_z.to(self.device)
-
-        # two options: pass all in forward pass, or generate pseudo-inputs batch per batch
         agg_q_z_x_mean = agg_q_z_x_mean.to(self.device)
         agg_q_z_x_stddev = agg_q_z_x_stddev.to(self.device)
+        # Make sure it's shuffled
+        # Only works as such because shape is [len_train_dataset, latent_dims]
+        perm_idx = torch.randperm(agg_z.shape[0])
+        agg_z = agg_z[perm_idx]
+        agg_q_z_x_mean = agg_q_z_x_mean[perm_idx]
+        agg_q_z_x_stddev = agg_q_z_x_stddev[perm_idx]
+
         q_z_x = D.Independent(D.Normal(agg_q_z_x_mean, agg_q_z_x_stddev), 1)
         p_z_mean, p_z_stddev = (
             p_z_mean[0].repeat(agg_z.shape[0], 1),
@@ -742,14 +747,15 @@ class V3AE(BaseVAE):
             gd_n_steps, gd_lr, gd_threshold = 10, 4e-1, 0.007
             # [len_train_dataset, latent_size]
             means, stddevs = (
-                q_z_x.base_dist.mean.to(self.device),
-                q_z_x.base_dist.stddev.to(self.device),
+                q_z_x.base_dist.mean.clone().detach().to(self.device),
+                q_z_x.base_dist.stddev.clone().detach().to(self.device),
             )
-            z_out = torch.zeros_like(means)
+            z_out = torch.zeros_like(means).type_as(means)
             # Need to batch the components - otherwise it's unfeasible to
             # Evaluate the aggregate posterior
-            batch_size_components = self.dm.batch_size * 10
+            batch_size_components = self.dm.batch_size * 12
             n_batch_components = means.shape[0] // batch_size_components
+            print("\n n batch components", n_batch_components)
             for i in range(n_batch_components + 1):
                 _i = i * batch_size_components
                 _i_1 = (i + 1) * batch_size_components
