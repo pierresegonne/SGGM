@@ -753,7 +753,7 @@ class V3AE(BaseVAE):
             z_out = torch.zeros_like(means).type_as(means)
             # Need to batch the components - otherwise it's unfeasible to
             # Evaluate the aggregate posterior
-            batch_size_components = self.dm.batch_size * 3
+            batch_size_components = self.dm.batch_size * 25
             n_batch_components = means.shape[0] // batch_size_components
             print("\n n batch components", n_batch_components)
             print(self.current_epoch)
@@ -1022,7 +1022,7 @@ class V3AE(BaseVAE):
     def step(self, batch, batch_idx, stage=None):
         x, _ = batch
         x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
-        print("step", self.current_epoch, x.shape)
+        print("step", self.current_epoch, x.shape, self.trainer.max_epochs)
 
         # [BS]
         expected_log_likelihood, ellk_lbd, kl_divergence_lbd = self.ellk(
