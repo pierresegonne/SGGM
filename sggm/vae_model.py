@@ -753,9 +753,10 @@ class V3AE(BaseVAE):
             z_out = torch.zeros_like(means).type_as(means)
             # Need to batch the components - otherwise it's unfeasible to
             # Evaluate the aggregate posterior
-            batch_size_components = self.dm.batch_size * 12
+            batch_size_components = self.dm.batch_size * 3
             n_batch_components = means.shape[0] // batch_size_components
             print("\n n batch components", n_batch_components)
+            print(self.current_epoch)
             for i in range(n_batch_components + 1):
                 _i = i * batch_size_components
                 _i_1 = (i + 1) * batch_size_components
@@ -980,6 +981,7 @@ class V3AE(BaseVAE):
         if self.ood_z_generation_method in OOD_Z_GENERATION_AVAILABLE_METHODS:
             # [n_mc_samples, BS, *self.latent_dims]
             z_out = self.sample_z_out_like(z)
+            print("zout", z_out.shape)
             z_out = z_out[: z.shape[1]]
             z_out = z_out.repeat(self.n_mc_samples, 1, 1)
             # [self.n_mc_samples, BS, self.input_size]
@@ -1020,6 +1022,7 @@ class V3AE(BaseVAE):
     def step(self, batch, batch_idx, stage=None):
         x, _ = batch
         x_hat, p_x_z, λ, q_λ_z, p_λ, z, q_z_x, p_z = self._run_step(x)
+        print("step", self.current_epoch, x.shape)
 
         # [BS]
         expected_log_likelihood, ellk_lbd, kl_divergence_lbd = self.ellk(
