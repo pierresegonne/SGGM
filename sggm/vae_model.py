@@ -753,7 +753,7 @@ class V3AE(BaseVAE):
             z_out = torch.zeros_like(means).type_as(means)
             # Need to batch the components - otherwise it's unfeasible to
             # Evaluate the aggregate posterior
-            batch_size_components = self.dm.batch_size * 25
+            batch_size_components = self.dm.batch_size * 10
             n_batch_components = means.shape[0] // batch_size_components
             for i in range(n_batch_components + 1):
                 _i = i * batch_size_components
