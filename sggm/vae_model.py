@@ -677,7 +677,7 @@ class V3AE(BaseVAE):
         self.pig_dl = DataLoader(
             TensorDataset(z_hat), batch_size=self.dm.batch_size, shuffle=True
         )
-        
+
         # Cleanup
         # Release vars
         del agg_z
@@ -745,6 +745,8 @@ class V3AE(BaseVAE):
                 q_z_x.base_dist.mean.to(self.device),
                 q_z_x.base_dist.stddev.to(self.device),
             )
+            print("means stddev")
+            print(means.shape, stddevs.shape)
             agg_q_z_x = D.Independent(D.Normal(means, stddevs), 1)
             mix = D.Categorical(
                 torch.ones(
