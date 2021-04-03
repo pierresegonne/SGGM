@@ -50,12 +50,12 @@ def get_misc_save_dict(experiment, model: pl.LightningModule) -> dict:
 
 
 class VerboseEarlyStopping(pl.callbacks.EarlyStopping):
-    def _run_early_stopping_check(self, trainer):
+    def _run_early_stopping_check(self, trainer, *args, **kwargs):
         """
         Simply adds a print when the ES is fired
         """
         _previous_should_stop = trainer.should_stop
-        super()._run_early_stopping_check(trainer)
+        super()._run_early_stopping_check(*args, **kwargs)
         _new_should_stop = trainer.should_stop
         if _previous_should_stop != _new_should_stop:
             print("\n--- EARLY STOPPING FIRED\n")
