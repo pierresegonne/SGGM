@@ -229,7 +229,7 @@ class Experiment:
 
             default_callbacks = [
                 pl.callbacks.EarlyStopping(
-                    EVAL_LOSS, patience=self.early_stopping_patience
+                    EVAL_LOSS, patience=self.early_stopping_patience, verbose=True
                 ),
             ]
             # Note that checkpointing is handled by default
