@@ -23,7 +23,7 @@
   seed: 3
   max_epochs: 200
   # pl trainer
-  early_stopping_patience: 50
+  early_stopping_patience: 200
   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 10 # How often does the log writes to disc
   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
