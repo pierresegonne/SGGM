@@ -1,6 +1,7 @@
 import math
 from typing import Union
 import torch
+from torch import distributions
 import torch.distributions as D
 
 from functools import reduce
@@ -55,17 +56,21 @@ def density_gradient_descent(
     x_hat.requires_grad = True
 
     import gc
+    print("distribution")
+    print(distribution.batch_shape, distribution.event_shape)
+    print("x_0")
+    print(x_0.shape)
 
     print("   PIG gradient descent:", end=" ", flush=True)
-    for n in range(N_steps):
-        for obj in gc.get_objects():
-            try:
-                if torch.is_tensor(obj) or (
-                    hasattr(obj, "data") and torch.is_tensor(obj.data)
-                ):
-                    print(type(obj), obj.size())
-            except:
-                pass
+    # for n in range(N_steps):
+    #     for obj in gc.get_objects():
+    #         try:
+    #             if torch.is_tensor(obj) or (
+    #                 hasattr(obj, "data") and torch.is_tensor(obj.data)
+    #             ):
+    #                 print(type(obj), obj.size())
+    #         except:
+    #             pass
         print(f"{n+1}", end=" ")
         with torch.no_grad():
             with torch.set_grad_enabled(True):
@@ -73,12 +78,14 @@ def density_gradient_descent(
                 density_grad = torch.autograd.grad(log_prob, x_hat, retain_graph=True)[
                     0
                 ]
+                print("density grad", density_grad.shape())
                 normed_density_grad = normalise_grad(density_grad)
                 normed_density_grad = torch.where(
                     torch.linalg.norm(density_grad, dim=1)[:, None] < threshold,
                     normed_density_grad,
                     torch.zeros_like(normed_density_grad),
                 )
+                exit()
                 x_hat = x_hat - lr * normed_density_grad
     print("-> OK")
     x_hat = x_hat.detach()

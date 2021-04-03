@@ -677,6 +677,17 @@ class V3AE(BaseVAE):
         self.pig_dl = DataLoader(
             TensorDataset(z_hat), batch_size=self.dm.batch_size, shuffle=True
         )
+        
+        # Cleanup
+        # Release vars
+        del agg_z
+        del agg_q_z_x_mean
+        del agg_q_z_x_stddev
+        del q_z_x
+        del p_z_mean
+        del p_z_stddev
+        del p_z
+        torch.cuda.empty_cache()
         # Safety, zero_grad on the optimisers
         for opt in self.optimizers():
             opt.zero_grad()
