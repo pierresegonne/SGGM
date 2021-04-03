@@ -748,7 +748,7 @@ class V3AE(BaseVAE):
             z_out = torch.zeros_like(means)
             # Need to batch the components - otherwise it's unfeasible to
             # Evaluate the aggregate posterior
-            batch_size_components = self.dm.batch_size * 21
+            batch_size_components = self.dm.batch_size * 2
             n_batch_components = means.shape[0] // batch_size_components
             for i in range(n_batch_components + 1):
                 _i = i * batch_size_components
@@ -774,7 +774,7 @@ class V3AE(BaseVAE):
                     z_start,
                     {"N_steps": gd_n_steps, "lr": gd_lr, "threshold": gd_threshold},
                 )
-                z_out[_i:_i_1] = _z_out
+                z_out[_i:_i_1] = _z_out.detach()
         else:
             z_out = torch.zeros_like(z)
 
