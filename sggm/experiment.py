@@ -1,15 +1,11 @@
 import copy
 import json
-import numpy as np
-import os
 import pytorch_lightning as pl
-import random
 import re
 import torch
 import yaml
 
 from argparse import ArgumentParser, Namespace
-from torch.utils.data import DataLoader, random_split
 
 from sggm.callbacks import callbacks
 from sggm.definitions import (
@@ -31,16 +27,9 @@ from sggm.definitions import (
     EXPERIMENT_NAME,
     EXPERIMENTS_CONFIG,
     MODEL_NAME,
-    PIG_DL,
 )
 from sggm.definitions import (
-    SEED,
-    SHIFTING_PROPORTION_K,
-    SHIFTING_PROPORTION_TOTAL,
-    DIGITS,
     SPLIT_TRAINING,
-    PRIOR_α,
-    PRIOR_β,
 )
 from sggm.definitions import (
     experiments_activation_function,
@@ -51,6 +40,7 @@ from sggm.experiment_helper import (
     clean_dict,
     get_misc_save_dict,
     split_mean_uncertainty_training,
+    VerboseEarlyStopping,
 )
 from sggm.regression_model import Regressor, VariationalRegressor
 from sggm.vae_model import BaseVAE, VanillaVAE, V3AE, V3AEm
@@ -228,9 +218,7 @@ class Experiment:
             trainer_args = TrainerArgs(clean_dict(self.__dict__))
 
             default_callbacks = [
-                pl.callbacks.EarlyStopping(
-                    EVAL_LOSS, patience=self.early_stopping_patience, verbose=True
-                ),
+                VerboseEarlyStopping(EVAL_LOSS, patience=self.early_stopping_patience),
             ]
             # Note that checkpointing is handled by default
             logger = pl.loggers.TensorBoardLogger(
