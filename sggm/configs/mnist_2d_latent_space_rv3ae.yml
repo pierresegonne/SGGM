@@ -15,8 +15,7 @@
     - 5
   # ood
   tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
-  # prior
+  ood_z_generation_method: gd_prior
   prior_α: 1.625
   prior_β: 0.001
   # misc
