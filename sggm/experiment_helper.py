@@ -55,7 +55,6 @@ class VerboseEarlyStopping(pl.callbacks.EarlyStopping):
         Simply adds a print when the ES is fired
         """
         _previous_should_stop = trainer.should_stop
-        print(*args)
         super()._run_early_stopping_check(trainer, *args, **kwargs)
         _new_should_stop = trainer.should_stop
         if _previous_should_stop != _new_should_stop:
