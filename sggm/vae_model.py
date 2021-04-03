@@ -745,15 +745,18 @@ class V3AE(BaseVAE):
                 q_z_x.base_dist.mean.to(self.device),
                 q_z_x.base_dist.stddev.to(self.device),
             )
-            z_out = torch.empty(*means.shape)
+            z_out = torch.zeros_like(means)
             # Need to batch the components - otherwise it's unfeasible to
             # Evaluate the aggregate posterior
-            batch_size_components = self.dm.batch_size * 15
+            batch_size_components = self.dm.batch_size * 21
+            print(batch_size_components)
             n_batch_components = means.shape[0] // batch_size_components
-            for i in range(n_batch_components):
+            print(n_batch_components)
+            for i in range(n_batch_components + 1):
                 _i = i * batch_size_components
                 _i_1 = (i + 1) * batch_size_components
                 _means, _stddevs = means[_i:_i_1], stddevs[_i:_i_1]
+                print(_means.shape, _stddevs.shape)
                 agg_q_z_x = D.Independent(D.Normal(_means, _stddevs), 1)
                 mix = D.Categorical(
                     torch.ones(
@@ -761,6 +764,7 @@ class V3AE(BaseVAE):
                     ).to(self.device)
                 )
                 agg_q_z_x = D.MixtureSameFamily(mix, agg_q_z_x)
+                print(q_z_x.mean[_i:_i_1].shape)
                 q_start = D.Independent(
                     D.Normal(
                         q_z_x.mean[_i:_i_1],
@@ -769,6 +773,8 @@ class V3AE(BaseVAE):
                     1,
                 )
                 z_start = q_start.sample((1,))[0]
+                print(z_start.shape)
+                exit()
                 _z_out = density_gradient_descent(
                     agg_q_z_x,
                     z_start,
