@@ -28,13 +28,14 @@ from sggm.definitions import (
 )
 
 
-def save_and_show(fig, name):
+def save_and_show(fig, name: str, show_plot: bool = True):
     fig.savefig(f"{name}.png", dpi=300)
     fig.savefig(f"{name}.svg")
-    plt.show()
+    if show_plot:
+        plt.show()
 
 
-def plot(experiment_log, seed=False, **kwargs):
+def plot(experiment_log, seed=False, show_plot=True, **kwargs):
     best_model = experiment_log.best_version.model
     save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
 
@@ -84,6 +85,7 @@ def plot(experiment_log, seed=False, **kwargs):
     save_and_show(
         plot_comparison(n_display, x_test, p_x_test, best_model.input_dims),
         f"{save_folder}/_main",
+        show_plot=show_plot,
     )
 
     # # Interpolation
@@ -106,22 +108,27 @@ def plot(experiment_log, seed=False, **kwargs):
         save_and_show(
             grid_samples,
             f"{save_folder}/_grid_samples",
+            show_plot=show_plot,
         )
         save_and_show(
             grid_mean,
             f"{save_folder}/_grid_mean",
+            show_plot=show_plot,
         )
         save_and_show(
             show_2d_latent_space(best_model, x_test, y_test, z_star=z_star),
             f"{save_folder}/_latent_space",
+            show_plot=show_plot,
         )
         save_and_show(
             show_reconstruction_arbitrary_latent(best_model, z_star),
             f"{save_folder}/_arbitrary_z_reconstruction",
+            show_plot=show_plot,
         )
 
     for other_mnist in kwargs["others"]:
         save_and_show(
             analyse_others_mnist(best_model, other_mnist, n_display),
             f"{save_folder}/{other_mnist}",
+            show_plot=show_plot,
         )

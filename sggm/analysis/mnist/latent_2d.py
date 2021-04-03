@@ -171,7 +171,7 @@ def plot_kl(
     extent: Union[int, float],
     # %
     # Change here for display
-    show_imshow: bool = True,
+    show_imshow: bool = False,
     show_per_pixel: bool = False,
     show_violin: bool = False,
 ):
@@ -307,10 +307,8 @@ def show_2d_latent_space(
         ax.plot(z_star[0], z_star[1], "o", markersize=6, color=colours["red"])
 
     # Pseudo-inputs
-    legend_ncols = 2
     if show_pi:
         show_pseudo_inputs(ax, model)
-        legend_ncols = 3
 
     # Geodesic
     if show_geodesic and isinstance(model, V3AEm):
@@ -331,7 +329,8 @@ def show_2d_latent_space(
         fancybox=True,
         shadow=False,
         # ncol=legend_ncols,
-        # bbox_to_anchor=(0.89, -0.15),
+        loc='upper left',
+        bbox_to_anchor=(-0.38, 1),
     )
     ax.set_title(title, fontsize=30)
 
