@@ -10,13 +10,15 @@ from torchvision import transforms
 
 from sggm.vae_model import VanillaVAE, V3AE, V3AEm
 from sggm.vae_model_helper import batch_reshape
-from sggm.styles_ import colours, colours_rgb
+from sggm.styles_ import colours, colours_rgb, random_rgb_colour
 from sggm.types_ import Tuple, Union
 
 colour_digits = [
     (1 / 255, 133 / 255, 90 / 255),
     (200 / 255, 154 / 255, 1 / 255),
 ]
+
+colour_digits += [random_rgb_colour() for _ in range(10)]
 
 
 def show_reconstruction_arbitrary_latent(
@@ -53,7 +55,7 @@ def show_pseudo_inputs(ax, model):
             z_out[:, 1],
             "o",
             markersize=3.5,
-            markerfacecolor=(*colours_rgb["purple"], 0.9),
+            markerfacecolor=(228 / 255, 37 / 255, 101 / 255, 0.9),
             markeredgewidth=1.2,
             markeredgecolor=(*colours_rgb["white"], 0.5),
             label="PI",
@@ -328,8 +330,8 @@ def show_2d_latent_space(
     ax.legend(
         fancybox=True,
         shadow=False,
-        ncol=legend_ncols,
-        bbox_to_anchor=(0.89, -0.15),
+        # ncol=legend_ncols,
+        # bbox_to_anchor=(0.89, -0.15),
     )
     ax.set_title(title, fontsize=30)
 

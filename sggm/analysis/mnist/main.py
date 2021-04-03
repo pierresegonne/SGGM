@@ -96,7 +96,7 @@ def plot(experiment_log, seed=False, **kwargs):
     # )
 
     # 2D Latent space
-    if experiment_name in [MNIST_2D, FASHION_MNIST_2D]:
+    if best_model.latent_size == 2:
         # Arbitrary latent code
         z_star = torch.Tensor([[[3.5, 3.5]]])
         (

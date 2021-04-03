@@ -54,8 +54,18 @@ def density_gradient_descent(
     x_hat = x_0.clone()
     x_hat.requires_grad = True
 
+    import gc
+
     print("   PIG gradient descent:", end=" ", flush=True)
     for n in range(N_steps):
+        for obj in gc.get_objects():
+            try:
+                if torch.is_tensor(obj) or (
+                    hasattr(obj, "data") and torch.is_tensor(obj.data)
+                ):
+                    print(type(obj), obj.size())
+            except:
+                pass
         print(f"{n+1}", end=" ")
         with torch.no_grad():
             with torch.set_grad_enabled(True):
