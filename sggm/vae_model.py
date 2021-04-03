@@ -680,14 +680,14 @@ class V3AE(BaseVAE):
 
         # Cleanup
         # Release vars
-        del agg_z
-        del agg_q_z_x_mean
-        del agg_q_z_x_stddev
-        del q_z_x
-        del p_z_mean
-        del p_z_stddev
-        del p_z
-        torch.cuda.empty_cache()
+        # del agg_z
+        # del agg_q_z_x_mean
+        # del agg_q_z_x_stddev
+        # del q_z_x
+        # del p_z_mean
+        # del p_z_stddev
+        # del p_z
+        # torch.cuda.empty_cache()
         # Safety, zero_grad on the optimisers
         for opt in self.optimizers():
             opt.zero_grad()
@@ -748,7 +748,7 @@ class V3AE(BaseVAE):
             z_out = torch.empty(*means.shape)
             # Need to batch the components - otherwise it's unfeasible to
             # Evaluate the aggregate posterior
-            batch_size_components = self.dm.batch_size * 4
+            batch_size_components = self.dm.batch_size * 15
             n_batch_components = means.shape[0] // batch_size_components
             for i in range(n_batch_components):
                 _i = i * batch_size_components
