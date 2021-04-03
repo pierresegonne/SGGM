@@ -740,33 +740,41 @@ class V3AE(BaseVAE):
         elif self.ood_z_generation_method == GD_AGGREGATE_POSTERIOR:
             # %
             gd_n_steps, gd_lr, gd_threshold = 10, 4e-1, 0.007
-            # %
+            # [len_train_dataset, latent_size]
             means, stddevs = (
                 q_z_x.base_dist.mean.to(self.device),
                 q_z_x.base_dist.stddev.to(self.device),
             )
-            print("means stddev")
-            print(means.shape, stddevs.shape)
-            agg_q_z_x = D.Independent(D.Normal(means, stddevs), 1)
-            mix = D.Categorical(
-                torch.ones(
-                    means.shape[0],
-                ).to(self.device)
-            )
-            agg_q_z_x = D.MixtureSameFamily(mix, agg_q_z_x)
-            q_start = D.Independent(
-                D.Normal(
-                    q_z_x.mean,
-                    2 * torch.ones_like(q_z_x.mean),
-                ),
-                1,
-            )
-            z_start = q_start.sample((1,)).reshape(*z.shape)
-            z_out = density_gradient_descent(
-                agg_q_z_x,
-                z_start,
-                {"N_steps": gd_n_steps, "lr": gd_lr, "threshold": gd_threshold},
-            )
+            z_out = torch.empty(*means.shape)
+            # Need to batch the components - otherwise it's unfeasible to
+            # Evaluate the aggregate posterior
+            batch_size_components = self.dm.batch_size * 4
+            n_batch_components = means.shape[0] // batch_size_components
+            for i in range(n_batch_components):
+                _i = i * batch_size_components
+                _i_1 = (i + 1) * batch_size_components
+                _means, _stddevs = means[_i:_i_1], stddevs[_i:_i_1]
+                agg_q_z_x = D.Independent(D.Normal(_means, _stddevs), 1)
+                mix = D.Categorical(
+                    torch.ones(
+                        _means.shape[0],
+                    ).to(self.device)
+                )
+                agg_q_z_x = D.MixtureSameFamily(mix, agg_q_z_x)
+                q_start = D.Independent(
+                    D.Normal(
+                        q_z_x.mean[_i:_i_1],
+                        2 * torch.ones_like(q_z_x.mean[_i:_i_1]),
+                    ),
+                    1,
+                )
+                z_start = q_start.sample((1,))[0]
+                _z_out = density_gradient_descent(
+                    agg_q_z_x,
+                    z_start,
+                    {"N_steps": gd_n_steps, "lr": gd_lr, "threshold": gd_threshold},
+                )
+                z_out[_i:_i_1] = _z_out
         else:
             z_out = torch.zeros_like(z)
 
