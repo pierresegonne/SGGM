@@ -1,6 +1,4 @@
 import matplotlib.pyplot as plt
-from sggm.data.fashion_mnist.datamodule import FashionMNISTDataModuleND
-from sggm.data.mnist.datamodule import MNISTDataModuleND
 import torch
 
 from pytorch_lightning import seed_everything, LightningDataModule
@@ -19,11 +17,10 @@ from sggm.data.mnist import MNISTDataModule, MNISTDataModuleND
 from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModuleND
 from sggm.data.not_mnist import NotMNISTDataModule
 from sggm.definitions import (
-    FASHION_MNIST_ND,
     MNIST,
-    MNIST_2D,
+    MNIST_ND,
     FASHION_MNIST,
-    FASHION_MNIST_2D,
+    FASHION_MNIST_ND,
     NOT_MNIST,
 )
 from sggm.definitions import (
@@ -42,14 +39,14 @@ def save_and_show(fig, name: str, show_plot: bool = True):
 def get_dm(experiment_name: str, misc: dict, bs: int):
     if experiment_name == MNIST:
         dm = MNISTDataModule(bs, 0)
-    elif experiment_name == MNIST_2D:
+    elif experiment_name == MNIST_ND:
         if DIGITS in misc:
             dm = MNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
             dm = MNISTDataModuleND(bs, 0)
     elif experiment_name == FASHION_MNIST:
         dm = FashionMNISTDataModule(bs, 0)
-    elif experiment_name == FASHION_MNIST_2D:
+    elif experiment_name == FASHION_MNIST_ND:
         if DIGITS in misc:
             dm = FASHION_MNIST_ND(bs, 0, digits=misc[DIGITS])
         else:

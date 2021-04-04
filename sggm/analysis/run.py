@@ -31,9 +31,9 @@ from sggm.definitions import (
     UCI_YACHT_SHIFTED,
     #
     MNIST,
-    MNIST_2D,
+    MNIST_ND,
     FASHION_MNIST,
-    FASHION_MNIST_2D,
+    FASHION_MNIST_ND,
     NOT_MNIST,
 )
 from sggm.regression_model import check_available_methods, MARGINAL
@@ -54,9 +54,9 @@ UCI = [
 ]
 MNIST_L = [
     MNIST,
-    MNIST_2D,
+    MNIST_ND,
     FASHION_MNIST,
-    FASHION_MNIST_2D,
+    FASHION_MNIST_ND,
     NOT_MNIST,
 ]
 
