@@ -179,6 +179,7 @@ variational_regressor_parameters = {
 regression_models = [VARIATIONAL_REGRESSOR]
 
 VANILLA_VAE = "vanilla_vae"
+VANILLA_VAE_MANIFOLD = "vanilla_vaem"
 VV_VAE = "v3ae"
 VV_VAE_MANIFOLD = "v3aem"
 vae_parameters = {
@@ -205,7 +206,7 @@ v3ae_parameters = {
     KDE_BANDWIDTH_MULTIPLIER: Param(KDE_BANDWIDTH_MULTIPLIER, 10, float),
     DECODER_α_OFFSET: Param(DECODER_α_OFFSET, 0.0, float),
 }
-generative_models = [VANILLA_VAE, VV_VAE, VV_VAE_MANIFOLD]
+generative_models = [VANILLA_VAE, VANILLA_VAE_MANIFOLD, VV_VAE, VV_VAE_MANIFOLD]
 
 
 model_names = regression_models + generative_models

@@ -19,6 +19,7 @@ from sggm.definitions import (
 from sggm.definitions import (
     VARIATIONAL_REGRESSOR,
     VANILLA_VAE,
+    VANILLA_VAE_MANIFOLD,
     VV_VAE,
     VV_VAE_MANIFOLD,
 )
@@ -43,7 +44,7 @@ from sggm.experiment_helper import (
     VerboseEarlyStopping,
 )
 from sggm.regression_model import Regressor, VariationalRegressor
-from sggm.vae_model import BaseVAE, VanillaVAE, V3AE, V3AEm
+from sggm.vae_model import BaseVAE, VanillaVAE, V3AE, V3AEm, VanillaVAEm
 
 from sggm.types_ import List
 
@@ -127,6 +128,17 @@ class Experiment:
                 )
                 if self.model_name == VANILLA_VAE:
                     return VanillaVAE(
+                        input_dims=self.datamodule.dims,
+                        activation=experiments_activation_function(
+                            self.experiment_name
+                        ),
+                        latent_dims=latent_dims,
+                        learning_rate=self.learning_rate,
+                        eps=self.eps,
+                        n_mc_samples=self.n_mc_samples,
+                    )
+                elif self.model_name == VANILLA_VAE_MANIFOLD:
+                    return VanillaVAEm(
                         input_dims=self.datamodule.dims,
                         activation=experiments_activation_function(
                             self.experiment_name
@@ -298,6 +310,8 @@ def get_model(experiment_config: dict) -> pl.LightningModule:
         model = VariationalRegressor
     elif model_name == VANILLA_VAE:
         model = VanillaVAE
+    elif model_name == VANILLA_VAE_MANIFOLD:
+        model = VanillaVAEm
     elif model_name == VV_VAE:
         model = V3AE
     elif model_name == VV_VAE_MANIFOLD:

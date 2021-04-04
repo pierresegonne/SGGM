@@ -1,6 +1,6 @@
-- name: test_geodesic
+- name: test_geodesic_vvaem
   experiment_name: mnist_2d
-  model_name: v3aem
+  model_name: vanilla_vaem
   n_workers: 0
   # hparams
   batch_size: 500
@@ -18,7 +18,7 @@
   prior_epistemic_c: 100
   prior_extrapolation_x: 100
   # misc
-  n_trials: 3
+  n_trials: 1
   seed: 3
   max_epochs: 100
   # pl trainer

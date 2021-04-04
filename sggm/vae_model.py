@@ -453,6 +453,43 @@ class VanillaVAE(BaseVAE):
         return model_specific_args(vanilla_vae_parameters, parent_parser)
 
 
+class VanillaVAEm(VanillaVAE, EmbeddedManifold):
+    def __init__(self, *args, **kwargs):
+        super(VanillaVAEm, self).__init__(*args, **kwargs)
+
+    def embed(self, z: torch.Tensor, jacobian=False) -> torch.Tensor:
+        is_batched = z.dim() > 2
+        if not is_batched:
+            z = z.unsqueeze(0)
+
+        # , *self.latent_dims
+        assert (
+            z.dim() == 3
+        ), "Latent codes to embed must be provided as a batch [batch_size, N, *latent_dims]"
+
+        # with n_mc_samples = batch_size
+        # [n_mc_samples, BS, *self.latent_dims/self.input_size]
+        z, μ_z, α_z, β_z = self.parametrise_z(z)
+        # [n_mc_samples, BS, *self.latent_dims/self.input_size]
+        σ_z = torch.sqrt(β_z / (α_z - 1))
+
+        # [n_mc_samples, BS, 2 *self.latent_dims/self.input_size]
+        embedded = torch.cat((μ_z, σ_z), dim=2)  # BxNx(2D)
+        if jacobian:
+            J_μ_z, J_σ_z = self.decoder_jacobian(z)
+            J = torch.cat((J_μ_z, J_σ_z), dim=2)
+
+        if not is_batched:
+            embedded = embedded.squeeze(0)
+            if jacobian:
+                J = J.squeeze(0)
+
+        if jacobian:
+            return embedded, J
+        else:
+            return embedded
+
+
 class V3AE(BaseVAE):
     """
     V3AE

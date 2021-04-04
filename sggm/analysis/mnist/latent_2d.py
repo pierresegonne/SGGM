@@ -242,7 +242,7 @@ def show_2d_latent_space(
     x,
     y,
     title="TITLE",
-    show_geodesic=False,
+    show_geodesic=True,
     show_kl=True,
     show_pi=True,
     z_star: Union[None, torch.Tensor] = None,
