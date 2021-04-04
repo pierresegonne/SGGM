@@ -468,26 +468,19 @@ class VanillaVAEm(VanillaVAE, EmbeddedManifold):
         ), "Latent codes to embed must be provided as a batch [batch_size, N, *latent_dims]"
 
         # with n_mc_samples = batch_size
+        # [BS, *self.latent_dims/self.input_size]
+        z = z.reshape(-1, self.latent_size)
+        μ_z, σ_z = self.decoder_μ(z), self.decoder_std(z)
         # [n_mc_samples, BS, *self.latent_dims/self.input_size]
-        z, μ_z, α_z, β_z = self.parametrise_z(z)
-        # [n_mc_samples, BS, *self.latent_dims/self.input_size]
-        σ_z = torch.sqrt(β_z / (α_z - 1))
+        μ_z, σ_z = μ_z[None, :], σ_z[None, :]
 
         # [n_mc_samples, BS, 2 *self.latent_dims/self.input_size]
         embedded = torch.cat((μ_z, σ_z), dim=2)  # BxNx(2D)
-        if jacobian:
-            J_μ_z, J_σ_z = self.decoder_jacobian(z)
-            J = torch.cat((J_μ_z, J_σ_z), dim=2)
 
         if not is_batched:
             embedded = embedded.squeeze(0)
-            if jacobian:
-                J = J.squeeze(0)
 
-        if jacobian:
-            return embedded, J
-        else:
-            return embedded
+        return embedded
 
 
 class V3AE(BaseVAE):
@@ -1304,16 +1297,8 @@ class V3AEm(V3AE, EmbeddedManifold):
 
         # [n_mc_samples, BS, 2 *self.latent_dims/self.input_size]
         embedded = torch.cat((μ_z, σ_z), dim=2)  # BxNx(2D)
-        if jacobian:
-            J_μ_z, J_σ_z = self.decoder_jacobian(z)
-            J = torch.cat((J_μ_z, J_σ_z), dim=2)
 
         if not is_batched:
             embedded = embedded.squeeze(0)
-            if jacobian:
-                J = J.squeeze(0)
 
-        if jacobian:
-            return embedded, J
-        else:
-            return embedded
+        return embedded
