@@ -1,3 +1,4 @@
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pytorch_lightning as pl
@@ -5,10 +6,11 @@ import seaborn as sns
 import torch
 import torch.distributions as D
 
-from torchvision.utils import save_image, make_grid
+from geoml.manifold import EmbeddedManifold
+from torchvision.utils import make_grid
 from torchvision import transforms
 
-from sggm.vae_model import VanillaVAE, V3AE, V3AEm
+from sggm.vae_model import VanillaVAE, V3AE
 from sggm.vae_model_helper import batch_reshape
 from sggm.styles_ import colours, colours_rgb, random_rgb_colour
 from sggm.types_ import Tuple, Union
@@ -24,8 +26,15 @@ colour_digits += [random_rgb_colour() for _ in range(10)]
 def show_reconstruction_arbitrary_latent(
     model: pl.LightningModule, z_star: torch.Tensor
 ) -> plt.Figure:
-    _, μ_z, α_z, β_z = model.parametrise_z(z_star)
-    x_hat, p_x = model.sample_generative(μ_z, α_z, β_z)
+    if isinstance(model, VanillaVAE):
+        μ_z, std_z = (
+            model.decoder_μ(z_star.reshape(-1, model.latent_size)),
+            model.decoder_std(z_star.reshape(-1, model.latent_size)),
+        )
+        x_hat, p_x = model.sample_generative(μ_z, std_z)
+    elif isinstance(model, V3AE):
+        _, μ_z, α_z, β_z = model.parametrise_z(z_star)
+        x_hat, p_x = model.sample_generative(μ_z, α_z, β_z)
 
     x_hat = batch_reshape(x_hat, model.input_dims)
     x_mu = batch_reshape(p_x.mean, model.input_dims)
@@ -202,13 +211,15 @@ def show_reconstruction_grid(
     y_mesh = torch.linspace(extent, -extent, size)
     x_mesh, y_mesh = torch.meshgrid(x_mesh, y_mesh)
     x_mesh, y_mesh = x_mesh.transpose(0, 1), y_mesh.transpose(0, 1)
-    z_mesh = torch.cat((x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1)[
-        None, :
-    ]
+    z_mesh = torch.cat((x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1)
 
     with torch.no_grad():
-        _, μ_z, α_z, β_z = model.parametrise_z(z_mesh)
-        x_hat, p_x = model.sample_generative(μ_z, α_z, β_z)
+        if isinstance(model, VanillaVAE):
+            μ_z, std_z = model.decoder_μ(z_mesh), model.decoder_std(z_mesh)
+            x_hat, p_x = model.sample_generative(μ_z, std_z)
+        elif isinstance(model, V3AE):
+            _, μ_z, α_z, β_z = model.parametrise_z(z_mesh[None, :])
+            x_hat, p_x = model.sample_generative(μ_z, α_z, β_z)
         x_mean = p_x.mean
 
     # reshape
@@ -315,7 +326,7 @@ def show_2d_latent_space(
         show_pseudo_inputs(ax, model)
 
     # Geodesic
-    if show_geodesic and isinstance(model, V3AEm):
+    if show_geodesic and isinstance(model, EmbeddedManifold):
         z1 = torch.Tensor([-0.58, -1.13])
         z2 = torch.Tensor([0.4, 1.1])
         C, success = model.connecting_geodesic(z1, z2)

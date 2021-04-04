@@ -10,6 +10,7 @@ from sggm.definitions import (
     regression_experiments,
     TEST_LOSS,
     VANILLA_VAE,
+    VANILLA_VAE_MANIFOLD,
     VV_VAE,
     VV_VAE_MANIFOLD,
     PIG_DL,
@@ -18,7 +19,7 @@ from sggm.definitions import (
     INDUCING_CENTROIDS,
 )
 from sggm.regression_model import VariationalRegressor
-from sggm.vae_model import VanillaVAE, V3AE, V3AEm
+from sggm.vae_model import VanillaVAE, V3AE, V3AEm, VanillaVAEm
 
 
 def version_dir(path):
@@ -90,6 +91,8 @@ class ExperimentLog:
         elif self.experiment_name in generative_experiments:
             if self.model_name == VANILLA_VAE:
                 pl_module = VanillaVAE
+            if self.model_name == VANILLA_VAE_MANIFOLD:
+                pl_module = VanillaVAEm
             elif self.model_name == VV_VAE:
                 pl_module = V3AE
             elif self.model_name == VV_VAE_MANIFOLD:
