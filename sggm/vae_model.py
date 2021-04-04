@@ -348,7 +348,7 @@ class VanillaVAE(BaseVAE):
             # Note: done with _gaussian_decoder | _bernouilli_decoder
             # Update β_elbo value through annealing
             self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2))
-        
+
         # Handle refitting the encoder
         else:
             for m in self.decoder_μ.modules():
@@ -1030,7 +1030,7 @@ class V3AE(BaseVAE):
 
                 self._setup_pi_dl()
                 self._setup_inducing_centroids()
- 
+
         # Handle refitting the encoder
         else:
             for m in self.decoder_μ.modules():
@@ -1198,56 +1198,56 @@ class V3AEm(V3AE, EmbeddedManifold):
         # self.decoder_α = self.nn_to_nnj(self.decoder_α)
         # self.decoder_β = self.nn_to_nnj(self.decoder_β)
 
-    @staticmethod
-    def extract_module_children(mod: nn.Module) -> List[nn.Module]:
-        # Extracts all children of a nn module and flattens them
-        _children = []
-        for child in mod.children():
-            _children += V3AEm.extract_module_children(child)
-        if len(_children) == 0:
-            _children.append(mod)
-        return _children
+    # @staticmethod
+    # def extract_module_children(mod: nn.Module) -> List[nn.Module]:
+    #     # Extracts all children of a nn module and flattens them
+    #     _children = []
+    #     for child in mod.children():
+    #         _children += V3AEm.extract_module_children(child)
+    #     if len(_children) == 0:
+    #         _children.append(mod)
+    #     return _children
 
-    @staticmethod
-    def nn_to_nnj(mod: nn.Module) -> nn.Module:
-        # Transform a module with nn layers and activations to nnj module from the geoml package.
-        _children = V3AEm.extract_module_children(mod)
-        _children_nnj = []
-        for child in _children:
-            # Layers
-            if isinstance(child, nn.Linear):
-                bias = True if child.bias is not None else False
-                _children_nnj.append(
-                    nnj.Linear(child.in_features, child.out_features, bias=bias)
-                )
-            elif isinstance(child, nn.BatchNorm1d):
-                _children_nnj.append(
-                    nnj.BatchNorm1d(
-                        child.num_features,
-                        eps=child.eps,
-                        momentum=child.momentum,
-                        affine=child.affine,
-                        track_running_stats=child.track_running_stats,
-                    )
-                )
-            # Activations
-            elif isinstance(child, nn.LeakyReLU):
-                _children_nnj.append(nnj.LeakyReLU())
-            elif isinstance(child, nn.Sigmoid):
-                _children_nnj.append(nnj.Sigmoid())
-            elif isinstance(child, nn.Softplus):
-                _children_nnj.append(nnj.Softplus())
-            else:
-                raise NotImplementedError(f"{child} casting to nnj not supported")
+    # @staticmethod
+    # def nn_to_nnj(mod: nn.Module) -> nn.Module:
+    #     # Transform a module with nn layers and activations to nnj module from the geoml package.
+    #     _children = V3AEm.extract_module_children(mod)
+    #     _children_nnj = []
+    #     for child in _children:
+    #         # Layers
+    #         if isinstance(child, nn.Linear):
+    #             bias = True if child.bias is not None else False
+    #             _children_nnj.append(
+    #                 nnj.Linear(child.in_features, child.out_features, bias=bias)
+    #             )
+    #         elif isinstance(child, nn.BatchNorm1d):
+    #             _children_nnj.append(
+    #                 nnj.BatchNorm1d(
+    #                     child.num_features,
+    #                     eps=child.eps,
+    #                     momentum=child.momentum,
+    #                     affine=child.affine,
+    #                     track_running_stats=child.track_running_stats,
+    #                 )
+    #             )
+    #         # Activations
+    #         elif isinstance(child, nn.LeakyReLU):
+    #             _children_nnj.append(nnj.LeakyReLU())
+    #         elif isinstance(child, nn.Sigmoid):
+    #             _children_nnj.append(nnj.Sigmoid())
+    #         elif isinstance(child, nn.Softplus):
+    #             _children_nnj.append(nnj.Softplus())
+    #         else:
+    #             raise NotImplementedError(f"{child} casting to nnj not supported")
 
-    def decoder_jacobian(self, z: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-        _, J_μ = self.decoder_μ(z, jacobian=True)
-        _, J_α = self.decoder_α(z, jacobian=True)
-        _, J_β = self.decoder_β(z, jacobian=True)
+    # def decoder_jacobian(self, z: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    #     _, J_μ = self.decoder_μ(z, jacobian=True)
+    #     _, J_α = self.decoder_α(z, jacobian=True)
+    #     _, J_β = self.decoder_β(z, jacobian=True)
 
-        # TODO - WIP but not necessary
-        J_σ = 1
-        return J_μ, J_σ
+    #     # TODO - WIP but not necessary
+    #     J_σ = 1
+    #     return J_μ, J_σ
 
     def embed(self, z: torch.Tensor, jacobian=False) -> torch.Tensor:
         is_batched = z.dim() > 2
