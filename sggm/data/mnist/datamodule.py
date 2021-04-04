@@ -95,7 +95,10 @@ class MNISTDataModule(pl.LightningDataModule):
         )
 
 
-class MNISTDataModule2D(MNISTDataModule):
+class MNISTDataModuleND(MNISTDataModule):
+    """
+    MNIST restricted to N of the 10 classes.
+    """
     def __init__(
         self,
         batch_size: int,
@@ -105,7 +108,8 @@ class MNISTDataModule2D(MNISTDataModule):
         **kwargs,
     ):
         super().__init__(batch_size, n_workers, train_val_split, **kwargs)
-        assert len(digits) == 2
+        assert len(digits) >= 2
+        assert len(digits) == len(set(digits))
         for d in digits:
             assert isinstance(d, int)
             assert (0 <= d) & (d <= 9)
@@ -125,9 +129,9 @@ class MNISTDataModule2D(MNISTDataModule):
             transform=mnist_transforms,
         )
 
-        idx = (train_val.targets == self.digits[0]) | (
-            train_val.targets == self.digits[1]
-        )
+        idx = torch.cat(
+            [train_val.targets[:, None] == digit for digit in self.digits], dim=1
+        ).any(dim=1)
         train_val.targets = train_val.targets[idx]
         train_val.data = train_val.data[idx]
 
@@ -144,16 +148,17 @@ class MNISTDataModule2D(MNISTDataModule):
             train=False,
             transform=mnist_transforms,
         )
-        idx = (self.test_dataset.targets == self.digits[0]) | (
-            self.test_dataset.targets == self.digits[1]
-        )
+        idx = torch.cat(
+            [self.test_dataset.targets[:, None] == digit for digit in self.digits],
+            dim=1,
+        ).any(dim=1)
         self.test_dataset.targets = self.test_dataset.targets[idx]
         self.test_dataset.data = self.test_dataset.data[idx]
 
 
 if __name__ == "__main__":
-    dm = MNISTDataModule(256, 0)
-    # dm = MNISTDataModule2D(256, 0, digits=[2, 5])
+    # dm = MNISTDataModule(256, 0)
+    dm = MNISTDataModuleND(256, 0, digits=[2, 5, 3])
     dm.setup()
 
     # Observe sample

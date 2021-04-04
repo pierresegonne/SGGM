@@ -249,9 +249,9 @@ UCI_YACHT_SHIFTED = UCI_YACHT + SHIFTED
 # Generative
 CIFAR = "cifar"
 MNIST = "mnist"
-MNIST_2D = "mnist_2d"
+MNIST_ND = "mnist_nd"
 FASHION_MNIST = "fashion_mnist"
-FASHION_MNIST_2D = "fashion_mnist_2d"
+FASHION_MNIST_ND = "fashion_mnist_nd"
 NOT_MNIST = "not_mnist"
 SVHN = "svhn"
 
@@ -275,9 +275,9 @@ experiment_names = [
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
     MNIST,
-    MNIST_2D,
+    MNIST_ND,
     FASHION_MNIST,
-    FASHION_MNIST_2D,
+    FASHION_MNIST_ND,
     NOT_MNIST,
 ]
 regression_experiments = [
@@ -299,17 +299,17 @@ regression_experiments = [
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
 ]
-generative_experiments = [MNIST, MNIST_2D, FASHION_MNIST, FASHION_MNIST_2D, NOT_MNIST]
+generative_experiments = [MNIST, MNIST_ND, FASHION_MNIST, FASHION_MNIST_ND, NOT_MNIST]
 
 
 def experiments_latent_dims(experiment_name: str) -> tuple:
     if experiment_name == MNIST:
         return (10,)  # Match Nicki and Martin
-    if experiment_name == MNIST_2D:
+    if experiment_name == MNIST_ND:
         return (2,)
     elif experiment_name == FASHION_MNIST:
         return (25,)
-    elif experiment_name == FASHION_MNIST_2D:
+    elif experiment_name == FASHION_MNIST_ND:
         return (2,)
     elif experiment_name == NOT_MNIST:
         return (10,)
@@ -364,9 +364,9 @@ def experiments_activation_function(experiment_name: str) -> str:
         return F_ELU
     elif experiment_name in [
         MNIST,
-        MNIST_2D,
+        MNIST_ND,
         FASHION_MNIST,
-        FASHION_MNIST_2D,
+        FASHION_MNIST_ND,
         NOT_MNIST,
     ]:
         # Match Martin & Nicki

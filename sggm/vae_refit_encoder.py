@@ -8,8 +8,8 @@ import torch
 from torch.utils.data import DataLoader
 
 from sggm.analysis.experiment_log import ExperimentLog
-from sggm.data.mnist import MNISTDataModule, MNISTDataModule2D
-from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModule2D
+from sggm.data.mnist import MNISTDataModule, MNISTDataModuleND
+from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModuleND
 from sggm.data.not_mnist import NotMNISTDataModule
 from sggm.definitions import (
     experiment_names,
@@ -48,16 +48,16 @@ def get_datamodule(
         dm = MNISTDataModule(bs, 0)
     elif experiment_name == MNIST_2D:
         if DIGITS in misc:
-            dm = MNISTDataModule2D(bs, 0, digits=misc[DIGITS])
+            dm = MNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
-            dm = MNISTDataModule2D(bs, 0)
+            dm = MNISTDataModuleND(bs, 0)
     elif experiment_name == FASHION_MNIST:
         dm = FashionMNISTDataModule(bs, 0)
     elif experiment_name == FASHION_MNIST_2D:
         if DIGITS in misc:
-            dm = FashionMNISTDataModule2D(bs, 0, digits=misc[DIGITS])
+            dm = FashionMNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
-            dm = FashionMNISTDataModule2D(bs, 0)
+            dm = FashionMNISTDataModuleND(bs, 0)
     elif experiment_name == NOT_MNIST:
         dm = NotMNISTDataModule(bs, 0)
     dm.setup()

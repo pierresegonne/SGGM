@@ -103,7 +103,7 @@ class FashionMNISTDataModule(pl.LightningDataModule):
         )
 
 
-class FashionMNISTDataModule2D(FashionMNISTDataModule):
+class FashionMNISTDataModuleND(FashionMNISTDataModule):
     def __init__(
         self,
         batch_size: int,
@@ -114,7 +114,8 @@ class FashionMNISTDataModule2D(FashionMNISTDataModule):
         **kwargs,
     ):
         super().__init__(batch_size, n_workers, train_val_split, **kwargs)
-        assert len(digits) == 2
+        assert len(digits) >= 2
+        assert len(digits) == len(set(digits))
         for d in digits:
             assert isinstance(d, int)
             assert (0 <= d) & (d <= 9)
@@ -134,9 +135,9 @@ class FashionMNISTDataModule2D(FashionMNISTDataModule):
             transform=mnist_transforms,
         )
 
-        idx = (train_val.targets == self.digits[0]) | (
-            train_val.targets == self.digits[1]
-        )
+        idx = torch.cat(
+            [train_val.targets[:, None] == digit for digit in self.digits], dim=1
+        ).any(dim=1)
         train_val.targets = train_val.targets[idx]
         train_val.data = train_val.data[idx]
 
@@ -153,16 +154,18 @@ class FashionMNISTDataModule2D(FashionMNISTDataModule):
             train=False,
             transform=mnist_transforms,
         )
-        idx = (self.test_dataset.targets == self.digits[0]) | (
-            self.test_dataset.targets == self.digits[1]
-        )
+        idx = torch.cat(
+            [self.test_dataset.targets[:, None] == digit for digit in self.digits],
+            dim=1,
+        ).any(dim=1)
         self.test_dataset.targets = self.test_dataset.targets[idx]
         self.test_dataset.data = self.test_dataset.data[idx]
 
 
 if __name__ == "__main__":
 
-    dm = FashionMNISTDataModule(256, 0)
+    # dm = FashionMNISTDataModule(256, 0)
+    dm = FashionMNISTDataModuleND(16, 0, digits=[2, 4, 5])
     dm.setup()
 
     # Observe sample

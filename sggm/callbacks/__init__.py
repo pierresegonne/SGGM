@@ -19,9 +19,9 @@ from sggm.definitions import (
     #
     CIFAR,
     MNIST,
-    MNIST_2D,
+    MNIST_ND,
     FASHION_MNIST,
-    FASHION_MNIST_2D,
+    FASHION_MNIST_ND,
     NOT_MNIST,
     SVHN,
 )
@@ -53,9 +53,9 @@ callbacks = {
     #
     CIFAR: [],
     MNIST: [IMGGeneratedSaver],
-    MNIST_2D: [],
+    MNIST_ND: [],
     FASHION_MNIST: [IMGGeneratedSaver],
-    FASHION_MNIST_2D: [],
+    FASHION_MNIST_ND: [],
     NOT_MNIST: [IMGGeneratedSaver],
     SVHN: [],
 }

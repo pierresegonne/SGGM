@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+from sggm.data.fashion_mnist.datamodule import FashionMNISTDataModuleND
+from sggm.data.mnist.datamodule import MNISTDataModuleND
 import torch
 
 from pytorch_lightning import seed_everything, LightningDataModule
@@ -13,10 +15,11 @@ from sggm.analysis.mnist.latent_2d import (
     show_reconstruction_grid,
 )
 from sggm.analysis.mnist.others_mnist import analyse_others_mnist
-from sggm.data.mnist import MNISTDataModule, MNISTDataModule2D
-from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModule2D
+from sggm.data.mnist import MNISTDataModule, MNISTDataModuleND
+from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModuleND
 from sggm.data.not_mnist import NotMNISTDataModule
 from sggm.definitions import (
+    FASHION_MNIST_ND,
     MNIST,
     MNIST_2D,
     FASHION_MNIST,
@@ -41,16 +44,16 @@ def get_dm(experiment_name: str, misc: dict, bs: int):
         dm = MNISTDataModule(bs, 0)
     elif experiment_name == MNIST_2D:
         if DIGITS in misc:
-            dm = MNISTDataModule2D(bs, 0, digits=misc[DIGITS])
+            dm = MNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
-            dm = MNISTDataModule2D(bs, 0)
+            dm = MNISTDataModuleND(bs, 0)
     elif experiment_name == FASHION_MNIST:
         dm = FashionMNISTDataModule(bs, 0)
     elif experiment_name == FASHION_MNIST_2D:
         if DIGITS in misc:
-            dm = FashionMNISTDataModule2D(bs, 0, digits=misc[DIGITS])
+            dm = FASHION_MNIST_ND(bs, 0, digits=misc[DIGITS])
         else:
-            dm = FashionMNISTDataModule2D(bs, 0)
+            dm = FashionMNISTDataModuleND(bs, 0)
     elif experiment_name == NOT_MNIST:
         dm = NotMNISTDataModule(bs, 0)
     dm.setup()
