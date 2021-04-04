@@ -348,6 +348,15 @@ class VanillaVAE(BaseVAE):
             # Note: done with _gaussian_decoder | _bernouilli_decoder
             # Update β_elbo value through annealing
             self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2))
+        
+        # Handle refitting the encoder
+        else:
+            for m in self.decoder_μ.modules():
+                if isinstance(m, nn.BatchNorm1d):
+                    m.eval()
+            for m in self.decoder_std.modules():
+                if isinstance(m, nn.BatchNorm1d):
+                    m.eval()
 
     def step(self, batch, batch_idx, stage=None):
         x, y = batch
@@ -430,8 +439,14 @@ class VanillaVAE(BaseVAE):
         # Freeze gradients of the decoder
         for p in self.decoder_μ.parameters():
             p.requires_grad = False
+        for m in self.decoder_μ.modules():
+            if isinstance(m, nn.BatchNorm1d):
+                m.eval()
         for p in self.decoder_std.parameters():
             p.requires_grad = False
+        for m in self.decoder_std.modules():
+            if isinstance(m, nn.BatchNorm1d):
+                m.eval()
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):
@@ -1015,6 +1030,18 @@ class V3AE(BaseVAE):
 
                 self._setup_pi_dl()
                 self._setup_inducing_centroids()
+ 
+        # Handle refitting the encoder
+        else:
+            for m in self.decoder_μ.modules():
+                if isinstance(m, nn.BatchNorm1d):
+                    m.eval()
+            for m in self.decoder_α.modules():
+                if isinstance(m, nn.BatchNorm1d):
+                    m.eval()
+            for m in self.decoder_β.modules():
+                if isinstance(m, nn.BatchNorm1d):
+                    m.eval()
 
     def step(self, batch, batch_idx, stage=None):
         x, _ = batch
@@ -1142,10 +1169,19 @@ class V3AE(BaseVAE):
         # Freeze gradients of the decoder
         for p in self.decoder_μ.parameters():
             p.requires_grad = False
+        for m in self.decoder_μ.modules():
+            if isinstance(m, nn.BatchNorm1d):
+                m.eval()
         for p in self.decoder_α.parameters():
             p.requires_grad = False
+        for m in self.decoder_α.modules():
+            if isinstance(m, nn.BatchNorm1d):
+                m.eval()
         for p in self.decoder_β.parameters():
             p.requires_grad = False
+        for m in self.decoder_β.modules():
+            if isinstance(m, nn.BatchNorm1d):
+                m.eval()
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser):

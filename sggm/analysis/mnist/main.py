@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import torch
 
-from pytorch_lightning import seed_everything
+from pytorch_lightning import seed_everything, LightningDataModule
 from torch import no_grad
 
 from sggm.analysis.mnist.helper import (
@@ -26,6 +26,7 @@ from sggm.definitions import (
 from sggm.definitions import (
     DIGITS,
 )
+from sggm.types_ import Union
 
 
 def save_and_show(fig, name: str, show_plot: bool = True):
@@ -35,16 +36,7 @@ def save_and_show(fig, name: str, show_plot: bool = True):
         plt.show()
 
 
-def plot(experiment_log, seed=False, show_plot=True, **kwargs):
-    best_model = experiment_log.best_version.model
-    save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
-
-    # Get correct datamodule
-    bs = 500
-    experiment_name = experiment_log.experiment_name
-    misc = experiment_log.best_version.misc
-    if ("seed" in misc) & seed:
-        seed_everything(misc["seed"])
+def get_dm(experiment_name: str, misc: dict, bs: int):
     if experiment_name == MNIST:
         dm = MNISTDataModule(bs, 0)
     elif experiment_name == MNIST_2D:
@@ -62,6 +54,29 @@ def plot(experiment_log, seed=False, show_plot=True, **kwargs):
     elif experiment_name == NOT_MNIST:
         dm = NotMNISTDataModule(bs, 0)
     dm.setup()
+    return dm
+
+
+def plot(
+    experiment_log,
+    seed=False,
+    show_plot=True,
+    dm: Union[LightningDataModule, None] = None,
+    save_folder: Union[str, None] = None,
+    **kwargs,
+):
+    best_model = experiment_log.best_version.model
+    if save_folder is None:
+        save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"
+
+    # Get correct datamodule
+    bs = 500
+    experiment_name = experiment_log.experiment_name
+    misc = experiment_log.best_version.misc
+    if ("seed" in misc) & seed:
+        seed_everything(misc["seed"])
+    if dm is None:
+        dm = get_dm(experiment_name, misc, bs)
 
     # Dataset
     training_dataset = next(iter(dm.train_dataloader()))
@@ -100,7 +115,7 @@ def plot(experiment_log, seed=False, show_plot=True, **kwargs):
     # 2D Latent space
     if best_model.latent_size == 2:
         # Arbitrary latent code
-        z_star = torch.Tensor([[[3.5, 3.5]]])
+        z_star = torch.Tensor([[[-3.5, 3.5]]])
         (
             grid_samples,
             grid_mean,
@@ -126,7 +141,7 @@ def plot(experiment_log, seed=False, show_plot=True, **kwargs):
             show_plot=show_plot,
         )
 
-    for other_mnist in kwargs["others"]:
+    for other_mnist in kwargs.get("others", []):
         save_and_show(
             analyse_others_mnist(best_model, other_mnist, n_display),
             f"{save_folder}/{other_mnist}",

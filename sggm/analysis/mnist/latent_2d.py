@@ -201,6 +201,7 @@ def show_reconstruction_grid(
     # Imshow starts by default from upper left
     y_mesh = torch.linspace(extent, -extent, size)
     x_mesh, y_mesh = torch.meshgrid(x_mesh, y_mesh)
+    x_mesh, y_mesh = x_mesh.transpose(0, 1), y_mesh.transpose(0, 1)
     z_mesh = torch.cat((x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1)[
         None, :
     ]
@@ -270,6 +271,9 @@ def show_2d_latent_space(
             _, _, decoder_α_z, decoder_β_z = model.parametrise_z(z_mesh[None, :])
             var = decoder_β_z[0] / (decoder_α_z[0] - 1)
             # %
+            z_tst = torch.Tensor([1, 1]).reshape(1, 1, 2)
+            _, _, alpha_tst, beta_tst = model.parametrise_z(z_tst)
+            # %
             if show_kl:
                 plot_kl(model, z, z_mesh, z_star, x_mesh.shape, extent)
 
@@ -304,7 +308,7 @@ def show_2d_latent_space(
 
     if isinstance(z_star, torch.Tensor):
         z_star = z_star.flatten()
-        ax.plot(z_star[0], z_star[1], "o", markersize=6, color=colours["red"])
+        ax.plot(z_star[0], z_star[1], "o", markersize=6, color="#0AEFFF")
 
     # Pseudo-inputs
     if show_pi:
@@ -329,7 +333,7 @@ def show_2d_latent_space(
         fancybox=True,
         shadow=False,
         # ncol=legend_ncols,
-        loc='upper left',
+        loc="upper left",
         bbox_to_anchor=(-0.38, 1),
     )
     ax.set_title(title, fontsize=30)

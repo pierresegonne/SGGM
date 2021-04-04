@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 
 from copy import deepcopy
 from torch import save
+import torch
 from torch.utils.data import DataLoader
 
 from sggm.analysis.experiment_log import ExperimentLog
@@ -31,16 +32,16 @@ Implementation of the workshop paper
 by P.A Mattei and Jes Frellsen
 """
 
-N_EPOCHS_REFIT = 2
+N_EPOCHS_REFIT = 10
 
 #%%
 
 
-def get_datamodule(experiment_log: ExperimentLog, seed=False) -> pl.LightningDataModule:
+def get_datamodule(
+    experiment_name: str, misc: dict, seed=False
+) -> pl.LightningDataModule:
     # Get correct datamodule
     bs = 500
-    experiment_name = experiment_log.experiment_name
-    misc = experiment_log.best_version.misc
     if ("seed" in misc) & seed:
         pl.seed_everything(misc["seed"])
     if experiment_name == MNIST:
@@ -98,8 +99,15 @@ def refit_encoder(
     )
     model.train()
     model.freeze_but_encoder()
+    for m in model.decoder_α.modules():
+        if isinstance(m, torch.nn.BatchNorm1d):
+            print("training ? ", m.training)
+            break
     if isinstance(model, V3AE):
         model.save_datamodule(dm_refit_test)
+        model.set_prior_parameters(
+            dm_refit_test, prior_α=model.prior_α, prior_β=model.prior_β
+        )
         model.ood_z_generation_method = None
 
     trainer.fit(model, datamodule=dm_refit_test)
@@ -123,6 +131,7 @@ if __name__ == "__main__":
         type=str,
         required=True,
     )
+    parser.add_argument("--run_on", type=str, choices=experiment_names, default=None)
     parser.add_argument("--model_name", type=str, default=None)
     parser.add_argument("--save_dir", type=str, default="lightning_logs")
     args = parser.parse_args()
@@ -138,11 +147,18 @@ if __name__ == "__main__":
     )
 
     # /!\ No check for use on correct experiment/model.
+    logger_name = f"{experiment_log.name}_refit_encoder"
+    if args.run_on is not None:
+        logger_name += "_" + args.run_on
     logger = pl.loggers.TensorBoardLogger(
         save_dir=experiment_log.experiment_path,
-        name=f"{experiment_log.name}_refit_encoder",
+        name=logger_name,
     )
-    dm = get_datamodule(experiment_log)
+    experiment_name = (
+        experiment_log.experiment_name if args.run_on is None else args.run_on
+    )
+    misc = experiment_log.best_version.misc
+    dm = get_datamodule(experiment_name, misc)
     res = refit_encoder(experiment_log.best_version.model, dm, logger)
 
     # Saving
