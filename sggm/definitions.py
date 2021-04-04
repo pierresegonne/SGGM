@@ -279,6 +279,8 @@ experiment_names = [
     FASHION_MNIST,
     FASHION_MNIST_ND,
     NOT_MNIST,
+    CIFAR,
+    SVHN,
 ]
 regression_experiments = [
     SANITY_CHECK,
@@ -299,7 +301,26 @@ regression_experiments = [
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
 ]
-generative_experiments = [MNIST, MNIST_ND, FASHION_MNIST, FASHION_MNIST_ND, NOT_MNIST]
+generative_experiments = [
+    CIFAR,
+    FASHION_MNIST,
+    FASHION_MNIST_ND,
+    MNIST,
+    MNIST_ND,
+    NOT_MNIST,
+    SVHN,
+]
+MNIST_ALL = [
+    FASHION_MNIST,
+    FASHION_MNIST_ND,
+    MNIST,
+    MNIST_ND,
+    NOT_MNIST,
+]
+
+FULLY_CONNECTED = "fully_connected"
+CONVOLUTIONAL = "convolutional"
+CONV_HIDDEN_DIMS = [32, 64, 128, 256, 512]
 
 
 def experiments_latent_dims(experiment_name: str) -> tuple:
@@ -308,11 +329,23 @@ def experiments_latent_dims(experiment_name: str) -> tuple:
     if experiment_name == MNIST_ND:
         return (2,)
     elif experiment_name == FASHION_MNIST:
-        return (25,)
+        return (10,)
     elif experiment_name == FASHION_MNIST_ND:
         return (2,)
     elif experiment_name == NOT_MNIST:
         return (10,)
+    # Unclear what latent size I should set as default here
+    elif experiment_name == CIFAR:
+        return (30,)
+    elif experiment_name == SVHN:
+        return (30,)
+
+
+def experiments_architecture(experiment_name: str) -> str:
+    if experiment_name in MNIST_ALL:
+        return FULLY_CONNECTED
+    elif experiment_name in [CIFAR, SVHN]:
+        return CONVOLUTIONAL
 
 
 # -------------
@@ -368,6 +401,9 @@ def experiments_activation_function(experiment_name: str) -> str:
         FASHION_MNIST,
         FASHION_MNIST_ND,
         NOT_MNIST,
+        # Probably needs a convolutional architecture for that
+        CIFAR,
+        SVHN,
     ]:
         # Match Martin & Nicki
         return F_LEAKY_RELU

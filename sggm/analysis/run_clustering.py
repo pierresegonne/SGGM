@@ -12,8 +12,7 @@ from sklearn.metrics import f1_score
 from sklearn.neighbors import KNeighborsClassifier
 
 from sggm.analysis.experiment_log import ExperimentLog
-from sggm.analysis.run import MNIST_L
-from sggm.definitions import experiment_names
+from sggm.definitions import experiment_names, MNIST_ALL
 from sggm.analysis.mnist.main import get_dm
 from sggm.styles_ import colours, colours_rgb
 from sggm.types_ import List, Tuple, Union
@@ -132,7 +131,7 @@ def run_clustering(
     save_dir: str,
     **kwargs,
 ):
-    assert experiment_name in MNIST_L
+    assert experiment_name in MNIST_ALL
     for name in names:
         experiment_log = ExperimentLog(
             experiment_name, name, model_name=model_name, save_dir=save_dir

@@ -4,8 +4,8 @@ import os
 from sggm.analysis.experiment_log import ExperimentLog
 from sggm.analysis.mnist import mnist_plot
 from sggm.analysis.mnist.main import get_dm
-from sggm.analysis.run import MNIST_L
 from sggm.definitions import (
+    MNIST_ALL,
     experiment_names,
 )
 
@@ -23,13 +23,15 @@ def run_analysis(experiment_name, run_on, names, model_name, save_dir, **kwargs)
         save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}/{run_on}/"
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
-        if experiment_name in MNIST_L:
+        if experiment_name in MNIST_ALL:
             dm = get_dm(run_on, experiment_log.best_version.misc, 500)
             mnist_plot(experiment_log, dm=dm, save_folder=save_folder, **kwargs)
+
 
 def parse_experiment_args(args):
     args.names = [name for name in args.names.split(",")]
     return args
+
 
 if __name__ == "__main__":
 

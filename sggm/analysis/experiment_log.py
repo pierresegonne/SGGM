@@ -91,7 +91,7 @@ class ExperimentLog:
         elif self.experiment_name in generative_experiments:
             if self.model_name == VANILLA_VAE:
                 pl_module = VanillaVAE
-            if self.model_name == VANILLA_VAE_MANIFOLD:
+            elif self.model_name == VANILLA_VAE_MANIFOLD:
                 pl_module = VanillaVAEm
             elif self.model_name == VV_VAE:
                 pl_module = V3AE

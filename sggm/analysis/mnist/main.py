@@ -48,7 +48,7 @@ def get_dm(experiment_name: str, misc: dict, bs: int):
         dm = FashionMNISTDataModule(bs, 0)
     elif experiment_name == FASHION_MNIST_ND:
         if DIGITS in misc:
-            dm = FASHION_MNIST_ND(bs, 0, digits=misc[DIGITS])
+            dm = FashionMNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
             dm = FashionMNISTDataModuleND(bs, 0)
     elif experiment_name == NOT_MNIST:
@@ -97,11 +97,11 @@ def plot(
 
     # # Reconstruction plots
     n_display = 5
-    # save_and_show(
-    #     plot_comparison(n_display, x_test, p_x_test, best_model.input_dims),
-    #     f"{save_folder}/_main",
-    #     show_plot=show_plot,
-    # )
+    save_and_show(
+        plot_comparison(n_display, x_test, p_x_test, best_model.input_dims),
+        f"{save_folder}/_main",
+        show_plot=show_plot,
+    )
 
     # # Interpolation
     # interpolation_digits = get_interpolation_digits(
@@ -116,30 +116,30 @@ def plot(
     if best_model.latent_size == 2:
         # Arbitrary latent code
         z_star = torch.Tensor([[[-3.5, 3.5]]])
-        # (
-        #     grid_samples,
-        #     grid_mean,
-        # ) = show_reconstruction_grid(best_model)
-        # save_and_show(
-        #     grid_samples,
-        #     f"{save_folder}/_grid_samples",
-        #     show_plot=show_plot,
-        # )
-        # save_and_show(
-        #     grid_mean,
-        #     f"{save_folder}/_grid_mean",
-        #     show_plot=show_plot,
-        # )
+        (
+            grid_samples,
+            grid_mean,
+        ) = show_reconstruction_grid(best_model)
+        save_and_show(
+            grid_samples,
+            f"{save_folder}/_grid_samples",
+            show_plot=show_plot,
+        )
+        save_and_show(
+            grid_mean,
+            f"{save_folder}/_grid_mean",
+            show_plot=show_plot,
+        )
         save_and_show(
             show_2d_latent_space(best_model, x_test, y_test, z_star=z_star),
             f"{save_folder}/_latent_space",
             show_plot=show_plot,
         )
-        # save_and_show(
-        #     show_reconstruction_arbitrary_latent(best_model, z_star),
-        #     f"{save_folder}/_arbitrary_z_reconstruction",
-        #     show_plot=show_plot,
-        # )
+        save_and_show(
+            show_reconstruction_arbitrary_latent(best_model, z_star),
+            f"{save_folder}/_arbitrary_z_reconstruction",
+            show_plot=show_plot,
+        )
 
     for other_mnist in kwargs.get("others", []):
         save_and_show(

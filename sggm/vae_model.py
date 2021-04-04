@@ -1,4 +1,4 @@
-from typing import Union
+import copy
 import geoml.nnj as nnj
 import numpy as np
 import pytorch_lightning as pl
@@ -36,6 +36,9 @@ from sggm.definitions import (
     DECODER_α_OFFSET,
 )
 from sggm.definitions import (
+    CONVOLUTIONAL,
+    FULLY_CONNECTED,
+    CONV_HIDDEN_DIMS,
     ACTIVATION_FUNCTIONS,
     F_ELU,
     F_LEAKY_RELU,
@@ -61,7 +64,7 @@ from sggm.definitions import (
     TEST_OOD_SAMPLE_MEAN_MSE,
 )
 from sggm.model_helper import log_2_pi, ShiftLayer
-from sggm.types_ import List, Tensor, Tuple
+from sggm.types_ import List, Tensor, Tuple, Union
 from sggm.vae_model_helper import (
     TruncatedNormal,
     batch_flatten,
@@ -112,6 +115,38 @@ def encoder_dense_base(
     )
 
 
+def encoder_conv_base(
+    input_dims: Tuple[int],
+    activation: str,
+) -> List[nn.Module]:
+    f = activation_function(activation)
+
+    input_channels = input_dims[0]
+
+    # Note if we want to handle larger than 32x32 images, leverage input_dims
+
+    modules = [nn.Unflatten(1, input_dims)]
+    hidden_dims = CONV_HIDDEN_DIMS
+
+    for h_dim in hidden_dims:
+        modules.append(
+            nn.Sequential(
+                nn.Conv2d(
+                    input_channels,
+                    out_channels=h_dim,
+                    kernel_size=3,
+                    stride=2,
+                    padding=1,
+                ),
+                nn.BatchNorm2d(h_dim),
+                f,
+            )
+        )
+        input_channels = h_dim
+
+    return modules
+
+
 def decoder_dense_base(
     latent_size: int,
     output_size: int,
@@ -130,9 +165,55 @@ def decoder_dense_base(
     )
 
 
+def decoder_conv_base(latent_size: int, activation: str) -> List[nn.Module]:
+    f = activation_function(activation)
+    hidden_dims = copy.deepcopy(CONV_HIDDEN_DIMS)
+
+    # Note * 1 to have 32x32 images
+
+    modules = [
+        nn.Linear(latent_size, hidden_dims[-1] * 1),
+        nn.Unflatten(1, (hidden_dims[-1], 1, 1)),
+    ]
+
+    hidden_dims.reverse()
+
+    for i in range(len(hidden_dims) - 1):
+        modules.append(
+            nn.Sequential(
+                nn.ConvTranspose2d(
+                    hidden_dims[i],
+                    hidden_dims[i + 1],
+                    kernel_size=3,
+                    stride=2,
+                    padding=1,
+                    output_padding=1,
+                ),
+                nn.BatchNorm2d(hidden_dims[i + 1]),
+                f,
+            )
+        )
+
+    return modules
+
+
+def decoder_conv_final(channels: int, activation: str) -> nn.Module:
+    f = activation_function(activation)
+    # /!| Still need to apply non-linearity
+    return nn.Sequential(
+        nn.ConvTranspose2d(
+            channels, channels, kernel_size=3, stride=2, padding=1, output_padding=1
+        ),
+        nn.BatchNorm2d(channels),
+        f,
+        nn.Conv2d(channels, out_channels=3, kernel_size=3, padding=1),
+    )
+
+
 class BaseVAE(pl.LightningModule):
     def __init__(
         self,
+        architecture: str,
         input_dims: tuple,
         activation: str,
         latent_dims: Tuple[int],
@@ -141,6 +222,8 @@ class BaseVAE(pl.LightningModule):
         n_mc_samples: int = vae_parameters[N_MC_SAMPLES].default,
     ):
         super().__init__()
+
+        self.architecture = architecture
 
         self.input_dims = list(input_dims)
         self.input_size = reduce_int_list(self.input_dims)
@@ -230,6 +313,7 @@ class VanillaVAE(BaseVAE):
 
     def __init__(
         self,
+        architecture: str,
         input_dims: tuple,
         activation: str,
         latent_dims: Tuple[int],
@@ -238,6 +322,7 @@ class VanillaVAE(BaseVAE):
         n_mc_samples: int = vae_parameters[N_MC_SAMPLES].default,
     ):
         super(VanillaVAE, self).__init__(
+            architecture,
             input_dims,
             activation,
             latent_dims=latent_dims,
@@ -251,29 +336,56 @@ class VanillaVAE(BaseVAE):
         self._gaussian_decoder = True
         self._bernouilli_decoder = False
 
-        self.encoder_μ = nn.Sequential(
-            encoder_dense_base(self.input_size, self.latent_size, self.activation),
-        )
+        if self.architecture == FULLY_CONNECTED:
+            self.encoder_μ = nn.Sequential(
+                encoder_dense_base(self.input_size, self.latent_size, self.activation),
+            )
 
-        self.encoder_std = nn.Sequential(
-            encoder_dense_base(self.input_size, self.latent_size, self.activation),
-            nn.Softplus(),
-        )
+            self.encoder_std = nn.Sequential(
+                encoder_dense_base(self.input_size, self.latent_size, self.activation),
+                nn.Softplus(),
+            )
 
-        self.decoder_μ = nn.Sequential(
-            decoder_dense_base(self.latent_size, self.input_size, self.activation),
-            nn.Sigmoid(),
-        )
-        self.decoder_std = nn.Sequential(
-            decoder_dense_base(self.latent_size, self.input_size, self.activation),
-            nn.Softplus(),
-        )
+            self.decoder_μ = nn.Sequential(
+                decoder_dense_base(self.latent_size, self.input_size, self.activation),
+                nn.Sigmoid(),
+            )
+            self.decoder_std = nn.Sequential(
+                decoder_dense_base(self.latent_size, self.input_size, self.activation),
+                nn.Softplus(),
+            )
+        elif self.architecture == CONVOLUTIONAL:
+            base_encoder = encoder_conv_base(self.input_dims, self.activation)
+            self.encoder_μ = nn.Sequential(
+                *base_encoder,
+                nn.Flatten(),
+                nn.Linear(CONV_HIDDEN_DIMS[-1] * 1, self.latent_size),
+            )
+            self.encoder_std = nn.Sequential(
+                *base_encoder,
+                nn.Flatten(),
+                nn.Linear(CONV_HIDDEN_DIMS[-1] * 1, self.latent_size),
+                nn.Softplus()
+            )
+
+            base_decoder = decoder_conv_base(self.latent_size, self.activation)
+            self.decoder_μ = nn.Sequential(
+                *base_decoder,
+                decoder_conv_final(CONV_HIDDEN_DIMS[0], self.activation),
+                nn.Sigmoid(),
+            )
+            self.decoder_std = nn.Sequential(
+                *base_decoder,
+                decoder_conv_final(CONV_HIDDEN_DIMS[0], self.activation),
+                nn.Softplus(),
+            )
 
         # %
         self._refit_encoder_mode = False
 
         # Save hparams
         self.save_hyperparameters(
+            "architecture",
             "activation",
             "input_dims",
             "latent_dims",
@@ -287,7 +399,9 @@ class VanillaVAE(BaseVAE):
         return False
 
     def forward(self, x):
+        print(x.shape)
         x = batch_flatten(x)
+        print(x.shape)
         μ_x = self.encoder_μ(x)
         std_x = self.encoder_std(x)
         z, _, _ = self.sample_latent(μ_x, std_x)
@@ -302,8 +416,10 @@ class VanillaVAE(BaseVAE):
         x = batch_flatten(x)
         μ_x = self.encoder_μ(x)
         std_x = self.encoder_std(x)
+        print('shape', μ_x.shape)
         z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
         μ_z, std_z = self.decoder_μ(z), self.decoder_std(z)
+        print(μ_z.shape)
         x_hat, p_x_z = self.sample_generative(μ_z, std_z)
         x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x_z, z, q_z_x, p_z
@@ -352,10 +468,10 @@ class VanillaVAE(BaseVAE):
         # Handle refitting the encoder
         else:
             for m in self.decoder_μ.modules():
-                if isinstance(m, nn.BatchNorm1d):
+                if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                     m.eval()
             for m in self.decoder_std.modules():
-                if isinstance(m, nn.BatchNorm1d):
+                if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                     m.eval()
 
     def step(self, batch, batch_idx, stage=None):
@@ -440,12 +556,12 @@ class VanillaVAE(BaseVAE):
         for p in self.decoder_μ.parameters():
             p.requires_grad = False
         for m in self.decoder_μ.modules():
-            if isinstance(m, nn.BatchNorm1d):
+            if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                 m.eval()
         for p in self.decoder_std.parameters():
             p.requires_grad = False
         for m in self.decoder_std.modules():
-            if isinstance(m, nn.BatchNorm1d):
+            if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                 m.eval()
 
     @staticmethod
@@ -490,6 +606,7 @@ class V3AE(BaseVAE):
 
     def __init__(
         self,
+        architecture: str,
         input_dims: tuple,
         activation: str,
         latent_dims: Tuple[int],
@@ -511,6 +628,7 @@ class V3AE(BaseVAE):
         decoder_α_offset: float = v3ae_parameters[DECODER_α_OFFSET].default,
     ):
         super(V3AE, self).__init__(
+            architecture,
             input_dims,
             activation,
             latent_dims=latent_dims,
@@ -532,28 +650,60 @@ class V3AE(BaseVAE):
         self._student_t_decoder = True
         self._bernouilli_decoder = False
 
-        self.encoder_μ = encoder_dense_base(
-            self.input_size, self.latent_size, self.activation
-        )
-        self.encoder_std = nn.Sequential(
-            encoder_dense_base(self.input_size, self.latent_size, self.activation),
-            nn.Softplus(),
-        )
-
-        self.decoder_μ = nn.Sequential(
-            decoder_dense_base(self.latent_size, self.input_size, self.activation),
-            nn.Sigmoid(),
-        )
         self.decoder_α_offset = decoder_α_offset
-        self.decoder_α = nn.Sequential(
-            decoder_dense_base(self.latent_size, self.input_size, self.activation),
-            nn.Softplus(),
-            ShiftLayer(1.0 + self.decoder_α_offset),
-        )
-        self.decoder_β = nn.Sequential(
-            decoder_dense_base(self.latent_size, self.input_size, self.activation),
-            nn.Softplus(),
-        )
+        if self.architecture == FULLY_CONNECTED:
+            self.encoder_μ = encoder_dense_base(
+                self.input_size, self.latent_size, self.activation
+            )
+            self.encoder_std = nn.Sequential(
+                encoder_dense_base(self.input_size, self.latent_size, self.activation),
+                nn.Softplus(),
+            )
+
+            self.decoder_μ = nn.Sequential(
+                decoder_dense_base(self.latent_size, self.input_size, self.activation),
+                nn.Sigmoid(),
+            )
+            self.decoder_α = nn.Sequential(
+                decoder_dense_base(self.latent_size, self.input_size, self.activation),
+                nn.Softplus(),
+                ShiftLayer(1.0 + self.decoder_α_offset),
+            )
+            self.decoder_β = nn.Sequential(
+                decoder_dense_base(self.latent_size, self.input_size, self.activation),
+                nn.Softplus(),
+            )
+        elif self.architecture == CONVOLUTIONAL:
+            base_encoder = encoder_conv_base(self.input_dims, self.activation)
+            self.encoder_μ = nn.Sequential(
+                *base_encoder,
+                nn.Flatten(),
+                nn.Linear(CONV_HIDDEN_DIMS[-1] * 1, self.latent_size),
+            )
+            self.encoder_std = nn.Sequential(
+                *base_encoder,
+                nn.Flatten(),
+                nn.Linear(CONV_HIDDEN_DIMS[-1] * 1, self.latent_size),
+                nn.Softplus()
+            )
+
+            base_decoder = decoder_conv_base(self.latent_size, self.activation)
+            self.decoder_μ = nn.Sequential(
+                *base_decoder,
+                decoder_conv_final(CONV_HIDDEN_DIMS[0], self.activation),
+                nn.Sigmoid(),
+            )
+            self.decoder_α = nn.Sequential(
+                *base_decoder,
+                decoder_conv_final(CONV_HIDDEN_DIMS[0], self.activation),
+                nn.Softplus(),
+                ShiftLayer(1.0 + self.decoder_α_offset),
+            )
+            self.decoder_β = nn.Sequential(
+                *base_decoder,
+                decoder_conv_final(CONV_HIDDEN_DIMS[0], self.activation),
+                nn.Softplus(),
+            )
 
         # set with `set_prior_parameters`
         self.prior_α = None
@@ -577,6 +727,7 @@ class V3AE(BaseVAE):
 
         # Save hparams
         self.save_hyperparameters(
+            "architecture",
             "activation",
             "input_dims",
             "latent_dims",
@@ -831,7 +982,7 @@ class V3AE(BaseVAE):
         return z_out
 
     def _setup_inducing_centroids(self, N_inducing: int = 50):
-        print(f"\n--- Generating Inducing Centroids", flush=True)
+        print("\n--- Generating Inducing Centroids", flush=True)
         # Gather all z
         with torch.no_grad():
             for idx, batch in enumerate(iter(self.dm.train_dataloader())):
@@ -1064,13 +1215,13 @@ class V3AE(BaseVAE):
         # Handle refitting the encoder
         else:
             for m in self.decoder_μ.modules():
-                if isinstance(m, nn.BatchNorm1d):
+                if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                     m.eval()
             for m in self.decoder_α.modules():
-                if isinstance(m, nn.BatchNorm1d):
+                if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                     m.eval()
             for m in self.decoder_β.modules():
-                if isinstance(m, nn.BatchNorm1d):
+                if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                     m.eval()
 
     def step(self, batch, batch_idx, stage=None):
@@ -1200,17 +1351,17 @@ class V3AE(BaseVAE):
         for p in self.decoder_μ.parameters():
             p.requires_grad = False
         for m in self.decoder_μ.modules():
-            if isinstance(m, nn.BatchNorm1d):
+            if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                 m.eval()
         for p in self.decoder_α.parameters():
             p.requires_grad = False
         for m in self.decoder_α.modules():
-            if isinstance(m, nn.BatchNorm1d):
+            if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                 m.eval()
         for p in self.decoder_β.parameters():
             p.requires_grad = False
         for m in self.decoder_β.modules():
-            if isinstance(m, nn.BatchNorm1d):
+            if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                 m.eval()
 
     @staticmethod
@@ -1222,62 +1373,6 @@ class V3AEm(V3AE, EmbeddedManifold):
     # This will probably fail
     def __init__(self, *args, **kwargs):
         super(V3AEm, self).__init__(*args, **kwargs)
-
-        # Update the decoder networks to allow for Jacobian computation
-        # self.decoder_μ = self.nn_to_nnj(self.decoder_μ)
-        # self.decoder_α = self.nn_to_nnj(self.decoder_α)
-        # self.decoder_β = self.nn_to_nnj(self.decoder_β)
-
-    # @staticmethod
-    # def extract_module_children(mod: nn.Module) -> List[nn.Module]:
-    #     # Extracts all children of a nn module and flattens them
-    #     _children = []
-    #     for child in mod.children():
-    #         _children += V3AEm.extract_module_children(child)
-    #     if len(_children) == 0:
-    #         _children.append(mod)
-    #     return _children
-
-    # @staticmethod
-    # def nn_to_nnj(mod: nn.Module) -> nn.Module:
-    #     # Transform a module with nn layers and activations to nnj module from the geoml package.
-    #     _children = V3AEm.extract_module_children(mod)
-    #     _children_nnj = []
-    #     for child in _children:
-    #         # Layers
-    #         if isinstance(child, nn.Linear):
-    #             bias = True if child.bias is not None else False
-    #             _children_nnj.append(
-    #                 nnj.Linear(child.in_features, child.out_features, bias=bias)
-    #             )
-    #         elif isinstance(child, nn.BatchNorm1d):
-    #             _children_nnj.append(
-    #                 nnj.BatchNorm1d(
-    #                     child.num_features,
-    #                     eps=child.eps,
-    #                     momentum=child.momentum,
-    #                     affine=child.affine,
-    #                     track_running_stats=child.track_running_stats,
-    #                 )
-    #             )
-    #         # Activations
-    #         elif isinstance(child, nn.LeakyReLU):
-    #             _children_nnj.append(nnj.LeakyReLU())
-    #         elif isinstance(child, nn.Sigmoid):
-    #             _children_nnj.append(nnj.Sigmoid())
-    #         elif isinstance(child, nn.Softplus):
-    #             _children_nnj.append(nnj.Softplus())
-    #         else:
-    #             raise NotImplementedError(f"{child} casting to nnj not supported")
-
-    # def decoder_jacobian(self, z: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-    #     _, J_μ = self.decoder_μ(z, jacobian=True)
-    #     _, J_α = self.decoder_α(z, jacobian=True)
-    #     _, J_β = self.decoder_β(z, jacobian=True)
-
-    #     # TODO - WIP but not necessary
-    #     J_σ = 1
-    #     return J_μ, J_σ
 
     def embed(self, z: torch.Tensor, jacobian=False) -> torch.Tensor:
         is_batched = z.dim() > 2

@@ -10,6 +10,7 @@ from argparse import ArgumentParser, Namespace
 from sggm.callbacks import callbacks
 from sggm.definitions import (
     experiment_names,
+    experiments_architecture,
     generative_experiments,
     model_names,
     parameters,
@@ -128,6 +129,7 @@ class Experiment:
                 )
                 if self.model_name == VANILLA_VAE:
                     return VanillaVAE(
+                        architecture=experiments_architecture(self.experiment_name),
                         input_dims=self.datamodule.dims,
                         activation=experiments_activation_function(
                             self.experiment_name
@@ -139,6 +141,7 @@ class Experiment:
                     )
                 elif self.model_name == VANILLA_VAE_MANIFOLD:
                     return VanillaVAEm(
+                        architecture=experiments_architecture(self.experiment_name),
                         input_dims=self.datamodule.dims,
                         activation=experiments_activation_function(
                             self.experiment_name
@@ -150,6 +153,7 @@ class Experiment:
                     )
                 elif self.model_name == VV_VAE:
                     return V3AE(
+                        architecture=experiments_architecture(self.experiment_name),
                         input_dims=self.datamodule.dims,
                         activation=experiments_activation_function(
                             self.experiment_name
@@ -168,6 +172,7 @@ class Experiment:
                     )
                 elif self.model_name == VV_VAE_MANIFOLD:
                     return V3AEm(
+                        architecture=experiments_architecture(self.experiment_name),
                         input_dims=self.datamodule.dims,
                         activation=experiments_activation_function(
                             self.experiment_name

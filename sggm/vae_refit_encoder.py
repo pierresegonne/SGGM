@@ -17,9 +17,9 @@ from sggm.definitions import (
 )
 from sggm.definitions import (
     MNIST,
-    MNIST_2D,
+    MNIST_ND,
     FASHION_MNIST,
-    FASHION_MNIST_2D,
+    FASHION_MNIST_ND,
     NOT_MNIST,
 )
 from sggm.vae_model import VanillaVAE, V3AE
@@ -32,7 +32,7 @@ Implementation of the workshop paper
 by P.A Mattei and Jes Frellsen
 """
 
-N_EPOCHS_REFIT = 10
+N_EPOCHS_REFIT = 50
 
 #%%
 
@@ -46,14 +46,14 @@ def get_datamodule(
         pl.seed_everything(misc["seed"])
     if experiment_name == MNIST:
         dm = MNISTDataModule(bs, 0)
-    elif experiment_name == MNIST_2D:
+    elif experiment_name == MNIST_ND:
         if DIGITS in misc:
             dm = MNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
             dm = MNISTDataModuleND(bs, 0)
     elif experiment_name == FASHION_MNIST:
         dm = FashionMNISTDataModule(bs, 0)
-    elif experiment_name == FASHION_MNIST_2D:
+    elif experiment_name == FASHION_MNIST_ND:
         if DIGITS in misc:
             dm = FashionMNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
@@ -99,10 +99,6 @@ def refit_encoder(
     )
     model.train()
     model.freeze_but_encoder()
-    for m in model.decoder_α.modules():
-        if isinstance(m, torch.nn.BatchNorm1d):
-            print("training ? ", m.training)
-            break
     if isinstance(model, V3AE):
         model.save_datamodule(dm_refit_test)
         model.set_prior_parameters(

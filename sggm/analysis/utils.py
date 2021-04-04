@@ -1,4 +1,11 @@
+import matplotlib
 import argparse
+
+
+def disable_ticks(ax: matplotlib.axes.Axes) -> matplotlib.axes.Axes:
+    ax.tick_params(axis="x", which="both", bottom=False, labelbottom=False)
+    ax.tick_params(axis="y", which="both", left=False, labelleft=False)
+    return ax
 
 
 # https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse

@@ -3,6 +3,7 @@ import argparse
 from sggm.analysis.experiment_log import ExperimentLog
 from sggm.analysis.parse_results_to_csv import parse_results
 
+from sggm.analysis.cifar_svhn import cifar_svhn_plot
 from sggm.analysis.mnist import mnist_plot
 from sggm.analysis.sanity_check import sanity_check_plot
 from sggm.analysis.toy import toy_plot
@@ -30,11 +31,14 @@ from sggm.definitions import (
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
     #
+    CIFAR,
     MNIST,
     MNIST_ND,
     FASHION_MNIST,
     FASHION_MNIST_ND,
     NOT_MNIST,
+    SVHN,
+    MNIST_ALL,
 )
 from sggm.regression_model import check_available_methods, MARGINAL
 
@@ -51,13 +55,6 @@ UCI = [
     UCI_WINE_WHITE_SHIFTED,
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
-]
-MNIST_L = [
-    MNIST,
-    MNIST_ND,
-    FASHION_MNIST,
-    FASHION_MNIST_ND,
-    NOT_MNIST,
 ]
 
 
@@ -77,8 +74,10 @@ def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
             toy_2d_plot(experiment_log, **kwargs)
         elif experiment_name in UCI:
             uci_plot(experiment_log, **kwargs)
-        elif experiment_name in MNIST_L:
+        elif experiment_name in MNIST_ALL:
             mnist_plot(experiment_log, **kwargs)
+        elif experiment_name in [CIFAR, SVHN]:
+            cifar_svhn_plot(experiment_log, **kwargs)
 
 
 def add_experiment_args(parser, experiment_name):
@@ -89,7 +88,7 @@ def add_experiment_args(parser, experiment_name):
             default=MARGINAL,
             help="Comma delimited list input, ex 'marginal,posterior'",
         )
-    if experiment_name in MNIST_L:
+    if experiment_name in MNIST_ALL:
         parser.add_argument(
             "--others",
             type=str,
@@ -103,7 +102,7 @@ def parse_experiment_args(args):
     experiment_name = args.experiment_name
     if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, *UCI]:
         args.methods = [item for item in args.methods.split(",")]
-    if experiment_name in MNIST_L:
+    if experiment_name in MNIST_ALL:
         args.others = (
             [item for item in args.others.split(",")]
             if getattr(args, "others", None) is not None

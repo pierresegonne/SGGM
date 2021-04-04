@@ -1,19 +1,13 @@
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
 from torch import no_grad
 
+from sggm.analysis.utils import disable_ticks
 from sggm.vae_model import V3AE, VanillaVAE
 from sggm.vae_model_helper import batch_flatten, batch_reshape
-
-
-def disable_ticks(ax: matplotlib.axes.Axes) -> matplotlib.axes.Axes:
-    ax.tick_params(axis="x", which="both", bottom=False, labelbottom=False)
-    ax.tick_params(axis="y", which="both", left=False, labelleft=False)
-    return ax
-
+from sggm.types_ import List
 
 def input_to_latent(model, x):
     x = batch_flatten(x)
@@ -33,16 +27,6 @@ def plot_comparison(n_display, x_og, p_x, input_dims):
     x_hat = batch_reshape(p_x.sample(), input_dims)
     x_mu = batch_reshape(p_x.mean, input_dims)
     x_var = batch_reshape(p_x.variance, input_dims)
-
-    #%
-    # alpha = p_x.base_dist.df / 2
-    # print("df min", p_x.base_dist.df.min())
-    # beta = (p_x.base_dist.scale ** 2) * alpha
-    # print(beta.min(), beta.max())
-    # print(x_var.min(), x_var.max())
-    # v = beta / (alpha - 1)
-    # print(v.min(), v.max())
-    #%
 
     for n in range(n_display):
         for k in range(4):
@@ -65,7 +49,10 @@ def plot_comparison(n_display, x_og, p_x, input_dims):
 
 
 def get_interpolation_digits(
-    dm, experiment_name, target_digits: [0, 1], target_digits_idx: [0, 0]
+    dm,
+    experiment_name,
+    target_digits: List[int] = [0, 1],
+    target_digits_idx: List[int] = [0, 0],
 ):
     """
     Organise class elements per class value and samples elements from it
