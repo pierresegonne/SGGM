@@ -207,6 +207,7 @@ def decoder_conv_final(channels: int, activation: str) -> nn.Module:
         nn.BatchNorm2d(channels),
         f,
         nn.Conv2d(channels, out_channels=3, kernel_size=3, padding=1),
+        nn.Flatten(),
     )
 
 
@@ -365,7 +366,7 @@ class VanillaVAE(BaseVAE):
                 *base_encoder,
                 nn.Flatten(),
                 nn.Linear(CONV_HIDDEN_DIMS[-1] * 1, self.latent_size),
-                nn.Softplus()
+                nn.Softplus(),
             )
 
             base_decoder = decoder_conv_base(self.latent_size, self.activation)
@@ -399,9 +400,7 @@ class VanillaVAE(BaseVAE):
         return False
 
     def forward(self, x):
-        print(x.shape)
         x = batch_flatten(x)
-        print(x.shape)
         μ_x = self.encoder_μ(x)
         std_x = self.encoder_std(x)
         z, _, _ = self.sample_latent(μ_x, std_x)
@@ -414,12 +413,13 @@ class VanillaVAE(BaseVAE):
         # All relevant information for a training step
         # Both latent and generated samples and parameters are returned
         x = batch_flatten(x)
+        # [batch_size, latent_size]
         μ_x = self.encoder_μ(x)
         std_x = self.encoder_std(x)
-        print('shape', μ_x.shape)
+        # batch_shape [batch_shape] event_shape [latent_size]
         z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
+        # [batch_shape, input_size]
         μ_z, std_z = self.decoder_μ(z), self.decoder_std(z)
-        print(μ_z.shape)
         x_hat, p_x_z = self.sample_generative(μ_z, std_z)
         x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x_z, z, q_z_x, p_z
@@ -684,7 +684,7 @@ class V3AE(BaseVAE):
                 *base_encoder,
                 nn.Flatten(),
                 nn.Linear(CONV_HIDDEN_DIMS[-1] * 1, self.latent_size),
-                nn.Softplus()
+                nn.Softplus(),
             )
 
             base_decoder = decoder_conv_base(self.latent_size, self.activation)
