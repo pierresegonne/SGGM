@@ -1081,13 +1081,13 @@ class V3AE(BaseVAE):
             self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
         )
 
-        if self.prior_extrapolation_x is not None:
-            prior_β_extrapolation = prior_β * self.prior_extrapolation_x
-            s = self.get_latent_extrapolation_ratios(z)
-            s = s.repeat(1, 1, beta.shape[2])
-            # How to make sure that this works properly?
-            # In analysis script, one could probably plot on the grid
-            prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
+        # if self.prior_extrapolation_x is not None:
+        #     prior_β_extrapolation = prior_β * self.prior_extrapolation_x
+        #     s = self.get_latent_extrapolation_ratios(z)
+        #     s = s.repeat(1, 1, beta.shape[2])
+        #     # How to make sure that this works properly?
+        #     # In analysis script, one could probably plot on the grid
+        #     prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
 
         p = D.Independent(
             D.Gamma(
@@ -1245,8 +1245,18 @@ class V3AE(BaseVAE):
             & (self.ood_z_generation_method is not None)
             & (self._student_t_decoder)
         ):
-            # NOTE: beware, for understandability, tau is opposite.
-            kl_divergence_lbd_ood = self.ood_kl(p_λ, z)
+            #%
+            if self.prior_extrapolation_x is not None:
+                prior_β_extrapolation = p_λ.base_dist.rate * self.prior_extrapolation_x
+                p_λ_out = D.Independent(
+                    D.Gamma(
+                        p_λ.base_dist.concentration,
+                        prior_β_extrapolation,
+                    ),
+                    1,
+                )
+                # NOTE: beware, for understandability, tau is opposite.
+            kl_divergence_lbd_ood = self.ood_kl(p_λ_out, z)
             expected_kl_divergence_lbd_ood = kl_divergence_lbd_ood.mean()
             loss = 2 * (
                 (1 - self.τ_ood) * loss + self.τ_ood * expected_kl_divergence_lbd_ood

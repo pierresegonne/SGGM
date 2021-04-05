@@ -32,7 +32,7 @@ Implementation of the workshop paper
 by P.A Mattei and Jes Frellsen
 """
 
-N_EPOCHS_REFIT = 50
+N_EPOCHS_REFIT = 20
 
 #%%
 
