@@ -346,7 +346,7 @@ class VanillaVAE(BaseVAE):
 
             self.decoder_μ = nn.Sequential(
                 decoder_dense_base(self.latent_size, self.input_size, self.activation),
-                nn.Sigmoid(),
+                nn.Tanh(),
             )
             self.decoder_std = nn.Sequential(
                 decoder_dense_base(self.latent_size, self.input_size, self.activation),
