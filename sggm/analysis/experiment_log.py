@@ -6,6 +6,7 @@ import yaml
 
 from sggm.definitions import (
     experiments_activation_function,
+    experiments_architecture,
     generative_experiments,
     regression_experiments,
     TEST_LOSS,
@@ -36,7 +37,9 @@ class VersionLog:
         # model
         checkpoint_name = glob.glob(f"{version_path}/checkpoints/*")[-1]
         self.model = pl_module.load_from_checkpoint(
-            checkpoint_name, activation=experiments_activation_function(experiment_name)
+            checkpoint_name,
+            activation=experiments_activation_function(experiment_name),
+            architecture=experiments_architecture(experiment_name),
         )
         self.model.freeze()
         # performance
