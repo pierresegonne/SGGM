@@ -1,4 +1,3 @@
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pytorch_lightning as pl
@@ -6,11 +5,13 @@ import seaborn as sns
 import torch
 import torch.distributions as D
 
+from geoml.curve import BasicCurve, DiscreteCurve
 from geoml.manifold import EmbeddedManifold
 from torchvision.utils import make_grid
 from torchvision import transforms
 
-from sggm.vae_model import VanillaVAE, V3AE
+from sggm.analysis.utils import disable_ticks
+from sggm.vae_model import BaseVAE, V3AEm, VanillaVAE, V3AE, VanillaVAEm
 from sggm.vae_model_helper import batch_reshape
 from sggm.styles_ import colours, colours_rgb, random_rgb_colour
 from sggm.types_ import Tuple, Union
@@ -23,22 +24,30 @@ colour_digits = [
 colour_digits += [random_rgb_colour() for _ in range(10)]
 
 
-def show_reconstruction_arbitrary_latent(
-    model: pl.LightningModule, z_star: torch.Tensor
-) -> plt.Figure:
+def decode_from_latent(
+    model: BaseVAE, z: torch.Tensor
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     if isinstance(model, VanillaVAE):
         μ_z, std_z = (
-            model.decoder_μ(z_star.reshape(-1, model.latent_size)),
-            model.decoder_std(z_star.reshape(-1, model.latent_size)),
+            model.decoder_μ(z.reshape(-1, model.latent_size)),
+            model.decoder_std(z.reshape(-1, model.latent_size)),
         )
         x_hat, p_x = model.sample_generative(μ_z, std_z)
     elif isinstance(model, V3AE):
-        _, μ_z, α_z, β_z = model.parametrise_z(z_star)
+        _, μ_z, α_z, β_z = model.parametrise_z(z)
         x_hat, p_x = model.sample_generative(μ_z, α_z, β_z)
 
     x_hat = batch_reshape(x_hat, model.input_dims)
     x_mu = batch_reshape(p_x.mean, model.input_dims)
     x_var = batch_reshape(p_x.variance, model.input_dims)
+
+    return x_hat, x_mu, x_var
+
+
+def show_reconstruction_arbitrary_latent(
+    model: pl.LightningModule, z_star: torch.Tensor
+) -> plt.Figure:
+    x_hat, x_mu, x_var = decode_from_latent(model, z_star)
 
     fig, (ax_reconstruct, ax_mean, ax_std) = plt.subplots(3, 1)
     # Reconstruction
@@ -70,6 +79,63 @@ def show_pseudo_inputs(ax, model):
             label="PI",
         )
     return ax
+
+
+def plot_geodesic_interpolation(
+    model: Union[VanillaVAEm, V3AEm],
+    z_start: torch.Tensor,
+    z_end: torch.Tensor,
+    N_interpolation: int,
+) -> Tuple[BasicCurve, BasicCurve]:
+    # Euclidean
+    C_euclidean = DiscreteCurve(z_start, z_end)
+    C_euclidean.plot()
+    # Geodesic
+    C_geodesic, success = model.connecting_geodesic(z_start, z_end)
+    C_geodesic.plot()
+
+    # 3 rows: mean, var, samples
+    def plot_interpolation(
+        model: Union[VanillaVAEm, V3AEm],
+        curve: BasicCurve,
+        N_interpolation: int,
+        title: str,
+    ):
+        # Interpolants along the trajectory
+        t_interpolation = torch.linspace(0, 1, N_interpolation)
+        with torch.no_grad():
+            interpolants = curve(t_interpolation)[None, :]
+
+        # Reconstruction
+        x_hat, x_mu, x_var = decode_from_latent(model, interpolants)
+
+        fig = plt.figure()
+        gs = fig.add_gridspec(
+            3,
+            N_interpolation,
+            width_ratios=[1] * N_interpolation,
+            height_ratios=[1] * 3,
+        )
+        gs.update(hspace=0.5, wspace=0.001)
+        for i in range(N_interpolation):
+            ax_mean, ax_var, ax_samples = (
+                plt.subplot(gs[0, i]),
+                plt.subplot(gs[1, i]),
+                plt.subplot(gs[2, i]),
+            )
+            ax_mean.imshow(x_mu[i, 0, :], cmap="binary", vmin=0, vmax=1)
+            ax_mean = disable_ticks(ax_mean)
+            ax_var.imshow(x_var[i, 0, :], cmap="binary")
+            ax_var = disable_ticks(ax_var)
+            ax_samples.imshow(x_hat[i, 0, :], cmap="binary", vmin=0, vmax=1)
+            ax_samples = disable_ticks(ax_samples)
+        fig.suptitle(title.capitalize())
+        return
+
+    plot_interpolation(model, C_euclidean, N_interpolation, "euclidean")
+    plot_interpolation(model, C_geodesic, N_interpolation, "geodesic")
+
+    return C_euclidean, C_geodesic
 
 
 def show_violin_plot_kl(model: V3AE, q_λ_z: D.Gamma, p_λ: D.Gamma, z: torch.Tensor):
@@ -255,7 +321,7 @@ def show_2d_latent_space(
     title="TITLE",
     show_geodesic=True,
     show_kl=True,
-    show_pi=True,
+    show_pi=False,
     z_star: Union[None, torch.Tensor] = None,
 ):
     digits = torch.unique(y)
@@ -269,9 +335,9 @@ def show_2d_latent_space(
             z = z[0]
 
     # Show imshow for variance -> inspiration from aleatoric_epistemic_split
-    extent = 5
-    x_mesh = torch.linspace(-extent, extent, 300)
-    y_mesh = torch.linspace(-extent, extent, 300)
+    extent, N_mesh = 5, 100
+    x_mesh = torch.linspace(-extent, extent, 100)
+    y_mesh = torch.linspace(-extent, extent, 100)
     x_mesh, y_mesh = torch.meshgrid(x_mesh, y_mesh)
     z_mesh = torch.cat((x_mesh.flatten()[:, None], y_mesh.flatten()[:, None]), dim=1)
     with torch.no_grad():
@@ -327,10 +393,12 @@ def show_2d_latent_space(
 
     # Geodesic
     if show_geodesic and isinstance(model, EmbeddedManifold):
-        z1 = torch.Tensor([-0.58, -1.13])
-        z2 = torch.Tensor([0.4, 1.1])
-        C, success = model.connecting_geodesic(z1, z2)
-        C.plot()
+        z_start = torch.Tensor([-0.04, -1.13])
+        z_end = torch.Tensor([0, 1.9])
+        N_interpolation = 10
+        C_euclidean, C_geodesic = plot_geodesic_interpolation(
+            model, z_start, z_end, N_interpolation
+        )
 
     # Misc
     ax.set_xticks([])

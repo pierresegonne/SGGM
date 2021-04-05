@@ -1,9 +1,10 @@
 import argparse
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 import torch
 
+from geoml import Manifold
+from geoml.stats import intrinsic_kmeans
 from matplotlib.axes import Axes
 from matplotlib.colors import ListedColormap
 from numpy.lib.arraysetops import unique
@@ -25,6 +26,46 @@ Run clustering on latent space for VAEs
 EUCLIDEAN = "euclidean"
 RIEMANNIAN = "riemannian"
 METRICS = [EUCLIDEAN, RIEMANNIAN]
+
+
+def f_measure(targets: Union[np.ndarray, torch.Tensor], predictions, K: int) -> float:
+    return 0.0
+
+
+class RiemanninaKMeans:
+    def __init__(
+        self,
+        manifold: Manifold,
+        n_clusters: int = 8,
+        init: Union[np.ndarray, torch.Tensor, None] = None,
+        learning_rate: Union[float, int] = 0.1,
+        batch_size: int = 100,
+        max_iter: int = 10,
+    ):
+        self.manifold = manifold
+        self.n_clusters = n_clusters
+        self.init = init
+        self.learning_rate = learning_rate
+        self.batch_size = batch_size
+        self.max_iter = max_iter
+
+        self.cluster_centers_ = None
+        self.labels_ = None
+
+    def fit(self, X: Union[np.ndarray, torch.Tensor]):
+        self.cluster_centers_ = intrinsic_kmeans(
+            self.manifold,
+            X,
+            self.n_clusters,
+            self.learning_rate,
+            init_mus=self.init,
+            batch_size=self.batch_size,
+            num_steps=self.max_iter,
+        )
+        self.labels_ = None
+
+    def predict(self, X: Union[np.ndarray, torch.Tensor]):
+        pass
 
 
 def plot_points(
@@ -104,14 +145,15 @@ def clustering_plot_and_metric(experiment_log: ExperimentLog, metric: str):
     predicted_classes, predicted_classes_mesh = np.zeros_like(y), np.zeros_like(
         classes_mesh
     )
+    n_clusters = len(unique(y))
     if metric == EUCLIDEAN:
-        kmeans = KMeans(n_clusters=len(unique(y))).fit(z)
+        kmeans = KMeans(n_clusters=n_clusters).fit(z)
         predicted_classes = kmeans.predict(z)
         predicted_classes_mesh = kmeans.predict(pos).reshape(*x_mesh.shape)
         print(f"[{metric}] F-Score: {f1_score(y, predicted_classes, average='micro')}")
 
     if metric == RIEMANNIAN:
-        pass
+        kmeans = RiemanninaKMeans(model, n_clusters=n_clusters).fit(z)
 
     fig, ax = plt.subplots()
     ax.contourf(x_mesh, y_mesh, predicted_classes_mesh, cmap=cmap_light)
