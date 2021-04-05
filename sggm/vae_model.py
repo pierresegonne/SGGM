@@ -61,7 +61,7 @@ from sggm.definitions import (
     TEST_OOD_SAMPLE_FIT_RMSE,
     TEST_OOD_SAMPLE_MEAN_MSE,
 )
-from sggm.model_helper import log_2_pi, ShiftLayer
+from sggm.model_helper import NNJ_ShiftLayer, log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple, Union
 from sggm.vae_model_helper import (
     batch_flatten,
@@ -99,15 +99,13 @@ def encoder_dense_base(
     latent_size: int,
     activation: str,
 ) -> nn.Module:
-    f = activation_function(activation)
-
     return nn.Sequential(
         nn.Linear(input_size, 512),
         nn.BatchNorm1d(512),
-        f,
+        activation_function(activation),
         nn.Linear(512, 256),
         nn.BatchNorm1d(256),
-        f,
+        activation_function(activation),
         nn.Linear(256, latent_size),
     )
 
@@ -116,8 +114,6 @@ def encoder_conv_base(
     input_dims: Tuple[int],
     activation: str,
 ) -> List[nn.Module]:
-    f = activation_function(activation)
-
     input_channels = input_dims[0]
 
     # Note if we want to handle larger than 32x32 images, leverage input_dims
@@ -136,7 +132,7 @@ def encoder_conv_base(
                     padding=1,
                 ),
                 nn.BatchNorm2d(h_dim),
-                f,
+                activation_function(activation),
             )
         )
         input_channels = h_dim
@@ -149,21 +145,18 @@ def decoder_dense_base(
     output_size: int,
     activation: str,
 ) -> nn.Module:
-    f = activation_function(activation)
-
     return nn.Sequential(
         nn.Linear(latent_size, 256),
         nn.BatchNorm1d(256),
-        f,
+        activation_function(activation),
         nn.Linear(256, 512),
         nn.BatchNorm1d(512),
-        f,
+        activation_function(activation),
         nn.Linear(512, output_size),
     )
 
 
 def decoder_conv_base(latent_size: int, activation: str) -> List[nn.Module]:
-    f = activation_function(activation)
     hidden_dims = copy.deepcopy(CONV_HIDDEN_DIMS)
 
     # Note * 1 to have 32x32 images
@@ -187,7 +180,7 @@ def decoder_conv_base(latent_size: int, activation: str) -> List[nn.Module]:
                     output_padding=1,
                 ),
                 nn.BatchNorm2d(hidden_dims[i + 1]),
-                f,
+                activation_function(activation),
             )
         )
 
@@ -195,14 +188,13 @@ def decoder_conv_base(latent_size: int, activation: str) -> List[nn.Module]:
 
 
 def decoder_conv_final(channels: int, activation: str) -> nn.Module:
-    f = activation_function(activation)
     # /!| Still need to apply non-linearity
     return nn.Sequential(
         nn.ConvTranspose2d(
             channels, channels, kernel_size=3, stride=2, padding=1, output_padding=1
         ),
         nn.BatchNorm2d(channels),
-        f,
+        activation_function(activation),
         nn.Conv2d(channels, out_channels=3, kernel_size=3, padding=1),
         nn.Flatten(),
     )
@@ -570,6 +562,56 @@ class VanillaVAEm(VanillaVAE, EmbeddedManifold):
     def __init__(self, *args, **kwargs):
         super(VanillaVAEm, self).__init__(*args, **kwargs)
 
+        self.decoder_μ = self.nn_to_nnj(self.decoder_μ)
+        self.decoder_std = self.nn_to_nnj(self.decoder_std)
+
+    @staticmethod
+    def _nn_to_nnj(nn_module: nn.Module) -> nn.Module:
+        """
+        Transform a single nn module to its nnj counterpart
+        """
+        # Layers
+        nnj_module = None
+        if isinstance(nn_module, nn.Linear):
+            bias = True if nn_module.bias is not None else False
+            nnj_module = nnj.Linear(
+                nn_module.in_features, nn_module.out_features, bias=bias
+            )
+        elif isinstance(nn_module, nn.BatchNorm1d):
+            nnj_module = nnj.BatchNorm1d(
+                nn_module.num_features,
+                eps=nn_module.eps,
+                momentum=nn_module.momentum,
+                affine=nn_module.affine,
+                track_running_stats=nn_module.track_running_stats,
+            )
+        # TODO add support for Conv and BatchNorm
+        # Activations
+        elif isinstance(nn_module, nn.LeakyReLU):
+            nnj_module = nnj.LeakyReLU()
+        elif isinstance(nn_module, nn.Sigmoid):
+            nnj_module = nnj.Sigmoid()
+        elif isinstance(nn_module, nn.Softplus):
+            nnj_module = nnj.Softplus()
+        else:
+            raise NotImplementedError(f"{nn_module} casting to nnj not supported")
+        return nnj_module
+
+    @staticmethod
+    def nn_to_nnj(mod: nn.Module) -> nn.Module:
+        _L = []
+        for n_m, m in list(mod.named_children()):
+            if isinstance(m, nn.Sequential):
+                _L.append(VanillaVAEm.nn_to_nnj(m))
+            else:
+                _L.append(VanillaVAEm._nn_to_nnj(m))
+        return nnj.Sequential(*_L)
+
+    def decoder_jacobian(self, z: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        _, J_μ = self.decoder_μ(z, jacobian=True)
+        _, J_σ = self.decoder_std(z, jacobian=True)
+        return J_μ, J_σ
+
     def embed(self, z: torch.Tensor, jacobian=False) -> torch.Tensor:
         is_batched = z.dim() > 2
         if not is_batched:
@@ -589,6 +631,10 @@ class VanillaVAEm(VanillaVAE, EmbeddedManifold):
 
         # [n_mc_samples, BS, 2 *self.latent_dims/self.input_size]
         embedded = torch.cat((μ_z, σ_z), dim=2)  # BxNx(2D)
+        if jacobian:
+            J_μ_z, J_σ_z = self.decoder_jacobian(z)
+            J_μ_z, J_σ_z = J_μ_z[None, :], J_σ_z[None, :]
+            J = torch.cat((J_μ_z, J_σ_z), dim=2)
 
         if not is_batched:
             embedded = embedded.squeeze(0)
@@ -1245,7 +1291,7 @@ class V3AE(BaseVAE):
             & (self.ood_z_generation_method is not None)
             & (self._student_t_decoder)
         ):
-            #%
+            # %
             if self.prior_extrapolation_x is not None:
                 prior_β_extrapolation = p_λ.base_dist.rate * self.prior_extrapolation_x
                 p_λ_out = D.Independent(
@@ -1381,6 +1427,60 @@ class V3AEm(V3AE, EmbeddedManifold):
     def __init__(self, *args, **kwargs):
         super(V3AEm, self).__init__(*args, **kwargs)
 
+        self.decoder_μ = self.nn_to_nnj(self.decoder_μ)
+        self.decoder_α = self.nn_to_nnj(self.decoder_α)
+        self.decoder_β = self.nn_to_nnj(self.decoder_β)
+
+    @staticmethod
+    def _nn_to_nnj(nn_module: nn.Module) -> nn.Module:
+        """
+        Transform a single nn module to its nnj counterpart
+        """
+        # Layers
+        nnj_module = None
+        if isinstance(nn_module, nn.Linear):
+            bias = True if nn_module.bias is not None else False
+            nnj_module = nnj.Linear(
+                nn_module.in_features, nn_module.out_features, bias=bias
+            )
+        elif isinstance(nn_module, nn.BatchNorm1d):
+            nnj_module = nnj.BatchNorm1d(
+                nn_module.num_features,
+                eps=nn_module.eps,
+                momentum=nn_module.momentum,
+                affine=nn_module.affine,
+                track_running_stats=nn_module.track_running_stats,
+            )
+        # TODO add support for Conv and BatchNorm
+        # Activations
+        elif isinstance(nn_module, nn.LeakyReLU):
+            nnj_module = nnj.LeakyReLU()
+        elif isinstance(nn_module, nn.Sigmoid):
+            nnj_module = nnj.Sigmoid()
+        elif isinstance(nn_module, nn.Softplus):
+            nnj_module = nnj.Softplus()
+        elif isinstance(nn_module, ShiftLayer):
+            nnj_module = NNJ_ShiftLayer(nn_module.shift_factor)
+        else:
+            raise NotImplementedError(f"{nn_module} casting to nnj not supported")
+        return nnj_module
+
+    @staticmethod
+    def nn_to_nnj(mod: nn.Module) -> nn.Module:
+        _L = []
+        for n_m, m in list(mod.named_children()):
+            if isinstance(m, nn.Sequential):
+                _L.append(VanillaVAEm.nn_to_nnj(m))
+            else:
+                _L.append(VanillaVAEm._nn_to_nnj(m))
+        return nnj.Sequential(*_L)
+
+    def decoder_jacobian(self, z: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        _, J_μ = self.decoder_μ(z, jacobian=True)
+        # TODO actually figure out the Jacobian of β / (α - 1)
+        J_σ = torch.ones_like(J_μ)
+        return J_μ, J_σ
+
     def embed(self, z: torch.Tensor, jacobian=False) -> torch.Tensor:
         is_batched = z.dim() > 2
         if not is_batched:
@@ -1399,8 +1499,17 @@ class V3AEm(V3AE, EmbeddedManifold):
 
         # [n_mc_samples, BS, 2 *self.latent_dims/self.input_size]
         embedded = torch.cat((μ_z, σ_z), dim=2)  # BxNx(2D)
+        if jacobian:
+            J_μ_z, J_σ_z = self.decoder_jacobian(z)
+            # To verify if needed
+            # J_μ_z, J_σ_z = J_μ_z[None, :], J_σ_z[None, :]
+            J = torch.cat((J_μ_z, J_σ_z), dim=2)
 
         if not is_batched:
             embedded = embedded.squeeze(0)
+            if jacobian:
+                J = J.squeeze(0)
 
+        if jacobian:
+            return embedded, J
         return embedded

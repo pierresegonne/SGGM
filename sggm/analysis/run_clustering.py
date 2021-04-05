@@ -99,10 +99,6 @@ def clustering_plot_and_metric(experiment_log: ExperimentLog, metric: str):
     misc = experiment_log.best_version.misc
     dm = get_dm(experiment_name, misc, bs)
 
-    # Dataset
-    # test_dataset = next(iter(dm.val_dataloader()))
-    # x_test, y_test = test_dataset
-
     # Get latent encodings
     z, y = [], []
     with torch.no_grad():
