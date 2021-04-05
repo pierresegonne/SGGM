@@ -321,7 +321,7 @@ def show_2d_latent_space(
     title="TITLE",
     show_geodesic=True,
     show_kl=True,
-    show_pi=False,
+    show_pi=True,
     z_star: Union[None, torch.Tensor] = None,
 ):
     digits = torch.unique(y)
