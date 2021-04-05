@@ -51,8 +51,6 @@ from sggm.definitions import (
     TEST_LOSS,
     TEST_ELBO,
     TEST_ELLK,
-    TEST_KL,
-    TEST_LLK,
     TEST_MEAN_FIT_MAE,
     TEST_MEAN_FIT_RMSE,
     TEST_VARIANCE_FIT_MAE,
@@ -66,7 +64,6 @@ from sggm.definitions import (
 from sggm.model_helper import log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple, Union
 from sggm.vae_model_helper import (
-    TruncatedNormal,
     batch_flatten,
     batch_reshape,
     check_ood_z_generation_method,

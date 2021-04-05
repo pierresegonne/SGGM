@@ -336,7 +336,8 @@ def experiments_latent_dims(experiment_name: str) -> tuple:
         return (10,)
     # Unclear what latent size I should set as default here
     elif experiment_name == CIFAR:
-        return (30,)
+        # TODO change to 128 when proof that everything runs nicely.
+        return (10,)
     elif experiment_name == SVHN:
         return (30,)
 
