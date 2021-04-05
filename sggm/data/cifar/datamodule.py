@@ -32,6 +32,7 @@ class CIFARDataModule(pl.LightningDataModule):
         # Manual
         self.x_mean = torch.Tensor([0.4914, 0.4822, 0.4465])
         self.x_std = torch.Tensor([0.2470, 0.2435, 0.2616])
+        # Override as data is already normalised.
         self.x_mean = 0
         self.x_std = 1
         self.dims = (3, 32, 32)
@@ -51,7 +52,7 @@ class CIFARDataModule(pl.LightningDataModule):
     def setup(self, stage: str = None):
 
         # Transforms
-        mnist_transforms = transforms.Compose(
+        cifar_transforms = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize([self.x_mean], [self.x_std])]
         )
 
@@ -60,7 +61,7 @@ class CIFARDataModule(pl.LightningDataModule):
             os.path.dirname(__file__),
             download=True,
             train=True,
-            transform=mnist_transforms,
+            transform=cifar_transforms,
         )
         train_length = int(len(train_val) * self.train_val_split)
         val_length = len(train_val) - train_length
@@ -73,7 +74,7 @@ class CIFARDataModule(pl.LightningDataModule):
             os.path.dirname(__file__),
             download=True,
             train=False,
-            transform=mnist_transforms,
+            transform=cifar_transforms,
         )
 
     def train_dataloader(self) -> DataLoader:
@@ -106,7 +107,7 @@ class CIFARDataModule(pl.LightningDataModule):
 
 if __name__ == "__main__":
 
-    dm = CIFARDataModule(16, 0)
+    dm = CIFARDataModule(512, 0)
     dm.setup()
 
     # Observe sample
