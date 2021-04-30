@@ -59,4 +59,4 @@ callbacks = {
 
 5. Define the activation function
 
-In the function `activation_function` in `experiment.py`
+In the function `experiments_activation_function` in `definitions.py`

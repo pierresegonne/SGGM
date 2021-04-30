@@ -1,0 +1,3 @@
+timestamp,experiment_id,project_name,duration,emissions,energy_consumed,country_name,country_iso_code,region,on_cloud,cloud_provider,cloud_region
+2021-04-30T16:35:24,20180e17-a001-4319-8b55-77c14b5ecd30,sggm,4.01857590675354,2.7418795498354214e-07,1.621312714871302e-06,Denmark,DNK,capital region,N,,
+2021-04-30T16:42:00,6fe95d51-bd23-4af1-8a31-b37513d0f53f,sggm,4.860713958740234,2.2224799700221233e-07,1.314184291633068e-06,Denmark,DNK,capital region,N,,

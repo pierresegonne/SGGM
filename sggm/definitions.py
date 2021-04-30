@@ -234,6 +234,8 @@ TOY = "toy"
 TOY_SHIFTED = TOY + SHIFTED
 TOY_2D = "toy_2d"
 TOY_2D_SHIFTED = TOY_2D + SHIFTED
+UCI_CARBON = "uci_carbon"
+UCI_CARBON_SHIFTED = UCI_CARBON + SHIFTED
 UCI_CCPP = "uci_ccpp"
 UCI_CCPP_SHIFTED = UCI_CCPP + SHIFTED
 UCI_CONCRETE = "uci_concrete"
@@ -379,6 +381,8 @@ def experiments_activation_function(experiment_name: str) -> str:
     if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, TOY_2D_SHIFTED]:
         return F_SIGMOID
     elif experiment_name in [
+        UCI_CARBON,
+        UCI_CARBON_SHIFTED,
         UCI_CCPP,
         UCI_CCPP_SHIFTED,
         UCI_CONCRETE,

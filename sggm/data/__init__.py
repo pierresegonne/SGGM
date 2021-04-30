@@ -1,6 +1,7 @@
 from sggm.data.sanity_check import SanityCheckDataModule
 from sggm.data.toy import ToyDataModule, ToyDataModuleShifted
 from sggm.data.toy_2d import Toy2DDataModule, Toy2DDataModuleShifted
+from sggm.data.uci_carbon import UCICarbonDataModule, UCICarbonDataModuleShifted
 from sggm.data.uci_ccpp import UCICCPPDataModule, UCICCPPDataModuleShifted
 from sggm.data.uci_concrete import UCIConcreteDataModule, UCIConcreteDataModuleShifted
 from sggm.data.uci_superconduct import (
@@ -26,6 +27,8 @@ from sggm.definitions import (
     TOY_SHIFTED,
     TOY_2D,
     TOY_2D_SHIFTED,
+    UCI_CARBON,
+    UCI_CARBON_SHIFTED,
     UCI_CCPP,
     UCI_CCPP_SHIFTED,
     UCI_CONCRETE,
@@ -54,6 +57,8 @@ datamodules = {
     TOY_SHIFTED: ToyDataModuleShifted,
     TOY_2D: Toy2DDataModule,
     TOY_2D_SHIFTED: Toy2DDataModuleShifted,
+    UCI_CARBON: UCICarbonDataModule,
+    UCI_CARBON_SHIFTED: UCICarbonDataModuleShifted,
     UCI_CCPP: UCICCPPDataModule,
     UCI_CCPP_SHIFTED: UCICCPPDataModuleShifted,
     UCI_CONCRETE: UCIConcreteDataModule,
