@@ -2,10 +2,12 @@ import copy
 import json
 import pytorch_lightning as pl
 import re
+import tempfile
 import torch
 import yaml
 
 from argparse import ArgumentParser, Namespace
+from codecarbon import EmissionsTracker
 
 from sggm.callbacks import callbacks
 from sggm.definitions import (
@@ -104,8 +106,8 @@ class Experiment:
                             self.experiment_name
                         ),
                         learning_rate=self.learning_rate,
-                        prior_α=self.prior_alpha,
-                        prior_β=self.prior_beta,
+                        prior_α=self.prior_α,
+                        prior_β=self.prior_β,
                         β_elbo=self.beta_elbo,
                         τ_ood=self.tau_ood,
                         ood_x_generation_method=self.ood_x_generation_method,
@@ -372,6 +374,14 @@ def cli_main():
 
         experiment = Experiment(_experiments_config[experiment_idx])
         print(f"--- Starting Experiment {clean_dict(experiment.__dict__)}")
+
+        impact_tracker = EmissionsTracker(
+            project_name="sggm",
+            output_dir="./impact_logs/",
+            co2_signal_api_token="06297ab81ba8d269",
+        )
+        impact_tracker.start()
+
         for n_t in range(experiment.n_trials):
 
             if isinstance(experiment.seed, int):
@@ -393,7 +403,9 @@ def cli_main():
             if isinstance(model, V3AE):
                 model.save_datamodule(datamodule)
                 model.set_prior_parameters(
-                    datamodule, prior_α=experiment.prior_α, prior_β=experiment.prior_β
+                    datamodule,
+                    prior_α=experiment.prior_α,
+                    prior_β=experiment.prior_β,
                 )
 
             # ------------
@@ -423,6 +435,9 @@ def cli_main():
                 get_misc_save_dict(experiment, model),
                 f"{trainer.logger.log_dir}/misc.pkl",
             )
+
+        emissions = impact_tracker.stop()
+        print(f"Emissions: {emissions} kg")
 
 
 if __name__ == "__main__":
