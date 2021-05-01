@@ -1,7 +1,6 @@
 import copy
 import numpy as np
 import pytorch_lightning as pl
-from sggm.data import mnist
 import torch
 
 from sggm.definitions import (

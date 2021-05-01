@@ -76,3 +76,5 @@ if __name__ == "__main__":
 
     dm = UCINavalDataModule(1024, 0)
     dm.setup()
+
+    print(dm.max_epochs, dm.max_batch_iterations)

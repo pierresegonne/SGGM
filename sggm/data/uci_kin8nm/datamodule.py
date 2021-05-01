@@ -83,3 +83,5 @@ if __name__ == "__main__":
 
     dm = UCIKin8nmDataModule(1024, 0)
     dm.setup()
+
+    print(dm.max_epochs, dm.max_batch_iterations)
