@@ -1,6 +1,5 @@
 daft==0.1.0
 torchplot==0.2.0
-geoml==0.0.1
 numpy==1.19.2
 matplotlib==3.3.2
 pytorch_lightning==1.0.2
