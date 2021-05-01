@@ -39,8 +39,8 @@ class UCICarbonDataModule(UCIDataModule):
         )
 
         # Manual as we know it
-        self.dims = 4
-        self.out_dims = 1
+        self.dims = 5
+        self.out_dims = 3
 
     def setup(self, stage: str = None):
 

@@ -234,12 +234,20 @@ TOY = "toy"
 TOY_SHIFTED = TOY + SHIFTED
 TOY_2D = "toy_2d"
 TOY_2D_SHIFTED = TOY_2D + SHIFTED
+UCI_BOSTON = "uci_boston"
+UCI_BOSTON_SHIFTED = UCI_BOSTON + SHIFTED
 UCI_CARBON = "uci_carbon"
 UCI_CARBON_SHIFTED = UCI_CARBON + SHIFTED
 UCI_CCPP = "uci_ccpp"
 UCI_CCPP_SHIFTED = UCI_CCPP + SHIFTED
 UCI_CONCRETE = "uci_concrete"
 UCI_CONCRETE_SHIFTED = UCI_CONCRETE + SHIFTED
+UCI_ENERGY = "uci_energy"
+UCI_ENERGY_SHIFTED = UCI_ENERGY + SHIFTED
+UCI_KIN8NM = "uci_kin8nm"
+UCI_KIN8NM_SHIFTED = UCI_KIN8NM + SHIFTED
+UCI_NAVAL = "uci_naval"
+UCI_NAVAL_SHIFTED = "uci_naval_shifted"
 UCI_SUPERCONDUCT = "uci_superconduct"
 UCI_SUPERCONDUCT_SHIFTED = UCI_SUPERCONDUCT + SHIFTED
 UCI_WINE_RED = "uci_wine_red"
@@ -248,6 +256,30 @@ UCI_WINE_WHITE = "uci_wine_white"
 UCI_WINE_WHITE_SHIFTED = UCI_WINE_WHITE + SHIFTED
 UCI_YACHT = "uci_yacht"
 UCI_YACHT_SHIFTED = UCI_YACHT + SHIFTED
+UCI_ALL = [
+    UCI_BOSTON,
+    UCI_BOSTON_SHIFTED,
+    UCI_CARBON,
+    UCI_CARBON_SHIFTED,
+    UCI_CCPP,
+    UCI_CCPP_SHIFTED,
+    UCI_CONCRETE,
+    UCI_CONCRETE_SHIFTED,
+    UCI_ENERGY,
+    UCI_ENERGY_SHIFTED,
+    UCI_KIN8NM,
+    UCI_KIN8NM_SHIFTED,
+    UCI_NAVAL,
+    UCI_NAVAL_SHIFTED,
+    UCI_SUPERCONDUCT,
+    UCI_SUPERCONDUCT_SHIFTED,
+    UCI_WINE_RED,
+    UCI_WINE_RED_SHIFTED,
+    UCI_WINE_WHITE,
+    UCI_WINE_WHITE_SHIFTED,
+    UCI_YACHT,
+    UCI_YACHT_SHIFTED,
+]
 # Generative
 CIFAR = "cifar"
 MNIST = "mnist"
@@ -256,62 +288,6 @@ FASHION_MNIST = "fashion_mnist"
 FASHION_MNIST_ND = "fashion_mnist_nd"
 NOT_MNIST = "not_mnist"
 SVHN = "svhn"
-
-
-experiment_names = [
-    SANITY_CHECK,
-    TOY,
-    TOY_SHIFTED,
-    TOY_2D,
-    TOY_2D_SHIFTED,
-    UCI_CCPP,
-    UCI_CCPP_SHIFTED,
-    UCI_CONCRETE,
-    UCI_CONCRETE_SHIFTED,
-    UCI_SUPERCONDUCT,
-    UCI_SUPERCONDUCT_SHIFTED,
-    UCI_WINE_RED,
-    UCI_WINE_RED_SHIFTED,
-    UCI_WINE_WHITE,
-    UCI_WINE_WHITE_SHIFTED,
-    UCI_YACHT,
-    UCI_YACHT_SHIFTED,
-    MNIST,
-    MNIST_ND,
-    FASHION_MNIST,
-    FASHION_MNIST_ND,
-    NOT_MNIST,
-    CIFAR,
-    SVHN,
-]
-regression_experiments = [
-    SANITY_CHECK,
-    TOY,
-    TOY_SHIFTED,
-    TOY_2D,
-    TOY_2D_SHIFTED,
-    UCI_CCPP,
-    UCI_CCPP_SHIFTED,
-    UCI_CONCRETE,
-    UCI_CONCRETE_SHIFTED,
-    UCI_SUPERCONDUCT,
-    UCI_SUPERCONDUCT_SHIFTED,
-    UCI_WINE_RED,
-    UCI_WINE_RED_SHIFTED,
-    UCI_WINE_WHITE,
-    UCI_WINE_WHITE_SHIFTED,
-    UCI_YACHT,
-    UCI_YACHT_SHIFTED,
-]
-generative_experiments = [
-    CIFAR,
-    FASHION_MNIST,
-    FASHION_MNIST_ND,
-    MNIST,
-    MNIST_ND,
-    NOT_MNIST,
-    SVHN,
-]
 MNIST_ALL = [
     FASHION_MNIST,
     FASHION_MNIST_ND,
@@ -319,6 +295,22 @@ MNIST_ALL = [
     MNIST_ND,
     NOT_MNIST,
 ]
+
+
+experiment_names = (
+    [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, TOY_2D_SHIFTED]
+    + UCI_ALL
+    + MNIST_ALL
+    + [CIFAR, SVHN]
+)
+regression_experiments = [
+    SANITY_CHECK,
+    TOY,
+    TOY_SHIFTED,
+    TOY_2D,
+    TOY_2D_SHIFTED,
+] + UCI_ALL
+generative_experiments = [CIFAR, SVHN] + MNIST_ALL
 
 FULLY_CONNECTED = "fully_connected"
 CONVOLUTIONAL = "convolutional"
@@ -380,22 +372,7 @@ ACTIVATION_FUNCTIONS = [
 def experiments_activation_function(experiment_name: str) -> str:
     if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, TOY_2D_SHIFTED]:
         return F_SIGMOID
-    elif experiment_name in [
-        UCI_CARBON,
-        UCI_CARBON_SHIFTED,
-        UCI_CCPP,
-        UCI_CCPP_SHIFTED,
-        UCI_CONCRETE,
-        UCI_CONCRETE_SHIFTED,
-        UCI_SUPERCONDUCT,
-        UCI_SUPERCONDUCT_SHIFTED,
-        UCI_WINE_RED,
-        UCI_WINE_RED_SHIFTED,
-        UCI_WINE_WHITE,
-        UCI_WINE_WHITE_SHIFTED,
-        UCI_YACHT,
-        UCI_YACHT_SHIFTED,
-    ]:
+    elif experiment_name in UCI_ALL:
         # Match VV
         # return F_RELU
         # Supposed to be best

@@ -1,9 +1,13 @@
 from sggm.data.sanity_check import SanityCheckDataModule
 from sggm.data.toy import ToyDataModule, ToyDataModuleShifted
 from sggm.data.toy_2d import Toy2DDataModule, Toy2DDataModuleShifted
+from sggm.data.uci_boston import UCIBostonDataModule, UCIBostonDataModuleShifted
 from sggm.data.uci_carbon import UCICarbonDataModule, UCICarbonDataModuleShifted
 from sggm.data.uci_ccpp import UCICCPPDataModule, UCICCPPDataModuleShifted
 from sggm.data.uci_concrete import UCIConcreteDataModule, UCIConcreteDataModuleShifted
+from sggm.data.uci_energy import UCIEnergyDataModule, UCIEnergyDataModuleShifted
+from sggm.data.uci_kin8nm import UCIKin8nmDataModule, UCIKin8nmDataModuleShifted
+from sggm.data.uci_naval import UCINavalDataModule, UCINavalDataModuleShifted
 from sggm.data.uci_superconduct import (
     UCISuperConductDataModule,
     UCISuperConductDataModuleShifted,
@@ -27,12 +31,20 @@ from sggm.definitions import (
     TOY_SHIFTED,
     TOY_2D,
     TOY_2D_SHIFTED,
+    UCI_BOSTON,
+    UCI_BOSTON_SHIFTED,
     UCI_CARBON,
     UCI_CARBON_SHIFTED,
     UCI_CCPP,
     UCI_CCPP_SHIFTED,
     UCI_CONCRETE,
     UCI_CONCRETE_SHIFTED,
+    UCI_ENERGY,
+    UCI_ENERGY_SHIFTED,
+    UCI_KIN8NM,
+    UCI_KIN8NM_SHIFTED,
+    UCI_NAVAL,
+    UCI_NAVAL_SHIFTED,
     UCI_SUPERCONDUCT,
     UCI_SUPERCONDUCT_SHIFTED,
     UCI_WINE_RED,
@@ -57,12 +69,20 @@ datamodules = {
     TOY_SHIFTED: ToyDataModuleShifted,
     TOY_2D: Toy2DDataModule,
     TOY_2D_SHIFTED: Toy2DDataModuleShifted,
+    UCI_BOSTON: UCIBostonDataModule,
+    UCI_BOSTON_SHIFTED: UCIBostonDataModuleShifted,
     UCI_CARBON: UCICarbonDataModule,
     UCI_CARBON_SHIFTED: UCICarbonDataModuleShifted,
     UCI_CCPP: UCICCPPDataModule,
     UCI_CCPP_SHIFTED: UCICCPPDataModuleShifted,
     UCI_CONCRETE: UCIConcreteDataModule,
     UCI_CONCRETE_SHIFTED: UCIConcreteDataModuleShifted,
+    UCI_ENERGY: UCIEnergyDataModule,
+    UCI_ENERGY_SHIFTED: UCIEnergyDataModuleShifted,
+    UCI_KIN8NM: UCIKin8nmDataModule,
+    UCI_KIN8NM_SHIFTED: UCIKin8nmDataModuleShifted,
+    UCI_NAVAL: UCINavalDataModule,
+    UCI_NAVAL_SHIFTED: UCINavalDataModuleShifted,
     UCI_SUPERCONDUCT: UCISuperConductDataModule,
     UCI_SUPERCONDUCT_SHIFTED: UCISuperConductDataModuleShifted,
     UCI_WINE_RED: UCIWineRedDataModule,

@@ -46,6 +46,8 @@ class UCIDataModule(RegressionDataModule):
         self.x_std = x.std(axis=0)[None, :]
         self.y_mean = y.mean(axis=0)[:, None]
         self.y_std = y.std(axis=0)[:, None]
+        # Handle the case where a feature is cst
+        self.x_std = np.where(self.x_std == 0, np.ones_like(self.x_std), self.x_std)
         x = (x - self.x_mean) / self.x_std
         y = (y - self.y_mean) / self.y_std
         x_test = (x_test - self.x_mean) / self.x_std

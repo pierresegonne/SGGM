@@ -1,1 +1,1 @@
-# from sggm.data.{module}.datamodule import {DataModule}
+from sggm.data.uci_naval.datamodule import UCINavalDataModule, UCINavalDataModuleShifted

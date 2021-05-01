@@ -1,17 +1,17 @@
-from os import sep
+import numpy as np
 import pandas as pd
 import pathlib
 
 from sggm.data.uci import UCIDataModule
 from sggm.data.shifted import DataModuleShifted
 
-DATA_FILENAME = "data.txt"
+DATA_FILENAME = "housing.data"
 """
-Link to get the data.txt file: https://archive.ics.uci.edu/ml/machine-learning-databases/00316/
+Link to get the housing dataset: https://archive.ics.uci.edu/ml/machine-learning-databases/housing/
 """
 
 
-class UCINavalDataModule(UCIDataModule):
+class UCIBostonDataModule(UCIDataModule):
     def __init__(
         self,
         batch_size: int,
@@ -29,23 +29,24 @@ class UCINavalDataModule(UCIDataModule):
         )
 
         # Manual as we know it
-        self.dims = 16
-        self.out_dims = 2
+        self.dims = 13
+        self.out_dims = 1
 
     def setup(self, stage: str = None):
-
-        df = pd.read_csv(
-            f"{pathlib.Path(__file__).parent.absolute()}/{DATA_FILENAME}",
-            header=None,
-            sep="   ",
-        )
-        x = df.values[:, :-2]
-        y = df.values[:, -2:]
+        df = pd.read_csv(f"{pathlib.Path(__file__).parent.absolute()}/{DATA_FILENAME}")
+        # Loads rows as string
+        data = np.empty((len(df.index), self.dims + self.out_dims))
+        for i in range(data.shape[0]):
+            data[i] = np.array(
+                [float(el) for el in df.values[i][0].split(" ") if el != ""]
+            )
+        x = data[:, :-1]
+        y = data[:, -1]
 
         UCIDataModule.setup(self, x, y)
 
 
-class UCINavalDataModuleShifted(UCINavalDataModule, DataModuleShifted):
+class UCIBostonDataModuleShifted(UCIBostonDataModule, DataModuleShifted):
     def __init__(
         self,
         batch_size: int,
@@ -56,7 +57,7 @@ class UCINavalDataModuleShifted(UCINavalDataModule, DataModuleShifted):
         shifting_proportion_k: float = 1e-2,
         **kwargs,
     ):
-        UCINavalDataModule.__init__(
+        UCIBostonDataModule.__init__(
             self,
             batch_size,
             n_workers,
@@ -68,11 +69,11 @@ class UCINavalDataModuleShifted(UCINavalDataModule, DataModuleShifted):
         )
 
     def setup(self, stage: str = None):
-        UCINavalDataModule.setup(self, stage)
+        UCIBostonDataModule.setup(self, stage)
         DataModuleShifted.setup(self)
 
 
 if __name__ == "__main__":
 
-    dm = UCINavalDataModule(1024, 0)
+    dm = UCIBostonDataModule(1024, 0)
     dm.setup()
