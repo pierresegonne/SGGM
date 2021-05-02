@@ -1,7 +1,41 @@
+import math
 import time
 import numpy as np
 
-from torch import cat
+from torch import cat, matmul
+
+
+def batchify(*arrays, batch_size=10, shuffel=True):
+    """Function that defines a generator that keeps outputting new batches
+        for the input arrays infinit times.
+    Arguments:
+        *arrays: a number of arrays all assume to have same length along the
+            first dimension
+        batch_size: int, size of each batch
+        shuffel: bool, if the arrays should be shuffeled when we have reached
+            the end
+    """
+    N = arrays[0].shape[0]
+    c = -1
+    while True:
+        c += 1
+        if c * batch_size >= N:  # reset if we reach end of array
+            c = 0
+            if shuffel:
+                perm_idx = np.random.permutation(N)
+                arrays = [a[perm_idx] for a in arrays]
+        lower = c * batch_size
+        upper = (c + 1) * batch_size
+        yield [a[lower:upper] for a in arrays]
+
+
+def dist(X, Y):  # X:  N x d , Y: M x d
+    dist = (
+        X.norm(p=2, dim=1, keepdim=True) ** 2
+        + Y.norm(p=2, dim=1, keepdim=False) ** 2
+        - 2 * matmul(X, Y.t())
+    )
+    return dist.clamp(0.0)  # N x M
 
 
 def ds_from_dl(dl, device):
@@ -15,6 +49,22 @@ def ds_from_dl(dl, device):
             x = cat((x, _x), dim=0)
             y = cat((y, _y), dim=0)
     return x, y
+
+
+def normal_log_prob(x, mean, var):
+    c = -0.5 * math.log(2 * math.pi)
+    if isinstance(x, np.ndarray):  # numpy implementation
+        return (
+            c
+            - np.log(var.flatten()) / 2
+            - (x - mean.flatten()) ** 2 / (2 * var.flatten())
+        )
+    else:  # torch implementation
+        return (
+            c
+            - var.flatten().log() / 2
+            - (x - mean.flatten()) ** 2 / (2 * var.flatten())
+        )
 
 
 class timer(object):
