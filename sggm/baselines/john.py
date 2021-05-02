@@ -136,14 +136,14 @@ def john(args, dm):
         ),
         lr=1e-4,
     )
-    mean_Q, mean_w = gen_Qw(X, mean_psu, mean_ssu, mean_M)
+    mean_Q, mean_w = gen_Qw(X.cpu(), mean_psu, mean_ssu, mean_M)
 
     if X.shape[0] > 100000 and X.shape[1] > 10:
         pca = PCA(n_components=0.5)
-        temp = pca.fit_transform(X)
+        temp = pca.fit_transform(X.cpu())
         var_Q, var_w = gen_Qw(temp, var_psu, var_ssu, var_M)
     else:
-        var_Q, var_w = gen_Qw(X, var_psu, var_ssu, var_M)
+        var_Q, var_w = gen_Qw(X.cpu(), var_psu, var_ssu, var_M)
 
     # mean_pseupoch = get_pseupoch(mean_w,0.5)
     # var_pseupoch = get_pseupoch(var_w,0.5)
@@ -198,7 +198,8 @@ def john(args, dm):
         if it % 500 == 0:
             m, v = model(data, switch)
             loss = -(
-                -v.log() / 2 - ((m.flatten() - label.flatten()) ** 2).reshape(1, -1, 1) / (2 * v)
+                -v.log() / 2
+                - ((m.flatten() - label.flatten()) ** 2).reshape(1, -1, 1) / (2 * v)
             ).mean()
             print("Iter {0}/{1}, Loss {2}".format(it, args.iters, loss.item()))
         it += 1
