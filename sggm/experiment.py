@@ -2,7 +2,6 @@ import copy
 import json
 import pytorch_lightning as pl
 import re
-import tempfile
 import torch
 import yaml
 

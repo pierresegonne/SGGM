@@ -16,7 +16,7 @@ from sggm.definitions import (
     SPLIT_TRAINING_STD_VV_MEAN,
 )
 from torch import nn
-from typing import Any
+from typing import Any, Tuple
 
 
 def clean_dict(dic: dict) -> dict:
@@ -64,7 +64,7 @@ def split_mean_uncertainty_training(
     experiment: Any,
     model: pl.LightningModule,
     datamodule: pl.LightningDataModule,
-) -> (Any, pl.LightningModule, pl.LightningDataModule, pl.Trainer):
+) -> Tuple[Any, pl.LightningModule, pl.LightningDataModule, pl.Trainer]:
     # Heuristic = Purely Eng
 
     # Set mode to standard ELBO
