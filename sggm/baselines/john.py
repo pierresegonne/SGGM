@@ -69,7 +69,7 @@ def john(args, dm):
 
     num_draws_train = 20
     kmeans = KMeans(n_clusters=args.n_clusters)
-    kmeans.fit(np.concatenate([X], axis=0))
+    kmeans.fit(np.concatenate([X.cpu()], axis=0))
     c = torch.tensor(kmeans.cluster_centers_, dtype=torch.float32)
     c.to(device)
 
