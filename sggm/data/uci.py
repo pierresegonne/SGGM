@@ -39,13 +39,14 @@ class UCIDataModule(RegressionDataModule):
         # First split test away
         test_size = int(x.shape[0] * self.test_split)
         x, x_test, y, y_test = train_test_split(x, y, test_size=test_size, shuffle=True)
-        y, y_test = y[:, None], y_test[:, None]
+        if len(y.shape) == 1:
+            y, y_test = y[:, None], y_test[:, None]
 
         # Standardise
         self.x_mean = x.mean(axis=0)[None, :]
         self.x_std = x.std(axis=0)[None, :]
-        self.y_mean = y.mean(axis=0)[:, None]
-        self.y_std = y.std(axis=0)[:, None]
+        self.y_mean = y.mean(axis=0)[None, :]
+        self.y_std = y.std(axis=0)[None, :]
         # Handle the case where a feature is cst
         self.x_std = np.where(self.x_std == 0, np.ones_like(self.x_std), self.x_std)
         x = (x - self.x_mean) / self.x_std

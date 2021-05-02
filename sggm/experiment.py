@@ -99,9 +99,11 @@ class Experiment:
             if self.experiment_name in regression_experiments:
                 if self.model_name == VARIATIONAL_REGRESSOR:
                     input_dim = self.datamodule.dims
+                    out_dim = self.datamodule.out_dims
                     return VariationalRegressor(
                         input_dim=input_dim,
                         hidden_dim=self.hidden_dim,
+                        out_dim=out_dim,
                         activation=experiments_activation_function(
                             self.experiment_name
                         ),

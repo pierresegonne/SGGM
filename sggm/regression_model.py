@@ -80,7 +80,7 @@ def check_available_methods(method: str):
     ), f"Unvalid method {method}, choices {available_methods}"
 
 
-def BaseMLP(input_dim: int, hidden_dim: int, activation: str) -> nn.Module:
+def BaseMLP(input_dim: int, hidden_dim: int, out_dim: int, activation: str) -> nn.Module:
     assert (
         activation in ACTIVATION_FUNCTIONS
     ), f"activation_function={activation} is not in {ACTIVATION_FUNCTIONS}"
@@ -95,12 +95,12 @@ def BaseMLP(input_dim: int, hidden_dim: int, activation: str) -> nn.Module:
     return nn.Sequential(
         nn.Linear(input_dim, hidden_dim),
         f,
-        nn.Linear(hidden_dim, 1),
+        nn.Linear(hidden_dim, out_dim),
     )
 
 
-def BaseMLPSoftPlus(input_dim: int, hidden_dim: int, activation: str) -> nn.Module:
-    mod = BaseMLP(input_dim, hidden_dim, activation)
+def BaseMLPSoftPlus(input_dim: int, hidden_dim: int, out_dim: int, activation: str) -> nn.Module:
+    mod = BaseMLP(input_dim, hidden_dim, out_dim, activation)
     mod.add_module("softplus", nn.Softplus())
     return mod
 
@@ -122,6 +122,7 @@ class VariationalRegressor(pl.LightningModule):
         self,
         input_dim: int,
         hidden_dim: int,
+        out_dim: int,
         activation: str,
         learning_rate: float = variational_regressor_parameters[LEARNING_RATE].default,
         prior_α: float = variational_regressor_parameters[PRIOR_α].default,
@@ -148,6 +149,7 @@ class VariationalRegressor(pl.LightningModule):
         # ---------
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
+        self.out_dim = out_dim
 
         self.activation = activation
 
@@ -181,12 +183,12 @@ class VariationalRegressor(pl.LightningModule):
         # ---------
         # Inference Networks
         # ---------
-        self.μ = BaseMLP(input_dim, hidden_dim, activation)
+        self.μ = BaseMLP(input_dim, hidden_dim, out_dim, activation)
 
-        self.α = BaseMLPSoftPlus(input_dim, hidden_dim, activation)
+        self.α = BaseMLPSoftPlus(input_dim, hidden_dim, out_dim, activation)
         self.α.add_module("shift", ShiftLayer(1))
 
-        self.β = BaseMLPSoftPlus(input_dim, hidden_dim, activation)
+        self.β = BaseMLPSoftPlus(input_dim, hidden_dim, out_dim, activation)
 
         # ---------
         # Misc
@@ -200,6 +202,7 @@ class VariationalRegressor(pl.LightningModule):
         self.save_hyperparameters(
             "input_dim",
             "hidden_dim",
+            "out_dim",
             "learning_rate",
             "activation",
             "prior_α",
@@ -452,6 +455,7 @@ class VariationalRegressor(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         x, y = batch
+        print(y.shape)
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.ellk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
@@ -462,6 +466,7 @@ class VariationalRegressor(pl.LightningModule):
             loss = -self.elbo(log_likelihood, kl_divergence, train=False)
 
         y_pred = self.predictive_mean(x)
+        print(y_pred.shape)
 
         m_p = D.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
 
