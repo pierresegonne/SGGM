@@ -106,6 +106,7 @@ def john(args, dm):
             self.trans = translatedSigmoid()
 
         def forward(self, x, switch):
+            print(x.device, c.device)
             d = dist(x, c)
             d_min = d.min(dim=1, keepdim=True)[0]
             s = self.trans(d_min)
@@ -165,8 +166,8 @@ def john(args, dm):
             opt_switch = opt_switch + 1  # change between var and mean optimizer
         with torch.autograd.detect_anomaly():
             data, label = next(batches)
-            data = data.to(device)
-            label = label.to(device)
+            data.to(device)
+            label.to(device)
             if not switch:
                 optimizer.zero_grad()
                 m, v = model(data, switch)
