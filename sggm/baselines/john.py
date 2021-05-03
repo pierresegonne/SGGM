@@ -137,6 +137,8 @@ def john(args, dm):
         lr=1e-4,
     )
     mean_Q, mean_w = gen_Qw(X.cpu(), mean_psu, mean_ssu, mean_M)
+    mean_Q = torch.tensor(mean_Q).to(torch.float32).to(device)
+    mean_w = torch.tensor(mean_w).to(torch.float32).to(device)
 
     if X.shape[0] > 100000 and X.shape[1] > 10:
         pca = PCA(n_components=0.5)
@@ -149,6 +151,7 @@ def john(args, dm):
     # var_pseupoch = get_pseupoch(var_w,0.5)
     opt_switch = 1
     mean_w = torch.tensor(mean_w).to(torch.float32).to(device)
+    var_Q = torch.tensor(var_Q).to(torch.float32).to(device)
     var_w = torch.tensor(var_w).to(torch.float32).to(device)
     model.train()
 
@@ -162,6 +165,8 @@ def john(args, dm):
             opt_switch = opt_switch + 1  # change between var and mean optimizer
         with torch.autograd.detect_anomaly():
             data, label = next(batches)
+            data = data.to(device)
+            label = label.to(device)
             if not switch:
                 optimizer.zero_grad()
                 m, v = model(data, switch)
