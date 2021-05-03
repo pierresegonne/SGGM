@@ -7,6 +7,7 @@ import torch
 from codecarbon import EmissionsTracker
 
 from sggm.baselines.utils import timer
+
 # from sggm.baselines.gp import gp
 from sggm.baselines.john import john
 from sggm.baselines.nn import bnn, ensnn, mcdnn, nn
@@ -116,13 +117,12 @@ if __name__ == "__main__":
                 )
 
                 T.begin()
-                logpx, rmse = john(args, dm)
-                try:
-                    logpx, rmse = eval(model)(args, dm)
-                    # logpx, rmse = john(args, dm)
-                except Exception as e:
-                    print("encountered error:", e)
-                    logpx, rmse = np.nan, np.nan
+                logpx, rmse = bnn(args, dm)
+                # try:
+                #     logpx, rmse = eval(model)(args, dm)
+                # except Exception as e:
+                #     print("encountered error:", e)
+                #     logpx, rmse = np.nan, np.nan
                 T.end()
                 log_score.append(logpx)
                 rmse_score.append(rmse)
