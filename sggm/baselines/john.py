@@ -150,7 +150,6 @@ def john(args, dm):
     # mean_pseupoch = get_pseupoch(mean_w,0.5)
     # var_pseupoch = get_pseupoch(var_w,0.5)
     opt_switch = 1
-    mean_w = torch.tensor(mean_w).to(torch.float32).to(device)
     var_Q = torch.tensor(var_Q).to(torch.float32).to(device)
     var_w = torch.tensor(var_w).to(torch.float32).to(device)
     model.train()
@@ -163,46 +162,46 @@ def john(args, dm):
 
         if it % 11:
             opt_switch = opt_switch + 1  # change between var and mean optimizer
-        with torch.autograd.detect_anomaly():
-            data, label = next(batches)
-            data.to(device)
-            label.to(device)
-            if not switch:
+
+        data, label = next(batches)
+        data.to(device)
+        label.to(device)
+        if not switch:
+            optimizer.zero_grad()
+            m, v = model(data, switch)
+            loss = (
+                -t_likelihood(label.reshape(-1, 1), m, v.reshape(1, -1, 1))
+                / X.shape[0]
+            )
+            loss.backward()
+            optimizer.step()
+        else:
+            if opt_switch % 2 == 0:
+                # for b in range(mean_pseupoch):
                 optimizer.zero_grad()
-                m, v = model(data, switch)
+                batch = locality_sampler2(
+                    mean_psu, mean_ssu, mean_Q.cpu(), mean_w.cpu()
+                )
+                m, v = model(X[batch], switch)
                 loss = (
-                    -t_likelihood(label.reshape(-1, 1), m, v.reshape(1, -1, 1))
+                    -t_likelihood(y[batch].reshape(-1, 1), m, v, mean_w[batch])
                     / X.shape[0]
                 )
                 loss.backward()
                 optimizer.step()
             else:
-                if opt_switch % 2 == 0:
-                    # for b in range(mean_pseupoch):
-                    optimizer.zero_grad()
-                    batch = locality_sampler2(
-                        mean_psu, mean_ssu, mean_Q.cpu(), mean_w.cpu()
-                    )
-                    m, v = model(X[batch], switch)
-                    loss = (
-                        -t_likelihood(y[batch].reshape(-1, 1), m, v, mean_w[batch])
-                        / X.shape[0]
-                    )
-                    loss.backward()
-                    optimizer.step()
-                else:
-                    # for b in range(var_pseupoch):
-                    optimizer2.zero_grad()
-                    batch = locality_sampler2(
-                        var_psu, var_ssu, var_Q.cpu(), var_w.cpu()
-                    )
-                    m, v = model(X[batch], switch)
-                    loss = (
-                        -t_likelihood(y[batch].reshape(-1, 1), m, v, var_w[batch])
-                        / X.shape[0]
-                    )
-                    loss.backward()
-                    optimizer2.step()
+                # for b in range(var_pseupoch):
+                optimizer2.zero_grad()
+                batch = locality_sampler2(
+                    var_psu, var_ssu, var_Q.cpu(), var_w.cpu()
+                )
+                m, v = model(X[batch], switch)
+                loss = (
+                    -t_likelihood(y[batch].reshape(-1, 1), m, v, var_w[batch])
+                    / X.shape[0]
+                )
+                loss.backward()
+                optimizer2.step()
 
         if it % 500 == 0:
             m, v = model(data, switch)

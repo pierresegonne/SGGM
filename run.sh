@@ -38,4 +38,4 @@ source env/bin/activate
 python3 -m pip install -r requirements.txt
 export PYTHONIOENCODING=utf8
 # cd sggm/ && python experiment.py --experiments_config configs/mnist_2d_latent_space_rv3ae.yml --gpus -1
-cd sggm/ && python baselines/run.py --model nn --experiment_name uci_concrete --n_trials 1 --iters 100
+cd sggm/ && python baselines/run.py --model bnn --experiment_name uci_concrete --n_trials 1 --iters 100
