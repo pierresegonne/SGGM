@@ -180,7 +180,9 @@ def john(args, dm):
                 if opt_switch % 2 == 0:
                     # for b in range(mean_pseupoch):
                     optimizer.zero_grad()
-                    batch = locality_sampler2(mean_psu.cpu(), mean_ssu.cpu(), mean_Q.cpu(), mean_w.cpu())
+                    batch = locality_sampler2(
+                        mean_psu, mean_ssu, mean_Q.cpu(), mean_w.cpu()
+                    )
                     m, v = model(X[batch], switch)
                     loss = (
                         -t_likelihood(y[batch].reshape(-1, 1), m, v, mean_w[batch])
@@ -191,7 +193,9 @@ def john(args, dm):
                 else:
                     # for b in range(var_pseupoch):
                     optimizer2.zero_grad()
-                    batch = locality_sampler2(var_psu.cpu(), var_ssu.cpu(), var_Q.cpu(), var_w.cpu())
+                    batch = locality_sampler2(
+                        var_psu, var_ssu, var_Q.cpu(), var_w.cpu()
+                    )
                     m, v = model(X[batch], switch)
                     loss = (
                         -t_likelihood(y[batch].reshape(-1, 1), m, v, var_w[batch])
