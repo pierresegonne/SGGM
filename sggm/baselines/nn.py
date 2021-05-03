@@ -248,7 +248,7 @@ def bnn(args, dm):
             + n[:, np.newaxis, :] * np.random.randn()
         )
 
-    samples = sample_net(Xval, W0, b0, W1, b1, n)
+    samples = sample_net(Xval.cpu(), W0, b0, W1, b1, n)
 
     m = samples.mean(axis=0)
     v = samples.var(axis=0)
