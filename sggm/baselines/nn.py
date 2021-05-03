@@ -223,7 +223,7 @@ def bnn(args, dm):
         while it < args.iters:
             data, label = next(batches)
             _, loss = sess.run(
-                [train_op, elbo_loss], feed_dict={x_p: data, y_p: label.reshape(-1, 1)}
+                [train_op, elbo_loss], feed_dict={x_p: data.cpu(), y_p: label.reshape(-1, 1).cpu()}
             )
             progressBar.update()
             progressBar.set_postfix({"loss": loss})
