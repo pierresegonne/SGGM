@@ -117,12 +117,12 @@ if __name__ == "__main__":
                 )
 
                 T.begin()
-                logpx, rmse = bnn(args, dm)
-                # try:
-                #     logpx, rmse = eval(model)(args, dm)
-                # except Exception as e:
-                #     print("encountered error:", e)
-                #     logpx, rmse = np.nan, np.nan
+                # Note that execution is not stopped here if error occurs in trial.
+                try:
+                    logpx, rmse = eval(model)(args, dm)
+                except Exception as e:
+                    print("encountered error:", e)
+                    logpx, rmse = np.nan, np.nan
                 T.end()
                 log_score.append(logpx)
                 rmse_score.append(rmse)
