@@ -256,7 +256,7 @@ def bnn(args, dm):
     # m = m * y_std + y_mean
     # v = v * y_std ** 2
 
-    log_probs = normal_log_prob(yval, m, v)
-    rmse = math.sqrt(((m.flatten() - yval) ** 2).mean())
+    log_probs = normal_log_prob(yval.cpu(), m, v)
+    rmse = math.sqrt(((m.flatten() - yval.cpu()) ** 2).mean())
 
     return log_probs.mean(), rmse
