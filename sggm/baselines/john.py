@@ -71,7 +71,7 @@ def john(args, dm):
     kmeans = KMeans(n_clusters=args.n_clusters)
     kmeans.fit(np.concatenate([X.cpu()], axis=0))
     c = torch.tensor(kmeans.cluster_centers_, dtype=torch.float32)
-    c.to(device)
+    c = c.to(device)
 
     class translatedSigmoid(torch.nn.Module):
         def __init__(self):
@@ -106,7 +106,6 @@ def john(args, dm):
             self.trans = translatedSigmoid()
 
         def forward(self, x, switch):
-            print(x.device, c.device)
             d = dist(x, c)
             d_min = d.min(dim=1, keepdim=True)[0]
             s = self.trans(d_min)
