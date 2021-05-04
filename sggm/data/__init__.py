@@ -8,6 +8,7 @@ from sggm.data.uci_concrete import UCIConcreteDataModule, UCIConcreteDataModuleS
 from sggm.data.uci_energy import UCIEnergyDataModule, UCIEnergyDataModuleShifted
 from sggm.data.uci_kin8nm import UCIKin8nmDataModule, UCIKin8nmDataModuleShifted
 from sggm.data.uci_naval import UCINavalDataModule, UCINavalDataModuleShifted
+from sggm.data.uci_protein import UCIProteinDataModule, UCIProteinDataModuleShifted
 from sggm.data.uci_superconduct import (
     UCISuperConductDataModule,
     UCISuperConductDataModuleShifted,
@@ -45,6 +46,8 @@ from sggm.definitions import (
     UCI_KIN8NM_SHIFTED,
     UCI_NAVAL,
     UCI_NAVAL_SHIFTED,
+    UCI_PROTEIN,
+    UCI_PROTEIN_SHIFTED,
     UCI_SUPERCONDUCT,
     UCI_SUPERCONDUCT_SHIFTED,
     UCI_WINE_RED,
@@ -83,6 +86,8 @@ datamodules = {
     UCI_KIN8NM_SHIFTED: UCIKin8nmDataModuleShifted,
     UCI_NAVAL: UCINavalDataModule,
     UCI_NAVAL_SHIFTED: UCINavalDataModuleShifted,
+    UCI_PROTEIN: UCIProteinDataModule,
+    UCI_PROTEIN_SHIFTED: UCIProteinDataModuleShifted,
     UCI_SUPERCONDUCT: UCISuperConductDataModule,
     UCI_SUPERCONDUCT_SHIFTED: UCISuperConductDataModuleShifted,
     UCI_WINE_RED: UCIWineRedDataModule,
