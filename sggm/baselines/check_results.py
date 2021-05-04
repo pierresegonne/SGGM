@@ -71,7 +71,6 @@ if __name__ == "__main__":
     df_rmse_score.sort_values("experiment_name", inplace=True)
     df_timings.sort_values("experiment_name", inplace=True)
 
-
     df_log_score.to_csv(f"{PATH}/results/log_score.csv", index=False)
     df_rmse_score.to_csv(f"{PATH}/results/rmse_score.csv", index=False)
     df_timings.to_csv(f"{PATH}/results/timings_score.csv", index=False)

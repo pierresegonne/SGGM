@@ -52,18 +52,21 @@ def ds_from_dl(dl, device):
 
 
 def normal_log_prob(x, mean, var):
+    print(x.shape, mean.shape, var.shape)
     c = -0.5 * math.log(2 * math.pi)
+    assert np.array_equal(x.shape, mean.shape)
+    assert np.array_equal(x.shape, var.shape)
     if isinstance(x, np.ndarray):  # numpy implementation
         return (
             c
-            - np.log(var.flatten()) / 2
-            - (x - mean.flatten()) ** 2 / (2 * var.flatten())
+            - np.log(var) / 2
+            - (x - mean) ** 2 / (2 * var)
         )
     else:  # torch implementation
         return (
             c
-            - var.flatten().log() / 2
-            - (x - mean.flatten()) ** 2 / (2 * var.flatten())
+            - var.log() / 2
+            - (x - mean) ** 2 / (2 * var)
         )
 
 

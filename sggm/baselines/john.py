@@ -32,6 +32,12 @@ def locality_sampler2(psu, ssu, Q, w):
 
 
 def t_likelihood(x, mean, var, w=None):
+    assert np.array_equal(x.shape, mean.shape)
+    if len(var.shape) == 2:
+        assert np.array_equal(x.shape, var.shape)
+    elif len(var.shape) == 3:
+        assert np.array_equal(x.shape, var.shape[1:])
+
     def logmeanexp(inputs, dim=0):
         input_max = inputs.max(dim=dim)[0]
         return (inputs - input_max).exp().mean(dim=dim).log() + input_max
@@ -89,18 +95,18 @@ def john(args, dm):
             self.mean = torch.nn.Sequential(
                 torch.nn.Linear(X.shape[1], n_neurons),
                 torch.nn.ReLU(),
-                torch.nn.Linear(n_neurons, 1),
+                torch.nn.Linear(n_neurons, y.shape[1]),
             )
             self.alph = torch.nn.Sequential(
                 torch.nn.Linear(X.shape[1], n_neurons),
                 torch.nn.ReLU(),
-                torch.nn.Linear(n_neurons, 1),
+                torch.nn.Linear(n_neurons, y.shape[1]),
                 torch.nn.Softplus(),
             )
             self.bet = torch.nn.Sequential(
                 torch.nn.Linear(X.shape[1], n_neurons),
                 torch.nn.ReLU(),
-                torch.nn.Linear(n_neurons, 1),
+                torch.nn.Linear(n_neurons, y.shape[1]),
                 torch.nn.Softplus(),
             )
             self.trans = translatedSigmoid()
@@ -170,7 +176,9 @@ def john(args, dm):
             optimizer.zero_grad()
             m, v = model(data, switch)
             loss = (
-                -t_likelihood(label.reshape(-1, 1), m, v.reshape(1, -1, 1))
+                -t_likelihood(
+                    label.reshape(-1, y.shape[1]), m, v.reshape(-1, y.shape[1])
+                )
                 / X.shape[0]
             )
             loss.backward()
@@ -184,7 +192,7 @@ def john(args, dm):
                 )
                 m, v = model(X[batch], switch)
                 loss = (
-                    -t_likelihood(y[batch].reshape(-1, 1), m, v, mean_w[batch])
+                    -t_likelihood(y[batch].reshape(-1, y.shape[1]), m, v, mean_w[batch])
                     / X.shape[0]
                 )
                 loss.backward()
@@ -192,12 +200,10 @@ def john(args, dm):
             else:
                 # for b in range(var_pseupoch):
                 optimizer2.zero_grad()
-                batch = locality_sampler2(
-                    var_psu, var_ssu, var_Q.cpu(), var_w.cpu()
-                )
+                batch = locality_sampler2(var_psu, var_ssu, var_Q.cpu(), var_w.cpu())
                 m, v = model(X[batch], switch)
                 loss = (
-                    -t_likelihood(y[batch].reshape(-1, 1), m, v, var_w[batch])
+                    -t_likelihood(y[batch].reshape(-1, y.shape[1]), m, v, var_w[batch])
                     / X.shape[0]
                 )
                 loss.backward()
@@ -205,10 +211,7 @@ def john(args, dm):
 
         if it % 500 == 0:
             m, v = model(data, switch)
-            loss = -(
-                -v.log() / 2
-                - ((m.flatten() - label.flatten()) ** 2).reshape(1, -1, 1) / (2 * v)
-            ).mean()
+            loss = -(-v.log() / 2 - ((m - label) ** 2) / (2 * v)).mean()
             print("Iter {0}/{1}, Loss {2}".format(it, args.iters, loss.item()))
         it += 1
 
@@ -221,6 +224,6 @@ def john(args, dm):
     # m = m * y_std + y_mean
     # v = v * y_std ** 2
     # log_px = normal_log_prob(label, m, v).mean(dim=0) # check for correctness
-    log_px = t_likelihood(label.reshape(-1, 1), m, v) / Xval.shape[0]  # check
-    rmse = ((label - m.flatten()) ** 2).mean().sqrt()
+    log_px = t_likelihood(label.reshape(-1, y.shape[1]), m, v) / Xval.shape[0]  # check
+    rmse = ((label - m) ** 2).mean().sqrt()
     return log_px.mean().item(), rmse.item()

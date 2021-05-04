@@ -17,13 +17,13 @@ def nn(args, dm):
     mean = torch.nn.Sequential(
         torch.nn.Linear(X.shape[1], n_neurons),
         torch.nn.ReLU(),
-        torch.nn.Linear(n_neurons, 1),
+        torch.nn.Linear(n_neurons, y.shape[1]),
     )
     mean.to(device)
     var = torch.nn.Sequential(
         torch.nn.Linear(X.shape[1], n_neurons),
         torch.nn.ReLU(),
-        torch.nn.Linear(n_neurons, 1),
+        torch.nn.Linear(n_neurons, y.shape[1]),
         torch.nn.Softplus(),
     )
     var.to(device)
@@ -53,7 +53,7 @@ def nn(args, dm):
     # m = m * y_std + y_mean
     # v = v * y_std ** 2
     log_px = normal_log_prob(label, m, v)
-    rmse = ((label - m.flatten()) ** 2).mean().sqrt()
+    rmse = ((label - m) ** 2).mean().sqrt()
     return log_px.mean().item(), rmse.item()
 
 
@@ -67,7 +67,7 @@ def mcdnn(args, dm):
         torch.nn.Linear(X.shape[1], n_neurons),
         torch.nn.Dropout(p=0.05),
         torch.nn.ReLU(),
-        torch.nn.Linear(n_neurons, 1),
+        torch.nn.Linear(n_neurons, y.shape[1]),
         torch.nn.Dropout(p=0.05),
     )
     mean.to(device)
@@ -91,13 +91,13 @@ def mcdnn(args, dm):
 
     data = Xval
     label = yval
-    samples = torch.zeros(Xval.shape[0], args.mcmc).to(device)
+    samples = torch.zeros(args.mcmc, Xval.shape[0], y.shape[1]).to(device)
     for i in range(args.mcmc):
-        samples[:, i] = mean(data).flatten()
-    m, v = samples.mean(dim=1), samples.var(dim=1)
+        samples[i, :] = mean(data)
+    m, v = samples.mean(dim=0), samples.var(dim=0)
 
     log_probs = normal_log_prob(label, m, v)
-    rmse = ((label - m.flatten()) ** 2).mean().sqrt()
+    rmse = ((label - m) ** 2).mean().sqrt()
     return log_probs.mean().item(), rmse.item()
 
 
@@ -112,13 +112,13 @@ def ensnn(args, dm):
         mean = torch.nn.Sequential(
             torch.nn.Linear(X.shape[1], n_neurons),
             torch.nn.ReLU(),
-            torch.nn.Linear(n_neurons, 1),
+            torch.nn.Linear(n_neurons, y.shape[1]),
         )
         mean.to(device)
         var = torch.nn.Sequential(
             torch.nn.Linear(X.shape[1], n_neurons),
             torch.nn.ReLU(),
-            torch.nn.Linear(n_neurons, 1),
+            torch.nn.Linear(n_neurons, y.shape[1]),
             torch.nn.Softplus(),
         )
         var.to(device)
@@ -159,7 +159,7 @@ def ensnn(args, dm):
     v = (vs + ms ** 2).mean(dim=0) - m ** 2
 
     log_px = normal_log_prob(label, m, v)
-    rmse = ((label - m.flatten()) ** 2).mean().sqrt()
+    rmse = ((label - m) ** 2).mean().sqrt()
     return log_px.mean().item(), rmse.item()
 
 
@@ -180,13 +180,13 @@ def bnn(args, dm):
 
     def VariationalNormal(name, shape, constraint=None):
         means = tf.compat.v1.get_variable(
-            name + "_mean", initializer=tf.ones([1]), constraint=constraint
+            name + "_mean", initializer=tf.ones(shape), constraint=constraint
         )
-        stds = tf.compat.v1.get_variable(name + "_std", initializer=-1.0 * tf.ones([1]))
+        stds = tf.compat.v1.get_variable(name + "_std", initializer=-1.0 * tf.ones(shape))
         return tfd.Normal(loc=means, scale=tf.nn.softplus(stds))
 
     x_p = tf.compat.v1.placeholder(tf.float32, shape=(None, X.shape[1]))
-    y_p = tf.compat.v1.placeholder(tf.float32, shape=(None, 1))
+    y_p = tf.compat.v1.placeholder(tf.float32, shape=(None, y.shape[1]))
 
     with tf.compat.v1.name_scope("model", values=[x_p]):
         layer1 = tfp.layers.DenseFlipout(
@@ -203,7 +203,7 @@ def bnn(args, dm):
         )
         predictions = layer2(layer1(x_p))
         noise = VariationalNormal(
-            "noise", [1], constraint=tf.keras.constraints.NonNeg()
+            "noise", [y.shape[1]], constraint=tf.keras.constraints.NonNeg()
         )
         pred_distribution = tfd.Normal(loc=predictions, scale=noise.sample())
 
@@ -223,7 +223,8 @@ def bnn(args, dm):
         while it < args.iters:
             data, label = next(batches)
             _, loss = sess.run(
-                [train_op, elbo_loss], feed_dict={x_p: data.cpu(), y_p: label.reshape(-1, 1).cpu()}
+                [train_op, elbo_loss],
+                feed_dict={x_p: data.cpu(), y_p: label.reshape(-1, y.shape[1]).cpu()},
             )
             progressBar.update()
             progressBar.set_postfix({"loss": loss})
@@ -257,6 +258,6 @@ def bnn(args, dm):
     # v = v * y_std ** 2
 
     log_probs = normal_log_prob(yval.cpu(), m, v)
-    rmse = math.sqrt(((m.flatten() - yval.cpu()) ** 2).mean())
+    rmse = math.sqrt(((m - yval.cpu()) ** 2).mean())
 
     return log_probs.mean(), rmse
