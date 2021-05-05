@@ -391,7 +391,7 @@ def cli_main():
             if experiment.n_trials is not None:
                 warn(
                     f"[WARNING] The number of trials specified, n_trials={experiment.n_trials},"
-                    + f"is overriden for experiment {experiment.experiment_name} (shift split)"
+                    + f" is overriden for experiment {experiment.experiment_name} (shift split)"
                 )
             experiment.n_trials = experiment.datamodule.dims
 
