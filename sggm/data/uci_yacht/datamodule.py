@@ -1,8 +1,10 @@
 import pandas as pd
 import pathlib
 
+from typing import Union
+
 from sggm.data.uci import UCIDataModule
-from sggm.data.shifted import DataModuleShifted
+from sggm.data.shifted import DataModuleShifted, DataModuleShiftedSplit
 
 DATA_FILENAME = "yacht_hydrodynamics.data"
 """
@@ -79,6 +81,28 @@ class UCIYachtDataModuleShifted(UCIYachtDataModule, DataModuleShifted):
     def setup(self, stage: str = None):
         UCIYachtDataModule.setup(self, stage)
         DataModuleShifted.setup(self)
+
+
+class UCIYachtDataModuleShiftedSplit(UCIYachtDataModule, DataModuleShiftedSplit):
+    def __init__(
+        self,
+        batch_size: int,
+        n_workers: int,
+        train_val_split: float = 0.9,
+        test_split: float = 0.1,
+        **kwargs,
+    ):
+        UCIYachtDataModule.__init__(
+            self,
+            batch_size,
+            n_workers,
+            train_val_split,
+            test_split,
+        )
+
+    def setup(self, dim_idx: Union[None, int] = None, stage: str = None):
+        UCIYachtDataModule.setup(self, stage)
+        DataModuleShiftedSplit.setup(self, dim_idx)
 
 
 if __name__ == "__main__":

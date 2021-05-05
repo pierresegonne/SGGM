@@ -124,3 +124,30 @@ class DataModuleShifted:
         self.train_dataset = TensorDataset(*train)
         self.setup_train_val_datasets(self.train_dataset)
         self.test_dataset = TensorDataset(*test)
+
+
+class DataModuleShiftedSplit:
+    """
+    Add-on class to introduce shift based on splits between the training and testing distibutions.
+    Based on: https://arxiv.org/abs/1906.11537 ['In-Between'] Uncertainty in BNN
+    [NOTE]: Implicitely assumes that is used in combinaison with a children of another DataModule
+    """
+
+    def setup(self, dim_idx: int):
+
+        x_train, y_train = self.train_dataset.dataset.tensors
+        x_test, y_test = self.test_dataset.tensors
+
+        _, dim_col_indices = x_train[:, dim_idx].sort()
+        N = dim_col_indices.shape[0]
+        split_indices = dim_col_indices[int(N / 3) : int((2 * N) / 3)]
+        non_split_indices = torch.cat(
+            (dim_col_indices[: int(N / 3)], dim_col_indices[int((2 * N) / 3) :])
+        )
+        x_test = torch.cat((x_test, x_train[split_indices]), dim=0)
+        y_test = torch.cat((y_test, y_train[split_indices]), dim=0)
+        x_train, y_train = x_train[non_split_indices], y_train[non_split_indices]
+
+        self.train_dataset = TensorDataset(x_train, y_train)
+        self.setup_train_val_datasets(self.train_dataset)
+        self.test_dataset = TensorDataset(x_test, y_test)

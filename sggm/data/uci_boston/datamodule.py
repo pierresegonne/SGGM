@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 import pathlib
 
+from typing import Union
+
 from sggm.data.uci import UCIDataModule
-from sggm.data.shifted import DataModuleShifted
+from sggm.data.shifted import DataModuleShifted, DataModuleShiftedSplit
 
 DATA_FILENAME = "housing.data"
 """
@@ -73,9 +75,31 @@ class UCIBostonDataModuleShifted(UCIBostonDataModule, DataModuleShifted):
         DataModuleShifted.setup(self)
 
 
+class UCIBostonDataModuleShiftedSplit(UCIBostonDataModule, DataModuleShiftedSplit):
+    def __init__(
+        self,
+        batch_size: int,
+        n_workers: int,
+        train_val_split: float = 0.9,
+        test_split: float = 0.1,
+        **kwargs,
+    ):
+        UCIBostonDataModule.__init__(
+            self,
+            batch_size,
+            n_workers,
+            train_val_split,
+            test_split,
+        )
+
+    def setup(self, dim_idx: Union[None, int] = None, stage: str = None):
+        UCIBostonDataModule.setup(self, stage)
+        DataModuleShiftedSplit.setup(self, dim_idx)
+
+
 if __name__ == "__main__":
 
-    dm = UCIBostonDataModule(1024, 0)
-    dm.setup()
+    dm = UCIBostonDataModuleShiftedSplit(1024, 0)
+    dm.setup(dim_idx=0)
 
     print(dm.max_epochs, dm.max_batch_iterations)

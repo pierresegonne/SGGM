@@ -136,7 +136,7 @@ class Param:
 parameters = {
     BATCH_SIZE: Param(BATCH_SIZE, 32, int),
     NAME: Param(NAME, "unnamed", str),
-    N_TRIALS: Param(N_TRIALS, 1, int),
+    N_TRIALS: Param(N_TRIALS, None, none_or_int),
     N_WORKERS: Param(N_WORKERS, 0, none_or_int),
     EARLY_STOPPING_PATIENCE: Param(EARLY_STOPPING_PATIENCE, 50, int),
     SEED: Param(SEED, None, none_or_int),
@@ -228,6 +228,7 @@ def model_specific_args(params, parent_parser):
 # -------------
 
 SHIFTED = "_shifted"
+SHIFTED_SPLIT = "_shifted_split"
 # Regression
 SANITY_CHECK = "sanity_check"
 TOY = "toy"
@@ -284,6 +285,7 @@ UCI_ALL = [
     UCI_YACHT,
     UCI_YACHT_SHIFTED,
 ]
+
 # Generative
 CIFAR = "cifar"
 MNIST = "mnist"
@@ -320,6 +322,8 @@ FULLY_CONNECTED = "fully_connected"
 CONVOLUTIONAL = "convolutional"
 CONV_HIDDEN_DIMS = [32, 64, 128, 256, 512]
 
+def is_shifted_split(experiment_name: str) -> bool:
+    return SHIFTED_SPLIT in experiment_name
 
 def experiments_latent_dims(experiment_name: str) -> tuple:
     if experiment_name == MNIST:

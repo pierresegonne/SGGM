@@ -2,7 +2,6 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import pathlib
 import seaborn as sns
 import torch
 
@@ -31,6 +30,7 @@ from sggm.data.uci_wine_white.datamodule import (
 from sggm.data.uci_yacht.datamodule import (
     UCIYachtDataModule,
     UCIYachtDataModuleShifted,
+    UCIYachtDataModuleShiftedSplit,
     COLUMNS as uci_yacht_columns,
 )
 from sggm.definitions import (
@@ -102,6 +102,7 @@ def main(experiment_name, with_pca=False):
             if SHIFTED
             else UCIYachtDataModule(bs, 0)
         )
+        # dm = UCIYachtDataModuleShiftedSplit(bs, 0)
         columns = uci_yacht_columns
     dm.setup()
 

@@ -7,6 +7,7 @@ import yaml
 
 from argparse import ArgumentParser, Namespace
 from codecarbon import EmissionsTracker
+from warnings import warn
 
 from sggm.callbacks import callbacks
 from sggm.definitions import (
@@ -32,6 +33,7 @@ from sggm.definitions import (
     MODEL_NAME,
 )
 from sggm.definitions import (
+    is_shifted_split,
     SPLIT_TRAINING,
 )
 from sggm.definitions import (
@@ -383,6 +385,15 @@ def cli_main():
         )
         impact_tracker.start()
 
+        # In the case of a shift split experiment, override number of trials to correspond to the splits.
+        if is_shifted_split(experiment.experiment_name):
+            if experiment.n_trials is not None:
+                warn(
+                    f"[WARNING] The number of trials specified, n_trials={experiment.n_trials},"
+                    + f"is overriden for experiment {experiment.experiment_name} (shift split)"
+                )
+            experiment.n_trials = experiment.datamodule.dims
+        print(experiment.n_trials)
         for n_t in range(experiment.n_trials):
 
             if isinstance(experiment.seed, int):
@@ -393,7 +404,9 @@ def cli_main():
             # data
             # ------------
             datamodule = experiment.datamodule
-            datamodule.setup()
+            datamodule.setup(dim_idx=n_t) if is_shifted_split(
+                experiment.experiment_name
+            ) else datamodule.setup()
 
             # ------------
             # model
