@@ -1,8 +1,10 @@
 import pandas as pd
 import pathlib
 
+from typing import Union
+
 from sggm.data.uci import UCIDataModule
-from sggm.data.shifted import DataModuleShifted
+from sggm.data.shifted import DataModuleShifted, DataModuleShiftedSplit
 
 DATA_FILENAME = "kin8nm.csv"
 """
@@ -77,6 +79,28 @@ class UCIKin8nmDataModuleShifted(UCIKin8nmDataModule, DataModuleShifted):
     def setup(self, stage: str = None):
         UCIKin8nmDataModule.setup(self, stage)
         DataModuleShifted.setup(self)
+
+
+class UCIKin8nmDataModuleShiftedSplit(UCIKin8nmDataModule, DataModuleShiftedSplit):
+    def __init__(
+        self,
+        batch_size: int,
+        n_workers: int,
+        train_val_split: float = 0.9,
+        test_split: float = 0.1,
+        **kwargs,
+    ):
+        UCIKin8nmDataModule.__init__(
+            self,
+            batch_size,
+            n_workers,
+            train_val_split,
+            test_split,
+        )
+
+    def setup(self, dim_idx: Union[None, int] = None, stage: str = None):
+        UCIKin8nmDataModule.setup(self, stage)
+        DataModuleShiftedSplit.setup(self, dim_idx, stage)
 
 
 if __name__ == "__main__":

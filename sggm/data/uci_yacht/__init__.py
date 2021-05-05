@@ -1,1 +1,5 @@
-from sggm.data.uci_yacht.datamodule import UCIYachtDataModule, UCIYachtDataModuleShifted
+from sggm.data.uci_yacht.datamodule import (
+    UCIYachtDataModule,
+    UCIYachtDataModuleShifted,
+    UCIYachtDataModuleShiftedSplit,
+)

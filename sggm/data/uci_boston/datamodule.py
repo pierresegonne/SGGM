@@ -94,7 +94,7 @@ class UCIBostonDataModuleShiftedSplit(UCIBostonDataModule, DataModuleShiftedSpli
 
     def setup(self, dim_idx: Union[None, int] = None, stage: str = None):
         UCIBostonDataModule.setup(self, stage)
-        DataModuleShiftedSplit.setup(self, dim_idx)
+        DataModuleShiftedSplit.setup(self, dim_idx, stage)
 
 
 if __name__ == "__main__":

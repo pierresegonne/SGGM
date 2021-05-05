@@ -455,7 +455,6 @@ class VariationalRegressor(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         x, y = batch
-        print(y.shape)
         μ_x, α_x, β_x = self(x)
         log_likelihood = self.ellk(μ_x, α_x, β_x, y)
         kl_divergence = self.kl(α_x, β_x, self.prior_α, self.prior_β)
@@ -466,7 +465,6 @@ class VariationalRegressor(pl.LightningModule):
             loss = -self.elbo(log_likelihood, kl_divergence, train=False)
 
         y_pred = self.predictive_mean(x)
-        print(y_pred.shape)
 
         m_p = D.StudentT(2 * α_x, loc=μ_x, scale=torch.sqrt(β_x / α_x))
 

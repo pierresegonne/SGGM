@@ -35,6 +35,7 @@ from sggm.definitions import (
 from sggm.definitions import (
     is_shifted_split,
     SPLIT_TRAINING,
+    STAGE_SETUP_SHIFTED_SPLIT,
 )
 from sggm.definitions import (
     experiments_activation_function,
@@ -393,7 +394,7 @@ def cli_main():
                     + f"is overriden for experiment {experiment.experiment_name} (shift split)"
                 )
             experiment.n_trials = experiment.datamodule.dims
-        print(experiment.n_trials)
+
         for n_t in range(experiment.n_trials):
 
             if isinstance(experiment.seed, int):
@@ -404,9 +405,9 @@ def cli_main():
             # data
             # ------------
             datamodule = experiment.datamodule
-            datamodule.setup(dim_idx=n_t) if is_shifted_split(
-                experiment.experiment_name
-            ) else datamodule.setup()
+            datamodule.setup(
+                dim_idx=n_t, stage=STAGE_SETUP_SHIFTED_SPLIT
+            ) if is_shifted_split(experiment.experiment_name) else datamodule.setup()
 
             # ------------
             # model

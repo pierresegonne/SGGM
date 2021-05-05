@@ -1,8 +1,10 @@
 import pandas as pd
 import pathlib
 
+from typing import Union
+
 from sggm.data.uci import UCIDataModule
-from sggm.data.shifted import DataModuleShifted
+from sggm.data.shifted import DataModuleShifted, DataModuleShiftedSplit
 
 DATA_FILENAME = "ccpp.csv"
 """
@@ -69,6 +71,28 @@ class UCICCPPDataModuleShifted(UCICCPPDataModule, DataModuleShifted):
     def setup(self, stage: str = None):
         UCICCPPDataModule.setup(self, stage)
         DataModuleShifted.setup(self)
+
+
+class UCICCPPDataModuleShiftedSplit(UCICCPPDataModule, DataModuleShiftedSplit):
+    def __init__(
+        self,
+        batch_size: int,
+        n_workers: int,
+        train_val_split: float = 0.9,
+        test_split: float = 0.1,
+        **kwargs,
+    ):
+        UCICCPPDataModule.__init__(
+            self,
+            batch_size,
+            n_workers,
+            train_val_split,
+            test_split,
+        )
+
+    def setup(self, dim_idx: Union[None, int] = None, stage: str = None):
+        UCICCPPDataModule.setup(self, stage)
+        DataModuleShiftedSplit.setup(self, dim_idx, stage)
 
 
 if __name__ == "__main__":

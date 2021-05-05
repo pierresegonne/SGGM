@@ -102,7 +102,7 @@ class UCIYachtDataModuleShiftedSplit(UCIYachtDataModule, DataModuleShiftedSplit)
 
     def setup(self, dim_idx: Union[None, int] = None, stage: str = None):
         UCIYachtDataModule.setup(self, stage)
-        DataModuleShiftedSplit.setup(self, dim_idx)
+        DataModuleShiftedSplit.setup(self, dim_idx, stage)
 
 
 if __name__ == "__main__":
