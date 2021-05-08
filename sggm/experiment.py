@@ -394,7 +394,6 @@ def cli_main():
                     + f" is overriden for experiment {experiment.experiment_name} (shift split)"
                 )
             experiment.n_trials = experiment.datamodule.dims
-            print(experiment.n_trials)
 
         for n_t in range(experiment.n_trials):
 
@@ -406,8 +405,6 @@ def cli_main():
             # data
             # ------------
             datamodule = experiment.datamodule
-            print(datamodule)
-            exit()
             datamodule.setup(
                 dim_idx=n_t, stage=STAGE_SETUP_SHIFTED_SPLIT
             ) if is_shifted_split(experiment.experiment_name) else datamodule.setup()
