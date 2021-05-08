@@ -134,3 +134,4 @@ sggm/_defence_plots
 sggm/_paper_plots
 sggm/hpc_lightning_logs/
 sggm/job_logs/
+impact_logs/
