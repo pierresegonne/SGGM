@@ -1,7 +1,9 @@
 import numpy as np
 import torch
+import torch.distributions as D
 import pytorch_lightning as pl
 
+from sklearn.mixture import BayesianGaussianMixture
 from torch.utils.data import DataLoader, TensorDataset
 from typing import Tuple
 
@@ -121,9 +123,49 @@ def gaussian_noise_pig_dl(
     return dl
 
 
-def kde_pig_dl() -> DataLoader:
-    # TODO
-    pass
+def kde_pig_dl(
+    dm: pl.LightningDataModule,
+    batch_size: int,
+    N_hat_multiplier: float = 1,
+) -> DataLoader:
+
+    # Spherical = each component has single variance.
+    bgm = BayesianGaussianMixture(
+        n_components=batch_size, covariance_type="spherical", warm_start=True
+    )
+
+    for idx, batch in enumerate(iter(dm.train_dataloader())):
+        # Estimate KDE
+        x, _ = batch
+        device = x.device
+        x = x.detach().cpu().numpy()
+        bgm.fit(x)
+        # [N_components, 1], [N_components, N_features], [N_components, 1]
+        weights, means, variances = (
+            torch.Tensor(bgm.weights_).to(device),
+            torch.Tensor(bgm.means_).to(device),
+            torch.Tensor(bgm.covariances_).to(device),
+        )
+        filter_weights_idx = weights >= 1e-5
+        weights, means, variances = (
+            weights[filter_weights_idx],
+            means[filter_weights_idx],
+            variances[filter_weights_idx][:, None],
+        )
+        n_selected_components = weights.shape[0]
+        p_x = D.Independent(D.Normal(means, torch.sqrt(variances)), 1)
+        mix = D.Categorical(weights)
+        p_x = D.MixtureSameFamily(mix, p_x)
+        # Sample according to multiplier
+        x_start = p_x.sample(
+            (
+                n_selected_components
+                * ((batch_size // n_selected_components) + 1)
+                * N_hat_multiplier,
+            )
+        ).reshape(-1, x.shape[1])
+
+        # Use GD
 
 
 def mean_shift_pig_dl(

@@ -278,6 +278,7 @@ class VariationalRegressor(pl.LightningModule):
         return pred_std
 
     def setup_pig(self, dm: pl.LightningDataModule) -> None:
+        """ NOTE: Memory bottleneck here as following methods load entire dataset on memory. """
         N_hat_multiplier = 4
 
         if self.ood_x_generation_method == GAUSSIAN_NOISE:
@@ -286,7 +287,9 @@ class VariationalRegressor(pl.LightningModule):
             )
 
         elif self.ood_x_generation_method == KDE:
-            self.pig_dl = kde_pig_dl()
+            self.pig_dl = kde_pig_dl(
+                dm, dm.batch_size, N_hat_multiplier=N_hat_multiplier
+            )
 
         elif self.ood_x_generation_method == MEAN_SHIFT:
             # Assigns a pig datamodule

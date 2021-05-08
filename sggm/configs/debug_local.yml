@@ -21,21 +21,21 @@
 #   check_val_every_n_epoch: 1 # Check val every n train epochs
 
 - name: test
-  experiment_name: uci_carbon_shifted_split
+  experiment_name: uci_carbon
   # hparams
   batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
-  tau_ood: 0
+  tau_ood: 0.5
   # prior_alpha: 1.025
   # prior_beta: 0.5
-  # ood_x_generation_method: mean_shift
+  ood_x_generation_method: kde
   # ms_bw_factor: 3
   # ms_kde_bw_factor: 12
   seed: 2
   # pl trainer
   early_stopping_patience: 250
-  # n_trials: 1
+  n_trials: 1
   max_epochs: 1
   log_every_n_steps: 1 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
