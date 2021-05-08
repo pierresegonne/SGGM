@@ -28,6 +28,7 @@ from sggm.definitions import (
     OOD_X_GENERATION_METHOD,
     BRUTE_FORCE,
     GAUSSIAN_NOISE,
+    KDE,
     MEAN_SHIFT,
 )
 from sggm.definitions import (
@@ -59,8 +60,9 @@ from sggm.regression_model_helper import (
     check_mixture_ratio,
     check_ood_x_generation_method,
     generate_noise_for_model_test,
+    gaussian_noise_pig_dl,
+    kde_pig_dl,
     mean_shift_pig_dl,
-    normalise_grad,
 )
 
 # ----------
@@ -276,20 +278,22 @@ class VariationalRegressor(pl.LightningModule):
         return pred_std
 
     def setup_pig(self, dm: pl.LightningDataModule) -> None:
-        N_hat = dm.batch_size * 4
+        N_hat_multiplier = 4
 
         if self.ood_x_generation_method == GAUSSIAN_NOISE:
-            # TODO
-            pass
-            # noise_std = torch.std(x) * 3  # 3 is Arbitrary
-            # return x + noise_std * torch.randn_like(x)
+            self.pig_dl = gaussian_noise_pig_dl(
+                dm, dm.batch_size, N_hat_multiplier=N_hat_multiplier, sigma_multiplier=3
+            )
+
+        elif self.ood_x_generation_method == KDE:
+            self.pig_dl = kde_pig_dl()
 
         elif self.ood_x_generation_method == MEAN_SHIFT:
             # Assigns a pig datamodule
             self.pig_dl = mean_shift_pig_dl(
                 dm,
                 dm.batch_size,
-                N_hat=N_hat,
+                N_hat_multiplier=N_hat_multiplier,
                 max_iters=100,
                 # ad hoc factors
                 h_factor=self.ms_bw_factor,

@@ -90,14 +90,46 @@ def unpack_dataloader(dl: DataLoader) -> Tuple[torch.Tensor, torch.Tensor]:
             continue
         x = torch.cat((x, batch[0]))
         y = torch.cat((y, batch[1]))
-    
+
     return x, y
+
+
+def gaussian_noise_pig_dl(
+    dm: pl.LightningDataModule,
+    batch_size: int,
+    N_hat_multiplier: float = 1,
+    sigma_multiplier: float = 1,
+) -> DataLoader:
+    #  * 3  # 3 is Arbitrary
+    # return x + noise_std * torch.randn_like(x)
+    x, _ = unpack_dataloader(dm.train_dataloader())
+    N = x.shape[0]
+    noise_std = torch.std(x)
+
+    # Does not exactly respect N_hat but easier to do that way
+    if N_hat_multiplier >= 1:
+        n_repeats = int(N_hat_multiplier)
+        x = x.repeat(1, n_repeats).view(-1, x.shape[1])
+    else:
+        N_hat = int(N * N_hat_multiplier)
+        idx = torch.randperm(x.shape[0])[:N_hat]
+        x = x[idx]
+
+    x_hat = x + noise_std * torch.randn_like(x)
+
+    dl = DataLoader(TensorDataset(x_hat), batch_size=batch_size, shuffle=True)
+    return dl
+
+
+def kde_pig_dl() -> DataLoader:
+    # TODO
+    pass
 
 
 def mean_shift_pig_dl(
     dm: pl.LightningDataModule,
     batch_size: int,
-    N_hat: int = 100,
+    N_hat_multiplier: float = 1,
     max_iters: int = 20,
     h: float = None,
     h_factor: float = 1,
@@ -114,10 +146,14 @@ def mean_shift_pig_dl(
         # Note multiplier is arbitrary
         sigma = torch.std(x) * sigma_factor
 
-    # With replacement to allow for N_hat > N
-    idx = torch.randint(x.shape[0], (N_hat,))
-    # Without replacement
-    # idx = torch.randperm(x.shape[0])[:N_hat]
+    N = x.shape[0]
+    N_hat = int(N_hat_multiplier * N)
+    if N_hat > N:
+        # With replacement to allow for N_hat > N
+        idx = torch.randint(x.shape[0], (N_hat,))
+    else:
+        # Without replacement
+        idx = torch.randperm(x.shape[0])[:N_hat]
     # [n_pig, D]
     x_start = x[idx]
 

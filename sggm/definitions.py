@@ -21,13 +21,16 @@ PRIOR_EPISTEMIC_C = "prior_epistemic_c"
 PRIOR_EXTRAPOLATION_X = "prior_extrapolation_x"
 OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 # Options for OOD_X_GENERATION_METHOD
-GAUSSIAN_NOISE = "gaussian_noise"
 BRUTE_FORCE = "brute_force"
+GAUSSIAN_NOISE = "gaussian_noise"
+KDE = "kde"
+KDE_BANDWIDTH_MULTIPLIER = "kde_bandwidth_multiplier"
 UNIFORM = "uniform"
 MEAN_SHIFT = "mean_shift"
 
 OOD_X_GENERATION_AVAILABLE_METHODS = [
     GAUSSIAN_NOISE,
+    KDE,
     BRUTE_FORCE,
     UNIFORM,
     MEAN_SHIFT,
@@ -38,8 +41,6 @@ MS_KDE_BW_FACTOR = "ms_kde_bw_factor"
 
 OOD_Z_GENERATION_METHOD = "ood_z_generation_method"
 # Options for OOD_Z_GENERATION_METHOD
-KDE = "kde"
-KDE_BANDWIDTH_MULTIPLIER = "kde_bandwidth_multiplier"
 GD_PRIOR = "gd_prior"
 GD_AGGREGATE_POSTERIOR = "gd_aggregate_posterior"
 
