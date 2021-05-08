@@ -22,14 +22,12 @@ PRIOR_EXTRAPOLATION_X = "prior_extrapolation_x"
 OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 # Options for OOD_X_GENERATION_METHOD
 GAUSSIAN_NOISE = "gaussian_noise"
-ADVERSARIAL = "adversarial"
 BRUTE_FORCE = "brute_force"
 UNIFORM = "uniform"
 MEAN_SHIFT = "mean_shift"
 
 OOD_X_GENERATION_AVAILABLE_METHODS = [
     GAUSSIAN_NOISE,
-    ADVERSARIAL,
     BRUTE_FORCE,
     UNIFORM,
     MEAN_SHIFT,

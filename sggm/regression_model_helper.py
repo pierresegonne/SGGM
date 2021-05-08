@@ -3,6 +3,7 @@ import torch
 import pytorch_lightning as pl
 
 from torch.utils.data import DataLoader, TensorDataset
+from typing import Tuple
 
 from sggm.definitions import OOD_X_GENERATION_AVAILABLE_METHODS
 
@@ -81,6 +82,18 @@ def silverman_bandwidth(x: torch.Tensor) -> torch.Tensor:
     ).type_as(x)
 
 
+def unpack_dataloader(dl: DataLoader) -> Tuple[torch.Tensor, torch.Tensor]:
+    # Unpack x
+    x, y = next(iter(dl))
+    for idx, batch in enumerate(iter(dl)):
+        if idx == 0:
+            continue
+        x = torch.cat((x, batch[0]))
+        y = torch.cat((y, batch[1]))
+    
+    return x, y
+
+
 def mean_shift_pig_dl(
     dm: pl.LightningDataModule,
     batch_size: int,
@@ -93,12 +106,7 @@ def mean_shift_pig_dl(
     kernel: str = "tophat",
     τ: float = 1e-5,
 ) -> DataLoader:
-    # Unpack x
-    x = next(iter(dm.train_dataloader()))[0]
-    for idx, batch in enumerate(iter(dm.train_dataloader())):
-        if idx == 0:
-            continue
-        x = torch.cat((x, batch[0]))
+    x, _ = unpack_dataloader(dm.train_dataloader())
 
     if h is None:
         h = silverman_bandwidth(x) * h_factor

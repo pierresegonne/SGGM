@@ -26,11 +26,9 @@ from sggm.definitions import (
     SPLIT_TRAINING_MODE,
     #
     OOD_X_GENERATION_METHOD,
-    ADVERSARIAL,
     BRUTE_FORCE,
     GAUSSIAN_NOISE,
     MEAN_SHIFT,
-    UNIFORM,
 )
 from sggm.definitions import (
     ACTIVATION_FUNCTIONS,
@@ -80,7 +78,9 @@ def check_available_methods(method: str):
     ), f"Unvalid method {method}, choices {available_methods}"
 
 
-def BaseMLP(input_dim: int, hidden_dim: int, out_dim: int, activation: str) -> nn.Module:
+def BaseMLP(
+    input_dim: int, hidden_dim: int, out_dim: int, activation: str
+) -> nn.Module:
     assert (
         activation in ACTIVATION_FUNCTIONS
     ), f"activation_function={activation} is not in {ACTIVATION_FUNCTIONS}"
@@ -99,7 +99,9 @@ def BaseMLP(input_dim: int, hidden_dim: int, out_dim: int, activation: str) -> n
     )
 
 
-def BaseMLPSoftPlus(input_dim: int, hidden_dim: int, out_dim: int, activation: str) -> nn.Module:
+def BaseMLPSoftPlus(
+    input_dim: int, hidden_dim: int, out_dim: int, activation: str
+) -> nn.Module:
     mod = BaseMLP(input_dim, hidden_dim, out_dim, activation)
     mod.add_module("softplus", nn.Softplus())
     return mod
@@ -160,10 +162,6 @@ class VariationalRegressor(pl.LightningModule):
         self.ood_x_generation_method = check_ood_x_generation_method(
             ood_x_generation_method
         )
-        # Adversarial
-        self.ood_generator_v = None
-        if self.ood_x_generation_method in [ADVERSARIAL]:
-            self.ood_generator_v = 1
         # Mean shift
         self.ms_bw_factor = ms_bw_factor
         self.ms_kde_bw_factor = ms_kde_bw_factor
@@ -277,13 +275,21 @@ class VariationalRegressor(pl.LightningModule):
 
         return pred_std
 
-    def setup_pig(self, dm):
-        if self.ood_x_generation_method == MEAN_SHIFT:
+    def setup_pig(self, dm: pl.LightningDataModule) -> None:
+        N_hat = dm.batch_size * 4
+
+        if self.ood_x_generation_method == GAUSSIAN_NOISE:
+            # TODO
+            pass
+            # noise_std = torch.std(x) * 3  # 3 is Arbitrary
+            # return x + noise_std * torch.randn_like(x)
+
+        elif self.ood_x_generation_method == MEAN_SHIFT:
             # Assigns a pig datamodule
             self.pig_dl = mean_shift_pig_dl(
                 dm,
                 dm.batch_size,
-                N_hat=dm.batch_size * 4,
+                N_hat=N_hat,
                 max_iters=100,
                 # ad hoc factors
                 h_factor=self.ms_bw_factor,
@@ -293,24 +299,8 @@ class VariationalRegressor(pl.LightningModule):
     def ood_x(self, x: torch.Tensor, **kwargs) -> torch.Tensor:
         # Skip generation if we're not going to see it used
         if self.τ_ood > 0:
-            if self.ood_x_generation_method == GAUSSIAN_NOISE:
-                noise_std = torch.std(x) * 3  # 3 is Arbitrary
-                return x + noise_std * torch.randn_like(x)
-
-            elif self.ood_x_generation_method == ADVERSARIAL:
-                kl = torch.mean(kwargs["kl"])
-                kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-                # By default norm 2 or fro
-                normed_kl_grad = normalise_grad(kl_grad)
-                return x + self.ood_generator_v * normed_kl_grad
-
-            elif self.ood_x_generation_method == UNIFORM:
-                N = x.shape[0]
-                x_right = torch.FloatTensor(int(N / 2), 1).uniform_(7, 16)
-                x_left = torch.FloatTensor(int(N / 2), 1).uniform_(-6, 3)
-                return torch.cat((x_right, x_left), dim=0)
-
-            elif self.ood_x_generation_method == BRUTE_FORCE:
+            # Special case - can only be done "online"
+            if self.ood_x_generation_method == BRUTE_FORCE:
                 x_ood_proposal = torch.reshape(
                     torch.linspace(-25, 35, 4000), (4000, 1)
                 ).type_as(x)
@@ -325,35 +315,17 @@ class VariationalRegressor(pl.LightningModule):
                 x_ood = x_ood_proposal[idx][::2]
                 return torch.reshape(x_ood, (500, 1))
 
-            elif self.ood_x_generation_method == MEAN_SHIFT:
-                # For now, hack to make it work without working for analysis
-                # Ok get the same number of pi as training points
-                if getattr(self, "pig_dl", None):
-                    x_ood = next(iter(self.pig_dl))[0]
-                    return x_ood.type_as(x)
+            # General case, PIG DL available.
+            # For now, hack to make it work without working for analysis
+            # Ok get the same number of pi as training points
+            if getattr(self, "pig_dl", None):
+                x_ood = next(iter(self.pig_dl))[0]
+                return x_ood.type_as(x)
 
         return torch.empty(0, 0)
 
     def tune_on_validation(self, x: torch.Tensor, **kwargs):
-        if self.ood_x_generation_method == ADVERSARIAL:
-            kl = torch.mean(kwargs["kl"])
-            kl_grad = torch.autograd.grad(kl, x, retain_graph=True)[0]
-            normed_kl_grad = normalise_grad(kl_grad)
-
-            with torch.no_grad():
-                v_available = [0.0001, 0.001, 0.01, 0.1, 1, 2, 3, 5, 10, 25, 100]
-                v_, kl_ = None, -np.inf
-                for v_proposal in v_available:
-
-                    _, α, β = self(x + v_proposal * normed_kl_grad)
-                    kl_proposal = torch.mean(self.kl(α, β, self.prior_α, self.prior_β))
-                    if (kl_proposal > kl_) & (kl_proposal < 1e10):
-                        kl_ = kl_proposal
-                        v_ = v_proposal
-
-                # Prevent divergence
-                if (kl_ > -np.inf) & (v_ is not None):
-                    self.ood_generator_v = v_
+        pass
 
     @staticmethod
     def ellk(
@@ -448,8 +420,6 @@ class VariationalRegressor(pl.LightningModule):
             loss = -self.elbo(log_likelihood, kl_divergence, train=False)
 
         self.log(EVAL_LOSS, loss, on_epoch=True)
-        if self.ood_generator_v is not None:
-            self.log("ood_generator_v", self.ood_generator_v, on_epoch=True)
 
         return loss
 
