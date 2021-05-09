@@ -218,7 +218,8 @@ def plot(experiment_log, methods, show_plot=True):
                 )
 
             print(f"Average test uncertainty= {std_test.mean():.3f}")
-            print(f"Average OOD uncertainty= {std_out.mean():.3f}")
+            if with_x_out:
+                print(f"Average OOD uncertainty= {std_out.mean():.3f}")
 
         mean_ax.set_ylabel(r"$y$")
         y_max, _ = torch.max(y_train, dim=0)
