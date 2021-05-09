@@ -1,12 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+from sggm import data
 import torch
 
 from pytorch_lightning import seed_everything
 from torch import no_grad
 
 from sggm.analysis.toy.helper import get_colour_for_method
+from sggm.data import datamodules
 from sggm.data.uci_ccpp.datamodule import UCICCPPDataModule, UCICCPPDataModuleShifted
 from sggm.data.uci_concrete import UCIConcreteDataModule, UCIConcreteDataModuleShifted
 from sggm.data.uci_superconduct import (
@@ -45,26 +47,19 @@ from sggm.styles_ import colours, colours_rgb, random_rgb_colour
 
 
 def plot(experiment_log, methods, show_plot=True):
+    # %
+    y_idx = 0
+    # %
+
     with no_grad():
         best_model = experiment_log.best_version.model
 
         # Get correct datamodule
         bs = 1000
         experiment_name = experiment_log.experiment_name
-        if experiment_name == UCI_CCPP:
-            dm = UCICCPPDataModule(bs, 0)
-        elif experiment_name == UCI_CONCRETE:
-            dm = UCIConcreteDataModule(bs, 0)
-        elif experiment_name == UCI_SUPERCONDUCT:
-            dm = UCISuperConductDataModule(bs, 0)
-        elif experiment_name == UCI_WINE_RED:
-            dm = UCIWineRedDataModule(bs, 0)
-        elif experiment_name == UCI_WINE_WHITE:
-            dm = UCIWineWhiteDataModule(bs, 0)
-        elif experiment_name == UCI_YACHT:
-            dm = UCIYachtDataModule(bs, 0)
+
         # Shifted
-        elif "_shifted" in experiment_name:
+        if "_shifted" in experiment_name:
 
             assert (
                 experiment_log.best_version.misc is not None
@@ -78,48 +73,18 @@ def plot(experiment_log, methods, show_plot=True):
             ]
             seed_everything(seed)
 
-            if experiment_name == UCI_CCPP_SHIFTED:
-                dm = UCICCPPDataModuleShifted(
-                    bs,
-                    0,
-                    shifting_proportion_total=shifting_proportion_total,
-                    shifting_proportion_k=shifting_proportion_k,
-                )
-            elif experiment_name == UCI_CONCRETE_SHIFTED:
-                dm = UCIConcreteDataModuleShifted(
-                    bs,
-                    0,
-                    shifting_proportion_total=shifting_proportion_total,
-                    shifting_proportion_k=shifting_proportion_k,
-                )
-            elif experiment_name == UCI_SUPERCONDUCT_SHIFTED:
-                dm = UCISuperConductDataModuleShifted(
-                    bs,
-                    0,
-                    shifting_proportion_total=shifting_proportion_total,
-                    shifting_proportion_k=shifting_proportion_k,
-                )
-            elif experiment_name == UCI_WINE_RED_SHIFTED:
-                dm = UCIWineRedDataModuleShifted(
-                    bs,
-                    0,
-                    shifting_proportion_total=shifting_proportion_total,
-                    shifting_proportion_k=shifting_proportion_k,
-                )
-            elif experiment_name == UCI_WINE_WHITE_SHIFTED:
-                dm = UCIWineWhiteDataModuleShifted(
-                    bs,
-                    0,
-                    shifting_proportion_total=shifting_proportion_total,
-                    shifting_proportion_k=shifting_proportion_k,
-                )
-            elif experiment_name == UCI_YACHT_SHIFTED:
-                dm = UCIYachtDataModuleShifted(
-                    bs,
-                    0,
-                    shifting_proportion_total=shifting_proportion_total,
-                    shifting_proportion_k=shifting_proportion_k,
-                )
+            dm = datamodules[experiment_name](
+                bs,
+                0,
+                shifting_proportion_total=shifting_proportion_total,
+                shifting_proportion_k=shifting_proportion_k,
+            )
+
+        else:
+            dm = datamodules[experiment_name](
+                bs,
+                0,
+            )
         dm.setup()
 
         # Plot training points for reference
@@ -134,18 +99,7 @@ def plot(experiment_log, methods, show_plot=True):
         # Fallback on GN generation if no x ood
         best_model.τ_ood = 0.5
         best_model.ood_x_generation_method = GAUSSIAN_NOISE
-        with torch.set_grad_enabled(True):
-            x_test.requires_grad = True
-            μ_x, α_x, β_x = best_model(x_test)
-            kl_divergence = best_model.kl(
-                α_x, β_x, best_model.prior_α, best_model.prior_β
-            )
-            # density_lk = best_model.gmm_density(x_test).log_prob(x_test).exp()
-            x_out = best_model.ood_x(
-                x_test,
-                kl=kl_divergence,
-                # density_lk=density_lk,
-            )
+        x_out = best_model.ood_x(x_test)
         x_test = x_test.detach()
         x_out = x_out.detach()
         with_x_out = True if (x_out is not None and torch.numel(x_out) > 0) else False
@@ -171,19 +125,20 @@ def plot(experiment_log, methods, show_plot=True):
         for method in methods:
             colour = get_colour_for_method(method)
 
+            # With multivariate predictions, creates the need to select y dimension
             mean_train, mean_test = (
-                best_model.predictive_mean(x_train, method).flatten(),
-                best_model.predictive_mean(x_test, method).flatten(),
+                best_model.predictive_mean(x_train, method)[:, y_idx].flatten(),
+                best_model.predictive_mean(x_test, method)[:, y_idx].flatten(),
             )
             std_train, std_test = (
-                best_model.predictive_std(x_train, method).flatten(),
-                best_model.predictive_std(x_test, method).flatten(),
+                best_model.predictive_std(x_train, method)[:, y_idx].flatten(),
+                best_model.predictive_std(x_test, method)[:, y_idx].flatten(),
             )
 
             if with_x_out:
                 mean_out, std_out = (
-                    best_model.predictive_mean(x_out, method).flatten(),
-                    best_model.predictive_std(x_out, method).flatten(),
+                    best_model.predictive_mean(x_out, method)[:, y_idx].flatten(),
+                    best_model.predictive_std(x_out, method)[:, y_idx].flatten(),
                 )
 
             mean_ax.errorbar(
@@ -212,7 +167,7 @@ def plot(experiment_log, methods, show_plot=True):
 
             var_ax.plot(
                 norm_x_test,
-                torch.sqrt((y_test.flatten() - mean_test) ** 2),
+                torch.sqrt((y_test[:, y_idx].flatten() - mean_test) ** 2),
                 "o",
                 markersize=3,
                 markerfacecolor=(*colours_rgb["navyBlue"], 0.6),
@@ -270,7 +225,7 @@ def plot(experiment_log, methods, show_plot=True):
         y_min, _ = torch.min(y_train, dim=0)
         y_max = torch.where(y_max > 0, 1.25 * y_max, 0.75 * y_max)
         y_min = torch.where(y_min > 0, 0.75 * y_min, 1.25 * y_min)
-        mean_ax.set_ylim((y_min, y_max))
+        mean_ax.set_ylim((y_min[y_idx], y_max[y_idx]))
         mean_ax.grid(True)
         mean_ax.legend()
 

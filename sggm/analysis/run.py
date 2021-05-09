@@ -18,18 +18,7 @@ from sggm.definitions import (
     TOY_SHIFTED,
     TOY_2D,
     TOY_2D_SHIFTED,
-    UCI_CCPP,
-    UCI_CCPP_SHIFTED,
-    UCI_CONCRETE,
-    UCI_CONCRETE_SHIFTED,
-    UCI_SUPERCONDUCT,
-    UCI_SUPERCONDUCT_SHIFTED,
-    UCI_WINE_RED,
-    UCI_WINE_RED_SHIFTED,
-    UCI_WINE_WHITE,
-    UCI_WINE_WHITE_SHIFTED,
-    UCI_YACHT,
-    UCI_YACHT_SHIFTED,
+    UCI_ALL,
     #
     CIFAR,
     MNIST,
@@ -41,21 +30,6 @@ from sggm.definitions import (
     MNIST_ALL,
 )
 from sggm.regression_model import check_available_methods, MARGINAL
-
-UCI = [
-    UCI_CCPP,
-    UCI_CCPP_SHIFTED,
-    UCI_CONCRETE,
-    UCI_CONCRETE_SHIFTED,
-    UCI_SUPERCONDUCT,
-    UCI_SUPERCONDUCT_SHIFTED,
-    UCI_WINE_RED,
-    UCI_WINE_RED_SHIFTED,
-    UCI_WINE_WHITE,
-    UCI_WINE_WHITE_SHIFTED,
-    UCI_YACHT,
-    UCI_YACHT_SHIFTED,
-]
 
 
 def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
@@ -72,7 +46,7 @@ def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
             toy_plot(experiment_log, **kwargs)
         elif experiment_name == [TOY_2D, TOY_2D_SHIFTED]:
             toy_2d_plot(experiment_log, **kwargs)
-        elif experiment_name in UCI:
+        elif experiment_name in UCI_ALL:
             uci_plot(experiment_log, **kwargs)
         elif experiment_name in MNIST_ALL:
             mnist_plot(experiment_log, **kwargs)
@@ -81,7 +55,7 @@ def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
 
 
 def add_experiment_args(parser, experiment_name):
-    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, *UCI]:
+    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, *UCI_ALL]:
         parser.add_argument(
             "--methods",
             type=str,
@@ -100,7 +74,7 @@ def add_experiment_args(parser, experiment_name):
 
 def parse_experiment_args(args):
     experiment_name = args.experiment_name
-    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, *UCI]:
+    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, *UCI_ALL]:
         args.methods = [item for item in args.methods.split(",")]
     if experiment_name in MNIST_ALL:
         args.others = (

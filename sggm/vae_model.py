@@ -63,11 +63,11 @@ from sggm.definitions import (
 )
 from sggm.model_helper import NNJ_ShiftLayer, log_2_pi, ShiftLayer
 from sggm.types_ import List, Tensor, Tuple, Union
+from sggm.model_helper import density_gradient_descent
 from sggm.vae_model_helper import (
     batch_flatten,
     batch_reshape,
     check_ood_z_generation_method,
-    density_gradient_descent,
     reduce_int_list,
     locscale_sigmoid,
 )

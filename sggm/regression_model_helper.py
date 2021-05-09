@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from typing import Tuple
 
 from sggm.definitions import OOD_X_GENERATION_AVAILABLE_METHODS
+from sggm.model_helper import density_gradient_descent
 
 
 def check_ood_x_generation_method(method: str) -> str:
@@ -23,25 +24,6 @@ def check_ood_x_generation_method(method: str) -> str:
 def check_mixture_ratio(r: float) -> float:
     assert (r >= 0) & (r <= 1), "Invalid ratio"
     return r
-
-
-def normalise_grad(grad: torch.Tensor) -> torch.Tensor:
-    """Normalise and handle NaNs caused by norm division.
-
-    Args:
-        grad (torch.Tensor): Gradient to normalise
-
-    Returns:
-        torch.Tensor: Normalised gradient
-    """
-    normed_grad = grad / torch.linalg.norm(grad, dim=1)[:, None]
-    if torch.isnan(normed_grad).any():
-        normed_grad = torch.where(
-            torch.isnan(normed_grad),
-            torch.zeros_like(normed_grad),
-            normed_grad,
-        )
-    return normed_grad
 
 
 def generate_noise_for_model_test(x: torch.Tensor) -> torch.Tensor:
@@ -128,17 +110,28 @@ def kde_pig_dl(
     batch_size: int,
     N_hat_multiplier: float = 1,
 ) -> DataLoader:
+    # %
+    gd_n_steps, gd_lr, gd_threshold = 5, 4e-1, 0.005
 
     # Spherical = each component has single variance.
     bgm = BayesianGaussianMixture(
-        n_components=batch_size, covariance_type="spherical", warm_start=True
+        n_components=batch_size,
+        covariance_type="spherical",
+        warm_start=True,
     )
 
+    x_hat = torch.Tensor()
     for idx, batch in enumerate(iter(dm.train_dataloader())):
-        # Estimate KDE
         x, _ = batch
         device = x.device
         x = x.detach().cpu().numpy()
+        # Last batch might have less elements than origin n_components
+        if x.shape[0] < bgm.n_components:
+            bgm = BayesianGaussianMixture(
+                n_components=x.shape[0],
+                covariance_type="spherical",
+            )
+        # Estimate KDE
         bgm.fit(x)
         # [N_components, 1], [N_components, N_features], [N_components, 1]
         weights, means, variances = (
@@ -164,8 +157,16 @@ def kde_pig_dl(
                 * N_hat_multiplier,
             )
         ).reshape(-1, x.shape[1])
-
         # Use GD
+        _x_hat = density_gradient_descent(
+            p_x,
+            x_start,
+            {"N_steps": gd_n_steps, "lr": gd_lr, "threshold": gd_threshold},
+        )
+        x_hat = torch.cat((x_hat, _x_hat.detach()))
+
+    dl = DataLoader(TensorDataset(x_hat), batch_size=batch_size, shuffle=True)
+    return dl
 
 
 def mean_shift_pig_dl(
