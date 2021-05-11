@@ -38,6 +38,6 @@ source env/bin/activate
 python3 -m pip install -r requirements.txt
 export PYTHONIOENCODING=utf8
 # Our model run
-cd sggm/ && python experiment.py --experiments_config configs/benchmarks_shifted_split.yml --gpus -1
+cd sggm/ && python experiment.py --experiments_config configs/eval_kde.yml --gpus -1
 # Baselines run
 # cd sggm/ && python baselines/run.py --experiment_name uci_carbon --n_trials 20

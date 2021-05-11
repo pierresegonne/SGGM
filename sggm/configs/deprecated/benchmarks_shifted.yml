@@ -7,8 +7,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   tau_ood: 0
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.5
@@ -29,8 +29,8 @@
   hidden_dim: 50
   beta_elbo: 0.5
   tau_ood: 0
-  prior_alpha: 1.025
-  prior_beta: 0.5
+  prior_α: 1.025
+  prior_β: 0.5
   # shift
   seed: 2
   shifting_proportion_total: 0.5
@@ -51,8 +51,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   ood_x_generation_method: gaussian_noise
 #   # shift
 #   seed: 2
@@ -74,8 +74,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   ood_x_generation_method: adversarial
 #   # shift
 #   seed: 2
@@ -97,8 +97,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   ood_x_generation_method: brute_force
 #   # shift
 #   seed: 2
@@ -125,8 +125,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   tau_ood: 0
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   # pl trainer
 #   n_trials: 20
 #   max_epochs: -1
@@ -144,8 +144,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   # pl trainer
 #   n_trials: 20
 #   max_epochs: -1
@@ -163,8 +163,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   ood_x_generation_method: gaussian_noise
 #   # pl trainer
 #   n_trials: 20
@@ -183,8 +183,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   ood_x_generation_method: adversarial
 #   # pl trainer
 #   n_trials: 20
@@ -204,8 +204,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.3
@@ -225,8 +225,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.3
@@ -246,8 +246,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: gaussian_noise
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -270,8 +270,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: adversarial
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -298,8 +298,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.7
@@ -319,8 +319,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.7
@@ -340,8 +340,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: gaussian_noise
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -364,8 +364,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: adversarial
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -391,8 +391,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.01
@@ -412,8 +412,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.01
@@ -433,8 +433,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: gaussian_noise
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -457,8 +457,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: adversarial
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -484,8 +484,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.002
@@ -505,8 +505,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.002
@@ -526,8 +526,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: gaussian_noise
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -550,8 +550,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: adversarial
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -577,8 +577,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.0001
@@ -598,8 +598,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.0001
@@ -619,8 +619,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: gaussian_noise
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -643,8 +643,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: adversarial
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -670,8 +670,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.95
@@ -691,8 +691,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   # shift
 #   seed: 2
 #   shifting_proportion_total: 0.95
@@ -712,8 +712,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: gaussian_noise
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean
@@ -736,8 +736,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.5
-#   prior_beta: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
 #   ood_x_generation_method: adversarial
 #   split_training: True
 #   split_training_mode: split_training_std_vv_mean

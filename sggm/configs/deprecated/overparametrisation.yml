@@ -6,8 +6,8 @@
   beta_elbo: 1
   beta_ood: 1
   ood_x_generation_method: gaussian_noise_around_x
-  prior_alpha: 1.0025
-  prior_beta: 0.05
+  prior_α: 1.0025
+  prior_β: 0.05
   # pl trainer
   n_trials: 5
   max_epochs: 6000
@@ -25,8 +25,8 @@
   beta_elbo: 1
   beta_ood: 1
   ood_x_generation_method: gaussian_noise_around_x
-  prior_alpha: 1.0025
-  prior_beta: 0.05
+  prior_α: 1.0025
+  prior_β: 0.05
   # pl trainer
   n_trials: 5
   max_epochs: 6000
@@ -44,8 +44,8 @@
   beta_elbo: 1
   beta_ood: 1
   ood_x_generation_method: gaussian_noise_around_x
-  prior_alpha: 1.0025
-  prior_beta: 0.05
+  prior_α: 1.0025
+  prior_β: 0.05
   # pl trainer
   n_trials: 5
   max_epochs: 6000
@@ -63,8 +63,8 @@
   beta_elbo: 1
   beta_ood: 1
   ood_x_generation_method: gaussian_noise_around_x
-  prior_alpha: 1.0025
-  prior_beta: 0.05
+  prior_α: 1.0025
+  prior_β: 0.05
   # pl trainer
   n_trials: 5
   max_epochs: 6000

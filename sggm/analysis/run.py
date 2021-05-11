@@ -38,7 +38,7 @@ def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
             experiment_name, name, model_name=model_name, save_dir=save_dir
         )
         print(
-            f"-- Best version: {experiment_log.versions[experiment_log.idx_best_version].version_id}"
+            f"-- {name} | Best version: {experiment_log.versions[experiment_log.idx_best_version].version_id}"
         )
         if experiment_name in [SANITY_CHECK]:
             sanity_check_plot(experiment_log, **kwargs)

@@ -18,7 +18,6 @@ def has_experiment_run(
     """ Verifies that the experiment ran for all run names """
     base_path = f"{save_dir}/{experiment_name}"
     for run_name in run_names:
-        print(f"{base_path}/{run_name}")
         if not os.path.exists(f"{base_path}/{run_name}"):
             return False
     return True
@@ -89,7 +88,7 @@ if __name__ == "__main__":
             # Check that data exists
             if has_experiment_run(save_dir, exp, names):
 
-                print(f"\n  -- Running {exp}")
+                print(f"\n  -- Running {exp} | {args.names}")
 
                 s_run = os.system(
                     f"python run.py --save_dir {save_dir} --experiment_name {exp} --names {args.names} --show_plot 0"
@@ -105,6 +104,7 @@ if __name__ == "__main__":
 
     # Assemble comparison
     # We'll asssume that the name of the csvs don't fallback on _unnamed
+    first = True
     if args.hpc is not None:
         for i, exp in enumerate(UCI_EXPERIMENTS):
             if has_experiment_run(save_dir, exp, names):
@@ -112,10 +112,11 @@ if __name__ == "__main__":
                 comparison_filename = (
                     f"{save_dir}/{exp}/compare/{args.names.replace(',', '-')}.csv"
                 )
-                if i == 0:
+                if first:
                     _df = pd.read_csv(comparison_filename)
                     comp_df = pd.DataFrame(columns=_df.columns)
                     comp_cols = comp_df.columns
+                    first = False
 
                 _df = pd.read_csv(comparison_filename)
 

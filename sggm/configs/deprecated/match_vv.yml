@@ -8,8 +8,8 @@
   learning_rate: 0.001
   beta_elbo: 0.5
   beta_ood: 0
-  prior_alpha: 1.0
-  prior_beta: 0.001
+  prior_α: 1.0
+  prior_β: 0.001
   seed: 2
   # data
   train_val_split: 0.99
@@ -31,8 +31,8 @@
   learning_rate: 0.001
   beta_elbo: 0.5
   beta_ood: 0
-  prior_alpha: 1.
-  prior_beta: 0.001
+  prior_α: 1.
+  prior_β: 0.001
   seed: 2
   # data
   train_val_split: 0.99

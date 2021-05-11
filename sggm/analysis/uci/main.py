@@ -1,7 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
-import random
-from sggm import data
 import torch
 
 from pytorch_lightning import seed_everything
@@ -9,41 +6,13 @@ from torch import no_grad
 
 from sggm.analysis.toy.helper import get_colour_for_method
 from sggm.data import datamodules
-from sggm.data.uci_ccpp.datamodule import UCICCPPDataModule, UCICCPPDataModuleShifted
-from sggm.data.uci_concrete import UCIConcreteDataModule, UCIConcreteDataModuleShifted
-from sggm.data.uci_superconduct import (
-    UCISuperConductDataModule,
-    UCISuperConductDataModuleShifted,
-)
-from sggm.data.uci_wine_red import UCIWineRedDataModule, UCIWineRedDataModuleShifted
-from sggm.data.uci_wine_white import (
-    UCIWineWhiteDataModule,
-    UCIWineWhiteDataModuleShifted,
-)
-from sggm.data.uci_yacht import UCIYachtDataModule, UCIYachtDataModuleShifted
-from sggm.definitions import (
-    UCI_CCPP,
-    UCI_CONCRETE,
-    UCI_SUPERCONDUCT,
-    UCI_WINE_RED,
-    UCI_WINE_WHITE,
-    UCI_YACHT,
-)
-from sggm.definitions import (
-    UCI_CCPP_SHIFTED,
-    UCI_CONCRETE_SHIFTED,
-    UCI_SUPERCONDUCT_SHIFTED,
-    UCI_WINE_RED_SHIFTED,
-    UCI_WINE_WHITE_SHIFTED,
-    UCI_YACHT_SHIFTED,
-)
 from sggm.definitions import (
     SEED,
     SHIFTING_PROPORTION_K,
     SHIFTING_PROPORTION_TOTAL,
     GAUSSIAN_NOISE,
 )
-from sggm.styles_ import colours, colours_rgb, random_rgb_colour
+from sggm.styles_ import colours, colours_rgb
 
 
 def plot(experiment_log, methods, show_plot=True):

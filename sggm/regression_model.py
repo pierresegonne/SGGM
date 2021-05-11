@@ -7,8 +7,6 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 
-from sklearn.mixture import GaussianMixture
-
 from sggm.definitions import (
     model_specific_args,
     regressor_parameters,
@@ -32,13 +30,6 @@ from sggm.definitions import (
     MEAN_SHIFT,
 )
 from sggm.definitions import (
-    ACTIVATION_FUNCTIONS,
-    F_ELU,
-    F_LEAKY_RELU,
-    F_RELU,
-    F_SIGMOID,
-)
-from sggm.definitions import (
     TRAIN_LOSS,
     EVAL_LOSS,
     TEST_LOSS,
@@ -55,7 +46,7 @@ from sggm.definitions import (
     NOISE_UNCERTAINTY,
     NOISE_KL,
 )
-from sggm.model_helper import log_2_pi, ShiftLayer
+from sggm.model_helper import log_2_pi, get_activation_function, ShiftLayer
 from sggm.regression_model_helper import (
     check_mixture_ratio,
     check_ood_x_generation_method,
@@ -83,17 +74,7 @@ def check_available_methods(method: str):
 def BaseMLP(
     input_dim: int, hidden_dim: int, out_dim: int, activation: str
 ) -> nn.Module:
-    assert (
-        activation in ACTIVATION_FUNCTIONS
-    ), f"activation_function={activation} is not in {ACTIVATION_FUNCTIONS}"
-    if activation == F_ELU:
-        f = nn.Tanh()
-    if activation == F_LEAKY_RELU:
-        f = nn.LeakyReLU()
-    elif activation == F_RELU:
-        f = nn.ReLU()
-    elif activation == F_SIGMOID:
-        f = nn.Sigmoid()
+    f = get_activation_function(activation)
     return nn.Sequential(
         nn.Linear(input_dim, hidden_dim),
         f,
@@ -178,7 +159,6 @@ class VariationalRegressor(pl.LightningModule):
         self.τ_ood = check_mixture_ratio(τ_ood)
 
         self.learning_rate = learning_rate
-        self.lr_v = 1e-2
 
         # ---------
         # Inference Networks

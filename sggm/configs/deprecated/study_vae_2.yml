@@ -8,8 +8,8 @@
   learning_rate: 1e-4
   eps: 1e-3
   # From prior_gamma_per_pixel - for MNIST only
-  prior_alpha: 0.3927581767454884
-  prior_beta: 0.0010704155012337458
+  prior_α: 0.3927581767454884
+  prior_β: 0.0010704155012337458
   # ood
   tau_ood: 0.5
   ood_z_generation_method: kde
@@ -34,8 +34,8 @@
   learning_rate: 1e-4
   eps: 1e-4
   # From prior_gamma_per_pixel - for MNIST only
-  prior_alpha: 0.3927581767454884
-  prior_beta: 0.0010704155012337458
+  prior_α: 0.3927581767454884
+  prior_β: 0.0010704155012337458
   # ood
   tau_ood: 0.5
   ood_z_generation_method: kde
@@ -60,8 +60,8 @@
   learning_rate: 1e-4
   eps: 1e-5
   # From prior_gamma_per_pixel - for MNIST only
-  prior_alpha: 0.3927581767454884
-  prior_beta: 0.0010704155012337458
+  prior_α: 0.3927581767454884
+  prior_β: 0.0010704155012337458
   # ood
   tau_ood: 0.5
   ood_z_generation_method: kde
@@ -86,8 +86,8 @@
   learning_rate: 1e-4
   eps: 1e-6
   # From prior_gamma_per_pixel - for MNIST only
-  prior_alpha: 0.3927581767454884
-  prior_beta: 0.0010704155012337458
+  prior_α: 0.3927581767454884
+  prior_β: 0.0010704155012337458
   # ood
   tau_ood: 0.5
   ood_z_generation_method: kde

@@ -27,8 +27,8 @@
 #   learning_rate: 1e-4
 #   eps: 1e-6
 #   # From prior_gamma_per_pixel - for MNIST only
-#   prior_alpha: 1.567
-#   prior_beta: 0.005466103219719339
+#   prior_α: 1.567
+#   prior_β: 0.005466103219719339
 #   # misc
 #   n_mc_samples: 5
 #   n_trials: 5
@@ -50,8 +50,8 @@
 #   learning_rate: 1e-4
 #   eps: 1e-6
 #   # From prior_gamma_per_pixel - for MNIST only
-#   prior_alpha: 1.567
-#   prior_beta: 0.005466103219719339
+#   prior_α: 1.567
+#   prior_β: 0.005466103219719339
 #   # ood
 #   tau_ood: 0.5
 #   ood_z_generation_method: kde

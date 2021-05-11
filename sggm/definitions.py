@@ -19,6 +19,12 @@ PRIOR_β = "prior_β"
 PRIOR_B = "prior_b"
 PRIOR_EPISTEMIC_C = "prior_epistemic_c"
 PRIOR_EXTRAPOLATION_X = "prior_extrapolation_x"
+
+# Baselines
+DROPOUT_RATE = "dropout_rate"
+N_ENS = "n_ens"
+
+
 OOD_X_GENERATION_METHOD = "ood_x_generation_method"
 # Options for OOD_X_GENERATION_METHOD
 BRUTE_FORCE = "brute_force"
@@ -148,9 +154,14 @@ parameters = {
 # Models
 # -------------
 VARIATIONAL_REGRESSOR = "variational_regressor"
+MCD_REGRESSOR = "mcd_regressor"
+ENS_REGRESSOR = "ens_regressor"
 regressor_parameters = {
     MODEL_NAME: Param(
-        MODEL_NAME, VARIATIONAL_REGRESSOR, str, choices=[VARIATIONAL_REGRESSOR]
+        MODEL_NAME,
+        VARIATIONAL_REGRESSOR,
+        str,
+        choices=[VARIATIONAL_REGRESSOR, MCD_REGRESSOR, ENS_REGRESSOR],
     ),
     #
     SPLIT_TRAINING: Param(SPLIT_TRAINING, False, bool),
@@ -168,12 +179,23 @@ variational_regressor_parameters = {
         none_or_str,
         choices=OOD_X_GENERATION_AVAILABLE_METHODS,
     ),
-    PRIOR_α: Param(PRIOR_α, 1.05, float),
-    PRIOR_β: Param(PRIOR_β, 1.0, float),
+    PRIOR_α: Param(PRIOR_α, 1.5, float),
+    PRIOR_β: Param(PRIOR_β, 0.5, float),
     #
     SPLIT_TRAINING_MODE: Param(SPLIT_TRAINING_MODE, None, str),
     MS_BW_FACTOR: Param(MS_BW_FACTOR, 1.0, float),
     MS_KDE_BW_FACTOR: Param(MS_KDE_BW_FACTOR, 1.0, float),
+}
+mcd_regressor_parameters = {
+    LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
+    HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
+    N_MC_SAMPLES: Param(N_MC_SAMPLES, 20, int),
+    DROPOUT_RATE: Param(DROPOUT_RATE, 0.05, float),
+}
+ens_regressor_parameters = {
+    LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
+    HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
+    N_ENS: Param(N_ENS, 5, int),
 }
 regression_models = [VARIATIONAL_REGRESSOR]
 
@@ -211,7 +233,7 @@ generative_models = [VANILLA_VAE, VANILLA_VAE_MANIFOLD, VV_VAE, VV_VAE_MANIFOLD]
 model_names = regression_models + generative_models
 
 
-def model_specific_args(params, parent_parser):
+def model_specific_args(params, parent_parser) -> ArgumentParser:
     parser = ArgumentParser(
         parents=[parent_parser], add_help=False, conflict_handler="resolve"
     )

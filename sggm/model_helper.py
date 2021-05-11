@@ -5,7 +5,30 @@ import torch.distributions as D
 from geoml.nnj import ActivationJacobian, JacType
 from torch import nn
 
+from sggm.definitions import (
+    ACTIVATION_FUNCTIONS,
+    F_ELU,
+    F_LEAKY_RELU,
+    F_RELU,
+    F_SIGMOID,
+)
+
 log_2_pi = float(torch.log(2 * torch.tensor([np.pi])))
+
+
+def get_activation_function(activation: str) -> nn.Module:
+    assert (
+        activation in ACTIVATION_FUNCTIONS
+    ), f"activation_function={activation} is not in {ACTIVATION_FUNCTIONS}"
+    if activation == F_ELU:
+        f = nn.Tanh()
+    if activation == F_LEAKY_RELU:
+        f = nn.LeakyReLU()
+    elif activation == F_RELU:
+        f = nn.ReLU()
+    elif activation == F_SIGMOID:
+        f = nn.Sigmoid()
+    return f
 
 
 def normalise_grad(grad: torch.Tensor) -> torch.Tensor:

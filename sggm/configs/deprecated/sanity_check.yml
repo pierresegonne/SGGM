@@ -5,8 +5,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   seed: 2
 #   # pl trainer
 #   early_stopping_patience: 250
@@ -24,8 +24,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   ood_x_generation_method: gaussian_noise
 #   seed: 2
 #   # pl trainer
@@ -44,8 +44,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0
-#   prior_alpha: 1.05
-#   prior_beta: 1
+#   prior_α: 1.05
+#   prior_β: 1
 #   seed: 2
 #   # pl trainer
 #   early_stopping_patience: 250
@@ -63,8 +63,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.05
-#   prior_beta: 1
+#   prior_α: 1.05
+#   prior_β: 1
 #   ood_x_generation_method: gaussian_noise
 #   seed: 2
 #   # pl trainer
@@ -83,8 +83,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.05
-#   prior_beta: 1
+#   prior_α: 1.05
+#   prior_β: 1
 #   ood_x_generation_method: adversarial
 #   seed: 2
 #   # pl trainer
@@ -103,8 +103,8 @@
   hidden_dim: 50
   beta_elbo: 0.5
   tau_ood: 0.5
-  prior_alpha: 1.5
-  prior_beta: 10
+  prior_α: 1.5
+  prior_β: 10
   ood_x_generation_method: gaussian_noise
   seed: 2
   # pl trainer
@@ -123,8 +123,8 @@
   hidden_dim: 50
   beta_elbo: 0.5
   tau_ood: 0.5
-  prior_alpha: 1.005
-  prior_beta: 0.1
+  prior_α: 1.005
+  prior_β: 0.1
   ood_x_generation_method: gaussian_noise
   seed: 2
   # pl trainer
@@ -143,8 +143,8 @@
 #   hidden_dim: 50
 #   beta_elbo: 0.5
 #   tau_ood: 0.5
-#   prior_alpha: 1.025
-#   prior_beta: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
 #   ood_x_generation_method: uniform
 #   seed: 2
 #   # pl trainer
