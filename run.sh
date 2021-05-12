@@ -1,9 +1,9 @@
 #!/bin/sh
 ### General options
 ### specify queue --
-#BSUB -q gpuv100
+#BSUB -q gpua100
 ### -- set the job Name --
-#BSUB -J benchmarks_shifted_split_continued
+#BSUB -J eval_vap
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 4
 #BSUB -R "span[hosts=1]"

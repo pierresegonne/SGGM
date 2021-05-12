@@ -101,4 +101,6 @@ if __name__ == "__main__":
     dm.setup()
 
     # Info about the data
+    import math
+
     print(dm.y_std)
