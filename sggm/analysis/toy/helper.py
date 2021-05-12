@@ -123,17 +123,18 @@ def best_model_plot(data_ax: Axes, model: VariationalRegressor, method: str) -> 
     colour = get_colour_for_method(method)
     best_mean = model.predictive_mean(x_plot, method).flatten()
     best_std = model.predictive_std(x_plot, method).flatten()
-    prior_std = model.prior_std(x_plot).flatten()
-
-    # Prior plot
-    data_ax.fill_between(
-        x_plot.flatten(),
-        best_mean + 1.96 * prior_std,
-        best_mean - 1.96 * prior_std,
-        facecolor=colours["grey"],
-        alpha=0.65,
-        label=r"$\mu_{%s}(x) \pm 1.96 \,\sigma_{%s}(x)$" % (method, method),
-    )
+    with_prior = getattr(model, "prior_std", None) is not None
+    if with_prior:
+        prior_std = model.prior_std(x_plot).flatten()
+        # Prior plot
+        data_ax.fill_between(
+            x_plot.flatten(),
+            best_mean + 1.96 * prior_std,
+            best_mean - 1.96 * prior_std,
+            facecolor=colours["grey"],
+            alpha=0.65,
+            label=r"$\mu_{%s}(x) \pm 1.96 \,\sigma_{%s}(x)$" % (method, method),
+        )
 
     # Model plot
     data_ax.plot(x_plot, best_mean, "-", color=colour, alpha=0.55)
@@ -166,16 +167,19 @@ def mean_models_plot(std_ax: Axes, experiment_log: ExperimentLog, method: str) -
         label=r"$\sigma_{%s}$" % method,
     )
 
-    # Add prior level
-    x_plot_prior = torch.Tensor(std_df["x"].values)
-    std_prior = experiment_log.best_version.model.prior_std(x_plot_prior)
-    std_ax.plot(
-        x_plot_prior,
-        std_prior,
-        color=colours["grey"],
-        alpha=0.65,
-        label=r"$\sigma_{prior}$",
-    )
+    model = experiment_log.best_version.model
+    with_prior = getattr(model, "prior_std", None) is not None
+    if with_prior:
+        # Add prior level
+        x_plot_prior = torch.Tensor(std_df["x"].values)
+        std_prior = experiment_log.best_version.model.prior_std(x_plot_prior)
+        std_ax.plot(
+            x_plot_prior,
+            std_prior,
+            color=colours["grey"],
+            alpha=0.65,
+            label=r"$\sigma_{prior}$",
+        )
 
     std_ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", borderaxespad=0.0)
 

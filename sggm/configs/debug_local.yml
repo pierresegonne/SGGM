@@ -1,16 +1,34 @@
-- name: visualise_kde
-  experiment_name: toy
+# - name: visualise_kde
+#   experiment_name: toy
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.025
+#   prior_β: 0.5
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   seed: 2
+#   # pl trainer
+#   early_stopping_patience: 250
+#   n_trials: 1
+#   max_epochs: -1
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: test_mcdnn
+  model_name: mcd_regressor
+  experiment_name: uci_ccpp
   # hparams
   batch_size: 1024
   hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.025
-  prior_β: 0.5
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
   seed: 2
+  dropout_rate: 0.05
+  n_mc_samples: 20
   # pl trainer
   early_stopping_patience: 250
   n_trials: 1

@@ -170,7 +170,6 @@ variational_regressor_parameters = {
     β_ELBO: Param(β_ELBO, 0.5, float),
     τ_OOD: Param(τ_OOD, 0.0, float),
     LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
-    EPS: Param(EPS, 1e-10, float),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
     N_MC_SAMPLES: Param(N_MC_SAMPLES, 20, int),
     OOD_X_GENERATION_METHOD: Param(
@@ -182,17 +181,20 @@ variational_regressor_parameters = {
     PRIOR_α: Param(PRIOR_α, 1.5, float),
     PRIOR_β: Param(PRIOR_β, 0.5, float),
     #
+    EPS: Param(EPS, 1e-10, float),
     SPLIT_TRAINING_MODE: Param(SPLIT_TRAINING_MODE, None, str),
     MS_BW_FACTOR: Param(MS_BW_FACTOR, 1.0, float),
     MS_KDE_BW_FACTOR: Param(MS_KDE_BW_FACTOR, 1.0, float),
 }
 mcd_regressor_parameters = {
+    EPS: Param(EPS, 1e-10, float),
     LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
     N_MC_SAMPLES: Param(N_MC_SAMPLES, 20, int),
     DROPOUT_RATE: Param(DROPOUT_RATE, 0.05, float),
 }
 ens_regressor_parameters = {
+    EPS: Param(EPS, 1e-10, float),
     LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
     N_ENS: Param(N_ENS, 5, int),

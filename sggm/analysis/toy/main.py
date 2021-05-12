@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from sggm.regression_model import VariationalRegressor
 
 from torch import no_grad
 from sggm.analysis.toy.helper import (
@@ -36,11 +37,12 @@ def plot(experiment_log, methods, **kwargs):
             std_ax = mean_models_plot(std_ax, experiment_log, method)
 
         # Misc
-        misc_ax = kl_grad_shift_plot(
-            misc_ax,
-            best_model,
-            best_training_dataset,
-        )
+        if isinstance(best_model, VariationalRegressor):
+            misc_ax = kl_grad_shift_plot(
+                misc_ax,
+                best_model,
+                best_training_dataset,
+            )
 
         # plt.legend()
         save_folder = f"{experiment_log.save_dir}/{experiment_log.experiment_name}/{experiment_log.name}"

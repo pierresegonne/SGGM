@@ -1,6 +1,7 @@
 from math import log
 import pytorch_lightning as pl
 import torch
+import torch.distributions as D
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -20,7 +21,7 @@ from sggm.definitions import (
     TEST_VARIANCE_FIT_RMSE,
     TRAIN_LOSS,
 )
-from sggm.definitions import DROPOUT_RATE, LEARNING_RATE, N_MC_SAMPLES
+from sggm.definitions import DROPOUT_RATE, EPS, LEARNING_RATE, N_MC_SAMPLES
 from sggm.definitions import (
     ens_regressor_parameters,
     mcd_regressor_parameters,
@@ -33,9 +34,8 @@ from sggm.regression_model_helper import generate_noise_for_model_test
 def norm_log_likelihood(
     x: torch.Tensor, mean: torch.Tensor, var: torch.Tensor
 ) -> torch.Tensor:
-    c = -0.5 * log_2_pi
-    log_likelihood = c - var.log() / 2 - (x - mean) ** 2 / (2 * var)
-    return log_likelihood
+    norm = D.Normal(mean, torch.sqrt(var))
+    return norm.log_prob(x)
 
 
 class MCDRegressor(pl.LightningModule):
@@ -46,9 +46,12 @@ class MCDRegressor(pl.LightningModule):
         out_dim: int,
         activation: str,
         dropout_rate: float = mcd_regressor_parameters[DROPOUT_RATE].default,
+        eps: float = mcd_regressor_parameters[EPS].default,
         learning_rate: float = mcd_regressor_parameters[LEARNING_RATE].default,
         n_mc_samples: int = mcd_regressor_parameters[N_MC_SAMPLES].default,
     ) -> None:
+        super(MCDRegressor, self).__init__()
+
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.out_dim = out_dim
@@ -69,6 +72,8 @@ class MCDRegressor(pl.LightningModule):
 
         self.learning_rate = learning_rate
 
+        self.eps = eps
+
         self.example_input_array = torch.rand((10, self.input_dim))
 
         self.save_hyperparameters(
@@ -82,22 +87,22 @@ class MCDRegressor(pl.LightningModule):
         )
 
     def _generate_mc_samples(self, x: torch.Tensor) -> torch.Tensor:
-        prev_eval = copy(self.eval)
+        prev_training = copy(self.training)
         # Need dropout to be activated
-        self.eval = False
+        self.train()
         y_mc_samples = torch.zeros(self.n_mc_samples, x.shape[0], self.out_dim).type_as(
             x
         )
         for i in range(self.n_mc_samples):
             y_mc_samples[i, :] = self.μ(x)
-        self.eval = prev_eval
+        self.train(mode=prev_training)
         return y_mc_samples
 
     def _predictive_mean(self, y_mc_samples: torch.Tensor) -> torch.Tensor:
         return y_mc_samples.mean(dim=0)
 
     def _predictive_std(self, y_mc_samples: torch.Tensor) -> torch.Tensor:
-        return y_mc_samples.std(dim=0)
+        return y_mc_samples.std(dim=0) + self.eps
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         y_mc_samples = self._generate_mc_samples(x)
@@ -105,12 +110,12 @@ class MCDRegressor(pl.LightningModule):
         σ_x = self._predictive_std(y_mc_samples)
         return (μ_x, σ_x)
 
-    def predictive_mean(self, x: torch.Tensor) -> torch.Tensor:
+    def predictive_mean(self, x: torch.Tensor, *args) -> torch.Tensor:
         y_mc_samples = self._generate_mc_samples(x)
         μ_x = self._predictive_mean(y_mc_samples)
         return μ_x
 
-    def predictive_std(self, x: torch.Tensor) -> torch.Tensor:
+    def predictive_std(self, x: torch.Tensor, *args) -> torch.Tensor:
         y_mc_samples = self._generate_mc_samples(x)
         σ_x = self._predictive_std(y_mc_samples)
         return σ_x
@@ -192,6 +197,8 @@ class ENSRegressor(pl.LightningModule):
         learning_rate: float = ens_regressor_parameters[LEARNING_RATE].default,
         n_ens: int = ens_regressor_parameters[N_ENS].default,
     ) -> None:
+        super(ENSRegressor).__init__()
+
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.out_dim = out_dim

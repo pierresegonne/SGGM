@@ -5,6 +5,9 @@ import torch
 import yaml
 
 from sggm.definitions import (
+    ENS_REGRESSOR,
+    MCD_REGRESSOR,
+    VARIATIONAL_REGRESSOR,
     experiments_activation_function,
     experiments_architecture,
     generative_experiments,
@@ -20,6 +23,7 @@ from sggm.definitions import (
     INDUCING_CENTROIDS,
 )
 from sggm.regression_model import VariationalRegressor
+from sggm.regression_baselines import ENSRegressor, MCDRegressor
 from sggm.vae_model import VanillaVAE, V3AE, V3AEm, VanillaVAEm
 
 
@@ -90,7 +94,12 @@ class ExperimentLog:
 
         # Attribute the right PL Module for loading
         if self.experiment_name in regression_experiments:
-            pl_module = VariationalRegressor
+            if self.model_name == VARIATIONAL_REGRESSOR:
+                pl_module = VariationalRegressor
+            elif self.model_name == MCD_REGRESSOR:
+                pl_module = MCDRegressor
+            elif self.model_name == ENS_REGRESSOR:
+                pl_module = ENSRegressor
         elif self.experiment_name in generative_experiments:
             if self.model_name == VANILLA_VAE:
                 pl_module = VanillaVAE

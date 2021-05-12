@@ -2,7 +2,7 @@
 # UCI BOSTON
 
 - name: f_vap
-  experiment_name: uci_boston_shifted_split
+  experiment_name: uci_boston
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -12,13 +12,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_boston_shifted_split
+  experiment_name: uci_boston
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -30,13 +31,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_boston_shifted_split
+  experiment_name: uci_boston
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -51,13 +53,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_boston_shifted_split
+  experiment_name: uci_boston
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -72,6 +75,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -81,7 +85,7 @@
 # UCI CARBON
 
 - name: f_vap
-  experiment_name: uci_carbon_shifted_split
+  experiment_name: uci_carbon
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -91,13 +95,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_carbon_shifted_split
+  experiment_name: uci_carbon
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -109,13 +114,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_carbon_shifted_split
+  experiment_name: uci_carbon
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -130,13 +136,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_carbon_shifted_split
+  experiment_name: uci_carbon
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -151,6 +158,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -160,7 +168,7 @@
 # UCI CCPP
 
 - name: f_vap
-  experiment_name: uci_ccpp_shifted_split
+  experiment_name: uci_ccpp
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -170,13 +178,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_ccpp_shifted_split
+  experiment_name: uci_ccpp
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -188,13 +197,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_ccpp_shifted_split
+  experiment_name: uci_ccpp
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -209,13 +219,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_ccpp_shifted_split
+  experiment_name: uci_ccpp
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -230,6 +241,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -240,7 +252,7 @@
 # # UCI CONCRETE
 
 - name: f_vap
-  experiment_name: uci_concrete_shifted_split
+  experiment_name: uci_concrete
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -250,13 +262,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_concrete_shifted_split
+  experiment_name: uci_concrete
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -268,13 +281,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_concrete_shifted_split
+  experiment_name: uci_concrete
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -289,13 +303,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_concrete_shifted_split
+  experiment_name: uci_concrete
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -310,6 +325,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -319,7 +335,7 @@
 # # ## UCI ENERGY
 
 - name: f_vap
-  experiment_name: uci_energy_shifted_split
+  experiment_name: uci_energy
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -329,13 +345,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_energy_shifted_split
+  experiment_name: uci_energy
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -347,13 +364,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_energy_shifted_split
+  experiment_name: uci_energy
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -368,13 +386,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_energy_shifted_split
+  experiment_name: uci_energy
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -389,6 +408,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -398,7 +418,7 @@
 # # ## UCI KIN8NM
 
 - name: f_vap
-  experiment_name: uci_kin8nm_shifted_split
+  experiment_name: uci_kin8nm
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -408,13 +428,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_kin8nm_shifted_split
+  experiment_name: uci_kin8nm
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -426,13 +447,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_kin8nm_shifted_split
+  experiment_name: uci_kin8nm
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -447,13 +469,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_kin8nm_shifted_split
+  experiment_name: uci_kin8nm
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -468,6 +491,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -478,7 +502,7 @@
 # # ## UCI NAVAL
 
 - name: f_vap
-  experiment_name: uci_naval_shifted_split
+  experiment_name: uci_naval
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -488,13 +512,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_naval_shifted_split
+  experiment_name: uci_naval
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -506,13 +531,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_naval_shifted_split
+  experiment_name: uci_naval
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -527,13 +553,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_naval_shifted_split
+  experiment_name: uci_naval
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -548,6 +575,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -558,7 +586,7 @@
 # # ## UCI PROTEIN
 
 - name: f_vap
-  experiment_name: uci_protein_shifted_split
+  experiment_name: uci_protein
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -568,13 +596,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_protein_shifted_split
+  experiment_name: uci_protein
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -586,13 +615,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_protein_shifted_split
+  experiment_name: uci_protein
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -607,13 +637,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_protein_shifted_split
+  experiment_name: uci_protein
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -628,6 +659,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -638,7 +670,7 @@
 # # ## UCI SUPERCONDUCT
 
 - name: f_vap
-  experiment_name: uci_superconduct_shifted_split
+  experiment_name: uci_superconduct
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -648,13 +680,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_superconduct_shifted_split
+  experiment_name: uci_superconduct
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -666,13 +699,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_superconduct_shifted_split
+  experiment_name: uci_superconduct
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -687,13 +721,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_superconduct_shifted_split
+  experiment_name: uci_superconduct
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -708,6 +743,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -717,7 +753,7 @@
 # ## UCI WINE RED
 
 - name: f_vap
-  experiment_name: uci_wine_red_shifted_split
+  experiment_name: uci_wine_red
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -727,13 +763,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_wine_red_shifted_split
+  experiment_name: uci_wine_red
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -745,13 +782,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_wine_red_shifted_split
+  experiment_name: uci_wine_red
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -766,13 +804,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_wine_red_shifted_split
+  experiment_name: uci_wine_red
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -787,6 +826,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -796,7 +836,7 @@
 # # UCI WINE WHITE
 
 - name: f_vap
-  experiment_name: uci_wine_white_shifted_split
+  experiment_name: uci_wine_white
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -806,13 +846,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_wine_white_shifted_split
+  experiment_name: uci_wine_white
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -824,13 +865,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_wine_white_shifted_split
+  experiment_name: uci_wine_white
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -845,13 +887,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_wine_white_shifted_split
+  experiment_name: uci_wine_white
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -866,6 +909,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -876,7 +920,7 @@
 # # UCI YACHT
 
 - name: f_vap
-  experiment_name: uci_yacht_shifted_split
+  experiment_name: uci_yacht
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -886,13 +930,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_yacht_shifted_split
+  experiment_name: uci_yacht
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -904,13 +949,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_gaussian_noise
-  experiment_name: uci_yacht_shifted_split
+  experiment_name: uci_yacht
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -925,13 +971,14 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_kde
-  experiment_name: uci_yacht_shifted_split
+  experiment_name: uci_yacht
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -946,6 +993,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
+  n_trials: 10
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).

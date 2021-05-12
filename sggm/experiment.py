@@ -2,6 +2,7 @@ import copy
 import json
 import pytorch_lightning as pl
 import re
+from sggm.regression_baselines import ENSRegressor, MCDRegressor
 import torch
 import yaml
 
@@ -11,6 +12,8 @@ from warnings import warn
 
 from sggm.callbacks import callbacks
 from sggm.definitions import (
+    ENS_REGRESSOR,
+    MCD_REGRESSOR,
     experiment_names,
     experiments_architecture,
     generative_experiments,
@@ -99,9 +102,9 @@ class Experiment:
             return self._model
         else:
             if self.experiment_name in regression_experiments:
+                input_dim = self.datamodule.dims
+                out_dim = self.datamodule.out_dims
                 if self.model_name == VARIATIONAL_REGRESSOR:
-                    input_dim = self.datamodule.dims
-                    out_dim = self.datamodule.out_dims
                     return VariationalRegressor(
                         input_dim=input_dim,
                         hidden_dim=self.hidden_dim,
@@ -122,6 +125,30 @@ class Experiment:
                         split_training_mode=self.split_training_mode,
                         ms_bw_factor=self.ms_bw_factor,
                         ms_kde_bw_factor=self.ms_kde_bw_factor,
+                    )
+                # Baselines
+                elif self.model_name == MCD_REGRESSOR:
+                    return MCDRegressor(
+                        input_dim=input_dim,
+                        hidden_dim=self.hidden_dim,
+                        out_dim=out_dim,
+                        activation=experiments_activation_function(
+                            self.experiment_name
+                        ),
+                        dropout_rate=self.dropout_rate,
+                        learning_rate=self.learning_rate,
+                        n_mc_samples=self.n_mc_samples,
+                    )
+                elif self.model_name == ENS_REGRESSOR:
+                    return ENSRegressor(
+                        input_dim=input_dim,
+                        hidden_dim=self.hidden_dim,
+                        out_dim=out_dim,
+                        activation=experiments_activation_function(
+                            self.experiment_name
+                        ),
+                        learning_rate=self.learning_rate,
+                        n_ens=self.n_ens,
                     )
                 else:
                     raise NotImplementedError(
@@ -319,6 +346,10 @@ def get_model(experiment_config: dict) -> pl.LightningModule:
     model_name = experiment_config[MODEL_NAME]
     if model_name == VARIATIONAL_REGRESSOR:
         model = VariationalRegressor
+    elif model_name == MCD_REGRESSOR:
+        model = MCDRegressor
+    elif model_name == ENS_REGRESSOR:
+        model = ENSRegressor
     elif model_name == VANILLA_VAE:
         model = VanillaVAE
     elif model_name == VANILLA_VAE_MANIFOLD:
