@@ -1,7 +1,7 @@
 #!/bin/sh
 ### General options
 ### specify queue --
-#BSUB -q gpuv100
+#BSUB -q gpua100
 ### -- set the job Name --
 #BSUB -J test_cuda_11
 ### -- ask for number of cores (default: 1) --
