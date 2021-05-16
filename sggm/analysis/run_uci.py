@@ -32,6 +32,12 @@ if __name__ == "__main__":
         help="Comma delimited list of run names, ex 'test1,test2'",
     )
     parser.add_argument(
+        "--model",
+        type=str,
+        required=False,
+        help="Specify model",
+    )
+    parser.add_argument(
         "--hpc",
         type=str2bool,
         required=False,
@@ -70,6 +76,7 @@ if __name__ == "__main__":
     args, unknown_args = parser.parse_known_args()
     save_dir = "../hpc_lightning_logs" if args.hpc else "../lightning_logs"
     names = [name for name in args.names.split(",")]
+    model = args.model
 
     UCI_EXPERIMENTS = [uci for uci in UCI_ALL if "shifted" not in uci]
     UCI_EXPERIMENTS = (
@@ -84,15 +91,17 @@ if __name__ == "__main__":
     )
 
     if args.run_analysis:
-        for exp in UCI_EXPERIMENTS:
+        for i, exp in enumerate(UCI_EXPERIMENTS):
             # Check that data exists
             if has_experiment_run(save_dir, exp, names):
 
                 print(f"\n  -- Running {exp} | {args.names}")
 
-                s_run = os.system(
-                    f"python run.py --save_dir {save_dir} --experiment_name {exp} --names {args.names} --show_plot 0"
-                )
+                run_command = f"python run.py --save_dir {save_dir} --experiment_name {exp} --names {args.names}"
+                if model is not None:
+                    run_command += f" --model_name {model}"
+                run_command += " --show_plot 0"
+                s_run = os.system(run_command)
                 s_compare = os.system(
                     f"python compare.py --save_dir {save_dir} --experiment_name {exp} --names {args.names}"
                 )

@@ -94,6 +94,7 @@ class ExperimentLog:
 
         # Attribute the right PL Module for loading
         if self.experiment_name in regression_experiments:
+            pl_module = VariationalRegressor
             if self.model_name == VARIATIONAL_REGRESSOR:
                 pl_module = VariationalRegressor
             elif self.model_name == MCD_REGRESSOR:

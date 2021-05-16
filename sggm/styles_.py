@@ -2,6 +2,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import random
 
+from typing import Tuple, Union
+
 # DTU colours
 # Source: https://www.designguide.dtu.dk/
 colours = {
@@ -35,6 +37,15 @@ colours_rgb = {
     "green": (0, 136, 53),
     "purple": (121, 35, 142),
 }
+
+
+def hex_to_rgb(
+    hex: str, norm: bool = False
+) -> Tuple[Union[int, float], Union[int, float], Union[int, float]]:
+    if hex[0] == "#":
+        hex = hex[1:]
+    div = 255 if norm else 1
+    return tuple(int(hex[i : i + 2], 16) / div for i in (0, 2, 4))
 
 
 def scale_down_rgb(rgb):

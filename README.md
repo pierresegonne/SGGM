@@ -57,6 +57,12 @@ The `analysis/` folder holds a variety of analysis scripts, which are supposed t
 * `analysis/run_uci.py`: Shortcut to run the analysis of all uci experiments at once.
 * `analysis/run_clustering.py`: Run clustering on the latent encodings of the test dataset in a VAE setting.
 * `analysis/compare.py`: Generates a comparison csv for the analysis metrics for several experiments at once.
+
+### Refitting the Encoder
+
+`run_name` becomes `run_name_refit_encoder_$other_experiment_name`
+
+
 ### Citation
 
 The Paper is currently WIP - Full reference to be provided soon!

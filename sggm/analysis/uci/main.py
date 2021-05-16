@@ -68,11 +68,15 @@ def plot(experiment_log, methods, show_plot=True):
         # Fallback on GN generation if no x ood
         best_model.τ_ood = 0.5
         best_model.ood_x_generation_method = GAUSSIAN_NOISE
-        x_out = best_model.ood_x(x_test)
+        x_out = best_model.ood_x(x_test) if getattr(best_model, "ood_x", None) else torch.Tensor()
         x_test = x_test.detach()
         x_out = x_out.detach()
         with_x_out = True if (x_out is not None and torch.numel(x_out) > 0) else False
-        norm_x_out = torch.norm(x_out, dim=1)[:, None]
+        if with_x_out:
+            norm_x_out = torch.norm(x_out, dim=1)[:, None]
+
+        # Prior
+        with_prior = True if getattr(best_model, "prior_std", None) else False
 
         # ======================
         # Plot
@@ -154,16 +158,17 @@ def plot(experiment_log, methods, show_plot=True):
                 markeredgecolor=(*colours_rgb["orange"], 0.1),
                 label=r"$\sigma(x)$",
             )
-            var_ax.plot(
-                norm_x_test,
-                best_model.prior_std(x_test),
-                "o",
-                markersize=3,
-                markerfacecolor=(*colours_rgb["black"], 0.4),
-                markeredgewidth=1,
-                markeredgecolor=(*colours_rgb["black"], 0.1),
-                label=r"$\sigma_{prior}(x)$",
-            )
+            if with_prior:
+                var_ax.plot(
+                    norm_x_test,
+                    best_model.prior_std(x_test),
+                    "o",
+                    markersize=3,
+                    markerfacecolor=(*colours_rgb["black"], 0.4),
+                    markeredgewidth=1,
+                    markeredgecolor=(*colours_rgb["black"], 0.1),
+                    label=r"$\sigma_{prior}(x)$",
+                )
             if with_x_out:
                 var_ax.plot(
                     norm_x_out,
@@ -175,16 +180,17 @@ def plot(experiment_log, methods, show_plot=True):
                     markeredgecolor=(*colours_rgb["primaryRed"], 0.1),
                     label=r"$\sigma(\hat{x})$",
                 )
-                var_ax.plot(
-                    norm_x_out,
-                    best_model.prior_std(x_out),
-                    "o",
-                    markersize=3,
-                    markerfacecolor=(*colours_rgb["black"], 0.4),
-                    markeredgewidth=1,
-                    markeredgecolor=(*colours_rgb["black"], 0.1),
-                    label=r"$\sigma_{prior}(\hat{x})$",
-                )
+                if with_prior:
+                    var_ax.plot(
+                        norm_x_out,
+                        best_model.prior_std(x_out),
+                        "o",
+                        markersize=3,
+                        markerfacecolor=(*colours_rgb["black"], 0.4),
+                        markeredgewidth=1,
+                        markeredgecolor=(*colours_rgb["black"], 0.1),
+                        label=r"$\sigma_{prior}(\hat{x})$",
+                    )
 
             print(f"Average test uncertainty= {std_test.mean():.3f}")
             if with_x_out:
