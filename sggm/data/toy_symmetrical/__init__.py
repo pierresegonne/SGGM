@@ -1,0 +1,1 @@
+from sggm.data.toy_symmetrical.datamodule import ToySymmetricalDataModule

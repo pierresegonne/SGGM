@@ -4,6 +4,7 @@ from sggm.definitions import (
     TOY_SHIFTED,
     TOY_2D,
     TOY_2D_SHIFTED,
+    TOY_SYMMETRICAL,
     UCI_ALL,
     #
     CIFAR,
@@ -25,6 +26,7 @@ callbacks = {
     SANITY_CHECK: [DataSaver, LossPrinter],
     TOY: [DataSaver, LossPrinter],
     TOY_SHIFTED: [DataSaver, LossPrinter],
+    TOY_SYMMETRICAL: [DataSaver, LossPrinter],
     TOY_2D: [DataSaver, LossPrinter],
     TOY_2D_SHIFTED: [DataSaver, LossPrinter],
     #

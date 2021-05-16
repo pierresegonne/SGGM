@@ -16,6 +16,7 @@ from sggm.definitions import (
     SANITY_CHECK,
     TOY,
     TOY_SHIFTED,
+    TOY_SYMMETRICAL,
     TOY_2D,
     TOY_2D_SHIFTED,
     UCI_ALL,
@@ -42,7 +43,7 @@ def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
         )
         if experiment_name in [SANITY_CHECK]:
             sanity_check_plot(experiment_log, **kwargs)
-        elif experiment_name in [TOY, TOY_SHIFTED]:
+        elif experiment_name in [TOY, TOY_SHIFTED, TOY_SYMMETRICAL]:
             toy_plot(experiment_log, **kwargs)
         elif experiment_name == [TOY_2D, TOY_2D_SHIFTED]:
             toy_2d_plot(experiment_log, **kwargs)
@@ -55,7 +56,7 @@ def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
 
 
 def add_experiment_args(parser, experiment_name):
-    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, *UCI_ALL]:
+    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_SYMMETRICAL, TOY_2D, *UCI_ALL]:
         parser.add_argument(
             "--methods",
             type=str,
@@ -74,7 +75,7 @@ def add_experiment_args(parser, experiment_name):
 
 def parse_experiment_args(args):
     experiment_name = args.experiment_name
-    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, *UCI_ALL]:
+    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_SYMMETRICAL, TOY_2D, *UCI_ALL]:
         args.methods = [item for item in args.methods.split(",")]
     if experiment_name in MNIST_ALL:
         args.others = (

@@ -256,6 +256,7 @@ SHIFTED_SPLIT = "_shifted_split"
 SANITY_CHECK = "sanity_check"
 TOY = "toy"
 TOY_SHIFTED = TOY + SHIFTED
+TOY_SYMMETRICAL = "toy_symmetrical"
 TOY_2D = "toy_2d"
 TOY_2D_SHIFTED = TOY_2D + SHIFTED
 UCI_BOSTON = "uci_boston"
@@ -332,7 +333,7 @@ MNIST_ALL = [
 
 
 experiment_names = (
-    [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, TOY_2D_SHIFTED]
+    [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_SYMMETRICAL, TOY_2D, TOY_2D_SHIFTED]
     + UCI_ALL
     + MNIST_ALL
     + [CIFAR, SVHN]
@@ -341,6 +342,7 @@ regression_experiments = [
     SANITY_CHECK,
     TOY,
     TOY_SHIFTED,
+    TOY_SYMMETRICAL,
     TOY_2D,
     TOY_2D_SHIFTED,
 ] + UCI_ALL
@@ -374,7 +376,7 @@ def experiments_latent_dims(experiment_name: str) -> tuple:
         # TODO change to 128 when proof that everything runs nicely.
         return (128,)
     elif experiment_name == SVHN:
-        return (30,)
+        return (128,)
 
 
 def experiments_architecture(experiment_name: str) -> str:
@@ -411,7 +413,14 @@ ACTIVATION_FUNCTIONS = [
 
 
 def experiments_activation_function(experiment_name: str) -> str:
-    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_2D, TOY_2D_SHIFTED]:
+    if experiment_name in [
+        SANITY_CHECK,
+        TOY,
+        TOY_SHIFTED,
+        TOY_SYMMETRICAL,
+        TOY_2D,
+        TOY_2D_SHIFTED,
+    ]:
         return F_SIGMOID
     elif experiment_name in UCI_ALL:
         # Match VV

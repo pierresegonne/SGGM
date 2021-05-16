@@ -1,0 +1,13 @@
+activation: sigmoid
+eps: 1.0e-10
+hidden_dim: 50
+input_dim: 1
+learning_rate: 0.01
+n_mc_samples: 20
+ood_x_generation_method: null
+out_dim: 1
+"prior_\u03B1": 1.4
+"prior_\u03B2": 1
+split_training_mode: null
+"\u03B2_elbo": 0.5
+"\u03C4_ood": 0

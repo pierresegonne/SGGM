@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from argparse import ArgumentParser
 
 from sggm.definitions import (
+    UNIFORM,
     model_specific_args,
     regressor_parameters,
     variational_regressor_parameters,
@@ -302,10 +303,16 @@ class VariationalRegressor(pl.LightningModule):
                 x_ood = x_ood_proposal[idx][::2]
                 return torch.reshape(x_ood, (500, 1))
 
+            elif self.ood_x_generation_method == UNIFORM:
+                N = x.shape[0]
+                x_right = torch.FloatTensor(int(N / 2), 1).uniform_(-200, -190)
+                x_left = torch.FloatTensor(int(N / 2), 1).uniform_(190, 200)
+                return torch.cat((x_right, x_left), dim=0)
+
             # General case, PIG DL available.
             # For now, hack to make it work without working for analysis
             # Ok get the same number of pi as training points
-            if getattr(self, "pig_dl", None):
+            elif getattr(self, "pig_dl", None):
                 x_ood = next(iter(self.pig_dl))[0]
                 return x_ood.type_as(x)
 
