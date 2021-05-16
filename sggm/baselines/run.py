@@ -8,7 +8,7 @@ from codecarbon import EmissionsTracker
 
 from sggm.baselines.utils import timer
 
-# from sggm.baselines.gp import gp
+from sggm.baselines.gp import gp
 from sggm.baselines.john import john
 from sggm.baselines.nn import bnn, ensnn, mcdnn, nn
 
@@ -16,7 +16,7 @@ from sggm.baselines.nn import bnn, ensnn, mcdnn, nn
 from sggm.definitions import UCI_ALL, TOY, TOY_SHIFTED
 from sggm.data import datamodules
 
-ALL_MODELS = ["john", "nn", "mcdnn", "ensnn", "bnn"]
+ALL_MODELS = ["john", "nn", "mcdnn", "ensnn", "bnn", "gp"]
 experiment_names = UCI_ALL + [TOY, TOY_SHIFTED]
 
 

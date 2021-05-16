@@ -1,4 +1,3 @@
-from math import log
 import pytorch_lightning as pl
 import torch
 import torch.distributions as D
@@ -7,6 +6,7 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 from copy import copy
+from itertools import chain
 from typing import Tuple
 
 from sggm.definitions import (
@@ -27,7 +27,7 @@ from sggm.definitions import (
     mcd_regressor_parameters,
     model_specific_args,
 )
-from sggm.model_helper import get_activation_function, log_2_pi
+from sggm.model_helper import get_activation_function
 from sggm.regression_model_helper import generate_noise_for_model_test
 
 
@@ -249,11 +249,21 @@ class ENSRegressor(pl.LightningModule):
 
         return (μ_x, σ_x)
 
+    def predictive_mean(self, x: torch.Tensor, *args) -> torch.Tensor:
+        return self(x)[0]
+
+    def predictive_std(self, x: torch.Tensor, *args) -> torch.Tensor:
+        return self(x)[1]
+
     def training_step(
         self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
     ) -> torch.Tensor:
         x, y = batch
         μ_x, σ_x = self(x)
+        # Switch
+        print(dir(self))
+        exit()
+
         loss = norm_log_likelihood(y, μ_x, σ_x).sum()
         self.log(TRAIN_LOSS, loss, on_epoch=True)
         return loss
@@ -307,7 +317,7 @@ class ENSRegressor(pl.LightningModule):
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.Adam(
-            self.μ.parameters(),
+            chain([_μ.parameters() for _μ in self.μ] + [_σ.parameters() for _σ in self.σ]),
             lr=self.learning_rate,
         )
         return optimizer
