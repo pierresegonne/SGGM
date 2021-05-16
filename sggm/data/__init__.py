@@ -1,5 +1,6 @@
 from sggm.data.sanity_check import SanityCheckDataModule
 from sggm.data.toy import ToyDataModule, ToyDataModuleShifted
+from sggm.data.toy_symmetrical import ToySymmetricalDataModule
 from sggm.data.toy_2d import Toy2DDataModule, Toy2DDataModuleShifted
 from sggm.data.uci_boston import (
     UCIBostonDataModule,
@@ -74,6 +75,7 @@ from sggm.definitions import (
     TOY_SHIFTED,
     TOY_2D,
     TOY_2D_SHIFTED,
+    TOY_SYMMETRICAL,
     UCI_BOSTON,
     UCI_BOSTON_SHIFTED,
     UCI_BOSTON_SHIFTED_SPLIT,
@@ -124,6 +126,7 @@ datamodules = {
     SANITY_CHECK: SanityCheckDataModule,
     TOY: ToyDataModule,
     TOY_SHIFTED: ToyDataModuleShifted,
+    TOY_SYMMETRICAL: ToySymmetricalDataModule,
     TOY_2D: Toy2DDataModule,
     TOY_2D_SHIFTED: Toy2DDataModuleShifted,
     UCI_BOSTON: UCIBostonDataModule,
