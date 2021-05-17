@@ -17,7 +17,9 @@ from sggm.definitions import UCI_ALL, TOY, TOY_SHIFTED
 from sggm.data import datamodules
 
 ALL_MODELS = ["john", "nn", "mcdnn", "ensnn", "bnn", "gp"]
-experiment_names = UCI_ALL + [TOY, TOY_SHIFTED]
+# experiment_names = UCI_ALL + [TOY, TOY_SHIFTED]
+# remove the shifted emmental
+experiment_names = [uci for uci in UCI_ALL if uci[-3:] != "ted"] + [TOY, TOY_SHIFTED]
 
 
 def parse_args():
