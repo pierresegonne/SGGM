@@ -138,36 +138,36 @@ def generate_pis(range_left, range_right, N) -> torch.Tensor:
     right = torch.FloatTensor(int(N / 2), 1).uniform_(*range_right)
     return torch.cat((left, right))
 
-
-fig_size = (5.8, 2)
-# Close
-fig_close, ax_close = plt.subplots(figsize=fig_size)
-ax_close = plot_uncertainty(ax_close, [-10, 20])
-# close pseudo_inputs
-pi_close = generate_pis([-3, 0.5], [10.2, 13], 20)
-ax_close.plot(
-    pi_close,
-    1e-2 + torch.zeros_like(pi_close),
-    "D",
-    markersize=5,
-    markerfacecolor=(*colours_rgb["green"], 0.8),
-    markeredgewidth=1,
-    markeredgecolor=(*colours_rgb["green"], 0.2),
-    zorder=10,
-)
-save_show("close")
-# Far
-fig_far, ax_far = plt.subplots(figsize=fig_size)
-ax_far = plot_uncertainty(ax_far, [-120, 200])
-pi_far = generate_pis([-120, -100], [170, 200], 20)
-ax_far.plot(
-    pi_far,
-    1e-2 + torch.zeros_like(pi_far),
-    "D",
-    markersize=5,
-    markerfacecolor=(*colours_rgb["navyBlue"], 0.8),
-    markeredgewidth=1,
-    markeredgecolor=(*colours_rgb["navyBlue"], 0.2),
-    zorder=10,
-)
-save_show("far")
+if __name__ == "__main__":
+    fig_size = (5.8, 2)
+    # Close
+    fig_close, ax_close = plt.subplots(figsize=fig_size)
+    ax_close = plot_uncertainty(ax_close, [-10, 20])
+    # close pseudo_inputs
+    pi_close = generate_pis([-3, 0.5], [10.2, 13], 20)
+    ax_close.plot(
+        pi_close,
+        1e-2 + torch.zeros_like(pi_close),
+        "D",
+        markersize=5,
+        markerfacecolor=(*colours_rgb["green"], 0.8),
+        markeredgewidth=1,
+        markeredgecolor=(*colours_rgb["green"], 0.2),
+        zorder=10,
+    )
+    save_show("close")
+    # Far
+    fig_far, ax_far = plt.subplots(figsize=fig_size)
+    ax_far = plot_uncertainty(ax_far, [-120, 200])
+    pi_far = generate_pis([-120, -100], [170, 200], 20)
+    ax_far.plot(
+        pi_far,
+        1e-2 + torch.zeros_like(pi_far),
+        "D",
+        markersize=5,
+        markerfacecolor=(*colours_rgb["navyBlue"], 0.8),
+        markeredgewidth=1,
+        markeredgecolor=(*colours_rgb["navyBlue"], 0.2),
+        zorder=10,
+    )
+    save_show("far")
