@@ -79,10 +79,10 @@ class CIFARDataModule(pl.LightningDataModule):
 
     def train_dataloader(self) -> DataLoader:
         # Put on GPU
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        values = torch.cat([e[0] for e in self.train_dataset], dim=0)
-        targets = torch.tensor([e[1] for e in self.train_dataset])
-        self.train_dataset = TensorDataset(values.to(device), targets.to(device))
+        # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # values = torch.cat([e[0] for e in self.train_dataset], dim=0)
+        # targets = torch.tensor([e[1] for e in self.train_dataset])
+        # self.train_dataset = TensorDataset(values.to(device), targets.to(device))
         return DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
