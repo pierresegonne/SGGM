@@ -801,6 +801,7 @@ class V3AE(BaseVAE):
         Assumes that we can hold the dataset in memory.
 
         OR
+
         applies the provided prior parameters
         """
         x_train = []
@@ -819,7 +820,9 @@ class V3AE(BaseVAE):
             # %
             x_train_var = x_train.var(dim=0)
 
+            # Per pixel prior mode
             prior_modes = 1 / x_train_var
+            # Bound the modes
             prior_modes = torch.maximum(
                 prior_modes, min_mode * torch.ones_like(prior_modes)
             )

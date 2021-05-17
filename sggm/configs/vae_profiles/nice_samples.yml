@@ -1,0 +1,31 @@
+- name: v3ae_nice_samples
+  experiment_name: mnist
+  model_name: v3ae
+  n_workers: 0
+  # hparams
+  batch_size: 128
+  learning_rate: 1e-3
+  eps: 1e-3
+  n_mc_samples: 3
+  decoder_α_offset: 1e-3
+  latent_dims:
+    - 2
+  digits:
+    - 2
+    - 5
+  # ood
+  tau_ood: 0.5
+  ood_z_generation_method: gd_aggregate_posterior
+  # prior
+  prior_α: 1.625
+  prior_β: 0.001
+  # misc
+  n_trials: 3
+  seed: 3
+  max_epochs: 200
+  # pl trainer
+  early_stopping_patience: 200
+  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 10 # How often does the log writes to disc
+  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 1 # Check val every n train epochs
