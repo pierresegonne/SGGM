@@ -11,25 +11,6 @@ from sggm.styles_ import colours, colours_rgb
 
 """ Plot to demonstrate the effect of PIs placement on the learned uncertainty for toy. """
 
-
-seed_everything(14)
-experiment_name = "toy_symmetrical"
-model_name = "variational_regressor"
-save_dir = "paper_logs"
-
-# Load the models
-model_no_pis: VariationalRegressor = ExperimentLog(
-    experiment_name, "svv", model_name=model_name, save_dir=save_dir
-).best_version.model
-model_close_pis: VariationalRegressor = ExperimentLog(
-    experiment_name, "uniform_close", model_name=model_name, save_dir=save_dir
-).best_version.model
-model_far_pis: VariationalRegressor = ExperimentLog(
-    experiment_name, "uniform_far", model_name=model_name, save_dir=save_dir
-).best_version.model
-
-prior_level = math.sqrt(model_close_pis.prior_β / (model_close_pis.prior_α - 1))
-
 # Plot data and params
 def get_plot_dataset(N: int = 5000):
     data_range_plot = [0, 10]
@@ -40,11 +21,6 @@ def get_plot_dataset(N: int = 5000):
         ToySymmetricalDataModule.data_mean(x),
         ToySymmetricalDataModule.data_std(x),
     )
-
-
-x_plot, y_plot, y_std_plot = get_plot_dataset()
-data_range_training = [0, 10]
-training_mask = (data_range_training[0] <= x_plot) * (x_plot <= data_range_training[1])
 
 
 def plot_uncertainty(ax, data_range):
@@ -138,7 +114,32 @@ def generate_pis(range_left, range_right, N) -> torch.Tensor:
     right = torch.FloatTensor(int(N / 2), 1).uniform_(*range_right)
     return torch.cat((left, right))
 
+
 if __name__ == "__main__":
+    seed_everything(14)
+    experiment_name = "toy_symmetrical"
+    model_name = "variational_regressor"
+    save_dir = "paper_logs"
+
+    # Load the models
+    model_no_pis: VariationalRegressor = ExperimentLog(
+        experiment_name, "svv", model_name=model_name, save_dir=save_dir
+    ).best_version.model
+    model_close_pis: VariationalRegressor = ExperimentLog(
+        experiment_name, "uniform_close", model_name=model_name, save_dir=save_dir
+    ).best_version.model
+    model_far_pis: VariationalRegressor = ExperimentLog(
+        experiment_name, "uniform_far", model_name=model_name, save_dir=save_dir
+    ).best_version.model
+
+    prior_level = math.sqrt(model_close_pis.prior_β / (model_close_pis.prior_α - 1))
+
+    x_plot, y_plot, y_std_plot = get_plot_dataset()
+    data_range_training = [0, 10]
+    training_mask = (data_range_training[0] <= x_plot) * (
+        x_plot <= data_range_training[1]
+    )
+
     fig_size = (5.8, 2)
     # Close
     fig_close, ax_close = plt.subplots(figsize=fig_size)
