@@ -1305,6 +1305,8 @@ class V3AE(BaseVAE):
                     1,
                 )
                 # NOTE: beware, for understandability, tau is opposite.
+            else:
+                p_λ_out = p_λ
             kl_divergence_lbd_ood = self.ood_kl(p_λ_out, z)
             expected_kl_divergence_lbd_ood = kl_divergence_lbd_ood.mean()
             loss = 2 * (
