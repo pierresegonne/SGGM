@@ -3,7 +3,7 @@
 ### specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J benchmarks
+#BSUB -J run_john
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 4
 #BSUB -R "span[hosts=1]"
@@ -37,7 +37,5 @@ python3 -m venv env
 source env/bin/activate
 python3 -m pip install -r requirements.txt
 export PYTHONIOENCODING=utf8
-# Our model run
-cd sggm/ && python experiment.py --experiments_config configs/benchmarks.yml --gpus -1
 # Baselines run
-# cd sggm/ && python baselines/run.py --experiment_name uci_carbon --n_trials 20
+cd sggm/ && python baselines/run.py --model john --n_trials 10
