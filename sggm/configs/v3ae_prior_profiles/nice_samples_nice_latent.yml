@@ -19,7 +19,7 @@
   # prior
   prior_α: 1.625
   prior_β: 1e-3
-  prior_extrapolation_x: 100
+  prior_extrapolation_x: 10000
   # misc
   n_trials: 2
   seed: 3
