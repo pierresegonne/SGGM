@@ -780,6 +780,8 @@ class V3AE(BaseVAE):
             "τ_ood",
             "ood_z_generation_method",
             "prior_b",
+            "prior_epistemic_c",
+            "prior_extrapolation_x",
             "decoder_α_offset",
         )
 
