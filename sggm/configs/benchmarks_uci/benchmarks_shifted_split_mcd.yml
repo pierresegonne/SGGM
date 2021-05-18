@@ -167,7 +167,7 @@
 
 - name: f_mcd
   model_name: mcd_regressor
-  experiment_name: uci_wine_red_split
+  experiment_name: uci_wine_red_shifted_split
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -185,7 +185,7 @@
 
 - name: f_mcd
   model_name: mcd_regressor
-  experiment_name: uci_wine_white_split
+  experiment_name: uci_wine_red_shifted_split
   # hparams
   batch_size: 1024
   hidden_dim: 50
@@ -204,7 +204,7 @@
 
 - name: f_mcd
   model_name: mcd_regressor
-  experiment_name: uci_yacht_split
+  experiment_name: uci_wine_red_shifted_split
   # hparams
   batch_size: 1024
   hidden_dim: 50
