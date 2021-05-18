@@ -35,11 +35,6 @@ def plot_comparison(
     x_mu = batch_reshape(p_x.mean, input_dims).clip(0, 1)
     x_var = batch_reshape(p_x.variance, input_dims).clip(0, 1)
 
-    print(x_og.shape, x_og[0, :].shape, x_og.min(), x_og.max())
-    print(x_hat.shape, x_hat.min(), x_hat.max())
-    print(x_mu.shape, x_mu.min(), x_mu.max())
-    print(x_var.shape, x_var.min(), x_var.max())
-
     for n in range(n_display):
         for k in range(4):
             ax = plt.subplot(gs[k, n])
