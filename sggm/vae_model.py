@@ -1296,6 +1296,7 @@ class V3AE(BaseVAE):
             & (self.ood_z_generation_method is not None)
             & (self._student_t_decoder)
         ):
+            p_λ_out = p_λ
             # %
             # if self.prior_extrapolation_x is not None:
             #     prior_β_extrapolation = p_λ.base_dist.rate * self.prior_extrapolation_x
@@ -1306,9 +1307,7 @@ class V3AE(BaseVAE):
             #         ),
             #         1,
             #     )
-                # NOTE: beware, for understandability, tau is opposite.
-            else:
-                p_λ_out = p_λ
+            # NOTE: beware, for understandability, tau is opposite.
             kl_divergence_lbd_ood = self.ood_kl(p_λ_out, z)
             expected_kl_divergence_lbd_ood = kl_divergence_lbd_ood.mean()
             loss = 2 * (
