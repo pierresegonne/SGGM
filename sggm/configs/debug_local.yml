@@ -1,56 +1,13 @@
-# - name: test_uniform_far
-#   experiment_name: toy_symmetrical
-#   # hparams
-#   batch_size: 1024
-#   hidden_dim: 50
-#   seed: 2
-#   beta_elbo: 0.5
-#   tau_ood: 0.5
-#   prior_α: 1.4
-#   prior_β: 1
-#   ood_x_generation_method: uniform
-#   split_training: True
-#   split_training_mode: split_training_std_vv_mean
-#   # pl trainer
-#   early_stopping_patience: 250
-#   n_trials: 1
-#   max_epochs: -1
-#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 10 # Check val every n train epochs
-
-
-- name: v3ae_nice_samples_nice_latent
-  experiment_name: mnist
-  model_name: v3ae
-  n_workers: 0
+- name: test_ens_nn
+  model_name: ens_regressor
+  experiment_name: toy
   # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-3
-  n_mc_samples: 5
-  decoder_α_offset: 1e-3
-  latent_dims:
-    - 2
-  digits:
-    - 2
-    - 5
-  # ood
-  tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
-  # prior
-  prior_α: 1.625
-  prior_β: 1e-3
-  prior_extrapolation_x: 10000
-  prior_extrapolation_mode: on_centroids
-  # misc
-  n_trials: 2
-  seed: 3
-  max_epochs: 2
-  # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 10 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 1 # Check val every n train epochs
+  batch_size: 1024
+  hidden_dim: 50
+  seed: 2
+  n_trials: 1
+  max_epochs: -1
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs

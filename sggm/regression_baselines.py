@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from argparse import ArgumentParser
 from copy import copy
 from itertools import chain
-from typing import Tuple
+from typing import List, Tuple
 
 from sggm.definitions import (
     EVAL_LOSS,
@@ -197,7 +197,7 @@ class ENSRegressor(pl.LightningModule):
         learning_rate: float = ens_regressor_parameters[LEARNING_RATE].default,
         n_ens: int = ens_regressor_parameters[N_ENS].default,
     ) -> None:
-        super(ENSRegressor).__init__()
+        super(ENSRegressor, self).__init__()
 
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
@@ -208,24 +208,29 @@ class ENSRegressor(pl.LightningModule):
         self.activation = activation
 
         f = get_activation_function(activation)
-        # Not sure how saving these will work
-        self.μ = [
-            nn.Sequential(
-                nn.Linear(input_dim, hidden_dim),
-                f,
-                nn.Linear(hidden_dim, out_dim),
+
+        for i in range(n_ens):
+            setattr(
+                self,
+                f"μ_{i}",
+                nn.Sequential(
+                    nn.Linear(input_dim, hidden_dim),
+                    f,
+                    nn.Linear(hidden_dim, out_dim),
+                ),
             )
-            for _ in range(n_ens)
-        ]
-        self.σ = [
-            nn.Sequential(
-                nn.Linear(input_dim, hidden_dim),
-                f,
-                nn.Linear(hidden_dim, out_dim),
-                nn.Softplus(),
+
+        for i in range(n_ens):
+            setattr(
+                self,
+                f"σ_{i}",
+                nn.Sequential(
+                    nn.Linear(input_dim, hidden_dim),
+                    f,
+                    nn.Linear(hidden_dim, out_dim),
+                    nn.Softplus(),
+                ),
             )
-            for _ in range(n_ens)
-        ]
 
         self.learning_rate = learning_rate
 
@@ -240,12 +245,25 @@ class ENSRegressor(pl.LightningModule):
             "n_ens",
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        _μ_x = torch.Tensor([_μ(x) for _μ in self.μ])
-        _σ_x = torch.Tensor([_σ(x) for _σ in self.σ])
+    @property
+    def automatic_optimization(self) -> bool:
+        return False
 
-        μ_x = _μ_x.mean()
-        σ_x = (_σ_x + _μ_x ** 2).mean(dim=0) - μ_x ** 2
+    @property
+    def μ(self) -> List[nn.Module]:
+        return [getattr(self, f"μ_{i}") for i in range(self.n_ens)]
+
+    @property
+    def σ(self) -> List[nn.Module]:
+        return [getattr(self, f"σ_{i}") for i in range(self.n_ens)]
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        _μ_x = torch.cat([_μ(x) for _μ in self.μ], dim=1)
+        _σ_x = torch.cat([_σ(x) for _σ in self.σ], dim=1)
+
+        μ_x = _μ_x.mean(dim=1)[:, None]
+
+        σ_x = (_σ_x + _μ_x ** 2).mean(dim=1)[:, None] - μ_x ** 2
 
         return (μ_x, σ_x)
 
@@ -256,15 +274,29 @@ class ENSRegressor(pl.LightningModule):
         return self(x)[1]
 
     def training_step(
-        self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int
+        self,
+        batch: Tuple[torch.Tensor, torch.Tensor],
+        batch_idx: int,
+        optimizer_idx: int,
     ) -> torch.Tensor:
-        x, y = batch
-        μ_x, σ_x = self(x)
-        # Switch
-        print(dir(self))
-        exit()
+        optimizers: List[torch.optim.Optimizer] = self.optimizers()
 
-        loss = norm_log_likelihood(y, μ_x, σ_x).sum()
+        x, y = batch
+
+        loss = torch.zeros((self.n_ens,)).type_as(x)
+        for idx_ens in range(self.n_ens):
+            μ_x, σ_x = self.μ[idx_ens](x), self.σ[idx_ens](x)
+
+            _loss = norm_log_likelihood(y, μ_x, σ_x).sum()
+
+            _opt = optimizers[idx_ens]
+            _opt.zero_grad()
+            self.manual_backward(_loss, _opt)
+            _opt.step()
+
+            loss[idx_ens] = _loss
+
+        loss = loss.mean()
         self.log(TRAIN_LOSS, loss, on_epoch=True)
         return loss
 
@@ -274,7 +306,7 @@ class ENSRegressor(pl.LightningModule):
         x, y = batch
         μ_x, σ_x = self(x)
         loss = norm_log_likelihood(y, μ_x, σ_x).sum()
-        self.log(TRAIN_LOSS, loss, on_epoch=True)
+        self.log(EVAL_LOSS, loss, on_epoch=True)
         return loss
 
     def test_step(
@@ -315,12 +347,15 @@ class ENSRegressor(pl.LightningModule):
 
         return loss
 
-    def configure_optimizers(self) -> torch.optim.Optimizer:
-        optimizer = torch.optim.Adam(
-            chain([_μ.parameters() for _μ in self.μ] + [_σ.parameters() for _σ in self.σ]),
-            lr=self.learning_rate,
-        )
-        return optimizer
+    def configure_optimizers(self) -> List[torch.optim.Optimizer]:
+        optimizers = [
+            torch.optim.Adam(
+                chain(self.μ[i].parameters(), self.σ[i].parameters()),
+                lr=self.learning_rate,
+            )
+            for i in range(self.n_ens)
+        ]
+        return optimizers
 
     @staticmethod
     def add_model_specific_args(parent_parser: ArgumentParser) -> ArgumentParser:

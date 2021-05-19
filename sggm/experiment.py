@@ -280,6 +280,8 @@ class Experiment:
             automatic_optimization = True
             if self.experiment_name in generative_experiments:
                 automatic_optimization = False
+            if self.model_name == ENS_REGRESSOR:
+                automatic_optimization = False
             return pl.Trainer.from_argparse_args(
                 trainer_args,
                 callbacks=self.callbacks + default_callbacks,
