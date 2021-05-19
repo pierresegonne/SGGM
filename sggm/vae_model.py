@@ -1132,13 +1132,13 @@ class V3AE(BaseVAE):
             self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
         )
 
-        # if self.prior_extrapolation_x is not None:
-        #     prior_β_extrapolation = prior_β * self.prior_extrapolation_x
-        #     s = self.get_latent_extrapolation_ratios(z)
-        #     s = s.repeat(1, 1, beta.shape[2])
-        #     # How to make sure that this works properly?
-        #     # In analysis script, one could probably plot on the grid
-        #     prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
+        if self.prior_extrapolation_x is not None:
+            prior_β_extrapolation = prior_β * self.prior_extrapolation_x
+            s = self.get_latent_extrapolation_ratios(z)
+            s = s.repeat(1, 1, beta.shape[2])
+            # How to make sure that this works properly?
+            # In analysis script, one could probably plot on the grid
+            prior_β = ((1 - s) * prior_β) + (s * prior_β_extrapolation)
 
         p = D.Independent(
             D.Gamma(
@@ -1297,15 +1297,15 @@ class V3AE(BaseVAE):
             & (self._student_t_decoder)
         ):
             # %
-            if self.prior_extrapolation_x is not None:
-                prior_β_extrapolation = p_λ.base_dist.rate * self.prior_extrapolation_x
-                p_λ_out = D.Independent(
-                    D.Gamma(
-                        p_λ.base_dist.concentration,
-                        prior_β_extrapolation,
-                    ),
-                    1,
-                )
+            # if self.prior_extrapolation_x is not None:
+            #     prior_β_extrapolation = p_λ.base_dist.rate * self.prior_extrapolation_x
+            #     p_λ_out = D.Independent(
+            #         D.Gamma(
+            #             p_λ.base_dist.concentration,
+            #             prior_β_extrapolation,
+            #         ),
+            #         1,
+            #     )
                 # NOTE: beware, for understandability, tau is opposite.
             else:
                 p_λ_out = p_λ
