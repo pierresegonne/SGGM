@@ -19,6 +19,13 @@ PRIOR_β = "prior_β"
 PRIOR_B = "prior_b"
 PRIOR_EPISTEMIC_C = "prior_epistemic_c"
 PRIOR_EXTRAPOLATION_X = "prior_extrapolation_x"
+PRIOR_EXTRAPOLATION_MODE = "prior_extrapolation_mode"
+PRIOR_EXTRAPOLATION_ON_PI = "on_pi"
+PRIOR_EXTRAPOLATION_ON_CENTROIDS = "on_centroids"
+PRIOR_EXTRAPOLATION_AVAILABLE_MODES = [
+    PRIOR_EXTRAPOLATION_ON_PI,
+    PRIOR_EXTRAPOLATION_ON_CENTROIDS,
+]
 
 # Baselines
 DROPOUT_RATE = "dropout_rate"
@@ -226,6 +233,12 @@ v3ae_parameters = {
     PRIOR_B: Param(PRIOR_B, None, float),
     PRIOR_EPISTEMIC_C: Param(PRIOR_EPISTEMIC_C, None, float),
     PRIOR_EXTRAPOLATION_X: Param(PRIOR_EXTRAPOLATION_X, None, float),
+    PRIOR_EXTRAPOLATION_MODE: Param(
+        PRIOR_EXTRAPOLATION_MODE,
+        None,
+        none_or_str,
+        choices=PRIOR_EXTRAPOLATION_AVAILABLE_MODES,
+    ),
     KDE_BANDWIDTH_MULTIPLIER: Param(KDE_BANDWIDTH_MULTIPLIER, 10, float),
     DECODER_α_OFFSET: Param(DECODER_α_OFFSET, 0.0, float),
 }

@@ -201,6 +201,7 @@ class Experiment:
                         prior_b=self.prior_b,
                         prior_epistemic_c=self.prior_epistemic_c,
                         prior_extrapolation_x=self.prior_extrapolation_x,
+                        prior_extrapolation_mode=self.prior_extrapolation_mode,
                         decoder_α_offset=self.decoder_α_offset,
                     )
                 elif self.model_name == VV_VAE_MANIFOLD:
@@ -220,6 +221,7 @@ class Experiment:
                         prior_b=self.prior_b,
                         prior_epistemic_c=self.prior_epistemic_c,
                         prior_extrapolation_x=self.prior_extrapolation_x,
+                        prior_extrapolation_mode=self.prior_extrapolation_mode,
                         decoder_α_offset=self.decoder_α_offset,
                     )
                 else:

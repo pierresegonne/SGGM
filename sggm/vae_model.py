@@ -26,6 +26,10 @@ from sggm.definitions import (
     PRIOR_B,
     PRIOR_EPISTEMIC_C,
     PRIOR_EXTRAPOLATION_X,
+    PRIOR_EXTRAPOLATION_AVAILABLE_MODES,
+    PRIOR_EXTRAPOLATION_MODE,
+    PRIOR_EXTRAPOLATION_ON_CENTROIDS,
+    PRIOR_EXTRAPOLATION_ON_PI,
     # %
     OOD_Z_GENERATION_AVAILABLE_METHODS,
     OOD_Z_GENERATION_METHOD,
@@ -668,6 +672,9 @@ class V3AE(BaseVAE):
         prior_extrapolation_x: Union[float, None] = v3ae_parameters[
             PRIOR_EXTRAPOLATION_X
         ].default,
+        prior_extrapolation_mode: Union[str, None] = v3ae_parameters[
+            PRIOR_EXTRAPOLATION_MODE
+        ].default,
         decoder_α_offset: float = v3ae_parameters[DECODER_α_OFFSET].default,
     ):
         super(V3AE, self).__init__(
@@ -755,6 +762,9 @@ class V3AE(BaseVAE):
         self.prior_b = prior_b
         self.prior_epistemic_c = prior_epistemic_c
         self.prior_extrapolation_x = prior_extrapolation_x
+        self.prior_extrapolation_mode = prior_extrapolation_mode
+        if self.prior_extrapolation_x is not None:
+            assert self.prior_extrapolation_mode in PRIOR_EXTRAPOLATION_AVAILABLE_MODES
 
         self._mean_x_train = None
 
@@ -782,6 +792,7 @@ class V3AE(BaseVAE):
             "prior_b",
             "prior_epistemic_c",
             "prior_extrapolation_x",
+            "prior_extrapolation_mode",
             "decoder_α_offset",
         )
 
@@ -1132,7 +1143,9 @@ class V3AE(BaseVAE):
             self.prior_β.flatten().repeat(beta.shape[0], beta.shape[1], 1).type_as(beta)
         )
 
-        if self.prior_extrapolation_x is not None:
+        if (self.prior_extrapolation_mode == PRIOR_EXTRAPOLATION_ON_CENTROIDS) & (
+            self.prior_extrapolation_x is not None
+        ):
             prior_β_extrapolation = prior_β * self.prior_extrapolation_x
             s = self.get_latent_extrapolation_ratios(z)
             s = s.repeat(1, 1, beta.shape[2])
@@ -1297,16 +1310,17 @@ class V3AE(BaseVAE):
             & (self._student_t_decoder)
         ):
             p_λ_out = p_λ
-            # %
-            # if self.prior_extrapolation_x is not None:
-            #     prior_β_extrapolation = p_λ.base_dist.rate * self.prior_extrapolation_x
-            #     p_λ_out = D.Independent(
-            #         D.Gamma(
-            #             p_λ.base_dist.concentration,
-            #             prior_β_extrapolation,
-            #         ),
-            #         1,
-            #     )
+            if (self.prior_extrapolation_mode == PRIOR_EXTRAPOLATION_ON_PI) & (
+                self.prior_extrapolation_x is not None
+            ):
+                prior_β_extrapolation = p_λ.base_dist.rate * self.prior_extrapolation_x
+                p_λ_out = D.Independent(
+                    D.Gamma(
+                        p_λ.base_dist.concentration,
+                        prior_β_extrapolation,
+                    ),
+                    1,
+                )
             # NOTE: beware, for understandability, tau is opposite.
             kl_divergence_lbd_ood = self.ood_kl(p_λ_out, z)
             expected_kl_divergence_lbd_ood = kl_divergence_lbd_ood.mean()
