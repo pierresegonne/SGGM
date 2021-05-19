@@ -1,6 +1,28 @@
-- name: training_more_like_github
+# - name: training_more_like_github
+#   experiment_name: cifar
+#   model_name: v3ae
+#   n_workers: 0
+#   # hparams
+#   batch_size: 256
+#   learning_rate: 5e-3
+#   eps: 1e-3
+#   latent_dims:
+#   - 128
+#   # misc
+#   n_trials: 2
+#   seed: 3
+#   max_epochs: 50
+#   # pl trainer
+#   early_stopping_patience: 200
+#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 3 # Check val every n train epochs
+
+
+- name: test_good_samples
   experiment_name: cifar
-  model_name: vanilla_vae
+  model_name: v3ae
   n_workers: 0
   # hparams
   batch_size: 256
@@ -8,10 +30,15 @@
   eps: 1e-3
   latent_dims:
   - 128
+  tau_ood: 0.5
+  ood_z_generation_method: gd_aggregate_posterior
+  # prior
+  prior_α: 1.625
+  prior_β: 0.00625
   # misc
   n_trials: 2
   seed: 3
-  max_epochs: 50
+  max_epochs: 200
   # pl trainer
   early_stopping_patience: 200
   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
