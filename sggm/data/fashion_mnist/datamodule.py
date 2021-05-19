@@ -82,10 +82,8 @@ class FashionMNISTDataModule(pl.LightningDataModule):
         # Put on GPU
         # Eugene's hack
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        values = torch.cat([e[0] for e in self.train_dataset], dim=0)
-        print(values.shape)
+        values = torch.cat([e[0][None, :] for e in self.train_dataset], dim=0)
         targets = torch.tensor([e[1] for e in self.train_dataset])
-        print(targets.shape)
         self.train_dataset = TensorDataset(values.to(device), targets.to(device))
         return DataLoader(
             self.train_dataset,
