@@ -135,6 +135,8 @@ sggm/_thesis_plots
 sggm/_paper_nips_plots
 sggm/hpc_lightning_logs/
 sggm/job_logs/
-sggm/impact_logs/
+sggm/impact_logs/*
 !sggm/impact_logs/.gitkeep
+sggm/paper_logs/*
+!sggm/paper_logs/.gitkeep
 impact_logs/
