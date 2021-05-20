@@ -163,6 +163,9 @@ def kde_pig_dl(
             x_start,
             {"N_steps": gd_n_steps, "lr": gd_lr, "threshold": gd_threshold},
         )
+        # Ensure same device
+        if x_hat.device != device:
+            x_hat = x_hat.to(device)
         x_hat = torch.cat((x_hat, _x_hat.detach()))
 
     dl = DataLoader(TensorDataset(x_hat), batch_size=batch_size, shuffle=True)
