@@ -1087,7 +1087,6 @@ class V3AE(BaseVAE):
     def forward(self, x):
         # Encoding
         x = batch_flatten(x)
-        print(x.device, self.encoder_std.device)
         μ_x = self.encoder_μ(x)
         std_x = self.encoder_std(x)
         z, _, _ = self.sample_latent(μ_x, std_x)
