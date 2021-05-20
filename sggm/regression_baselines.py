@@ -195,6 +195,7 @@ class ENSRegressor(pl.LightningModule):
         out_dim: int,
         activation: str,
         learning_rate: float = ens_regressor_parameters[LEARNING_RATE].default,
+        eps: float = ens_regressor_parameters[EPS].default,
         n_ens: int = ens_regressor_parameters[N_ENS].default,
     ) -> None:
         super(ENSRegressor, self).__init__()
@@ -203,6 +204,7 @@ class ENSRegressor(pl.LightningModule):
         self.hidden_dim = hidden_dim
         self.out_dim = out_dim
 
+        self.eps = eps
         self.n_ens = n_ens
 
         self.activation = activation
@@ -259,7 +261,7 @@ class ENSRegressor(pl.LightningModule):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         _μ_x = torch.cat([_μ(x) for _μ in self.μ], dim=1)
-        _σ_x = torch.cat([_σ(x) for _σ in self.σ], dim=1)
+        _σ_x = torch.cat([_σ(x) for _σ in self.σ], dim=1) + self.eps
 
         μ_x = _μ_x.mean(dim=1)[:, None]
 
@@ -285,9 +287,9 @@ class ENSRegressor(pl.LightningModule):
 
         loss = torch.zeros((self.n_ens,)).type_as(x)
         for idx_ens in range(self.n_ens):
-            μ_x, σ_x = self.μ[idx_ens](x), self.σ[idx_ens](x)
+            μ_x, σ_x = self.μ[idx_ens](x), self.σ[idx_ens](x) + self.eps
 
-            _loss = norm_log_likelihood(y, μ_x, σ_x).sum()
+            _loss = norm_log_likelihood(y, μ_x, σ_x ** 2).sum()
 
             _opt = optimizers[idx_ens]
             _opt.zero_grad()
@@ -305,7 +307,7 @@ class ENSRegressor(pl.LightningModule):
     ) -> torch.Tensor:
         x, y = batch
         μ_x, σ_x = self(x)
-        loss = norm_log_likelihood(y, μ_x, σ_x).sum()
+        loss = norm_log_likelihood(y, μ_x, σ_x ** 2).sum()
         self.log(EVAL_LOSS, loss, on_epoch=True)
         return loss
 
@@ -314,7 +316,7 @@ class ENSRegressor(pl.LightningModule):
     ) -> torch.Tensor:
         x, y = batch
         μ_x, σ_x = self(x)
-        log_likelihood = norm_log_likelihood(y, μ_x, σ_x)
+        log_likelihood = norm_log_likelihood(y, μ_x, σ_x ** 2)
 
         loss = log_likelihood.sum()
         self.log(TEST_LOSS, loss, on_epoch=True)

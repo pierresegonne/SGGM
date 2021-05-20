@@ -148,6 +148,7 @@ class Experiment:
                             self.experiment_name
                         ),
                         learning_rate=self.learning_rate,
+                        eps=self.eps,
                         n_ens=self.n_ens,
                     )
                 else:

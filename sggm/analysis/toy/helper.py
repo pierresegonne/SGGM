@@ -24,7 +24,7 @@ from sklearn.mixture import GaussianMixture
 # ------------
 # Plot data definition
 # ------------
-data_range_plot = [-200, 200]
+data_range_plot = [-10, 20]
 data_range_training = [0, 10]
 
 
