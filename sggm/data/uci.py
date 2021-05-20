@@ -68,6 +68,12 @@ class UCIDataModule(RegressionDataModule):
         self.test_dataset = TensorDataset(x_test, y_test)
 
     def train_dataloader(self):
+        # Put on GPU
+        # Eugene's hack
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        values = torch.cat([e[0][None, :] for e in self.train_dataset], dim=0)
+        targets = torch.tensor([e[1] for e in self.train_dataset])
+        self.train_dataset = TensorDataset(values.to(device), targets.to(device))
         return DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
