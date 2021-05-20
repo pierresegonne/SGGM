@@ -72,7 +72,7 @@ class UCIDataModule(RegressionDataModule):
         # Eugene's hack
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         values = torch.cat([e[0][None, :] for e in self.train_dataset], dim=0)
-        targets = torch.tensor([e[1] for e in self.train_dataset])
+        targets = torch.cat([e[1][None, :] for e in self.train_dataset], dim=0)
         self.train_dataset = TensorDataset(values.to(device), targets.to(device))
         return DataLoader(
             self.train_dataset,

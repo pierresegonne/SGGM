@@ -68,7 +68,11 @@ def plot(experiment_log, methods, show_plot=True):
         # Fallback on GN generation if no x ood
         best_model.τ_ood = 0.5
         best_model.ood_x_generation_method = GAUSSIAN_NOISE
-        x_out = best_model.ood_x(x_test) if getattr(best_model, "ood_x", None) else torch.Tensor()
+        x_out = (
+            best_model.ood_x(x_test)
+            if getattr(best_model, "ood_x", None)
+            else torch.Tensor()
+        )
         x_test = x_test.detach()
         x_out = x_out.detach()
         with_x_out = True if (x_out is not None and torch.numel(x_out) > 0) else False
