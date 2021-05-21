@@ -25,7 +25,7 @@
   model_name: v3ae
   n_workers: 0
   # hparams
-  batch_size: 256
+  batch_size: 128
   learning_rate: 1e-3
   eps: 1e-5
   latent_dims:
