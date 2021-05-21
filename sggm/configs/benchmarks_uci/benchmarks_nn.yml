@@ -1,0 +1,470 @@
+# # ===================
+# # UCI BOSTON
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_boston
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_boston
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# # ===================
+# # UCI CARBON
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_carbon
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_carbon
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# # ===================
+# # UCI CCPP
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_ccpp
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_ccpp
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# # # ===================
+# # # UCI CONCRETE
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_concrete
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_concrete
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# # # ## ===================
+# # # ## UCI ENERGY
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_energy
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_energy
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# # # ## ===================
+# # # ## UCI KIN8NM
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_kin8nm
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_kin8nm
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# # # ## ===================
+# # # ## UCI NAVAL
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_naval
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_naval
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+
+# # # ## ===================
+# # # ## UCI PROTEIN
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_protein
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_protein
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+
+# # # ## ===================
+# # # ## UCI SUPERCONDUCT
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_superconduct
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_superconduct
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# # ## ===================
+# # ## UCI WINE RED
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_wine_red
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_wine_red
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# # # ===================
+# # # UCI WINE WHITE
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_wine_white
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_wine_white
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+
+# # ===================
+# # UCI YACHT
+
+- name: f_mvn
+  model_name: ens_regressor
+  experiment_name: uci_yacht
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 1
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: f_ens
+  model_name: ens_regressor
+  experiment_name: uci_yacht
+  # hparams
+  batch_size: 1024
+  hidden_dim: 50
+  eps: 1e-3
+  n_ens: 5
+  # shift
+  seed: 2
+  # pl trainer
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs

@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from argparse import ArgumentParser
 from copy import copy
 from itertools import chain
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from sggm.definitions import (
     EVAL_LOSS,
@@ -34,7 +34,7 @@ from sggm.regression_model_helper import generate_noise_for_model_test
 def norm_log_likelihood(
     x: torch.Tensor, mean: torch.Tensor, var: torch.Tensor
 ) -> torch.Tensor:
-    norm = D.Normal(mean, torch.sqrt(var))
+    norm = D.Independent(D.Normal(mean, torch.sqrt(var)), 1)
     return norm.log_prob(x)
 
 
@@ -207,11 +207,13 @@ class ENSRegressor(pl.LightningModule):
         self.eps = eps
         self.n_ens = n_ens
 
+        self.std = 0.02
+
         self.activation = activation
 
         f = get_activation_function(activation)
 
-        for i in range(n_ens):
+        for i in range(self.n_ens):
             setattr(
                 self,
                 f"μ_{i}",
@@ -222,7 +224,7 @@ class ENSRegressor(pl.LightningModule):
                 ),
             )
 
-        for i in range(n_ens):
+        for i in range(self.n_ens):
             setattr(
                 self,
                 f"σ_{i}",
@@ -275,21 +277,33 @@ class ENSRegressor(pl.LightningModule):
     def predictive_std(self, x: torch.Tensor, *args) -> torch.Tensor:
         return self(x)[1]
 
+    def _update_hacks(self):
+        self.switch = 1 if self.current_epoch > self.trainer.max_epochs / 2 else 0
+
     def training_step(
         self,
         batch: Tuple[torch.Tensor, torch.Tensor],
         batch_idx: int,
-        optimizer_idx: int,
+        optimizer_idx: int = None,
     ) -> torch.Tensor:
-        optimizers: List[torch.optim.Optimizer] = self.optimizers()
+        optimizers: Union[
+            List[torch.optim.Optimizer], torch.optim.Optimizer
+        ] = self.optimizers()
+        if isinstance(optimizers, torch.optim.Optimizer):
+            optimizers = [optimizers]
 
         x, y = batch
+
+        self._update_hacks()
 
         loss = torch.zeros((self.n_ens,)).type_as(x)
         for idx_ens in range(self.n_ens):
             μ_x, σ_x = self.μ[idx_ens](x), self.σ[idx_ens](x) + self.eps
 
-            _loss = norm_log_likelihood(y, μ_x, σ_x ** 2).sum()
+            if not self.switch:
+                σ_x = self.std * torch.ones_like(σ_x)
+
+            _loss = -norm_log_likelihood(y, μ_x, σ_x ** 2).mean()
 
             _opt = optimizers[idx_ens]
             _opt.zero_grad()
