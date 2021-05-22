@@ -3,7 +3,7 @@
 ### specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J ge
+#BSUB -J nice_likelihood
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 4
 #BSUB -R "span[hosts=1]"
@@ -38,6 +38,6 @@ source env/bin/activate
 python3 -m pip install -r requirements.txt
 export PYTHONIOENCODING=utf8
 # Our model run
-cd sggm/ && python experiment.py --experiments_config configs/grid_explore_encoder_refit.yml --gpus -1
+cd sggm/ && python experiment.py --experiments_config configs/v3ae_prior_profiles/nice_likelihood.yml --gpus -1
 # Baselines run
 # cd sggm/ && python baselines/run.py --experiment_name uci_carbon --n_trials 20
