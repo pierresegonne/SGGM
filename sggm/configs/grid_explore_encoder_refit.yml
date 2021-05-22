@@ -17,69 +17,69 @@
 
 
 ## UNCERTAINTY 1e-2
-- name: ge_u1e-2_x1e2
-  experiment_name: fashion_mnist
-  model_name: v3ae
-  n_workers: 0
-  # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-4
-  n_mc_samples: 3
-  decoder_α_offset: 1e-4
-  latent_dims:
-    - 2
-  # ood
-  tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
-  # prior
-  prior_α: 11.0
-  prior_β: 1e-3
-  prior_extrapolation_x: 1e2
-  prior_extrapolation_mode: on_centroids
-  # misc
-  n_trials: 2
-  seed: 3
-  max_epochs: 100
-  # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 10 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 5 # Check val every n train epochs
+# - name: ge_u1e-2_x1e2
+#   experiment_name: fashion_mnist
+#   model_name: v3ae
+#   n_workers: 0
+#   # hparams
+#   batch_size: 128
+#   learning_rate: 1e-3
+#   eps: 1e-4
+#   n_mc_samples: 3
+#   decoder_α_offset: 1e-4
+#   latent_dims:
+#     - 2
+#   # ood
+#   tau_ood: 0.5
+#   ood_z_generation_method: gd_aggregate_posterior
+#   # prior
+#   prior_α: 11.0
+#   prior_β: 1e-3
+#   prior_extrapolation_x: 1e2
+#   prior_extrapolation_mode: on_centroids
+#   # misc
+#   n_trials: 2
+#   seed: 3
+#   max_epochs: 100
+#   # pl trainer
+#   early_stopping_patience: 200
+#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 5 # Check val every n train epochs
 
-- name: ge_u1e-2_x1e3
-  experiment_name: fashion_mnist
-  model_name: v3ae
-  n_workers: 0
-  # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-4
-  n_mc_samples: 3
-  decoder_α_offset: 1e-4
-  latent_dims:
-    - 2
-  # ood
-  tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
-  # prior
-  prior_α: 11.0
-  prior_β: 1e-3
-  prior_extrapolation_x: 1e3
-  prior_extrapolation_mode: on_centroids
-  # misc
-  n_trials: 2
-  seed: 3
-  max_epochs: 100
-  # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 10 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 5 # Check val every n train epochs
+# - name: ge_u1e-2_x1e3
+#   experiment_name: fashion_mnist
+#   model_name: v3ae
+#   n_workers: 0
+#   # hparams
+#   batch_size: 128
+#   learning_rate: 1e-3
+#   eps: 1e-4
+#   n_mc_samples: 3
+#   decoder_α_offset: 1e-4
+#   latent_dims:
+#     - 2
+#   # ood
+#   tau_ood: 0.5
+#   ood_z_generation_method: gd_aggregate_posterior
+#   # prior
+#   prior_α: 11.0
+#   prior_β: 1e-3
+#   prior_extrapolation_x: 1e3
+#   prior_extrapolation_mode: on_centroids
+#   # misc
+#   n_trials: 2
+#   seed: 3
+#   max_epochs: 100
+#   # pl trainer
+#   early_stopping_patience: 200
+#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 5 # Check val every n train epochs
 
-- name: ge_u1e-2_x1e4
+- name: ge_u1e-2_x1e4_K1
   experiment_name: fashion_mnist
   model_name: v3ae
   n_workers: 0
@@ -111,189 +111,189 @@
   check_val_every_n_epoch: 5 # Check val every n train epochs
 
 ## UNCERTAINTY 1e-3
-- name: ge_u1e-3_x1e2
-  experiment_name: fashion_mnist
-  model_name: v3ae
-  n_workers: 0
-  # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-4
-  n_mc_samples: 3
-  decoder_α_offset: 1e-4
-  latent_dims:
-    - 2
-  # ood
-  tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
-  # prior
-  prior_α: 1001.0
-  prior_β: 1e-3
-  prior_extrapolation_x: 1e2
-  prior_extrapolation_mode: on_centroids
-  # misc
-  n_trials: 2
-  seed: 3
-  max_epochs: 100
-  # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 10 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 5 # Check val every n train epochs
+# - name: ge_u1e-3_x1e2
+#   experiment_name: fashion_mnist
+#   model_name: v3ae
+#   n_workers: 0
+#   # hparams
+#   batch_size: 128
+#   learning_rate: 1e-3
+#   eps: 1e-4
+#   n_mc_samples: 3
+#   decoder_α_offset: 1e-4
+#   latent_dims:
+#     - 2
+#   # ood
+#   tau_ood: 0.5
+#   ood_z_generation_method: gd_aggregate_posterior
+#   # prior
+#   prior_α: 1001.0
+#   prior_β: 1e-3
+#   prior_extrapolation_x: 1e2
+#   prior_extrapolation_mode: on_centroids
+#   # misc
+#   n_trials: 2
+#   seed: 3
+#   max_epochs: 100
+#   # pl trainer
+#   early_stopping_patience: 200
+#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 5 # Check val every n train epochs
 
-- name: ge_u1e-3_x1e3
-  experiment_name: fashion_mnist
-  model_name: v3ae
-  n_workers: 0
-  # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-4
-  n_mc_samples: 3
-  decoder_α_offset: 1e-4
-  latent_dims:
-    - 2
-  # ood
-  tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
-  # prior
-  prior_α: 1001.0
-  prior_β: 1e-3
-  prior_extrapolation_x: 1e3
-  prior_extrapolation_mode: on_centroids
-  # misc
-  n_trials: 2
-  seed: 3
-  max_epochs: 100
-  # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 10 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 5 # Check val every n train epochs
+# - name: ge_u1e-3_x1e3
+#   experiment_name: fashion_mnist
+#   model_name: v3ae
+#   n_workers: 0
+#   # hparams
+#   batch_size: 128
+#   learning_rate: 1e-3
+#   eps: 1e-4
+#   n_mc_samples: 3
+#   decoder_α_offset: 1e-4
+#   latent_dims:
+#     - 2
+#   # ood
+#   tau_ood: 0.5
+#   ood_z_generation_method: gd_aggregate_posterior
+#   # prior
+#   prior_α: 1001.0
+#   prior_β: 1e-3
+#   prior_extrapolation_x: 1e3
+#   prior_extrapolation_mode: on_centroids
+#   # misc
+#   n_trials: 2
+#   seed: 3
+#   max_epochs: 100
+#   # pl trainer
+#   early_stopping_patience: 200
+#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 5 # Check val every n train epochs
 
-- name: ge_u1e-3_x1e4
-  experiment_name: fashion_mnist
-  model_name: v3ae
-  n_workers: 0
-  # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-4
-  n_mc_samples: 3
-  decoder_α_offset: 1e-4
-  latent_dims:
-    - 2
-  # ood
-  tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
-  # prior
-  prior_α: 1001.0
-  prior_β: 1e-3
-  prior_extrapolation_x: 1e4
-  prior_extrapolation_mode: on_centroids
-  # misc
-  n_trials: 2
-  seed: 3
-  max_epochs: 100
-  # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 10 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 5 # Check val every n train epochs
+# - name: ge_u1e-3_x1e4
+#   experiment_name: fashion_mnist
+#   model_name: v3ae
+#   n_workers: 0
+#   # hparams
+#   batch_size: 128
+#   learning_rate: 1e-3
+#   eps: 1e-4
+#   n_mc_samples: 3
+#   decoder_α_offset: 1e-4
+#   latent_dims:
+#     - 2
+#   # ood
+#   tau_ood: 0.5
+#   ood_z_generation_method: gd_aggregate_posterior
+#   # prior
+#   prior_α: 1001.0
+#   prior_β: 1e-3
+#   prior_extrapolation_x: 1e4
+#   prior_extrapolation_mode: on_centroids
+#   # misc
+#   n_trials: 2
+#   seed: 3
+#   max_epochs: 100
+#   # pl trainer
+#   early_stopping_patience: 200
+#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 5 # Check val every n train epochs
 
-## UNCERTAINTY 1e-4
-- name: ge_u1e-4_x1e2
-  experiment_name: fashion_mnist
-  model_name: v3ae
-  n_workers: 0
-  # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-4
-  n_mc_samples: 3
-  decoder_α_offset: 1e-4
-  latent_dims:
-    - 2
-  # ood
-  tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
-  # prior
-  prior_α: 10001.0
-  prior_β: 1e-3
-  prior_extrapolation_x: 1e2
-  prior_extrapolation_mode: on_centroids
-  # misc
-  n_trials: 2
-  seed: 3
-  max_epochs: 100
-  # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 10 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 5 # Check val every n train epochs
+# ## UNCERTAINTY 1e-4
+# - name: ge_u1e-4_x1e2
+#   experiment_name: fashion_mnist
+#   model_name: v3ae
+#   n_workers: 0
+#   # hparams
+#   batch_size: 128
+#   learning_rate: 1e-3
+#   eps: 1e-4
+#   n_mc_samples: 3
+#   decoder_α_offset: 1e-4
+#   latent_dims:
+#     - 2
+#   # ood
+#   tau_ood: 0.5
+#   ood_z_generation_method: gd_aggregate_posterior
+#   # prior
+#   prior_α: 10001.0
+#   prior_β: 1e-3
+#   prior_extrapolation_x: 1e2
+#   prior_extrapolation_mode: on_centroids
+#   # misc
+#   n_trials: 2
+#   seed: 3
+#   max_epochs: 100
+#   # pl trainer
+#   early_stopping_patience: 200
+#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 5 # Check val every n train epochs
 
-- name: ge_u1e-4_x1e3
-  experiment_name: fashion_mnist
-  model_name: v3ae
-  n_workers: 0
-  # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-4
-  n_mc_samples: 3
-  decoder_α_offset: 1e-4
-  latent_dims:
-    - 2
-  # ood
-  tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
-  # prior
-  prior_α: 10001.0
-  prior_β: 1e-3
-  prior_extrapolation_x: 1e3
-  prior_extrapolation_mode: on_centroids
-  # misc
-  n_trials: 2
-  seed: 3
-  max_epochs: 100
-  # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 10 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 5 # Check val every n train epochs
+# - name: ge_u1e-4_x1e3
+#   experiment_name: fashion_mnist
+#   model_name: v3ae
+#   n_workers: 0
+#   # hparams
+#   batch_size: 128
+#   learning_rate: 1e-3
+#   eps: 1e-4
+#   n_mc_samples: 3
+#   decoder_α_offset: 1e-4
+#   latent_dims:
+#     - 2
+#   # ood
+#   tau_ood: 0.5
+#   ood_z_generation_method: gd_aggregate_posterior
+#   # prior
+#   prior_α: 10001.0
+#   prior_β: 1e-3
+#   prior_extrapolation_x: 1e3
+#   prior_extrapolation_mode: on_centroids
+#   # misc
+#   n_trials: 2
+#   seed: 3
+#   max_epochs: 100
+#   # pl trainer
+#   early_stopping_patience: 200
+#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 5 # Check val every n train epochs
 
-- name: ge_u1e-4_x1e4
-  experiment_name: fashion_mnist
-  model_name: v3ae
-  n_workers: 0
-  # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-4
-  n_mc_samples: 3
-  decoder_α_offset: 1e-4
-  latent_dims:
-    - 2
-  # ood
-  tau_ood: 0.5
-  ood_z_generation_method: gd_aggregate_posterior
-  # prior
-  prior_α: 10001.0
-  prior_β: 1e-3
-  prior_extrapolation_x: 1e4
-  prior_extrapolation_mode: on_centroids
-  # misc
-  n_trials: 2
-  seed: 3
-  max_epochs: 100
-  # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 10 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 5 # Check val every n train epochs
+# - name: ge_u1e-4_x1e4
+#   experiment_name: fashion_mnist
+#   model_name: v3ae
+#   n_workers: 0
+#   # hparams
+#   batch_size: 128
+#   learning_rate: 1e-3
+#   eps: 1e-4
+#   n_mc_samples: 3
+#   decoder_α_offset: 1e-4
+#   latent_dims:
+#     - 2
+#   # ood
+#   tau_ood: 0.5
+#   ood_z_generation_method: gd_aggregate_posterior
+#   # prior
+#   prior_α: 10001.0
+#   prior_β: 1e-3
+#   prior_extrapolation_x: 1e4
+#   prior_extrapolation_mode: on_centroids
+#   # misc
+#   n_trials: 2
+#   seed: 3
+#   max_epochs: 100
+#   # pl trainer
+#   early_stopping_patience: 200
+#   log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 10 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 5 # Check val every n train epochs
