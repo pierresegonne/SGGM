@@ -33,7 +33,7 @@
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   # prior
-  prior_α: 11
+  prior_α: 11.0
   prior_β: 1e-3
   prior_extrapolation_x: 1e2
   prior_extrapolation_mode: on_centroids
@@ -64,7 +64,7 @@
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   # prior
-  prior_α: 11
+  prior_α: 11.0
   prior_β: 1e-3
   prior_extrapolation_x: 1e3
   prior_extrapolation_mode: on_centroids
@@ -95,7 +95,7 @@
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   # prior
-  prior_α: 11
+  prior_α: 11.0
   prior_β: 1e-3
   prior_extrapolation_x: 1e4
   prior_extrapolation_mode: on_centroids
@@ -127,7 +127,7 @@
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   # prior
-  prior_α: 1001
+  prior_α: 1001.0
   prior_β: 1e-3
   prior_extrapolation_x: 1e2
   prior_extrapolation_mode: on_centroids
@@ -158,7 +158,7 @@
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   # prior
-  prior_α: 1001
+  prior_α: 1001.0
   prior_β: 1e-3
   prior_extrapolation_x: 1e3
   prior_extrapolation_mode: on_centroids
@@ -189,7 +189,7 @@
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   # prior
-  prior_α: 1001
+  prior_α: 1001.0
   prior_β: 1e-3
   prior_extrapolation_x: 1e4
   prior_extrapolation_mode: on_centroids
@@ -221,7 +221,7 @@
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   # prior
-  prior_α: 10001
+  prior_α: 10001.0
   prior_β: 1e-3
   prior_extrapolation_x: 1e2
   prior_extrapolation_mode: on_centroids
@@ -252,7 +252,7 @@
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   # prior
-  prior_α: 10001
+  prior_α: 10001.0
   prior_β: 1e-3
   prior_extrapolation_x: 1e3
   prior_extrapolation_mode: on_centroids
@@ -283,7 +283,7 @@
   tau_ood: 0.5
   ood_z_generation_method: gd_aggregate_posterior
   # prior
-  prior_α: 10001
+  prior_α: 10001.0
   prior_β: 1e-3
   prior_extrapolation_x: 1e4
   prior_extrapolation_mode: on_centroids
