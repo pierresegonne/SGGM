@@ -1,4 +1,4 @@
-- name: v3ae_nice_samples_nice_latent_on_centroids
+- name: test_on_pi_x1e6
   experiment_name: fashion_mnist
   model_name: v3ae
   n_workers: 0
@@ -16,8 +16,8 @@
   # prior
   prior_α: 1.625
   prior_β: 1e-3
-  prior_extrapolation_x: 1000
-  prior_extrapolation_mode: on_centroids
+  prior_extrapolation_x: 1e6
+  prior_extrapolation_mode: on_pi
   # misc
   n_trials: 2
   seed: 3
@@ -29,7 +29,8 @@
   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 5 # Check val every n train epochs
 
-- name: v3ae_nice_samples_nice_latent_on_pi
+
+- name: test_on_pi_x1
   experiment_name: fashion_mnist
   model_name: v3ae
   n_workers: 0
@@ -47,7 +48,38 @@
   # prior
   prior_α: 1.625
   prior_β: 1e-3
-  prior_extrapolation_x: 100000
+  prior_extrapolation_x: 1
+  prior_extrapolation_mode: on_pi
+  # misc
+  n_trials: 2
+  seed: 3
+  max_epochs: 100
+  # pl trainer
+  early_stopping_patience: 200
+  log_every_n_steps: 10 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 10 # How often does the log writes to disc
+  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 5 # Check val every n train epochs
+
+- name: test_on_pi_x1e-6
+  experiment_name: fashion_mnist
+  model_name: v3ae
+  n_workers: 0
+  # hparams
+  batch_size: 128
+  learning_rate: 1e-3
+  eps: 1e-3
+  n_mc_samples: 5
+  decoder_α_offset: 1e-3
+  latent_dims:
+    - 2
+  # ood
+  tau_ood: 0.5
+  ood_z_generation_method: gd_aggregate_posterior
+  # prior
+  prior_α: 1.625
+  prior_β: 1e-3
+  prior_extrapolation_x: 1e-6
   prior_extrapolation_mode: on_pi
   # misc
   n_trials: 2
