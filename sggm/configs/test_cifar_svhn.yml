@@ -19,7 +19,8 @@
 #   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 3 # Check val every n train epochs
 
-
+# Goal of this is to check if we can get good samples by imposing a lower general uncertainty level.
+# That would unlock adding the metrics for cifar (and svhn in the table showing better sampling capacity).
 - name: test_good_samples
   experiment_name: cifar
   model_name: v3ae
