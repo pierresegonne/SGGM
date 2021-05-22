@@ -41,7 +41,7 @@ def get_datamodule(
     experiment_name: str, misc: dict, seed=False
 ) -> pl.LightningDataModule:
     # Get correct datamodule
-    bs = 500
+    bs = 128
     if ("seed" in misc) & seed:
         pl.seed_everything(misc["seed"])
     if experiment_name == MNIST:
