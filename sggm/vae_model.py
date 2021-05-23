@@ -872,13 +872,13 @@ class V3AE(BaseVAE):
                 x_train_var = x_train.var(dim=0)
                 self.prior_α = torch.where(
                     x_train_var > 1e-2,
-                    prior_α * torch.ones(datamodule.dims),
-                    1e3 * torch.ones(datamodule.dims),
+                    prior_α * torch.ones(datamodule.dims).type_as(x_train_var),
+                    1e3 * torch.ones(datamodule.dims).type_as(x_train_var),
                 )
                 self.prior_β = torch.where(
                     x_train_var > 1e-2,
-                    prior_β * torch.ones(datamodule.dims),
-                    1e-3 * torch.ones(datamodule.dims),
+                    prior_β * torch.ones(datamodule.dims).type_as(x_train_var),
+                    1e-3 * torch.ones(datamodule.dims).type_as(x_train_var),
                 )
             elif isinstance(prior_α, torch.Tensor):
                 assert (
