@@ -39,7 +39,7 @@
     - 10
   # ood
   # prior
-  prior_α: 11.
+  prior_α: 11
   prior_β: 1e-3
   # misc
   n_trials: 2
