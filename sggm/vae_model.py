@@ -862,6 +862,8 @@ class V3AE(BaseVAE):
                 )
 
         elif (prior_α is not None) & (prior_β is not None):
+            prior_α = float(prior_α) if isinstance(prior_α, int) else prior_α
+            prior_β = float(prior_β) if isinstance(prior_β, int) else prior_β
             assert type(prior_α) == type(
                 prior_β
             ), "prior_α and prior_β are not of the same type"
