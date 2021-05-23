@@ -178,7 +178,7 @@ variational_regressor_parameters = {
     τ_OOD: Param(τ_OOD, 0.0, float),
     LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
-    N_MC_SAMPLES: Param(N_MC_SAMPLES, 5, int),
+    N_MC_SAMPLES: Param(N_MC_SAMPLES, 3, int),
     OOD_X_GENERATION_METHOD: Param(
         OOD_X_GENERATION_METHOD,
         None,
@@ -197,7 +197,7 @@ mcd_regressor_parameters = {
     EPS: Param(EPS, 1e-10, float),
     LEARNING_RATE: Param(LEARNING_RATE, 1e-2, float),
     HIDDEN_DIM: Param(HIDDEN_DIM, 50, int),
-    N_MC_SAMPLES: Param(N_MC_SAMPLES, 5, int),
+    N_MC_SAMPLES: Param(N_MC_SAMPLES, 3, int),
     DROPOUT_RATE: Param(DROPOUT_RATE, 0.05, float),
 }
 ens_regressor_parameters = {
@@ -215,7 +215,7 @@ VV_VAE_MANIFOLD = "v3aem"
 vae_parameters = {
     LEARNING_RATE: Param(LEARNING_RATE, 1e-3, float),
     EPS: Param(EPS, 1e-4, float),
-    N_MC_SAMPLES: Param(N_MC_SAMPLES, 5, int),
+    N_MC_SAMPLES: Param(N_MC_SAMPLES, 3, int),
     #
     DIGITS: Param(DIGITS, None, none_or_list),
 }
