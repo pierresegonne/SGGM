@@ -133,7 +133,7 @@
   prior_α: 2
   prior_β: 1e-6
   # misc
-  n_trials: 10
+  n_trials: 5
   seed: 3
   max_epochs: 100
   # pl trainer

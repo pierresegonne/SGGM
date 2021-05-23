@@ -8,7 +8,6 @@
 #   eps: 1e-3
 #   latent_dims:
 #     - 10
-#   # From prior_gamma_per_pixel - for MNIST only
 #   # misc
 #   n_trials: 10
 #   seed: 3
@@ -20,28 +19,66 @@
 #   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 5 # Check val every n train epochs
 
-
-- name: f_vae_2d
-  experiment_name: mnist
+- name: f_vae
+  experiment_name: cifar
   model_name: vanilla_vae
   n_workers: 0
   # hparams
   batch_size: 128
   learning_rate: 1e-3
   eps: 1e-3
-  latent_dims:
-    - 2
-  # From prior_gamma_per_pixel - for MNIST only
   # misc
-  n_trials: 10
+  n_trials: 5
   seed: 3
-  max_epochs: 100
+  max_epochs: 300
   # pl trainer
   early_stopping_patience: 50
   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 5 # Check val every n train epochs
+
+- name: f_vae
+  experiment_name: svhn
+  model_name: vanilla_vae
+  n_workers: 0
+  # hparams
+  batch_size: 128
+  learning_rate: 1e-3
+  eps: 1e-3
+  # misc
+  n_trials: 5
+  seed: 3
+  max_epochs: 300
+  # pl trainer
+  early_stopping_patience: 50
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 5 # Check val every n train epochs
+
+
+# - name: f_vae_2d
+#   experiment_name: mnist
+#   model_name: vanilla_vae
+#   n_workers: 0
+#   # hparams
+#   batch_size: 128
+#   learning_rate: 1e-3
+#   eps: 1e-3
+#   latent_dims:
+#     - 2
+#   # From prior_gamma_per_pixel - for MNIST only
+#   # misc
+#   n_trials: 10
+#   seed: 3
+#   max_epochs: 100
+#   # pl trainer
+#   early_stopping_patience: 50
+#   log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 5 # Check val every n train epochs
 
 # - name: f_vae_2d
 #   experiment_name: fashion_mnist

@@ -67,7 +67,7 @@ class SVHNDataModule(pl.LightningDataModule):
     def train_dataloader(self) -> DataLoader:
         # Put on GPU
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        values = torch.cat([e[0] for e in self.train_dataset], dim=0)
+        values = torch.cat([e[0][None, :] for e in self.train_dataset], dim=0)
         targets = torch.tensor([e[1] for e in self.train_dataset])
         self.train_dataset = TensorDataset(values.to(device), targets.to(device))
         return DataLoader(
