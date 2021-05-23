@@ -868,8 +868,18 @@ class V3AE(BaseVAE):
                 prior_β
             ), "prior_α and prior_β are not of the same type"
             if isinstance(prior_α, float) | isinstance(prior_α, int):
-                self.prior_α = prior_α * torch.ones(datamodule.dims)
-                self.prior_β = prior_β * torch.ones(datamodule.dims)
+                # TODO it's a hack!
+                x_train_var = x_train.var(dim=0)
+                self.prior_α = torch.where(
+                    x_train_var > 1e-2,
+                    prior_α * torch.ones(datamodule.dims),
+                    1e3 * torch.ones(datamodule.dims),
+                )
+                self.prior_β = torch.where(
+                    x_train_var > 1e-2,
+                    prior_β * torch.ones(datamodule.dims),
+                    1e-3 * torch.ones(datamodule.dims),
+                )
             elif isinstance(prior_α, torch.Tensor):
                 assert (
                     prior_α.shape == datamodule.dims
