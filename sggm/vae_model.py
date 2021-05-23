@@ -772,7 +772,7 @@ class V3AE(BaseVAE):
         self.pig_dl = None
 
         # Inducing centroids for latent prior extrapolation
-        self.N_inducing = 100
+        self.N_inducing = 10
         self.inducing_centroids = torch.zeros((self.N_inducing, self.latent_size))
 
         # %
