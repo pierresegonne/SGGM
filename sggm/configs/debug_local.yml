@@ -14,26 +14,59 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: hack_likelihood
+- name: hack_likelihood_1e-4
   experiment_name: fashion_mnist
   model_name: v3ae
   n_workers: 0
   # hparams
   batch_size: 128
   learning_rate: 1e-3
-  eps: 1e-4
+  eps: 1e-6
   n_mc_samples: 3
   decoder_α_offset: 1e-4
   latent_dims:
     - 10
   # ood
   # prior
+  tau_ood: 0.5
+  ood_z_generation_method: gd_aggregate_posterior
+  # prior
   prior_α: 2
-  prior_β: 1e-3
+  prior_β: 1e-4
   # misc
   n_trials: 1
   seed: 3
-  max_epochs: 200
+  max_epochs: 100
+  # pl trainer
+  early_stopping_patience: 200
+  log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 100 # How often does the log writes to disc
+  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 10 # Check val every n train epochs
+
+- name: hack_likelihood_1e-5
+  experiment_name: fashion_mnist
+  model_name: v3ae
+  n_workers: 0
+  # hparams
+  batch_size: 128
+  learning_rate: 1e-3
+  eps: 1e-6
+  n_mc_samples: 3
+  decoder_α_offset: 1e-4
+  latent_dims:
+    - 10
+  # ood
+  # prior
+  tau_ood: 0.5
+  ood_z_generation_method: gd_aggregate_posterior
+  # prior
+  prior_α: 2
+  prior_β: 1e-5
+  # misc
+  n_trials: 1
+  seed: 3
+  max_epochs: 100
   # pl trainer
   early_stopping_patience: 200
   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
