@@ -1348,6 +1348,7 @@ class V3AE(BaseVAE):
             )
 
         # TODO monitor mean rmse
+        print(p_x_z.mean.shape)
         x_mean = batch_reshape(p_x_z.mean[0], self.input_dims)
         mean_rmse = torch.sqrt(F.mse_loss(x_mean, x))
         logs = {
