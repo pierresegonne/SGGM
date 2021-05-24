@@ -1272,7 +1272,7 @@ class V3AE(BaseVAE):
                 and previous_switch != self._switch_to_decoder_var
             ):
                 #TODO investigate
-                z_deterministic = torch.ones((1, 1, *self.latent_dims), device=self.device)
+                z_deterministic = torch.ones((1, *self.latent_dims), device=self.device)
                 print("decoder", self.decoder_μ(z_deterministic)[0, :5])
                 for p in self.encoder_μ.parameters():
                     p.requires_grad = False
