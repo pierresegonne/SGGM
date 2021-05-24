@@ -1281,6 +1281,7 @@ class V3AE(BaseVAE):
                 self.encoder_μ.load_state_dict(torch.load("_tmp/encoder_mu.pkl"))
                 self.encoder_std.load_state_dict(torch.load("_tmp/encoder_std.pkl"))
                 self.decoder_μ.load_state_dict(torch.load("_tmp/decoder_mu.pkl"))
+
                 # ----
                 for p in self.encoder_μ.parameters():
                     p.requires_grad = False
@@ -1289,6 +1290,16 @@ class V3AE(BaseVAE):
                 for p in self.decoder_μ.parameters():
                     p.requires_grad = False
 
+                for m in self.encoder_μ.modules():
+                    if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
+                        m.eval()
+                for m in self.encoder_std.modules():
+                    if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
+                        m.eval()
+                for m in self.decoder_μ.modules():
+                    if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
+                        m.eval()
+                        
                 self._setup_pi_dl()
                 self._setup_inducing_centroids()
 
