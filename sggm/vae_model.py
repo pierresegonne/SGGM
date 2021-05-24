@@ -446,8 +446,6 @@ class VanillaVAE(BaseVAE):
     def update_hacks(self):
         if not self._refit_encoder_mode:
             # Switches
-            # TODO
-            prev_switch = copy.copy(self._switch_to_decoder_var)
             self._switch_to_decoder_var = (
                 True if self.current_epoch > self.trainer.max_epochs / 2 else False
             )
@@ -459,10 +457,6 @@ class VanillaVAE(BaseVAE):
             # Note: done with _gaussian_decoder | _bernouilli_decoder
             # Update β_elbo value through annealing
             self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2))
-            # TODO
-            if (self._switch_to_decoder_var) * (self._switch_to_decoder_var != prev_switch):
-                z_deterministic = torch.ones((1, *self.latent_dims), device=self.device)
-                print("decoder", self.decoder_μ(z_deterministic)[0, :5])
 
         # Handle refitting the encoder
         else:
@@ -538,7 +532,14 @@ class VanillaVAE(BaseVAE):
         return loss
 
     def configure_optimizers(self):
-        model_opt = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        model_opt = torch.optim.Adam(
+            chain(
+                self.encoder_μ.parameters(),
+                self.encoder_std.parameters(),
+                self.decoder_μ.parameters(),
+            ),
+            lr=self.learning_rate,
+        )
         decoder_var_opt = torch.optim.Adam(
             self.decoder_std.parameters(), lr=self.learning_rate
         )
@@ -1271,9 +1272,6 @@ class V3AE(BaseVAE):
                 self._switch_to_decoder_var
                 and previous_switch != self._switch_to_decoder_var
             ):
-                #TODO investigate
-                z_deterministic = torch.ones((1, *self.latent_dims), device=self.device)
-                print("decoder", self.decoder_μ(z_deterministic)[0, :5])
                 for p in self.encoder_μ.parameters():
                     p.requires_grad = False
                 for p in self.encoder_std.parameters():
@@ -1359,13 +1357,6 @@ class V3AE(BaseVAE):
             logs[TEST_ELLK] = expected_log_likelihood.mean()
             # MEAN
             # Only keep a single z sample
-            # TODO investigate
-            print(
-                "Check means are the same",
-                p_x_z.mean[
-                    :, :4
-                ]
-            )
             x_mean = batch_reshape(p_x_z.mean[0], self.input_dims)
             logs[TEST_MEAN_FIT_MAE] = F.l1_loss(x_mean, x)
             logs[TEST_MEAN_FIT_RMSE] = torch.sqrt(F.mse_loss(x_mean, x))
@@ -1415,7 +1406,14 @@ class V3AE(BaseVAE):
         return loss
 
     def configure_optimizers(self):
-        model_opt = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        model_opt = torch.optim.Adam(
+            chain(
+                self.encoder_μ.parameters(),
+                self.encoder_std.parameters(),
+                self.decoder_μ.parameters(),
+            ),
+            lr=self.learning_rate,
+        )
         decoder_var_opt = torch.optim.Adam(
             chain(self.decoder_α.parameters(), self.decoder_β.parameters()),
             lr=self.learning_rate,
