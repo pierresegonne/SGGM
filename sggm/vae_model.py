@@ -1348,9 +1348,13 @@ class V3AE(BaseVAE):
             )
 
         # TODO monitor mean rmse
-        print(p_x_z.mean.shape)
         x_mean = batch_reshape(p_x_z.mean[0], self.input_dims)
         mean_rmse = torch.sqrt(F.mse_loss(x_mean, x))
+        _, mu, _, _ = self.parametrise_z(z)
+        x_mean = batch_reshape(mu[0], self.input_dims)
+        mean_rmse_2 = torch.sqrt(F.mse_loss(x_mean, x))
+        print(mean_rmse, mean_rmse_2)
+
         logs = {
             "llk": expected_log_likelihood.sum(),
             "ellk": expected_log_likelihood.mean(),
@@ -1360,6 +1364,7 @@ class V3AE(BaseVAE):
             "kl_lbd_ood": kl_divergence_lbd_ood.mean(),
             "loss": loss,
             "mean_rmse": mean_rmse,
+            "mean_rmse_2": mean_rmse_2,
         }
 
         # Test logs
