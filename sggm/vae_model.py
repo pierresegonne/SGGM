@@ -1299,9 +1299,9 @@ class V3AE(BaseVAE):
                 and previous_switch != self._switch_to_decoder_var
             ):
                 # TODO this is a hack to circumvent weird mean behaviour
-                self.encoder_μ.load_state_dict(torch.load("_tmp/encoder_mu.pkl"))
-                self.encoder_std.load_state_dict(torch.load("_tmp/encoder_std.pkl"))
-                self.decoder_μ.load_state_dict(torch.load("_tmp/decoder_mu.pkl"))
+                # self.encoder_μ.load_state_dict(torch.load("_tmp/encoder_mu.pkl"))
+                # self.encoder_std.load_state_dict(torch.load("_tmp/encoder_std.pkl"))
+                # self.decoder_μ.load_state_dict(torch.load("_tmp/decoder_mu.pkl"))
 
                 # ----
                 for p in self.encoder_μ.parameters():

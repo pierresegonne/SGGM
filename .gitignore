@@ -139,4 +139,5 @@ sggm/impact_logs/*
 !sggm/impact_logs/.gitkeep
 sggm/paper_logs/*
 !sggm/paper_logs/.gitkeep
+sggm/_paper_plots
 impact_logs/
