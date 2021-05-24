@@ -445,6 +445,7 @@ class VanillaVAE(BaseVAE):
 
     def update_hacks(self):
         if not self._refit_encoder_mode:
+            previous_switch = copy.copy(self._switch_to_decoder_var)
             # Switches
             self._switch_to_decoder_var = (
                 True if self.current_epoch > self.trainer.max_epochs / 2 else False
@@ -457,6 +458,26 @@ class VanillaVAE(BaseVAE):
             # Note: done with _gaussian_decoder | _bernouilli_decoder
             # Update β_elbo value through annealing
             self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2))
+            if (
+                self._switch_to_decoder_var
+                and previous_switch != self._switch_to_decoder_var
+            ):
+                for p in self.encoder_μ.parameters():
+                    p.requires_grad = False
+                for p in self.encoder_std.parameters():
+                    p.requires_grad = False
+                for p in self.decoder_μ.parameters():
+                    p.requires_grad = False
+
+                for m in self.encoder_μ.modules():
+                    if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
+                        m.eval()
+                for m in self.encoder_std.modules():
+                    if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
+                        m.eval()
+                for m in self.decoder_μ.modules():
+                    if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
+                        m.eval()
 
         # Handle refitting the encoder
         else:
@@ -1265,7 +1286,7 @@ class V3AE(BaseVAE):
 
     def update_hacks(self):
         if not self._refit_encoder_mode:
-            previous_switch = self._switch_to_decoder_var
+            previous_switch = copy.copy(self._switch_to_decoder_var)
             self._switch_to_decoder_var = (
                 True if self.current_epoch >= self.trainer.max_epochs / 2 else False
             )
@@ -1299,7 +1320,7 @@ class V3AE(BaseVAE):
                 for m in self.decoder_μ.modules():
                     if isinstance(m, nn.BatchNorm1d) | isinstance(m, nn.BatchNorm2d):
                         m.eval()
-                        
+
                 self._setup_pi_dl()
                 self._setup_inducing_centroids()
 
@@ -1361,11 +1382,6 @@ class V3AE(BaseVAE):
         # TODO monitor mean rmse
         x_mean = batch_reshape(p_x_z.mean[0], self.input_dims)
         mean_rmse = torch.sqrt(F.mse_loss(x_mean, x))
-        _, mu, _, _ = self.parametrise_z(z)
-        x_mean = batch_reshape(mu[0], self.input_dims)
-        mean_rmse_2 = torch.sqrt(F.mse_loss(x_mean, x))
-        print(mean_rmse, mean_rmse_2)
-
         logs = {
             "llk": expected_log_likelihood.sum(),
             "ellk": expected_log_likelihood.mean(),
@@ -1375,7 +1391,6 @@ class V3AE(BaseVAE):
             "kl_lbd_ood": kl_divergence_lbd_ood.mean(),
             "loss": loss,
             "mean_rmse": mean_rmse,
-            "mean_rmse_2": mean_rmse_2,
         }
 
         # Test logs
