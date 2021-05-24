@@ -478,11 +478,16 @@ class VanillaVAE(BaseVAE):
             expected_log_likelihood, kl_divergence, train=(stage == TRAINING)
         ).mean()
 
+        # TODO monitor mean rmse
+        x_mean = batch_reshape(p_x_z.mean, self.input_dims)
+        mean_rmse = torch.sqrt(F.mse_loss(x_mean, x))
+
         logs = {
             "llk": expected_log_likelihood.sum(),
             "ellk": expected_log_likelihood.mean(),
             "kl": kl_divergence.mean(),
             "loss": loss,
+            "mean_rmse": mean_rmse,
         }
 
         # Test logs
@@ -1342,6 +1347,9 @@ class V3AE(BaseVAE):
                 (1 - self.τ_ood) * loss + self.τ_ood * expected_kl_divergence_lbd_ood
             )
 
+        # TODO monitor mean rmse
+        x_mean = batch_reshape(p_x_z.mean[0], self.input_dims)
+        mean_rmse = torch.sqrt(F.mse_loss(x_mean, x))
         logs = {
             "llk": expected_log_likelihood.sum(),
             "ellk": expected_log_likelihood.mean(),
@@ -1350,6 +1358,7 @@ class V3AE(BaseVAE):
             "kl_lbd": kl_divergence_lbd.mean(),
             "kl_lbd_ood": kl_divergence_lbd_ood.mean(),
             "loss": loss,
+            "mean_rmse": mean_rmse,
         }
 
         # Test logs
