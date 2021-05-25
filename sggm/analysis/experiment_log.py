@@ -44,6 +44,7 @@ class VersionLog:
             checkpoint_name,
             activation=experiments_activation_function(experiment_name),
             architecture=experiments_architecture(experiment_name),
+            # out_dim=1,
         )
         self.model.freeze()
         # performance

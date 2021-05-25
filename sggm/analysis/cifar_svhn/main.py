@@ -16,7 +16,7 @@ from sggm.vae_model_helper import batch_flatten, batch_reshape
 def get_dm(experiment_name: str, bs: int):
     if experiment_name == CIFAR:
         dm = CIFARDataModule(bs, 0)
-    elif experiment_name == SVHNDataModule:
+    elif experiment_name == SVHN:
         dm = SVHNDataModule(bs, 0)
     dm.setup()
     return dm
