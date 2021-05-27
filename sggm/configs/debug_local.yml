@@ -1,135 +1,21 @@
-# - name: v3ae_samples_likelihood_a1_25_b2e-3
-#   experiment_name: svhn
-#   model_name: v3ae
-#   n_workers: 0
-#   # hparams
-#   batch_size: 128
-#   learning_rate: 1e-3
-#   eps: 1e-3
-#   n_mc_samples: 1
-#   decoder_α_offset: 1e-3
-#   # ood
-#   # prior
-#   tau_ood: 0
-#   # prior
-#   prior_α: 1.25
-#   prior_β: 2e-3
-#   # misc
-#   n_trials: 1
-#   seed: 3
-#   max_epochs: 200
-#   # pl trainer
-#   early_stopping_patience: 200
-#   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 100 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 10 # Check val every n train epochs
-
-# - name: v3ae_samples_likelihood_a1_25_b1e-3
-#   experiment_name: svhn
-#   model_name: v3ae
-#   n_workers: 0
-#   # hparams
-#   batch_size: 128
-#   learning_rate: 1e-3
-#   eps: 1e-3
-#   n_mc_samples: 1
-#   decoder_α_offset: 1e-3
-#   # ood
-#   # prior
-#   tau_ood: 0
-#   # prior
-#   prior_α: 1.25
-#   prior_β: 1e-3
-#   # misc
-#   n_trials: 1
-#   seed: 3
-#   max_epochs: 200
-#   # pl trainer
-#   early_stopping_patience: 200
-#   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 100 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 10 # Check val every n train epochs
-
-# - name: v3ae_samples_likelihood_a1_25_b8e-4
-#   experiment_name: svhn
-#   model_name: v3ae
-#   n_workers: 0
-#   # hparams
-#   batch_size: 128
-#   learning_rate: 1e-3
-#   eps: 1e-3
-#   n_mc_samples: 1
-#   decoder_α_offset: 1e-3
-#   # ood
-#   # prior
-#   tau_ood: 0
-#   # prior
-#   prior_α: 1.25
-#   prior_β: 8e-4
-#   # misc
-#   n_trials: 1
-#   seed: 3
-#   max_epochs: 200
-#   # pl trainer
-#   early_stopping_patience: 200
-#   log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
-#   flush_logs_every_n_steps: 100 # How often does the log writes to disc
-#   progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-#   check_val_every_n_epoch: 10 # Check val every n train epochs
-
-
-- name: v3ae_samples_likelihood_a1_5_b2e-3
-  experiment_name: svhn
-  model_name: v3ae
-  n_workers: 0
+- name: f_kde_new_prior
+  experiment_name: uci_ccpp
   # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-3
-  n_mc_samples: 1
-  decoder_α_offset: 1e-3
-  # ood
-  # prior
-  tau_ood: 0
-  # prior
+  batch_size: 1024
+  hidden_dim: 50
+  beta_elbo: 0.5
+  tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 2e-3
-  # misc
-  n_trials: 1
-  seed: 3
-  max_epochs: 200
+  prior_β: 0.115
+  ood_x_generation_method: kde
+  split_training: True
+  split_training_mode: split_training_std_vv_mean
+  # shift
+  seed: 2
   # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 100 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
-
-- name: v3ae_samples_likelihood_a1_5_b8e-4
-  experiment_name: svhn
-  model_name: v3ae
-  n_workers: 0
-  # hparams
-  batch_size: 128
-  learning_rate: 1e-3
-  eps: 1e-3
-  n_mc_samples: 1
-  decoder_α_offset: 1e-3
-  # ood
-  # prior
-  tau_ood: 0
-  # prior
-  prior_α: 1.5
-  prior_β: 8e-4
-  # misc
-  n_trials: 1
-  seed: 3
-  max_epochs: 200
-  # pl trainer
-  early_stopping_patience: 200
-  log_every_n_steps: 100 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 100 # How often does the log writes to disc
-  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  max_epochs: -1
+  n_trials: 10
+  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  flush_logs_every_n_steps: 50 # How often does the log writes to disc
+  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
