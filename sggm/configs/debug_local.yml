@@ -1,13 +1,13 @@
 - name: f_kde_new_prior
-  experiment_name: uci_superconduct
+  experiment_name: uci_protein
   # hparams
-  batch_size: 512
+  batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
   prior_β: 0.115
-  ood_x_generation_method: gaussian_noise
+  ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
   # shift
