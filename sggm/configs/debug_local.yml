@@ -7,7 +7,7 @@
   tau_ood: 0.5
   prior_α: 1.5
   prior_β: 0.115
-  ood_x_generation_method: kde
+  ood_x_generation_method: gaussian_noise
   split_training: True
   split_training_mode: split_training_std_vv_mean
   # shift
