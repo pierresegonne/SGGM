@@ -1,7 +1,7 @@
 - name: f_kde_new_prior
-  experiment_name: uci_ccpp
+  experiment_name: uci_superconduct
   # hparams
-  batch_size: 256
+  batch_size: 1024
   hidden_dim: 50
   beta_elbo: 0.5
   tau_ood: 0.5
@@ -14,7 +14,7 @@
   seed: 2
   # pl trainer
   max_epochs: -1
-  n_trials: 10
+  n_trials: 1
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
