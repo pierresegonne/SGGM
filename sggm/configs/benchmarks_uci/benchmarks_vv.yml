@@ -937,7 +937,7 @@
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 - name: f_standard_elbo
-  experiment_name: uci_yacht
+  experiment_name: uci_yacht_shifted_split
   # hparams
   batch_size: 1024
   hidden_dim: 50
