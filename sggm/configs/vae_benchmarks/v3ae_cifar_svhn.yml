@@ -94,7 +94,7 @@
   tau_ood: 0
   # prior
   prior_α: 1.5
-  prior_β: 3e-3
+  prior_β: 2e-3
   # misc
   n_trials: 5
   seed: 3
