@@ -59,27 +59,27 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_boston
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.19
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_boston
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.19
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 # # ===================
 # # UCI CARBON
@@ -142,27 +142,27 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_carbon
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.013
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_carbon
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.013
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 # # ===================
 # # UCI CCPP
@@ -225,27 +225,27 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_ccpp
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.115
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_ccpp
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.115
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 
 # # # ===================
@@ -309,27 +309,27 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_concrete
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.135
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_concrete
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.135
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 # # # ## ===================
 # # # ## UCI ENERGY
@@ -392,27 +392,27 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_energy
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.036
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_energy
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.036
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 # # # ## ===================
 # # # ## UCI KIN8NM
@@ -475,27 +475,27 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_kin8nm
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.132
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_kin8nm
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.132
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 
 # # # ## ===================
@@ -559,27 +559,27 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_naval
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.047
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_naval
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.047
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 
 # # # ## ===================
@@ -643,27 +643,27 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_protein
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.35
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_protein
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.35
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 
 # # # ## ===================
@@ -705,27 +705,27 @@
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_superconduct
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.17
-  ood_x_generation_method: gaussian_noise
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_superconduct
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.17
+#   ood_x_generation_method: gaussian_noise
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 # - name: f_kde
 #   experiment_name: uci_superconduct
@@ -810,27 +810,27 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_wine_red
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.428
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_wine_red
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.428
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 # # # ===================
 # # # UCI WINE WHITE
@@ -893,27 +893,27 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_wine_white
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.413
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_wine_white
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.413
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
 
 
 # # # ===================
@@ -977,24 +977,24 @@
 #   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
 #   check_val_every_n_epoch: 10 # Check val every n train epochs
 
-- name: f_kde
-  experiment_name: uci_yacht
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.018
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.5
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+# - name: f_kde
+#   experiment_name: uci_yacht
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.018
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.5
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
