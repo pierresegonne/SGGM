@@ -1,7 +1,7 @@
 - name: f_kde_new_prior
   experiment_name: uci_ccpp
   # hparams
-  batch_size: 1024
+  batch_size: 256
   hidden_dim: 50
   beta_elbo: 0.5
   tau_ood: 0.5
