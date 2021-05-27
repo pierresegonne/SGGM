@@ -67,7 +67,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.19
+  prior_β: 0.266
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -149,7 +149,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.013
+  prior_β: 0.016
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -231,7 +231,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.115
+  prior_β: 0.126
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -314,7 +314,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.135
+  prior_β: 0.276
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -396,7 +396,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.036
+  prior_β: 0.127
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -478,7 +478,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.132
+  prior_β: 0.141
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -561,7 +561,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.047
+  prior_β: 0.88
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -644,7 +644,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.35
+  prior_β: 0.415
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -705,7 +705,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.17
+  prior_β: 0.299
   ood_x_generation_method: gaussian_noise
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -809,7 +809,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.428
+  prior_β: 0.567
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -891,7 +891,7 @@
   beta_elbo: 0.5
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.413
+  prior_β: 0.476
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
@@ -974,7 +974,7 @@
   beta_elbo: 0.018
   tau_ood: 0.5
   prior_α: 1.5
-  prior_β: 0.5
+  prior_β: 0.05
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
