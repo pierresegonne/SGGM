@@ -75,6 +75,7 @@ if __name__ == "__main__":
     )
     args, unknown_args = parser.parse_known_args()
     save_dir = "../hpc_lightning_logs" if args.hpc else "../lightning_logs"
+    save_dir = "../_tmp_lightning_logs" if args.hpc else "../lightning_logs"
     names = [name for name in args.names.split(",")]
     model = args.model
 
