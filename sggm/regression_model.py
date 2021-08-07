@@ -23,6 +23,7 @@ from sggm.definitions import (
     LEARNING_RATE,
     #
     SPLIT_TRAINING_MODE,
+    PI_BATCH_SIZE_MULTIPLIER,
     #
     OOD_X_GENERATION_METHOD,
     BRUTE_FORCE,
@@ -131,11 +132,20 @@ class VariationalRegressor(pl.LightningModule):
         split_training_mode: str = variational_regressor_parameters[
             SPLIT_TRAINING_MODE
         ].default,
+        pi_batch_size_multiplier: float = variational_regressor_parameters[
+            PI_BATCH_SIZE_MULTIPLIER
+        ].default,
         ms_bw_factor: float = variational_regressor_parameters[MS_BW_FACTOR].default,
-        ms_kde_bw_factor: float = variational_regressor_parameters[MS_KDE_BW_FACTOR].default,
-        kde_gd_n_steps: float = variational_regressor_parameters[KDE_GD_N_STEPS].default,
+        ms_kde_bw_factor: float = variational_regressor_parameters[
+            MS_KDE_BW_FACTOR
+        ].default,
+        kde_gd_n_steps: float = variational_regressor_parameters[
+            KDE_GD_N_STEPS
+        ].default,
         kde_gd_lr: float = variational_regressor_parameters[KDE_GD_LR].default,
-        kde_gd_threshold: float = variational_regressor_parameters[KDE_GD_THRESHOLD].default,
+        kde_gd_threshold: float = variational_regressor_parameters[
+            KDE_GD_THRESHOLD
+        ].default,
     ):
         super(VariationalRegressor, self).__init__()
 
@@ -155,6 +165,7 @@ class VariationalRegressor(pl.LightningModule):
         self.ood_x_generation_method = check_ood_x_generation_method(
             ood_x_generation_method
         )
+        self.pi_batch_size_multiplier = pi_batch_size_multiplier
         # Mean shift
         self.ms_bw_factor = ms_bw_factor
         self.ms_kde_bw_factor = ms_kde_bw_factor
@@ -210,6 +221,7 @@ class VariationalRegressor(pl.LightningModule):
             "kde_gd_n_steps",
             "kde_gd_lr",
             "kde_gd_threshold",
+            "pi_batch_size_multiplier",
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -277,26 +289,27 @@ class VariationalRegressor(pl.LightningModule):
     def setup_pig(self, dm: pl.LightningDataModule) -> None:
         """ NOTE: Memory bottleneck here as following methods load entire dataset on memory. """
         N_hat_multiplier = 4
+        pi_batch_size = int(dm.batch_size * self.pi_batch_size_multiplier)
 
         if self.ood_x_generation_method == GAUSSIAN_NOISE:
             # TODO change sigma multiplier again
             self.pig_dl = gaussian_noise_pig_dl(
                 dm,
-                dm.batch_size,
+                pi_batch_size,
                 N_hat_multiplier=N_hat_multiplier,
                 sigma_multiplier=15,
             )
 
         elif self.ood_x_generation_method == KDE:
             self.pig_dl = kde_pig_dl(
-                dm, dm.batch_size, N_hat_multiplier=N_hat_multiplier
+                dm, pi_batch_size, N_hat_multiplier=N_hat_multiplier
             )
 
         elif self.ood_x_generation_method == MEAN_SHIFT:
             # Assigns a pig datamodule
             self.pig_dl = mean_shift_pig_dl(
                 dm,
-                dm.batch_size,
+                pi_batch_size,
                 N_hat_multiplier=N_hat_multiplier,
                 max_iters=100,
                 # ad hoc factors

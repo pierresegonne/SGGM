@@ -48,6 +48,7 @@ OOD_X_GENERATION_AVAILABLE_METHODS = [
     UNIFORM,
     MEAN_SHIFT,
 ]
+PI_BATCH_SIZE_MULTIPLIER = "pi_batch_size_multiplier"
 # Options for OOD_X_GENERATION_AVAILABLE_METHODS
 MS_BW_FACTOR = "ms_bw_factor"
 MS_KDE_BW_FACTOR = "ms_kde_bw_factor"
@@ -190,9 +191,9 @@ variational_regressor_parameters = {
     ),
     PRIOR_α: Param(PRIOR_α, 1.5, float),
     PRIOR_β: Param(PRIOR_β, 0.5, float),
-    #
     EPS: Param(EPS, 1e-10, float),
     SPLIT_TRAINING_MODE: Param(SPLIT_TRAINING_MODE, None, str),
+    PI_BATCH_SIZE_MULTIPLIER: Param(PI_BATCH_SIZE_MULTIPLIER, 1.0, float),
     MS_BW_FACTOR: Param(MS_BW_FACTOR, 1.0, float),
     MS_KDE_BW_FACTOR: Param(MS_KDE_BW_FACTOR, 1.0, float),
     KDE_GD_N_STEPS: Param(KDE_GD_N_STEPS, 5, int),
