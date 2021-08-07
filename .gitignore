@@ -141,3 +141,6 @@ sggm/paper_logs/*
 !sggm/paper_logs/.gitkeep
 sggm/_paper_plots
 impact_logs/
+_paper_plots*
+_thesis_plots*
+_tmp_*

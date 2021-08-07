@@ -263,8 +263,12 @@ class VariationalRegressor(pl.LightningModule):
         N_hat_multiplier = 4
 
         if self.ood_x_generation_method == GAUSSIAN_NOISE:
+            # TODO change sigma multiplier again
             self.pig_dl = gaussian_noise_pig_dl(
-                dm, dm.batch_size, N_hat_multiplier=N_hat_multiplier, sigma_multiplier=3
+                dm,
+                dm.batch_size,
+                N_hat_multiplier=N_hat_multiplier,
+                sigma_multiplier=15,
             )
 
         elif self.ood_x_generation_method == KDE:
