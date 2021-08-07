@@ -29,6 +29,12 @@ from sggm.definitions import (
     GAUSSIAN_NOISE,
     KDE,
     MEAN_SHIFT,
+    #
+    KDE_GD_LR,
+    KDE_GD_N_STEPS,
+    KDE_GD_THRESHOLD,
+    MS_BW_FACTOR,
+    MS_KDE_BW_FACTOR,
 )
 from sggm.definitions import (
     TRAIN_LOSS,
@@ -125,8 +131,11 @@ class VariationalRegressor(pl.LightningModule):
         split_training_mode: str = variational_regressor_parameters[
             SPLIT_TRAINING_MODE
         ].default,
-        ms_bw_factor: float = 1.0,
-        ms_kde_bw_factor: float = 1.0,
+        ms_bw_factor: float = variational_regressor_parameters[MS_BW_FACTOR].default,
+        ms_kde_bw_factor: float = variational_regressor_parameters[MS_KDE_BW_FACTOR].default,
+        kde_gd_n_steps: float = variational_regressor_parameters[KDE_GD_N_STEPS].default,
+        kde_gd_lr: float = variational_regressor_parameters[KDE_GD_LR].default,
+        kde_gd_threshold: float = variational_regressor_parameters[KDE_GD_THRESHOLD].default,
     ):
         super(VariationalRegressor, self).__init__()
 
@@ -149,6 +158,10 @@ class VariationalRegressor(pl.LightningModule):
         # Mean shift
         self.ms_bw_factor = ms_bw_factor
         self.ms_kde_bw_factor = ms_kde_bw_factor
+        # KDE gd pig
+        self.kde_gd_n_steps = kde_gd_n_steps
+        self.kde_gd_lr = kde_gd_lr
+        self.kde_gd_threshold = kde_gd_threshold
 
         # ---------
         # HParameters
@@ -194,6 +207,9 @@ class VariationalRegressor(pl.LightningModule):
             "eps",
             "n_mc_samples",
             "split_training_mode",
+            "kde_gd_n_steps",
+            "kde_gd_lr",
+            "kde_gd_threshold",
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

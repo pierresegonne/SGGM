@@ -109,9 +109,10 @@ def kde_pig_dl(
     dm: pl.LightningDataModule,
     batch_size: int,
     N_hat_multiplier: float = 1,
+    gd_n_steps: int = 5,
+    gd_lr: float = 4e-1,
+    gd_threshold: float = 0.005,
 ) -> DataLoader:
-    # %
-    gd_n_steps, gd_lr, gd_threshold = 5, 4e-1, 0.005
 
     # Spherical = each component has single variance.
     bgm = BayesianGaussianMixture(

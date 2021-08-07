@@ -51,6 +51,9 @@ OOD_X_GENERATION_AVAILABLE_METHODS = [
 # Options for OOD_X_GENERATION_AVAILABLE_METHODS
 MS_BW_FACTOR = "ms_bw_factor"
 MS_KDE_BW_FACTOR = "ms_kde_bw_factor"
+KDE_GD_N_STEPS = "kde_gd_n_steps"
+KDE_GD_LR = "kde_gd_lr"
+KDE_GD_THRESHOLD = "kde_gd_threshold"
 
 OOD_Z_GENERATION_METHOD = "ood_z_generation_method"
 # Options for OOD_Z_GENERATION_METHOD
@@ -192,6 +195,9 @@ variational_regressor_parameters = {
     SPLIT_TRAINING_MODE: Param(SPLIT_TRAINING_MODE, None, str),
     MS_BW_FACTOR: Param(MS_BW_FACTOR, 1.0, float),
     MS_KDE_BW_FACTOR: Param(MS_KDE_BW_FACTOR, 1.0, float),
+    KDE_GD_N_STEPS: Param(KDE_GD_N_STEPS, 5, int),
+    KDE_GD_LR: Param(KDE_GD_LR, 4e-1, float),
+    KDE_GD_THRESHOLD: Param(KDE_GD_THRESHOLD, 0.005, float),
 }
 mcd_regressor_parameters = {
     EPS: Param(EPS, 1e-10, float),
