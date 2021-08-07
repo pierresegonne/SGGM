@@ -176,7 +176,7 @@ def kde_pig_dl(
 def mean_shift_pig_dl(
     dm: pl.LightningDataModule,
     batch_size: int,
-    N_hat_multiplier: float = 1 / 20,
+    N_hat_multiplier: float = 1.0,
     max_iters: int = 20,
     h: float = None,
     h_factor: float = 1,

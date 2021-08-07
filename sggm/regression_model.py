@@ -288,7 +288,7 @@ class VariationalRegressor(pl.LightningModule):
 
     def setup_pig(self, dm: pl.LightningDataModule) -> None:
         """ NOTE: Memory bottleneck here as following methods load entire dataset on memory. """
-        N_hat_multiplier = 4
+        N_hat_multiplier = 1 / 10
         pi_batch_size = int(dm.batch_size * self.pi_batch_size_multiplier)
 
         if self.ood_x_generation_method == GAUSSIAN_NOISE:
