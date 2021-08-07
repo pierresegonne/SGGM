@@ -10,6 +10,10 @@
   ood_x_generation_method: kde
   split_training: True
   split_training_mode: split_training_std_vv_mean
+  pi_batch_size_multiplier: 0.3
+  kde_gd_lr: 1
+  kde_gd_n_steps: 2
+  kde_gd_threshold: 4
   # shift
   seed: 2
   # pl trainer

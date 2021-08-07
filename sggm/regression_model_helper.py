@@ -153,9 +153,11 @@ def kde_pig_dl(
         # Sample according to multiplier
         x_start = p_x.sample(
             (
-                n_selected_components
-                * ((batch_size // n_selected_components) + 1)
-                * N_hat_multiplier,
+                int(
+                    n_selected_components
+                    * ((batch_size // n_selected_components) + 1)
+                    * N_hat_multiplier
+                ),
             )
         ).reshape(-1, x.shape[1])
         # Use GD

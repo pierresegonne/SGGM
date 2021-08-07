@@ -118,6 +118,7 @@ class Experiment:
                         β_elbo=self.beta_elbo,
                         τ_ood=self.tau_ood,
                         ood_x_generation_method=self.ood_x_generation_method,
+                        pi_batch_size_multiplier=self.pi_batch_size_multiplier,
                         eps=self.eps,
                         n_mc_samples=self.n_mc_samples,
                         y_mean=self.datamodule.y_mean,
@@ -125,6 +126,9 @@ class Experiment:
                         split_training_mode=self.split_training_mode,
                         ms_bw_factor=self.ms_bw_factor,
                         ms_kde_bw_factor=self.ms_kde_bw_factor,
+                        kde_gd_lr=self.kde_gd_lr,
+                        kde_gd_n_steps=self.kde_gd_n_steps,
+                        kde_gd_threshold=self.kde_gd_threshold,
                     )
                 # Baselines
                 elif self.model_name == MCD_REGRESSOR:
