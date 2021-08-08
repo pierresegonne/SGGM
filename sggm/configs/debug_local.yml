@@ -1,25 +1,20 @@
-- name: test
-  experiment_name: uci_boston
+- name: vae_test_stl10
+  experiment_name: stl10
+  model_name: vanilla_vae
+  n_workers: 0
   # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.19
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  pi_batch_size_multiplier: 0.3
-  kde_gd_lr: 1
-  kde_gd_n_steps: 2
-  kde_gd_threshold: 4
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: 1
+  batch_size: 10
+  learning_rate: 1e-3
+  eps: 1e-3
+  latent_dims:
+    - 256
+  # misc
   n_trials: 1
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+  seed: 3
+  max_epochs: 1
+  # pl trainer
+  early_stopping_patience: 50
+  log_every_n_steps: 50 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
+  progress_bar_refresh_rate: 3 # How often to refresh progress bar (in steps).
+  check_val_every_n_epoch: 5 # Check val every n train epochs

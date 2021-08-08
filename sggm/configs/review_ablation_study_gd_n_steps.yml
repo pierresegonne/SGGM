@@ -1,4 +1,194 @@
-# Goal is to evaluate the influence of the gd parameters
+# # Goal is to evaluate the influence of the gd parameters
+# - name: abl_study_n_steps_0
+#   experiment_name: uci_carbon
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.013
+#   kde_gd_n_steps: 0
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# - name: abl_study_n_steps_0
+#   experiment_name: uci_naval
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.047
+#   kde_gd_n_steps: 0
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# - name: abl_study_n_steps_1
+#   experiment_name: uci_carbon
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.013
+#   kde_gd_n_steps: 1
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# - name: abl_study_n_steps_1
+#   experiment_name: uci_naval
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.047
+#   kde_gd_n_steps: 1
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# - name: abl_study_n_steps_5
+#   experiment_name: uci_carbon
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.013
+#   kde_gd_n_steps: 5
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# - name: abl_study_n_steps_5
+#   experiment_name: uci_naval
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.047
+#   kde_gd_n_steps: 5
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# - name: abl_study_n_steps_10
+#   experiment_name: uci_carbon
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.013
+#   kde_gd_n_steps: 10
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
+
+# - name: abl_study_n_steps_10
+#   experiment_name: uci_naval
+#   # hparams
+#   batch_size: 1024
+#   hidden_dim: 50
+#   beta_elbo: 0.5
+#   tau_ood: 0.5
+#   prior_α: 1.5
+#   prior_β: 0.047
+#   kde_gd_n_steps: 10
+#   ood_x_generation_method: kde
+#   split_training: True
+#   split_training_mode: split_training_std_vv_mean
+#   # shift
+#   seed: 2
+#   # pl trainer
+#   max_epochs: -1
+#   n_trials: 3
+#   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
+#   flush_logs_every_n_steps: 50 # How often does the log writes to disc
+#   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
+#   check_val_every_n_epoch: 10 # Check val every n train epochs
+
+
+
+
+# =====
+
+
 - name: abl_study_n_steps_0
   experiment_name: uci_carbon
   # hparams
@@ -15,123 +205,8 @@
   # shift
   seed: 2
   # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
-
-- name: abl_study_n_steps_0
-  experiment_name: uci_naval
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.047
-  kde_gd_n_steps: 0
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
-
-- name: abl_study_n_steps_1
-  experiment_name: uci_carbon
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.013
-  kde_gd_n_steps: 1
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
-
-- name: abl_study_n_steps_1
-  experiment_name: uci_naval
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.047
-  kde_gd_n_steps: 1
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
-
-- name: abl_study_n_steps_5
-  experiment_name: uci_carbon
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.013
-  kde_gd_n_steps: 5
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
-
-- name: abl_study_n_steps_5
-  experiment_name: uci_naval
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.047
-  kde_gd_n_steps: 5
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
+  max_epochs: 1
+  n_trials: 1
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
@@ -153,31 +228,8 @@
   # shift
   seed: 2
   # pl trainer
-  max_epochs: -1
-  n_trials: 3
-  log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
-  flush_logs_every_n_steps: 50 # How often does the log writes to disc
-  progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).
-  check_val_every_n_epoch: 10 # Check val every n train epochs
-
-- name: abl_study_n_steps_10
-  experiment_name: uci_naval
-  # hparams
-  batch_size: 1024
-  hidden_dim: 50
-  beta_elbo: 0.5
-  tau_ood: 0.5
-  prior_α: 1.5
-  prior_β: 0.047
-  kde_gd_n_steps: 10
-  ood_x_generation_method: kde
-  split_training: True
-  split_training_mode: split_training_std_vv_mean
-  # shift
-  seed: 2
-  # pl trainer
-  max_epochs: -1
-  n_trials: 3
+  max_epochs: 1
+  n_trials: 1
   log_every_n_steps: 500 # How often to log within steps (defaults to every 50 steps)
   flush_logs_every_n_steps: 50 # How often does the log writes to disc
   progress_bar_refresh_rate: 0 # How often to refresh progress bar (in steps).

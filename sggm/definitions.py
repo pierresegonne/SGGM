@@ -371,6 +371,7 @@ generative_experiments = [CIFAR, SVHN, STL10] + MNIST_ALL
 
 FULLY_CONNECTED = "fully_connected"
 CONVOLUTIONAL = "convolutional"
+RESNET = "resnet"
 CONV_HIDDEN_DIMS = [32, 64, 128, 256, 512]
 
 
@@ -404,8 +405,10 @@ def experiments_latent_dims(experiment_name: str) -> tuple:
 def experiments_architecture(experiment_name: str) -> str:
     if experiment_name in MNIST_ALL:
         return FULLY_CONNECTED
-    elif experiment_name in [CIFAR, SVHN, STL10]:
+    elif experiment_name in [CIFAR, SVHN]:
         return CONVOLUTIONAL
+    elif experiment_name in [STL10]:
+        return RESNET
 
 
 # -------------

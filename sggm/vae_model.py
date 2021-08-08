@@ -9,6 +9,7 @@ import torch.nn.functional as F
 
 from argparse import ArgumentParser
 from itertools import chain
+from pl_bolts.models.autoencoders import VAE
 from sklearn.cluster import KMeans
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -42,6 +43,7 @@ from sggm.definitions import (
 from sggm.definitions import (
     CONVOLUTIONAL,
     FULLY_CONNECTED,
+    RESNET,
     CONV_HIDDEN_DIMS,
     ACTIVATION_FUNCTIONS,
     F_ELU,
@@ -373,6 +375,15 @@ class VanillaVAE(BaseVAE):
                 decoder_conv_final(CONV_HIDDEN_DIMS[0], self.activation),
                 nn.Softplus(),
             )
+        elif architecture == RESNET:
+            vae = VAE(input_height=96, first_conv=True)
+            vae = vae.from_pretrained("stl10-resnet18")
+
+            self.encoder_μ = nn.Sequential(vae.encoder, vae.fc_mu)
+            self.encoder_std = nn.Sequential(vae.encoder, vae.fc_var)
+
+            self.decoder_μ = vae.decoder
+            self.decoder_std = copy.deepcopy(vae.decoder)
 
         # %
         self._refit_encoder_mode = False
@@ -393,28 +404,50 @@ class VanillaVAE(BaseVAE):
         return False
 
     def forward(self, x):
-        x = batch_flatten(x)
-        μ_x = self.encoder_μ(x)
-        std_x = self.encoder_std(x)
-        z, _, _ = self.sample_latent(μ_x, std_x)
-        μ_z, std_z = self.decoder_μ(z), self.decoder_std(z)
-        x_hat, p_x = self.sample_generative(μ_z, std_z)
-        x_hat = batch_reshape(x_hat, self.input_dims)
+        if self.architecture == RESNET:
+            μ_x = self.encoder_μ(x)
+            std_x = self.encoder_std(x)
+            std_x = torch.exp(std_x)
+            z, _, _ = self.sample_latent(μ_x, std_x)
+            μ_z, std_z = self.decoder_μ(z), self.decoder_std(z)
+            std_z = torch.exp(std_z)
+            x_hat, p_x = self.sample_generative(μ_z, std_z)
+            # Seems like the decoder down samples
+            x_hat = batch_reshape(x_hat, (3, 32, 32))
+        else:
+            x = batch_flatten(x)
+            μ_x = self.encoder_μ(x)
+            std_x = self.encoder_std(x)
+            z, _, _ = self.sample_latent(μ_x, std_x)
+            μ_z, std_z = self.decoder_μ(z), self.decoder_std(z)
+            x_hat, p_x = self.sample_generative(μ_z, std_z)
+            x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x
 
     def _run_step(self, x):
         # All relevant information for a training step
         # Both latent and generated samples and parameters are returned
-        x = batch_flatten(x)
-        # [batch_size, latent_size]
-        μ_x = self.encoder_μ(x)
-        std_x = self.encoder_std(x)
-        # batch_shape [batch_shape] event_shape [latent_size]
-        z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
-        # [batch_shape, input_size]
-        μ_z, std_z = self.decoder_μ(z), self.decoder_std(z)
-        x_hat, p_x_z = self.sample_generative(μ_z, std_z)
-        x_hat = batch_reshape(x_hat, self.input_dims)
+        if self.architecture == RESNET:
+            # [batch_size, latent_size]
+            μ_x = self.encoder_μ(x)
+            std_x = torch.exp(self.encoder_std(x))
+            # batch_shape [batch_shape] event_shape [latent_size]
+            z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
+            # [batch_shape, input_size]
+            μ_z, std_z = self.decoder_μ(z), torch.exp(self.decoder_std(z))
+            x_hat, p_x_z = self.sample_generative(μ_z, std_z)
+            x_hat = batch_reshape(x_hat, (3, 32, 32))
+        else:
+            x = batch_flatten(x)
+            # [batch_size, latent_size]
+            μ_x = self.encoder_μ(x)
+            std_x = self.encoder_std(x)
+            # batch_shape [batch_shape] event_shape [latent_size]
+            z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
+            # [batch_shape, input_size]
+            μ_z, std_z = self.decoder_μ(z), self.decoder_std(z)
+            x_hat, p_x_z = self.sample_generative(μ_z, std_z)
+            x_hat = batch_reshape(x_hat, self.input_dims)
         return x_hat, p_x_z, z, q_z_x, p_z
 
     def sample_latent(self, mu, std):
@@ -461,7 +494,8 @@ class VanillaVAE(BaseVAE):
             if (
                 self._switch_to_decoder_var
                 and previous_switch != self._switch_to_decoder_var
-            ):
+            ) | (self.architecture == RESNET & self.current_epoch == 0):
+                import pdb; pdb.set_trace()
                 for p in self.encoder_μ.parameters():
                     p.requires_grad = False
                 for p in self.encoder_std.parameters():

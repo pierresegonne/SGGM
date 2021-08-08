@@ -36,6 +36,7 @@ class STL10DataModule(pl.LightningDataModule):
         self.x_mean = 0
         self.x_std = 1
         self.dims = (3, 96, 96)
+        # TODO update
         self.class_names = [
             "airplane",
             "automobile",
@@ -60,7 +61,8 @@ class STL10DataModule(pl.LightningDataModule):
         train_val = STL10(
             os.path.dirname(__file__),
             download=True,
-            split="train+unlabeled",
+            # split="train+unlabeled",
+            split="train",
             transform=stl10_transforms,
         )
         train_length = int(len(train_val) * self.train_val_split)
