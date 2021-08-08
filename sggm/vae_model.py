@@ -434,7 +434,9 @@ class VanillaVAE(BaseVAE):
             # batch_shape [batch_shape] event_shape [latent_size]
             z, q_z_x, p_z = self.sample_latent(μ_x, std_x)
             # [batch_shape, input_size]
-            μ_z, std_z = self.decoder_μ(z), torch.exp(self.decoder_std(z))
+            μ_z, std_z = batch_flatten(self.decoder_μ(z)), batch_flatten(
+                torch.exp(self.decoder_std(z))
+            )
             x_hat, p_x_z = self.sample_generative(μ_z, std_z)
             x_hat = batch_reshape(x_hat, (3, 32, 32))
         else:
@@ -481,7 +483,7 @@ class VanillaVAE(BaseVAE):
             previous_switch = copy.copy(self._switch_to_decoder_var)
             # Switches
             self._switch_to_decoder_var = (
-                True if self.current_epoch > self.trainer.max_epochs / 2 else False
+                True if ((self.current_epoch > self.trainer.max_epochs / 2) | (self.architecture == RESNET)) else False
             )
             self._gaussian_decoder = self._switch_to_decoder_var
             self._bernouilli_decoder = not self._switch_to_decoder_var
@@ -491,11 +493,11 @@ class VanillaVAE(BaseVAE):
             # Note: done with _gaussian_decoder | _bernouilli_decoder
             # Update β_elbo value through annealing
             self.β_elbo = min(1, self.current_epoch / (self.trainer.max_epochs / 2))
+
             if (
                 self._switch_to_decoder_var
-                and previous_switch != self._switch_to_decoder_var
-            ) | (self.architecture == RESNET & self.current_epoch == 0):
-                import pdb; pdb.set_trace()
+                & (previous_switch != self._switch_to_decoder_var)
+            ):
                 for p in self.encoder_μ.parameters():
                     p.requires_grad = False
                 for p in self.encoder_std.parameters():
@@ -526,6 +528,9 @@ class VanillaVAE(BaseVAE):
         x, y = batch
         x_hat, p_x_z, z, q_z_x, p_z = self._run_step(x)
 
+        if self.architecture == RESNET:
+            x = F.interpolate(x, scale_factor=1 / 3)
+
         expected_log_likelihood = self.ellk(p_x_z, x)
         kl_divergence = self.kl(q_z_x, p_z)
 
@@ -533,7 +538,10 @@ class VanillaVAE(BaseVAE):
             expected_log_likelihood, kl_divergence, train=(stage == TRAINING)
         ).mean()
 
-        x_mean = batch_reshape(p_x_z.mean, self.input_dims)
+        if self.architecture == RESNET:
+            x_mean = batch_reshape(p_x_z.mean, (3, 32, 32))
+        else:
+            x_mean = batch_reshape(p_x_z.mean, self.input_dims)
         mean_rmse = torch.sqrt(F.mse_loss(x_mean, x))
 
         logs = {
@@ -553,11 +561,17 @@ class VanillaVAE(BaseVAE):
             # ELLK
             logs[TEST_ELLK] = expected_log_likelihood.mean()
             # MEAN
-            x_mean = batch_reshape(p_x_z.mean, self.input_dims)
+            if self.architecture == RESNET:
+                x_mean = batch_reshape(p_x_z.mean, (3, 32, 32))
+            else:
+                x_mean = batch_reshape(p_x_z.mean, self.input_dims)
             logs[TEST_MEAN_FIT_MAE] = F.l1_loss(x_mean, x)
             logs[TEST_MEAN_FIT_RMSE] = torch.sqrt(F.mse_loss(x_mean, x))
             # Variance
-            x_var = batch_reshape(p_x_z.variance, self.input_dims)
+            if self.architecture == RESNET:
+                x_var = batch_reshape(p_x_z.variance, (3, 32, 32))
+            else:
+                x_var = batch_reshape(p_x_z.variance, self.input_dims)
             empirical_var = (x_mean - x) ** 2
             logs[TEST_VARIANCE_FIT_MAE] = F.l1_loss(x_var, empirical_var)
             logs[TEST_VARIANCE_FIT_RMSE] = torch.sqrt(F.mse_loss(x_var, empirical_var))
