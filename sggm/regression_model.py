@@ -302,7 +302,12 @@ class VariationalRegressor(pl.LightningModule):
 
         elif self.ood_x_generation_method == KDE:
             self.pig_dl = kde_pig_dl(
-                dm, pi_batch_size, N_hat_multiplier=N_hat_multiplier
+                dm,
+                pi_batch_size,
+                N_hat_multiplier=N_hat_multiplier,
+                gd_lr=self.kde_gd_lr,
+                gd_n_steps=self.kde_gd_n_steps,
+                gd_threshold=self.kde_gd_threshold,
             )
 
         elif self.ood_x_generation_method == MEAN_SHIFT:
