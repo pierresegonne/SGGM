@@ -343,6 +343,7 @@ FASHION_MNIST = "fashion_mnist"
 FASHION_MNIST_ND = "fashion_mnist_nd"
 NOT_MNIST = "not_mnist"
 SVHN = "svhn"
+STL10 = "stl10"
 MNIST_ALL = [
     FASHION_MNIST,
     FASHION_MNIST_ND,
@@ -356,7 +357,7 @@ experiment_names = (
     [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_SYMMETRICAL, TOY_2D, TOY_2D_SHIFTED]
     + UCI_ALL
     + MNIST_ALL
-    + [CIFAR, SVHN]
+    + [CIFAR, SVHN, STL10]
 )
 regression_experiments = [
     SANITY_CHECK,
@@ -366,7 +367,7 @@ regression_experiments = [
     TOY_2D,
     TOY_2D_SHIFTED,
 ] + UCI_ALL
-generative_experiments = [CIFAR, SVHN] + MNIST_ALL
+generative_experiments = [CIFAR, SVHN, STL10] + MNIST_ALL
 
 FULLY_CONNECTED = "fully_connected"
 CONVOLUTIONAL = "convolutional"
@@ -396,12 +397,14 @@ def experiments_latent_dims(experiment_name: str) -> tuple:
         return (128,)
     elif experiment_name == SVHN:
         return (128,)
+    elif experiment_name == STL10:
+        return (256,)
 
 
 def experiments_architecture(experiment_name: str) -> str:
     if experiment_name in MNIST_ALL:
         return FULLY_CONNECTED
-    elif experiment_name in [CIFAR, SVHN]:
+    elif experiment_name in [CIFAR, SVHN, STL10]:
         return CONVOLUTIONAL
 
 
@@ -455,6 +458,7 @@ def experiments_activation_function(experiment_name: str) -> str:
         # Probably needs a convolutional architecture for that
         CIFAR,
         SVHN,
+        STL10,
     ]:
         # Match Martin & Nicki
         return F_LEAKY_RELU

@@ -67,6 +67,7 @@ from sggm.data.cifar import CIFARDataModule
 from sggm.data.mnist import MNISTDataModule, MNISTDataModuleND
 from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModuleND
 from sggm.data.not_mnist import NotMNISTDataModule
+from sggm.data.stl10 import STL10DataModule
 from sggm.data.svhn import SVHNDataModule
 
 from sggm.definitions import (
@@ -119,6 +120,7 @@ from sggm.definitions import (
     FASHION_MNIST,
     FASHION_MNIST_ND,
     NOT_MNIST,
+    STL10,
     SVHN,
 )
 
@@ -172,5 +174,6 @@ datamodules = {
     FASHION_MNIST: FashionMNISTDataModule,
     FASHION_MNIST_ND: FashionMNISTDataModuleND,
     NOT_MNIST: NotMNISTDataModule,
+    STL10: STL10DataModule,
     SVHN: SVHNDataModule,
 }

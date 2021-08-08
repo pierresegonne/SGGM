@@ -13,6 +13,7 @@ from sggm.definitions import (
     FASHION_MNIST,
     FASHION_MNIST_ND,
     NOT_MNIST,
+    STL10,
     SVHN,
 )
 from sggm.callbacks.data_saver import DataSaver
@@ -36,6 +37,7 @@ callbacks = {
     FASHION_MNIST: [IMGGeneratedSaver],
     FASHION_MNIST_ND: [],
     NOT_MNIST: [IMGGeneratedSaver],
+    STL10: [],
     SVHN: [],
 }
 
