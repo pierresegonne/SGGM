@@ -182,7 +182,9 @@ def bnn(args, dm):
         means = tf.compat.v1.get_variable(
             name + "_mean", initializer=tf.ones(shape), constraint=constraint
         )
-        stds = tf.compat.v1.get_variable(name + "_std", initializer=-1.0 * tf.ones(shape))
+        stds = tf.compat.v1.get_variable(
+            name + "_std", initializer=-1.0 * tf.ones(shape)
+        )
         return tfd.Normal(loc=means, scale=tf.nn.softplus(stds))
 
     x_p = tf.compat.v1.placeholder(tf.float32, shape=(None, X.shape[1]))

@@ -57,17 +57,9 @@ def normal_log_prob(x, mean, var):
     assert np.array_equal(x.shape, mean.shape)
     assert np.array_equal(x.shape, var.shape)
     if isinstance(x, np.ndarray):  # numpy implementation
-        return (
-            c
-            - np.log(var) / 2
-            - (x - mean) ** 2 / (2 * var)
-        )
+        return c - np.log(var) / 2 - (x - mean) ** 2 / (2 * var)
     else:  # torch implementation
-        return (
-            c
-            - var.log() / 2
-            - (x - mean) ** 2 / (2 * var)
-        )
+        return c - var.log() / 2 - (x - mean) ** 2 / (2 * var)
 
 
 class timer(object):

@@ -56,7 +56,14 @@ def run_analysis(experiment_name, names, model_name, save_dir, **kwargs):
 
 
 def add_experiment_args(parser, experiment_name):
-    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_SYMMETRICAL, TOY_2D, *UCI_ALL]:
+    if experiment_name in [
+        SANITY_CHECK,
+        TOY,
+        TOY_SHIFTED,
+        TOY_SYMMETRICAL,
+        TOY_2D,
+        *UCI_ALL,
+    ]:
         parser.add_argument(
             "--methods",
             type=str,
@@ -75,7 +82,14 @@ def add_experiment_args(parser, experiment_name):
 
 def parse_experiment_args(args):
     experiment_name = args.experiment_name
-    if experiment_name in [SANITY_CHECK, TOY, TOY_SHIFTED, TOY_SYMMETRICAL, TOY_2D, *UCI_ALL]:
+    if experiment_name in [
+        SANITY_CHECK,
+        TOY,
+        TOY_SHIFTED,
+        TOY_SYMMETRICAL,
+        TOY_2D,
+        *UCI_ALL,
+    ]:
         args.methods = [item for item in args.methods.split(",")]
     if experiment_name in MNIST_ALL:
         args.others = (

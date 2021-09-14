@@ -9,6 +9,7 @@ from sggm.vae_model import V3AE, VanillaVAE
 from sggm.vae_model_helper import batch_flatten, batch_reshape
 from sggm.types_ import List
 
+
 def input_to_latent(model, x):
     x = batch_flatten(x)
     μ_x = model.encoder_μ(x)
