@@ -3,7 +3,7 @@
 ### specify queue --
 #BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J v3ae_cifar_svhn
+#BSUB -J test_stl10
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 4
 #BSUB -R "span[hosts=1]"
@@ -38,6 +38,6 @@ source env/bin/activate
 python3 -m pip install -r requirements.txt
 export PYTHONIOENCODING=utf8
 # Our model run
-cd sggm/ && python experiment.py --experiments_config configs/vae_benchmarks/v3ae_cifar_svhn.yml --gpus -1
+cd sggm/ && python experiment.py --experiments_config configs/debug_local.yml --gpus -1
 # Baselines run
 # cd sggm/ && python baselines/run.py --experiment_name uci_carbon --n_trials 20
