@@ -1,44 +1,23 @@
+from argparse import ArgumentParser
 import copy
-import geoml.nnj as nnj
-import numpy as np
+from itertools import chain
+from typing import List, Tuple
+
 import pytorch_lightning as pl
 import torch
 import torch.distributions as D
 import torch.nn as nn
 import torch.nn.functional as F
 
-from argparse import ArgumentParser
-from itertools import chain
 from pl_bolts.models.autoencoders import VAE
-from sklearn.cluster import KMeans
-from torch.utils.data import DataLoader, TensorDataset
-
-from geoml import EmbeddedManifold
 
 from sggm.definitions import (
     model_specific_args,
     vae_parameters,
     vanilla_vae_parameters,
-    v3ae_parameters,
     LEARNING_RATE,
-    τ_OOD,
     EPS,
     N_MC_SAMPLES,
-    PRIOR_B,
-    PRIOR_EPISTEMIC_C,
-    PRIOR_EXTRAPOLATION_X,
-    PRIOR_EXTRAPOLATION_AVAILABLE_MODES,
-    PRIOR_EXTRAPOLATION_MODE,
-    PRIOR_EXTRAPOLATION_ON_CENTROIDS,
-    PRIOR_EXTRAPOLATION_ON_PI,
-    # %
-    OOD_Z_GENERATION_AVAILABLE_METHODS,
-    OOD_Z_GENERATION_METHOD,
-    KDE,
-    GD_PRIOR,
-    GD_AGGREGATE_POSTERIOR,
-    KDE_BANDWIDTH_MULTIPLIER,
-    DECODER_α_OFFSET,
 )
 from sggm.definitions import (
     CONVOLUTIONAL,
@@ -67,15 +46,10 @@ from sggm.definitions import (
     TEST_OOD_SAMPLE_FIT_RMSE,
     TEST_OOD_SAMPLE_MEAN_MSE,
 )
-from sggm.model_helper import NNJ_ShiftLayer, log_2_pi, ShiftLayer
-from sggm.types_ import List, Tensor, Tuple, Union
-from sggm.model_helper import density_gradient_descent
 from sggm.vae_model_helper import (
     batch_flatten,
     batch_reshape,
-    check_ood_z_generation_method,
     reduce_int_list,
-    locscale_sigmoid,
 )
 
 # stages for steps
@@ -257,7 +231,7 @@ class BaseVAE(pl.LightningModule):
         # Returns generated_samples, decoder
         raise NotImplementedError("Method must be overriden by child VAE model")
 
-    def forward(self, x: Tensor) -> Tuple[torch.Tensor, D.Distribution]:
+    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, D.Distribution]:
         # Reconstruction
         # Returns generated_samples, decoder
         raise NotImplementedError("Method must be overriden by child VAE model")

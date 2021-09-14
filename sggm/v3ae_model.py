@@ -1,14 +1,15 @@
+from argparse import ArgumentParser
+import copy
+from itertools import chain
 from typing import Tuple, Union
 
-import copy
 import pytorch_lightning as pl
 import torch
 import torch.distributions as D
 import torch.nn as nn
 import torch.nn.functional as F
 
-from argparse import ArgumentParser
-from itertools import chain
+
 from sklearn.cluster import KMeans
 from torch.utils.data import DataLoader, TensorDataset
 
