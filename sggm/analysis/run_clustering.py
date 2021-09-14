@@ -17,7 +17,8 @@ from sggm.analysis.experiment_log import ExperimentLog
 from sggm.definitions import experiment_names, MNIST_ALL
 from sggm.analysis.mnist.main import get_dm
 from sggm.styles_ import colours_rgb
-from sggm.vae_model import V3AE, VanillaVAE
+from sggm.vae_model import VanillaVAE
+from sggm.v3ae_model import V3AE
 
 
 """
