@@ -1,3 +1,82 @@
+from typing import Tuple, Union
+
+import copy
+import pytorch_lightning as pl
+import torch
+import torch.distributions as D
+import torch.nn as nn
+import torch.nn.functional as F
+
+from argparse import ArgumentParser
+from itertools import chain
+from sklearn.cluster import KMeans
+from torch.utils.data import DataLoader, TensorDataset
+
+from sggm.definitions import (
+    model_specific_args,
+    vae_parameters,
+    v3ae_parameters,
+    LEARNING_RATE,
+    τ_OOD,
+    EPS,
+    N_MC_SAMPLES,
+    PRIOR_B,
+    PRIOR_EPISTEMIC_C,
+    PRIOR_EXTRAPOLATION_X,
+    PRIOR_EXTRAPOLATION_AVAILABLE_MODES,
+    PRIOR_EXTRAPOLATION_MODE,
+    PRIOR_EXTRAPOLATION_ON_CENTROIDS,
+    PRIOR_EXTRAPOLATION_ON_PI,
+    # %
+    OOD_Z_GENERATION_AVAILABLE_METHODS,
+    OOD_Z_GENERATION_METHOD,
+    KDE,
+    GD_PRIOR,
+    GD_AGGREGATE_POSTERIOR,
+    KDE_BANDWIDTH_MULTIPLIER,
+    DECODER_α_OFFSET,
+)
+from sggm.definitions import (
+    CONVOLUTIONAL,
+    FULLY_CONNECTED,
+    RESNET,  # TODO
+    CONV_HIDDEN_DIMS,
+)
+from sggm.definitions import (
+    TRAIN_LOSS,
+    TEST_LOSS,
+    TEST_ELBO,
+    TEST_ELLK,
+    TEST_MEAN_FIT_MAE,
+    TEST_MEAN_FIT_RMSE,
+    TEST_VARIANCE_FIT_MAE,
+    TEST_VARIANCE_FIT_RMSE,
+    TEST_SAMPLE_FIT_MAE,
+    TEST_SAMPLE_FIT_RMSE,
+    TEST_OOD_SAMPLE_FIT_MAE,
+    TEST_OOD_SAMPLE_FIT_RMSE,
+    TEST_OOD_SAMPLE_MEAN_MSE,
+)
+from sggm.model_helper import log_2_pi, ShiftLayer
+from sggm.model_helper import density_gradient_descent
+from sggm.vae_model import (
+    BaseVAE,
+    decoder_conv_base,
+    decoder_conv_final,
+    decoder_dense_base,
+    encoder_conv_base,
+    encoder_dense_base,
+    TESTING,
+    TRAINING,
+)
+from sggm.vae_model_helper import (
+    batch_flatten,
+    batch_reshape,
+    check_ood_z_generation_method,
+    locscale_sigmoid,
+)
+
+
 class V3AE(BaseVAE):
     """
     V3AE

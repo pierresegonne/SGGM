@@ -1,3 +1,15 @@
+from typing import Tuple
+
+from geoml import EmbeddedManifold
+import geoml.nnj as nnj
+import torch
+import torch.nn as nn
+
+from sggm.model_helper import NNJ_ShiftLayer, ShiftLayer
+from sggm.vae_model_manifold import VanillaVAEm
+from sggm.v3ae_model import V3AE
+
+
 class V3AEm(V3AE, EmbeddedManifold):
     # This will probably fail
     def __init__(self, *args, **kwargs):

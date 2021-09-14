@@ -1,3 +1,13 @@
+from typing import Tuple
+
+from geoml import EmbeddedManifold
+import geoml.nnj as nnj
+import torch
+import torch.nn as nn
+
+from sggm.vae_model import VanillaVAE
+
+
 class VanillaVAEm(VanillaVAE, EmbeddedManifold):
     def __init__(self, *args, **kwargs):
         super(VanillaVAEm, self).__init__(*args, **kwargs)
