@@ -1,8 +1,6 @@
 import math
-from typing import Union
+from typing import List, Union
 import torch
-from torch import distributions
-import torch.distributions as D
 
 from functools import reduce
 from numbers import Number
@@ -10,7 +8,6 @@ from torch.distributions import Distribution, constraints
 from torch.distributions.utils import broadcast_all
 
 from sggm.definitions import OOD_Z_GENERATION_AVAILABLE_METHODS
-from sggm.types_ import List
 
 
 def batch_flatten(x: torch.Tensor) -> torch.Tensor:

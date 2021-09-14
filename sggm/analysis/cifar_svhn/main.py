@@ -1,16 +1,16 @@
-import matplotlib.pyplot as plt
-import torch
-import torch.distributions as D
+from typing import Tuple, Union
 
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 from pytorch_lightning import seed_everything, LightningDataModule
+import torch
+import torch.distributions as D
 
 from sggm.analysis.utils import disable_ticks
 from sggm.data.cifar import CIFARDataModule
 from sggm.data.svhn import SVHNDataModule
 from sggm.definitions import CIFAR, SVHN
-from sggm.types_ import Tuple, Union
-from sggm.vae_model_helper import batch_flatten, batch_reshape
+from sggm.vae_model_helper import batch_reshape
 
 
 def get_dm(experiment_name: str, bs: int):

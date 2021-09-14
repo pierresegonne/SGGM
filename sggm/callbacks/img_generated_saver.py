@@ -5,9 +5,10 @@ import torch
 import torchvision
 
 from PIL import Image
-from pytorch_lightning import Callback, Trainer, LightningModule
+from pytorch_lightning import Trainer, LightningModule
 
-from sggm.vae_model import VanillaVAE, V3AE
+from sggm.vae_model import VanillaVAE
+from sggm.v3ae_model import V3AE
 from sggm.vae_model_helper import batch_reshape
 
 """

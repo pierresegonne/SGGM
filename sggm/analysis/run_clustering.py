@@ -2,6 +2,7 @@ import argparse
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from typing import List, Tuple, Union
 
 from geoml import Manifold
 from geoml.stats import intrinsic_kmeans
@@ -15,8 +16,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sggm.analysis.experiment_log import ExperimentLog
 from sggm.definitions import experiment_names, MNIST_ALL
 from sggm.analysis.mnist.main import get_dm
-from sggm.styles_ import colours, colours_rgb
-from sggm.types_ import List, Tuple, Union
+from sggm.styles_ import colours_rgb
 from sggm.vae_model import V3AE, VanillaVAE
 
 

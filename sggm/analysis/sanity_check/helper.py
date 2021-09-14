@@ -1,22 +1,8 @@
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import torch
-import torch.distributions as D
+from typing import Tuple
 
-from matplotlib.axes import Axes
-from sggm.types_ import Tuple, List
-from scipy.stats import norm
-from sggm.analysis.experiment_log import ExperimentLog
+import torch
+
 from sggm.data.sanity_check import SanityCheckDataModule
-from sggm.regression_model import (
-    MARGINAL,
-    POSTERIOR,
-    #
-    VariationalRegressor,
-)
-from sggm.styles_ import colours, colours_rgb
 
 # ------------
 # Plot data definition
@@ -32,8 +18,3 @@ def get_plot_dataset(N: int = 5000) -> Tuple[torch.Tensor, torch.Tensor, torch.T
 
 
 plot_dataset = get_plot_dataset()
-
-
-# ------------
-# Plot methods
-# ------------

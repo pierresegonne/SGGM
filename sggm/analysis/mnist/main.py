@@ -1,7 +1,8 @@
-import matplotlib.pyplot as plt
-import torch
+from typing import Union
 
+import matplotlib.pyplot as plt
 from pytorch_lightning import seed_everything, LightningDataModule
+import torch
 from torch import no_grad
 
 from sggm.analysis.mnist.helper import (
@@ -26,7 +27,6 @@ from sggm.definitions import (
 from sggm.definitions import (
     DIGITS,
 )
-from sggm.types_ import Union
 
 
 def save_and_show(fig, name: str, show_plot: bool = True):

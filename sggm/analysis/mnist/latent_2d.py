@@ -1,20 +1,23 @@
+from typing import Tuple, Union
+
+from geoml.curve import BasicCurve, DiscreteCurve
+from geoml.manifold import EmbeddedManifold
 import matplotlib.pyplot as plt
 import numpy as np
 import pytorch_lightning as pl
 import seaborn as sns
 import torch
 import torch.distributions as D
-
-from geoml.curve import BasicCurve, DiscreteCurve
-from geoml.manifold import EmbeddedManifold
-from torchvision.utils import make_grid
 from torchvision import transforms
+from torchvision.utils import make_grid
 
 from sggm.analysis.utils import disable_ticks
-from sggm.vae_model import BaseVAE, V3AEm, VanillaVAE, V3AE, VanillaVAEm
+from sggm.vae_model import BaseVAE, VanillaVAE
+from sggm.vae_model_manifold import VanillaVAEm
+from sggm.v3ae_model import V3AE
+from sggm.v3ae_model_manifold import V3AEm
 from sggm.vae_model_helper import batch_reshape
 from sggm.styles_ import colours, colours_rgb, random_rgb_colour
-from sggm.types_ import Tuple, Union
 
 colour_digits = [
     (1 / 255, 133 / 255, 90 / 255),

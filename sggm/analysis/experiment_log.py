@@ -24,7 +24,10 @@ from sggm.definitions import (
 )
 from sggm.regression_model import VariationalRegressor
 from sggm.regression_baselines import ENSRegressor, MCDRegressor
-from sggm.vae_model import VanillaVAE, V3AE, V3AEm, VanillaVAEm
+from sggm.vae_model import VanillaVAE
+from sggm.vae_model_manifold import VanillaVAEm
+from sggm.v3ae_model import V3AE
+from sggm.v3ae_model_manifold import V3AEm
 
 
 def version_dir(path):

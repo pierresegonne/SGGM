@@ -1,13 +1,12 @@
 import multiprocessing
 import os
+from typing import List
+
 import pytorch_lightning as pl
 import torch
-
 from torch.utils.data import DataLoader, random_split, TensorDataset
 from torchvision import transforms
 from torchvision.datasets import MNIST
-
-from sggm.types_ import List
 
 N_cpus = multiprocessing.cpu_count()
 

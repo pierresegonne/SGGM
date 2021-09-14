@@ -1,13 +1,14 @@
+from typing import List
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-
 from torch import no_grad
 
 from sggm.analysis.utils import disable_ticks
-from sggm.vae_model import V3AE, VanillaVAE
+from sggm.vae_model import VanillaVAE
+from sggm.v3ae_model import V3AE
 from sggm.vae_model_helper import batch_flatten, batch_reshape
-from sggm.types_ import List
 
 
 def input_to_latent(model, x):

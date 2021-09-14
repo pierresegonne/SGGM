@@ -1,14 +1,16 @@
+from argparse import ArgumentParser, Namespace
 import copy
 import json
 import pytorch_lightning as pl
 import re
 from sggm.regression_baselines import ENSRegressor, MCDRegressor
 import torch
+from typing import List
+from warnings import warn
 import yaml
 
-from argparse import ArgumentParser, Namespace
+
 from codecarbon import EmissionsTracker
-from warnings import warn
 
 from sggm.callbacks import callbacks
 from sggm.definitions import (
@@ -52,9 +54,10 @@ from sggm.experiment_helper import (
     VerboseEarlyStopping,
 )
 from sggm.regression_model import Regressor, VariationalRegressor
-from sggm.vae_model import BaseVAE, VanillaVAE, V3AE, V3AEm, VanillaVAEm
-
-from sggm.types_ import List
+from sggm.vae_model import BaseVAE, VanillaVAE
+from sggm.vae_model_manifold import VanillaVAEm
+from sggm.v3ae_model import V3AE
+from sggm.v3ae_model_manifold import V3AEm
 
 
 class Experiment:

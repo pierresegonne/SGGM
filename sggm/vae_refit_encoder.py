@@ -1,10 +1,9 @@
 import argparse
-import os
-import pytorch_lightning as pl
-
 from copy import deepcopy
+from typing import Union
+
+import pytorch_lightning as pl
 from torch import save
-import torch
 from torch.utils.data import DataLoader
 
 from sggm.analysis.experiment_log import ExperimentLog
@@ -22,8 +21,8 @@ from sggm.definitions import (
     FASHION_MNIST_ND,
     NOT_MNIST,
 )
-from sggm.vae_model import VanillaVAE, V3AE
-from sggm.types_ import Union
+from sggm.vae_model import VanillaVAE
+from sggm.v3ae_model import V3AE
 
 """
 Refit your encoder:

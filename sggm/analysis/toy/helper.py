@@ -1,13 +1,12 @@
-import matplotlib.pyplot as plt
+from typing import Tuple, List
+
+from matplotlib.axes import Axes
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
 import torch.distributions as D
 
-from matplotlib.axes import Axes
-from sggm.types_ import Tuple, List
-from scipy.stats import norm
 from sggm.analysis.experiment_log import ExperimentLog
 from sggm.data.toy import ToyDataModule
 from sggm.regression_model import (
