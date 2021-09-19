@@ -507,7 +507,8 @@ class VanillaVAE(BaseVAE):
         x_hat, p_x_z, z, q_z_x, p_z = self._run_step(x)
 
         if self.architecture == RESNET:
-            x = F.interpolate(x, scale_factor=1 / 3)
+            # Recompute scale factor silences warning, cf doc
+            x = F.interpolate(x, scale_factor=1 / 3, recompute_scale_factor=True)
 
         expected_log_likelihood = self.ellk(p_x_z, x)
         kl_divergence = self.kl(q_z_x, p_z)
