@@ -7,6 +7,10 @@ import torch
 
 from pytorch_lightning import seed_everything
 from sklearn.decomposition import PCA
+from sggm.data.uci_boston.datamodule import (
+    UCIBostonDataModule,
+    UCIBostonDataModuleShifted,
+)
 from sggm.data.uci_ccpp.datamodule import (
     UCICCPPDataModule,
     UCICCPPDataModuleShifted,
@@ -34,6 +38,8 @@ from sggm.data.uci_yacht.datamodule import (
     COLUMNS as uci_yacht_columns,
 )
 from sggm.definitions import (
+    FASHION_MNIST,
+    UCI_BOSTON,
     UCI_CONCRETE,
     UCI_CCPP,
     UCI_SUPERCONDUCT,
@@ -49,7 +55,7 @@ def main(experiment_name, with_pca=False):
     TEST_FIRST = True
 
     # Investigate shift effect on pairplot
-    SHIFTED = True
+    SHIFTED = False
     sp_tot = 0.3
     sp_k = 0.0002
     TEST_FIRST = False if SHIFTED else TEST_FIRST
@@ -58,7 +64,16 @@ def main(experiment_name, with_pca=False):
 
     # Get correct datamodule
     bs = 10000
-    if experiment_name == UCI_CCPP:
+    if experiment_name == UCI_BOSTON:
+        dm = (
+            UCIBostonDataModuleShifted(
+                bs, 0, shifting_proportion_total=sp_tot, shifting_proportion_k=sp_k
+            )
+            if SHIFTED
+            else UCIBostonDataModule(bs, 0)
+        )
+        columns = [i for i in range(1, 15)]
+    elif experiment_name == UCI_CCPP:
         dm = (
             UCICCPPDataModuleShifted(
                 bs, 0, shifting_proportion_total=sp_tot, shifting_proportion_k=sp_k
@@ -159,6 +174,7 @@ if __name__ == "__main__":
         type=str,
         required=True,
         choices=[
+            UCI_BOSTON,
             UCI_CONCRETE,
             UCI_CCPP,
             UCI_SUPERCONDUCT,
