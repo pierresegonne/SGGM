@@ -376,8 +376,8 @@ def show_2d_latent_space(
     # cla = ["Pullover", "Sandal"]
     for i, d in enumerate(digits):
         ax.plot(
-            z[:, 0][y == d],
-            z[:, 1][y == d],
+            z[:, 0][y.flatten() == d],
+            z[:, 1][y.flatten() == d],
             "o",
             markersize=3.5,
             markerfacecolor=(*colour_digits[i], 0.95),

@@ -15,13 +15,17 @@ from sggm.analysis.mnist.latent_2d import (
 )
 from sggm.analysis.mnist.others_mnist import analyse_others_mnist
 from sggm.data.mnist import MNISTDataModule, MNISTDataModuleND
+from sggm.data.emnist import EMNISTDataModule
 from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModuleND
+from sggm.data.kmnist import KMNISTDataModule
 from sggm.data.not_mnist import NotMNISTDataModule
 from sggm.definitions import (
     MNIST,
     MNIST_ND,
+    EMNIST,
     FASHION_MNIST,
     FASHION_MNIST_ND,
+    KMNIST,
     NOT_MNIST,
 )
 from sggm.definitions import (
@@ -44,6 +48,8 @@ def get_dm(experiment_name: str, misc: dict, bs: int):
             dm = MNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
             dm = MNISTDataModuleND(bs, 0)
+    elif experiment_name == EMNIST:
+        dm = EMNISTDataModule(bs, 0)
     elif experiment_name == FASHION_MNIST:
         dm = FashionMNISTDataModule(bs, 0)
     elif experiment_name == FASHION_MNIST_ND:
@@ -51,6 +57,8 @@ def get_dm(experiment_name: str, misc: dict, bs: int):
             dm = FashionMNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
             dm = FashionMNISTDataModuleND(bs, 0)
+    elif experiment_name == KMNIST:
+        dm = KMNISTDataModule(bs, 0)
     elif experiment_name == NOT_MNIST:
         dm = NotMNISTDataModule(bs, 0)
     dm.setup()

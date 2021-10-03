@@ -339,14 +339,18 @@ UCI_ALL = UCI_ALL + UCI_ALL_SHIFTED + UCI_ALL_SHIFTED_SPLIT
 CIFAR = "cifar"
 MNIST = "mnist"
 MNIST_ND = "mnist_nd"
+EMNIST = "emnist"
 FASHION_MNIST = "fashion_mnist"
 FASHION_MNIST_ND = "fashion_mnist_nd"
+KMNIST = "kmnist"
 NOT_MNIST = "not_mnist"
 SVHN = "svhn"
 STL10 = "stl10"
 MNIST_ALL = [
+    EMNIST,
     FASHION_MNIST,
     FASHION_MNIST_ND,
+    KMNIST,
     MNIST,
     MNIST_ND,
     NOT_MNIST,

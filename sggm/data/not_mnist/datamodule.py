@@ -116,12 +116,12 @@ class NotMNISTDataModule(pl.LightningDataModule):
 
 if __name__ == "__main__":
 
-    dm = NotMNISTDataModule(256, 0)
+    dm = NotMNISTDataModule(10000, 0)
     dm.setup()
 
     # Observe sample
     x, y = next(iter(dm.train_dataloader()))
-
+    print(x.mean(), x.std())
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots()

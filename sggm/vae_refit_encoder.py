@@ -8,7 +8,9 @@ from torch.utils.data import DataLoader
 
 from sggm.analysis.experiment_log import ExperimentLog
 from sggm.data.mnist import MNISTDataModule, MNISTDataModuleND
+from sggm.data.emnist import EMNISTDataModule
 from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModuleND
+from sggm.data.kmnist import KMNISTDataModule
 from sggm.data.not_mnist import NotMNISTDataModule
 from sggm.definitions import (
     experiment_names,
@@ -17,8 +19,10 @@ from sggm.definitions import (
 from sggm.definitions import (
     MNIST,
     MNIST_ND,
+    EMNIST,
     FASHION_MNIST,
     FASHION_MNIST_ND,
+    KMNIST,
     NOT_MNIST,
 )
 from sggm.vae_model import VanillaVAE
@@ -50,6 +54,8 @@ def get_datamodule(
             dm = MNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
             dm = MNISTDataModuleND(bs, 0)
+    elif experiment_name == EMNIST:
+        dm = EMNISTDataModule(bs, 0)
     elif experiment_name == FASHION_MNIST:
         dm = FashionMNISTDataModule(bs, 0)
     elif experiment_name == FASHION_MNIST_ND:
@@ -57,6 +63,8 @@ def get_datamodule(
             dm = FashionMNISTDataModuleND(bs, 0, digits=misc[DIGITS])
         else:
             dm = FashionMNISTDataModuleND(bs, 0)
+    elif experiment_name == KMNIST:
+        dm = KMNISTDataModule(bs, 0)
     elif experiment_name == NOT_MNIST:
         dm = NotMNISTDataModule(bs, 0)
     dm.setup()

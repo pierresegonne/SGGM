@@ -65,7 +65,9 @@ from sggm.data.uci_yacht import (
 
 from sggm.data.cifar import CIFARDataModule
 from sggm.data.mnist import MNISTDataModule, MNISTDataModuleND
+from sggm.data.emnist import EMNISTDataModule
 from sggm.data.fashion_mnist import FashionMNISTDataModule, FashionMNISTDataModuleND
+from sggm.data.kmnist import KMNISTDataModule
 from sggm.data.not_mnist import NotMNISTDataModule
 from sggm.data.stl10 import STL10DataModule
 from sggm.data.svhn import SVHNDataModule
@@ -117,8 +119,10 @@ from sggm.definitions import (
     CIFAR,
     MNIST,
     MNIST_ND,
+    EMNIST,
     FASHION_MNIST,
     FASHION_MNIST_ND,
+    KMNIST,
     NOT_MNIST,
     STL10,
     SVHN,
@@ -171,8 +175,10 @@ datamodules = {
     CIFAR: CIFARDataModule,
     MNIST: MNISTDataModule,
     MNIST_ND: MNISTDataModuleND,
+    EMNIST: EMNISTDataModule,
     FASHION_MNIST: FashionMNISTDataModule,
     FASHION_MNIST_ND: FashionMNISTDataModuleND,
+    KMNIST: KMNISTDataModule,
     NOT_MNIST: NotMNISTDataModule,
     STL10: STL10DataModule,
     SVHN: SVHNDataModule,
