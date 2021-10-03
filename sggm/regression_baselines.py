@@ -343,7 +343,7 @@ class ENSRegressor(pl.LightningModule):
 
         # Mean fit
         self.log(TEST_MEAN_FIT_MAE, F.l1_loss(y_pred, y), on_epoch=True)
-        self.log(TEST_MEAN_FIT_RMSE, torch.sqrt(loss), on_epoch=True)
+        self.log(TEST_MEAN_FIT_RMSE, torch.sqrt(F.mse_loss(y_pred, y)), on_epoch=True)
 
         # Variance fit
         self.log(
