@@ -111,9 +111,9 @@ class UCIWineWhiteDataModuleShiftedSplit(
 
 
 if __name__ == "__main__":
+    from sggm.definitions import STAGE_SETUP_SHIFTED_SPLIT
 
-    dm = UCIWineWhiteDataModule(1024, 0)
-    dm.setup()
-
-    # Info about the data
-    print(dm.y_std)
+    dm = UCIWineWhiteDataModuleShiftedSplit(1024, 0)
+    dm.setup(dim_idx=1, stage=STAGE_SETUP_SHIFTED_SPLIT)
+    print(len(dm.test_dataset))
+    print(len(dm.train_dataset))
