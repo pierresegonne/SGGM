@@ -27,7 +27,9 @@ def parse_results(experiment_name, names, save_dir, **kwargs):
             result = torch.load(f"{version_folder}/results.pkl")[0]
             df = df.append(result, ignore_index=True)
 
-        # Compute mean and std
+        # Compute mean and std - take very large for infinites
+        df = df.replace(np.inf, 1e12)
+        df = df.replace(-np.inf, -1e12)
         mean, std = df.mean(axis=0), df.std(axis=0)
 
         # Add separation line
