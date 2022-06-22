@@ -13,7 +13,7 @@ geoml==0.0.1
 scipy==1.5.3
 torch==1.8.0
 pandas==1.1.3
-numpy==1.19.2
+numpy==1.22.0
 codecarbon==1.2.0
 torchvision==0.9.0
 # GPy==1.10.0
