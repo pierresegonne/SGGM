@@ -18,7 +18,7 @@ codecarbon==1.2.0
 torchvision==0.9.0
 # GPy==1.10.0
 # KDEpy==1.1.0
-Pillow==8.3.1
+Pillow==9.3.0
 PyYAML==5.4.1
 scikit_learn==0.24.2
 umap==0.1.1
