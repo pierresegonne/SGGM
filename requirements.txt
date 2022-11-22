@@ -13,7 +13,7 @@ daft==0.1.0
 torch==1.8.0
 umap_learn==0.5.1
 KDEpy==1.0.10
-Pillow==8.2.0
+Pillow==9.3.0
 PyYAML==5.4.1
 scikit_learn==0.24.2
 umap==0.1.1
